@@ -7,11 +7,16 @@
 The purpose of this repo is for experimental code. Examples include demo apps,
 native api explorations, or anything really that does not fit in an existing Cordova platform.
 
-## Good Karma
+## Project Organization
 
-Each project should prefix the commits with the project name (or shortered name).
-This allows us to easy associate each commit with a project.
+> Everyone works on a branch
 
-For example, the project `./cordova-hello-world`:
+`master` branch should *never* have content.
 
-    git commit -m "[hello-world] Add an amazing feature."
+Each project should create a separate branch to work on. There are major benefits
+to this practice:
+
+- Each project has an isolate git history, which allows for easy migration to
+  a new git repository;
+- Working directory is not polluted with the files of other projects.
+- Projects will not step on each others toes.
