@@ -1,0 +1,20 @@
+{
+  "name": "cordova",
+  "version": "0.0.1",
+  "description": "Cordova client tool",
+  "main": "cordova.js",
+  "scripts": {
+    "test": "jake"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:imhotep/cordova-client.git"
+  },
+  "keywords": [
+    "cordova",
+    "client",
+    "tool"
+  ],
+  "author": "Anis Kadri",
+  "license": "Apache"
+}
