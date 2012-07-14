@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+--><html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
+<meta name="generator" content="joDoc">
+<title>Apache Cordova API Documentation</title>
+<link rel="stylesheet" type="text/css" href="index.css">
+<link rel="stylesheet" type="text/css" href="mobile.css" media="only screen and (max-device-width: 1024px)">
+<link rel="stylesheet" type="text/css" href="prettify/prettify.css">
+</head>
+<body>
+        <div id="header">
+            <h1><a href="index.html">Apache <strong>Cordova</strong> Documentation</a></h1>
+            <small>
+                <select><optgroup label="English" value="en">
+<option value="edge">edge</option>
+<option value="1.9.0rc1">1.9.0rc1</option>
+<option selected value="1.9.0">1.9.0</option>
+<option value="1.8.1">1.8.1</option>
+<option value="1.8.0rc1">1.8.0rc1</option>
+<option value="1.8.0">1.8.0</option>
+<option value="1.7.0rc1">1.7.0rc1</option>
+<option value="1.7.0">1.7.0</option>
+<option value="1.6.1">1.6.1</option>
+<option value="1.6.0rc1">1.6.0rc1</option>
+<option value="1.6.0">1.6.0</option>
+<option value="1.5.0rc1">1.5.0rc1</option>
+<option value="1.5.0">1.5.0</option>
+<option value="1.4.1">1.4.1</option>
+<option value="1.4.0rc1">1.4.0rc1</option>
+<option value="1.4.0">1.4.0</option>
+<option value="1.3.0">1.3.0</option>
+<option value="1.2.0">1.2.0</option>
+<option value="1.1.0">1.1.0</option>
+<option value="1.0.0rc3">1.0.0rc3</option>
+<option value="1.0.0rc2">1.0.0rc2</option>
+<option value="1.0.0rc1">1.0.0rc1</option>
+<option value="1.0.0">1.0.0</option>
+<option value="0.9.6">0.9.6</option>
+<option value="0.9.5.1">0.9.5.1</option>
+<option value="0.9.5">0.9.5</option>
+<option value="0.9.4">0.9.4</option>
+<option value="0.9.3">0.9.3</option>
+<option value="0.9.2">0.9.2</option>
+</optgroup>
+<optgroup label="Español" value="es"><option value="1.0.0">1.0.0</option></optgroup>
+<optgroup label="Français" value="fr">
+<option value="1.3.0">1.3.0</option>
+<option value="1.2.0">1.2.0</option>
+<option value="1.1.0">1.1.0</option>
+</optgroup>
+<optgroup label="Japanese" value="jp">
+<option value="1.7.0">1.7.0</option>
+<option value="0.9.5">0.9.5</option>
+</optgroup></select></small>
+        </div>
+        <div id="subheader">
+            <h1>Camera</h1>
+            <small><select><option value="Camera">Camera</option>
+<option value="Camera_methods">      - Methods</option>
+<option value="Camera_permissions">      - Permissions</option>
+<option value="camera.getPicture">camera.getPicture</option>
+<option value="camera.getPicture_description">      - Description</option>
+<option value="camera.getPicture_supported_platforms">      - Supported Platforms</option>
+<option value="camera.getPicture_ios_quirks">      - iOS Quirks</option>
+<option value="camera.getPicture_windows_phone_7_quirks">      - Windows Phone 7 Quirks</option>
+<option value="camera.getPicture_quick_example">      - Quick Example</option>
+<option value="camera.getPicture_full_example">      - Full Example</option>
+<option value="cameraSuccess">cameraSuccess</option>
+<option value="cameraSuccess_parameters">      - Parameters</option>
+<option value="cameraSuccess_example">      - Example</option>
+<option value="cameraError">cameraError</option>
+<option value="cameraError_parameters">      - Parameters</option>
+<option value="cameraOptions">cameraOptions</option>
+<option value="cameraOptions_options">      - Options</option>
+<option value="cameraOptions_android_quirks">      - Android Quirks</option>
+<option value="cameraOptions_blackberry_quirks">      - BlackBerry Quirks</option>
+<option value="cameraOptions_webos_quirks">      - webOS Quirks</option>
+<option value="cameraOptions_ios_quirks">      - iOS Quirks</option>
+<option value="cameraOptions_windows_phone_7_quirks">      - Windows Phone 7 Quirks</option>
+<option value="cameraOptions_bada_1_2_quirks">      - Bada 1.2 Quirks</option>
+<option value="CameraPopoverOptions">CameraPopoverOptions</option>
+<option value="CameraPopoverOptions_camerapopoveroptions">      - CameraPopoverOptions</option>
+<option value="CameraPopoverOptions_quick_example">      - Quick Example</option></select></small>
+        </div>
+
+        <div id="sidebar">
+            <div class="vertical_divider"></div>
+        <h1>API Reference</h1>
+<ul>
+<li><a href="cordova_accelerometer_accelerometer.md.html#Accelerometer">Accelerometer</a></li>
+<li><a href="cordova_camera_camera.md.html#Camera">Camera</a></li>
+<li><a href="cordova_media_capture_capture.md.html#Capture">Capture</a></li>
+<li><a href="cordova_compass_compass.md.html#Compass">Compass</a></li>
+<li><a href="cordova_connection_connection.md.html#Connection">Connection</a></li>
+<li><a href="cordova_contacts_contacts.md.html#Contacts">Contacts</a></li>
+<li><a href="cordova_device_device.md.html#Device">Device</a></li>
+<li><a href="cordova_events_events.md.html#Events">Events</a></li>
+<li><a href="cordova_file_file.md.html#File">File</a></li>
+<li><a href="cordova_geolocation_geolocation.md.html#Geolocation">Geolocation</a></li>
+<li><a href="cordova_media_media.md.html#Media">Media</a></li>
+<li><a href="cordova_notification_notification.md.html#Notification">Notification</a></li>
+<li><a href="cordova_storage_storage.md.html#Storage">Storage</a></li>
+</ul>
+<h1>Guides</h1>
+<ul>
+<li><a href="guide_getting-started_index.md.html#Getting%20Started%20Guides">Getting Started Guides</a></li>
+<li><a href="guide_command-line_index.md.html#Command-Line%20Usage">Command-Line Usage</a></li>
+<li><a href="guide_upgrading_index.md.html#Upgrading%20Guides">Upgrading Guides</a></li>
+<li><a href="guide_whitelist_index.md.html#Domain%20Whitelist%20Guide">Domain Whitelist Guide</a></li>
+<li><a href="guide_cordova-webview_index.md.html#Embedding%20WebView">Embedding WebView</a></li>
+<li><a href="_index.html">Keyword Index</a></li>
+</ul>
+</div>
+
+        <div id="scrollable">
+            <div id="content">
+                <h1><a name="Camera">Camera</a></h1>
+
+<blockquote>
+  <p>The <code>camera</code> object provides access to the device's default camera application.</p>
+</blockquote>
+
+<h2>
+<a name="Camera_methods">Methods</a>
+</h2>
+
+<ul>
+<li><a href="cordova_camera_camera.md.html#camera.getPicture">camera.getPicture</a></li>
+<li><a href="cordova_camera_camera.cleanup.md.html#camera.cleanup">camera.cleanup</a></li>
+</ul>
+<h2>
+<a name="Camera_permissions">Permissions</a>
+</h2>
+
+<h3>Android</h3>
+
+<h4>app/res/xml/plugins.xml</h4>
+
+<pre class="prettyprint"><code>&lt;plugin name="<a href="cordova_camera_camera.md.html#Camera">Camera</a>" value="org.apache.cordova.CameraLauncher" /&gt;
+</code></pre>
+
+<h4>app/AndroidManifest</h4>
+
+<pre class="prettyprint"><code>&lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /&gt;
+</code></pre>
+
+<h3>Bada</h3>
+
+<h4>manifest.xml</h4>
+
+<pre class="prettyprint"><code>&lt;Privilege&gt;
+    &lt;Name&gt;CAMERA&lt;/Name&gt;
+&lt;/Privilege&gt;
+&lt;Privilege&gt;
+    &lt;Name&gt;RECORDING&lt;/Name&gt;
+&lt;/Privilege&gt;
+</code></pre>
+
+<h3>BlackBerry WebWorks</h3>
+
+<h4>www/plugins.xml</h4>
+
+<pre class="prettyprint"><code>&lt;plugin name="<a href="cordova_camera_camera.md.html#Camera">Camera</a>" value="org.apache.cordova.camera.<a href="cordova_camera_camera.md.html#Camera">Camera</a>" /&gt;
+</code></pre>
+
+<h4>www/config.xml</h4>
+
+<pre class="prettyprint"><code>&lt;feature id="blackberry.media.camera" /&gt;
+
+&lt;rim:permissions&gt;
+    &lt;rim:permit&gt;use_camera&lt;/rim:permit&gt;
+&lt;/rim:permissions&gt;
+</code></pre>
+
+<h3>iOS</h3>
+
+<h4>App/Supporting Files/Cordova.plist</h4>
+
+<pre class="prettyprint"><code>&lt;key&gt;Plugins&lt;/key&gt;
+&lt;dict&gt;
+    &lt;key&gt;<a href="cordova_camera_camera.md.html#Camera">Camera</a>&lt;/key&gt;
+    &lt;string&gt;CDVCamera&lt;/string&gt;
+&lt;/dict&gt;
+</code></pre>
+
+<h3>webOS</h3>
+
+<pre class="prettyprint"><code>No permissions are required.
+</code></pre>
+
+<h3>Windows Phone</h3>
+
+<h4>Properties/WPAppManifest.xml</h4>
+
+<pre class="prettyprint"><code>&lt;Capabilities&gt;
+    &lt;Capability Name="ID_CAP_CAMERA" /&gt;
+    &lt;Capability Name="ID_CAP_ISV_CAMERA" /&gt;
+    &lt;Capability Name="ID_HW_FRONTCAMERA" /&gt;
+&lt;/Capabilities&gt;
+</code></pre>
+
+<p>Reference: <a class="external" href="http://msdn.microsoft.com/en-us/library/ff769509%28v=vs.92%29.aspx">Application Manifest for Windows Phone</a></p>
+
+<hr>
+<h1><a name="camera.getPicture">camera.getPicture</a></h1>
+
+<p>Takes a photo using the camera or retrieves a photo from the device's album.  The image is returned as a base64 encoded <code>String</code> or as the URI of an image file.</p>
+
+<pre class="prettyprint"><code>navigator.<a href="cordova_camera_camera.md.html#camera.getPicture">camera.getPicture</a>( <a href="cordova_camera_camera.md.html#cameraSuccess">cameraSuccess</a>, <a href="cordova_camera_camera.md.html#cameraError">cameraError</a>, [ <a href="cordova_camera_camera.md.html#cameraOptions">cameraOptions</a> ] );
+</code></pre>
+
+<h2>
+<a name="camera.getPicture_description">Description</a>
+</h2>
+
+<p>Function <code><a href="cordova_camera_camera.md.html#camera.getPicture">camera.getPicture</a></code> opens the device's default camera application so that the user can take a picture (if <code><a href="cordova_camera_camera.md.html#Camera">Camera</a>.sourceType = <a href="cordova_camera_camera.md.html#Camera">Camera</a>.PictureSourceType.CAMERA</code>, which is the default). Once the photo is taken, the camera application closes and your application is restored.</p>
+
+<p>If <code><a href="cordova_camera_camera.md.html#Camera">Camera</a>.sourceType = <a href="cordova_camera_camera.md.html#Camera">Camera</a>.PictureSourceType.PHOTOLIBRARY</code> or <code><a href="cordova_camera_camera.md.html#Camera">Camera</a>.PictureSourceType.SAVEDPHOTOALBUM</code>, then a photo chooser dialog is shown, from which a photo from the album can be selected.</p>
+
+<p>The return value will be sent to the <code><a href="cordova_camera_camera.md.html#cameraSuccess">cameraSuccess</a></code> function, in one of the following formats, depending on the <code><a href="cordova_camera_camera.md.html#cameraOptions">cameraOptions</a></code> you specify:</p>
+
+<ul>
+<li>A <code>String</code> containing the Base64 encoded photo image (default). </li>
+<li>A <code>String</code> representing the image file location on local storage.  </li>
+</ul>
+<p>You can do whatever you want with the encoded image or URI, for example:</p>
+
+<ul>
+<li>Render the image in an <code>&lt;img&gt;</code> tag <em>(see example below)</em>
+</li>
+<li>Save the data locally (<code>LocalStorage</code>, <a class="external" href="http://brianleroux.github.com/lawnchair/">Lawnchair</a>, etc)</li>
+<li>Post the data to a remote server</li>
+</ul>
+<p>Note: The image quality of pictures taken using the camera on newer devices is quite good, and images from the Photo Album will not be downscaled to a lower quality, even if a quality parameter is specified.  <em>Encoding such images using Base64 has caused memory issues on some of these devices (iPhone 4, BlackBerry Torch 9800).</em>  Therefore, using FILE_URI as the '<a href="cordova_camera_camera.md.html#Camera">Camera</a>.destinationType' is highly recommended.</p>
+
+<h2>
+<a name="camera.getPicture_supported_platforms">Supported Platforms</a>
+</h2>
+
+<ul>
+<li>Android</li>
+<li>Blackberry WebWorks (OS 5.0 and higher)</li>
+<li>iOS</li>
+<li>Windows Phone 7 ( Mango )</li>
+<li>Bada 1.2</li>
+<li>webOS</li>
+</ul>
+<h2>
+<a name="camera.getPicture_ios_quirks">iOS Quirks</a>
+</h2>
+
+<p>Including a JavaScript alert() in either of the callback functions can cause problems.  Wrap the alert in a setTimeout() to allow the iOS image picker or popover to fully close before the alert is displayed: setTimeout("alert('message');", 0);</p>
+
+<h2>
+<a name="camera.getPicture_windows_phone_7_quirks">Windows Phone 7 Quirks</a>
+</h2>
+
+<p>Invoking the native camera application while your device is connected
+via Zune will not work, and the error callback will be triggered.</p>
+
+<h2>
+<a name="camera.getPicture_quick_example">Quick Example</a>
+</h2>
+
+<p>Take photo and retrieve Base64-encoded image:</p>
+
+<pre class="prettyprint"><code>navigator.<a href="cordova_camera_camera.md.html#camera.getPicture">camera.getPicture</a>(onSuccess, onFail, { quality: 50,
+    destinationType: <a href="cordova_camera_camera.md.html#Camera">Camera</a>.DestinationType.DATA_URL
+ }); 
+
+function onSuccess(imageData) {
+    var image = document.getElementById('myImage');
+    image.src = "data:image/jpeg;base64," + imageData;
+}
+
+function onFail(message) {
+    alert('Failed because: ' + message);
+}
+</code></pre>
+
+<p>Take photo and retrieve image file location: </p>
+
+<pre class="prettyprint"><code>navigator.<a href="cordova_camera_camera.md.html#camera.getPicture">camera.getPicture</a>(onSuccess, onFail, { quality: 50, 
+    destinationType: <a href="cordova_camera_camera.md.html#Camera">Camera</a>.DestinationType.FILE_URI }); 
+
+function onSuccess(imageURI) {
+    var image = document.getElementById('myImage');
+    image.src = imageURI;
+}
+
+function onFail(message) {
+    alert('Failed because: ' + message);
+}
+</code></pre>
+
+<h2>
+<a name="camera.getPicture_full_example">Full Example</a>
+</h2>
+
+<pre class="prettyprint"><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;<a href="cordova_media_capture_capture.md.html#Capture">Capture</a> Photo&lt;/title&gt;
+
+    &lt;script type="text/javascript" charset="utf-8" src="cordova-1.9.0.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" charset="utf-8"&gt;
+
+    var pictureSource;   // picture source
+    var destinationType; // sets the format of returned value 
+
+    // Wait for Cordova to connect with the device
+    //
+    document.addEventListener("<a href="cordova_events_events.md.html#deviceready">deviceready</a>",onDeviceReady,false);
+
+    // Cordova is ready to be used!
+    //
+    function onDeviceReady() {
+        pictureSource=navigator.camera.PictureSourceType;
+        destinationType=navigator.camera.DestinationType;
+    }
+
+    // Called when a photo is successfully retrieved
+    //
+    function onPhotoDataSuccess(imageData) {
+      // Uncomment to view the base64 encoded image data
+      // console.log(imageData);
+
+      // Get image handle
+      //
+      var smallImage = document.getElementById('smallImage');
+
+      // Unhide image elements
+      //
+      smallImage.style.display = 'block';
+
+      // Show the captured photo
+      // The inline CSS rules are used to resize the image
+      //
+      smallImage.src = "data:image/jpeg;base64," + imageData;
+    }
+
+    // Called when a photo is successfully retrieved
+    //
+    function onPhotoURISuccess(imageURI) {
+      // Uncomment to view the image file URI 
+      // console.log(imageURI);
+
+      // Get image handle
+      //
+      var largeImage = document.getElementById('largeImage');
+
+      // Unhide image elements
+      //
+      largeImage.style.display = 'block';
+
+      // Show the captured photo
+      // The inline CSS rules are used to resize the image
+      //
+      largeImage.src = imageURI;
+    }
+
+    // A button will call this function
+    //
+    function capturePhoto() {
+      // Take picture using device camera and retrieve image as base64-encoded string
+      navigator.<a href="cordova_camera_camera.md.html#camera.getPicture">camera.getPicture</a>(onPhotoDataSuccess, onFail, { quality: 50,
+        destinationType: destinationType.DATA_URL });
+    }
+
+    // A button will call this function
+    //
+    function capturePhotoEdit() {
+      // Take picture using device camera, allow edit, and retrieve image as base64-encoded string  
+      navigator.<a href="cordova_camera_camera.md.html#camera.getPicture">camera.getPicture</a>(onPhotoDataSuccess, onFail, { quality: 20, allowEdit: true,
+        destinationType: destinationType.DATA_URL });
+    }
+
+    // A button will call this function
+    //
+    function getPhoto(source) {
+      // Retrieve image file location from specified source
+      navigator.<a href="cordova_camera_camera.md.html#camera.getPicture">camera.getPicture</a>(onPhotoURISuccess, onFail, { quality: 50, 
+        destinationType: destinationType.FILE_URI,
+        sourceType: source });
+    }
+
+    // Called if something bad happens.
+    // 
+    function onFail(message) {
+      alert('Failed because: ' + message);
+    }
+
+    &lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;button onclick="capturePhoto();"&gt;<a href="cordova_media_capture_capture.md.html#Capture">Capture</a> Photo&lt;/button&gt; &lt;br&gt;
+    &lt;button onclick="capturePhotoEdit();"&gt;<a href="cordova_media_capture_capture.md.html#Capture">Capture</a> Editable Photo&lt;/button&gt; &lt;br&gt;
+    &lt;button onclick="getPhoto(pictureSource.PHOTOLIBRARY);"&gt;From Photo Library&lt;/button&gt;&lt;br&gt;
+    &lt;button onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);"&gt;From Photo Album&lt;/button&gt;&lt;br&gt;
+    &lt;img style="display:none;width:60px;height:60px;" id="smallImage" src="" /&gt;
+    &lt;img style="display:none;" id="largeImage" src="" /&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<hr>
+<h1><a name="cameraSuccess">cameraSuccess</a></h1>
+
+<p>onSuccess callback function that provides the image data.</p>
+
+<pre class="prettyprint"><code>function(imageData) {
+    // Do something with the image
+}
+</code></pre>
+
+<h2>
+<a name="cameraSuccess_parameters">Parameters</a>
+</h2>
+
+<ul>
+<li>
+<strong>imageData:</strong> Base64 encoding of the image data, OR the image file URI, depending on <code><a href="cordova_camera_camera.md.html#cameraOptions">cameraOptions</a></code> used. (<code>String</code>)</li>
+</ul>
+<h2>
+<a name="cameraSuccess_example">Example</a>
+</h2>
+
+<pre class="prettyprint"><code>// Show image
+//
+function cameraCallback(imageData) {
+    var image = document.getElementById('myImage');
+    image.src = "data:image/jpeg;base64," + imageData;
+}
+</code></pre>
+
+<hr>
+<h1><a name="cameraError">cameraError</a></h1>
+
+<p>onError callback function that provides an error message.</p>
+
+<pre class="prettyprint"><code>function(message) {
+    // Show a helpful message
+}
+</code></pre>
+
+<h2>
+<a name="cameraError_parameters">Parameters</a>
+</h2>
+
+<ul>
+<li>
+<strong>message:</strong> The message is provided by the device's native code. (<code>String</code>)</li>
+</ul>
+<hr>
+<h1><a name="cameraOptions">cameraOptions</a></h1>
+
+<p>Optional parameters to customize the camera settings.</p>
+
+<pre class="prettyprint"><code>{ quality : 75, 
+  destinationType : <a href="cordova_camera_camera.md.html#Camera">Camera</a>.DestinationType.DATA_URL, 
+  sourceType : <a href="cordova_camera_camera.md.html#Camera">Camera</a>.PictureSourceType.CAMERA, 
+  allowEdit : true,
+  encodingType: <a href="cordova_camera_camera.md.html#Camera">Camera</a>.EncodingType.JPEG,
+  targetWidth: 100,
+  targetHeight: 100,
+  popoverOptions: <a href="cordova_camera_camera.md.html#CameraPopoverOptions">CameraPopoverOptions</a>,
+  saveToPhotoAlbum: false };
+</code></pre>
+
+<h2>
+<a name="cameraOptions_options">Options</a>
+</h2>
+
+<ul>
+<li><p><strong>quality:</strong> Quality of saved image. Range is [0, 100]. (<code>Number</code>)</p></li>
+<li>
+<p><strong>destinationType:</strong> Choose the format of the return value.  Defined in navigator.camera.DestinationType (<code>Number</code>)</p>
+
+<pre class="prettyprint"><code>    <a href="cordova_camera_camera.md.html#Camera">Camera</a>.DestinationType = {
+        DATA_URL : 0,                // Return image as base64 encoded string
+        FILE_URI : 1                 // Return image file URI
+    };
+</code></pre>
+</li>
+<li>
+<p><strong>sourceType:</strong> Set the source of the picture.  Defined in nagivator.camera.PictureSourceType (<code>Number</code>)</p>
+
+<pre class="prettyprint"><code><a href="cordova_camera_camera.md.html#Camera">Camera</a>.PictureSourceType = {
+    PHOTOLIBRARY : 0,
+    CAMERA : 1,
+    SAVEDPHOTOALBUM : 2
+};
+</code></pre>
+</li>
+<li><p><strong>allowEdit:</strong> Allow simple editing of image before selection. (<code>Boolean</code>)</p></li>
+<li>
+<p><strong>encodingType:</strong> Choose the encoding of the returned image file.  Defined in navigator.camera.EncodingType (<code>Number</code>)</p>
+
+<pre class="prettyprint"><code>    <a href="cordova_camera_camera.md.html#Camera">Camera</a>.EncodingType = {
+        JPEG : 0,               // Return JPEG encoded image
+        PNG : 1                 // Return PNG encoded image
+    };
+</code></pre>
+</li>
+<li><p><strong>targetWidth:</strong> Width in pixels to scale image. Must be used with targetHeight.  Aspect ratio is maintained. (<code>Number</code>)</p></li>
+<li><p><strong>targetHeight:</strong> Height in pixels to scale image. Must be used with targetWidth. Aspect ratio is maintained. (<code>Number</code>)</p></li>
+<li>
+<p><strong>mediaType:</strong> Set the type of media to select from.  Only works when PictureSourceType is PHOTOLIBRARY or SAVEDPHOTOALBUM. Defined in nagivator.camera.MediaType (<code>Number</code>)</p>
+
+<pre class="prettyprint"><code><a href="cordova_camera_camera.md.html#Camera">Camera</a>.MediaType = { 
+    PICTURE: 0,             // allow selection of still pictures only. DEFAULT. Will return format specified via DestinationType
+    VIDEO: 1,               // allow selection of video only, WILL ALWAYS RETURN FILE_URI
+    ALLMEDIA : 2            // allow selection from all media types
+</code></pre>
+
+<p>};</p>
+</li>
+<li><p><strong>correctOrientation:</strong> Rotate the image to correct for the orientation of the device during capture. (<code>Boolean</code>)</p></li>
+<li>
+<strong>saveToPhotoAlbum:</strong> Save the image to the photo album on the device after capture. (<code>Boolean</code>)</li>
+<li>
+<strong>popoverOptions:</strong> iOS only options to specify popover location in iPad.  Defined in <a href="cordova_camera_camera.md.html#CameraPopoverOptions">CameraPopoverOptions</a>
+</li>
+</ul>
+<h2>
+<a name="cameraOptions_android_quirks">Android Quirks</a>
+</h2>
+
+<ul>
+<li>Ignores the <code>allowEdit</code> parameter.</li>
+<li>
+<a href="cordova_camera_camera.md.html#Camera">Camera</a>.PictureSourceType.PHOTOLIBRARY and <a href="cordova_camera_camera.md.html#Camera">Camera</a>.PictureSourceType.SAVEDPHOTOALBUM both display the same photo album.</li>
+<li>Ignores the <code>correctOrientation</code> parameter.</li>
+</ul>
+<h2>
+<a name="cameraOptions_blackberry_quirks">BlackBerry Quirks</a>
+</h2>
+
+<ul>
+<li>Ignores the <code>quality</code> parameter.</li>
+<li>Ignores the <code>sourceType</code> parameter.</li>
+<li>Ignores the <code>allowEdit</code> parameter.</li>
+<li>Application must have key injection permissions to close native <a href="cordova_camera_camera.md.html#Camera">Camera</a> application after photo is taken.</li>
+<li>Using Large image sizes may result in inability to encode image on later model devices with high resolution cameras (e.g. Torch 9800).</li>
+<li>
+<a href="cordova_camera_camera.md.html#Camera">Camera</a>.MediaType is not supported.</li>
+<li>Ignores the <code>correctOrientation</code> parameter.</li>
+<li>Ignores the <code>saveToPhotoAlbum</code> parameter.</li>
+</ul>
+<h2>
+<a name="cameraOptions_webos_quirks">webOS Quirks</a>
+</h2>
+
+<ul>
+<li>Ignores the <code>quality</code> parameter.</li>
+<li>Ignores the <code>sourceType</code> parameter.</li>
+<li>Ignores the <code>allowEdit</code> parameter.</li>
+<li>
+<a href="cordova_camera_camera.md.html#Camera">Camera</a>.MediaType is not supported.</li>
+<li>Ignores the <code>correctOrientation</code> parameter.</li>
+<li>Ignores the <code>saveToPhotoAlbum</code> parameter.</li>
+</ul>
+<h2>
+<a name="cameraOptions_ios_quirks">iOS Quirks</a>
+</h2>
+
+<ul>
+<li>Set <code>quality</code> below 50 to avoid memory error on some devices.</li>
+<li>When <code>destinationType.FILE_URI</code> is used, photos are saved in the application's temporary directory.  Developers may delete the contents of this directory using the navigator.fileMgr APIs if storage space is a concern.</li>
+</ul>
+<h2>
+<a name="cameraOptions_windows_phone_7_quirks">Windows Phone 7 Quirks</a>
+</h2>
+
+<ul>
+<li>Ignores the <code>allowEdit</code> parameter.</li>
+<li>Ignores the <code>correctOrientation</code> parameter.</li>
+<li>Ignores the <code>saveToPhotoAlbum</code> parameter.</li>
+</ul>
+<h2>
+<a name="cameraOptions_bada_1_2_quirks">Bada 1.2 Quirks</a>
+</h2>
+
+<ul>
+<li>options not supported</li>
+<li>always returns a FILE URI</li>
+</ul>
+<hr>
+<h1><a name="CameraPopoverOptions">CameraPopoverOptions</a></h1>
+
+<p>Parameters only used by iOS to specify the anchor element location and arrow direction of popover used on iPad when selecting images from the library or album.</p>
+
+<pre class="prettyprint"><code>{ x : 0, 
+  y :  32,
+  width : 320,
+  height : 480,
+  arrowDir : <a href="cordova_camera_camera.md.html#Camera">Camera</a>.PopoverArrowDirection.ARROW_ANY
+};
+</code></pre>
+
+<h2>
+<a name="CameraPopoverOptions_camerapopoveroptions">CameraPopoverOptions</a>
+</h2>
+
+<ul>
+<li><p><strong>x:</strong> x pixel coordinate of element on the screen to anchor popover onto. (<code>Number</code>)</p></li>
+<li><p><strong>y:</strong> y pixel coordinate of element on the screen to anchor popover onto. (<code>Number</code>)</p></li>
+<li><p><strong>width:</strong> width, in pixels, of the element on the screen to anchor popover onto. (<code>Number</code>)</p></li>
+<li><p><strong>height:</strong> height, in pixels, of the element on the screen to anchor popover onto. (<code>Number</code>)</p></li>
+<li>
+<p><strong>arrowDir:</strong> Direction the arrow on the popover should point.  Defined in <a href="cordova_camera_camera.md.html#Camera">Camera</a>.PopoverArrowDirection (<code>Number</code>)</p>
+
+<pre class="prettyprint"><code>    <a href="cordova_camera_camera.md.html#Camera">Camera</a>.PopoverArrowDirection = {
+        ARROW_UP : 1,        // matches iOS UIPopoverArrowDirection constants
+        ARROW_DOWN : 2,
+        ARROW_LEFT : 4,
+        ARROW_RIGHT : 8,
+        ARROW_ANY : 15
+    };
+</code></pre>
+</li>
+</ul>
+<p>Note that the size of the popover may change to adjust to the direction of the arrow and orientation of the screen.  Make sure to account for orientation changes when specifying the anchor element location. </p>
+
+<h2>
+<a name="CameraPopoverOptions_quick_example">Quick Example</a>
+</h2>
+
+<pre class="prettyprint"><code> var popover = new <a href="cordova_camera_camera.md.html#CameraPopoverOptions">CameraPopoverOptions</a>(300,300,100,100,<a href="cordova_camera_camera.md.html#Camera">Camera</a>.PopoverArrowDirection.ARROW_ANY);
+ var options = { quality: 50, destinationType: <a href="cordova_camera_camera.md.html#Camera">Camera</a>.DestinationType.DATA_URL,sourceType: <a href="cordova_camera_camera.md.html#Camera">Camera</a>.PictureSource.SAVEDPHOTOALBUM, popoverOptions : popover };
+
+ navigator.<a href="cordova_camera_camera.md.html#camera.getPicture">camera.getPicture</a>(onSuccess, onFail, options);
+
+ function onSuccess(imageData) {
+    var image = document.getElementById('myImage');
+    image.src = "data:image/jpeg;base64," + imageData;
+}
+
+function onFail(message) {
+    alert('Failed because: ' + message);
+}
+</code></pre>
+
+            </div>
+        </div>
+
+        <!-- Functionality and Syntax Highlighting -->
+        <script type="text/javascript" src="index.js"></script><script type="text/javascript" src="prettify/prettify.js"></script>
+</body>
+</html>

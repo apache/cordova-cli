@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 var fs = require('fs'),
     util = require('util'),
     spawn = require('child_process').spawn;
@@ -105,8 +103,3 @@ function processArguments() {
     });
 }
 
-if(process.argv.length < 3) {
-    usage(1);
-} else {
-    processArguments();
-}

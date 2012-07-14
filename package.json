@@ -4,7 +4,7 @@
   "description": "Cordova client tool",
   "main": "cordova.js",
   "scripts": {
-    "test": "jake"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -16,5 +16,6 @@
     "tool"
   ],
   "author": "Anis Kadri",
+  "contributors": [{"name": "Brian LeRoux","email": "b@brian.io"}],
   "license": "Apache"
 }

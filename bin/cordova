@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+var cordova = require('./../cordova')
+,   cmd     = process.argv[2]
+,   opts    = process.argv.slice(3, process.argv.length)
+
+if (cordova.hasOwnProperty(cmd)) {
+    t[cmd].call(opts)
+}
+else {
+    console.error('Cordova does not know ' + cmd + '; try help for a list of all the available commands.')
+}
+
