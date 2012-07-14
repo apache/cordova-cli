@@ -1,8 +1,12 @@
 {
   "name": "cordova",
   "version": "0.0.1",
+  "preferGlobal": "true",
   "description": "Cordova client tool",
-  "main": "cordova.js",
+  "main": "cordova",
+  "bin": {
+    "cordova": "./bin/cordova"
+  },
   "scripts": {
     "test": "mocha"
   },
@@ -13,8 +17,9 @@
   "keywords": [
     "cordova",
     "client",
-    "tool"
+    "cli"
   ],
+  "devDependencies": {"mocha":"*"},
   "author": "Anis Kadri",
   "contributors": [{"name": "Brian LeRoux","email": "b@brian.io"}],
   "license": "Apache"
