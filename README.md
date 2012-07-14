@@ -58,3 +58,29 @@ Emulating projects
     cordova emulate [directory] [directory]...|cordova.conf
 
 Will launch the platform's emulator
+
+
+Examples:
+=========
+
+Creating a sample iOS and android project
+-----------------------------------------
+
+    cordova create
+
+this will generate two projects in the current directory: _ios-example_ and _android-example_
+
+Creating a sample iOS project and android project with specific arguments
+-------------------------------------------------------------------------
+    
+    cordova create ios:./my-ios-project:com.example.myiospackage:CordovaExample android:./my-android-project:com.example.myandroidpackage:CordovaActivity
+
+Building projects (platform does not matter)
+--------------------------------------------
+
+    cordova build ./ios-example ./android-example
+
+Emulating projects (platform does not matter)
+--------------------------------------------
+
+    cordova emulate ./ios-example ./android-example
