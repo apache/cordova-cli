@@ -1,0 +1,16 @@
+Synopsis:
+    
+    cordova cmd [options]
+
+Available commands:
+
+    create [platform package name] .... creates a cordova project
+    build ............................. builds a cordova project
+    emulate ........................... starts emulator for cordova project
+
+Example usage:
+
+    $ cordova create ios com.foobar Baz
+    $ cd Baz
+    $ codova build && cordova emulate 
+
