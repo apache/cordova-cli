@@ -60,15 +60,16 @@ module.exports = {
     }
     ,
     create: function create (platform, package, name) {
-        var args = [].slice.call(arguments)
-        ,   projectPath = path.join(process.cwd(), name)
-
+        var projectPath = path.join(process.cwd(), name)
+        ,   args        = [].slice.call(arguments)
+        ,   cmd         = util.format("%s/lib/%s/bin/create %s %s %s", dist, platform, projectPath, package, name)
+        
         if (args.length != 3) {
             console.error('Invalid number of arguments.')
             process.exit(1)
         }
         
-        exec(util.format("%s/lib/%s/bin/create %s %s %s", dist, platform, projectPath, package, name), function(err, stdout, stderr) {
+        exec(cmd, function(err, stdout, stderr) {
             if (err) {
                 console.error('An error occurred while creating project!', err)
             } 
@@ -78,22 +79,18 @@ module.exports = {
         })
     }
     ,
-    build: function build() {
-        console.log(util.format("%s/cordova/debug ", directory));
-        spawn(util.format("%s/cordova/debug", directory), [], function(code) {
-            if(code != 0) {
-                console.error("An error occurred while building project");
-            }
-        });
+    build: function build () {
+        var cmd = util.format("%s/cordova/debug", process.cwd())
+        exec(cmd, function(err, stderr, stdout) {
+            if (err) console.error('An error occurred while building project.', err)
+        })
     }
     ,
     emulate: function emulate() {
-        console.log(util.format("%s/cordova/emulate ", directory));
-        spawn(util.format("%s/cordova/emulate", directory), [], function(code) {
-            if(code != 0) {
-                console.error("An error occurred while emulating project");
-            }
-        });
+        var cmd = util.format("%s/cordova/emulate", process.cwd())
+        exec(cmd, function(err, stderr, stdout) {
+            if (err) console.error('An error occurred attempting to start emulator.', err)
+        })
    }
    // end of module defn
 }
