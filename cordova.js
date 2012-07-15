@@ -34,6 +34,27 @@ module.exports = {
         }).join("\n"))
     }
     ,
+    docs: function docs () {
+
+        var express = require('express')
+        ,   port    = 2222
+        ,   static  = path.join(dist, 'doc')
+        ,   server  = express.createServer();
+        
+        server.configure(function() {
+            server.use(express.static(static))
+            server.use(express.errorHandler({ dumpExceptions: true, showStack: true }))
+        })
+
+        server.get('/', function(req, res) {
+            return res.render('index.html')
+        })
+
+        console.log("\nServing Cordova/Docs at: ".grey + 'http://localhost:2222'.blue.underline + "\n")
+        console.log('Hit ctrl + c to terminate the process.'.cyan)
+        server.listen(parseInt(port, 10))
+    }
+    ,
     create: function create (platform, package, name) {
         var projectPath = path.join(process.cwd(), name)
         ,   args        = [].slice.call(arguments)
