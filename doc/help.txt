@@ -8,6 +8,7 @@ Available commands
     create [platform package name] .... creates a cordova project
     build ............................. builds a cordova project
     emulate ........................... starts emulator for cordova project
+    docs .............................. serves docs at http://localhost:2222
 
 Example usage
 
