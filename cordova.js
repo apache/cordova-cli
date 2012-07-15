@@ -26,6 +26,7 @@ module.exports = {
                 console.error('An error occurred while creating project!', err)
             } 
             else {
+                console.log(stdout)
                 console.log( platform + ' project successfully created.')
             }
         })
@@ -34,14 +35,22 @@ module.exports = {
     build: function build () {
         var cmd = util.format("%s/cordova/debug", process.cwd())
         exec(cmd, function(err, stderr, stdout) {
-            if (err) console.error('An error occurred while building project.', err)
+            if (err) 
+                console.error('An error occurred while building project.', err)
+            
+            console.log(stdout)
+            console.log(stderr)
         })
     }
     ,
     emulate: function emulate() {
         var cmd = util.format("%s/cordova/emulate", process.cwd())
         exec(cmd, function(err, stderr, stdout) {
-            if (err) console.error('An error occurred attempting to start emulator.', err)
+            if (err) 
+                console.error('An error occurred attempting to start emulator.', err)
+            
+            console.log(stdout)
+            console.log(stderr)
         })
    }
    // end of module defn
