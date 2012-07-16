@@ -25,11 +25,11 @@ Creating projects
     cordova create [[platform:[directory]:[package_name]:[project_name]] [platform:[directory]:[package_name]:[project_name]]...|cordova.conf]
 <!-- -->
 
-- directory: path to your new Cordova based project
-- package_name: following reverse-domain style convention
-- project_name: Cordova based project name
+- `directory`: path to your new Cordova based project
+- `package_name`: following reverse-domain style convention
+- `project_name`: Cordova based project name
 
-When called with no arguments _cordova create_ will generate an _cordova-ios-example_ and _cordova-android-example_ in the current directory
+When called with no arguments, `cordova create` will generate a `cordova-ios-example` and `cordova-android-example` in the current directory
 
 cordova.conf format
 -------------------
@@ -49,7 +49,7 @@ Building projects
 
     cordova build [[directory] [directory]...|cordova.conf]
 
-You can call _cordova build_ with no arguments if you are inside a cordova based project. _cordova build_ will just call the _./cordova/debug_ script.
+You can call `cordova build` with no arguments if you are inside a cordova based project. `cordova build` will just call the `./cordova/debug` script.
 
 
 Emulating projects
@@ -68,7 +68,7 @@ Creating a sample iOS and android project
 
     cordova create
 
-this will generate two projects in the current directory: _ios-example_ and _android-example_
+this will generate two projects in the current directory: `ios-example` and `android-example`
 
 Creating a sample iOS project and android project with specific arguments
 -------------------------------------------------------------------------

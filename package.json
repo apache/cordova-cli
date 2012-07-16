@@ -8,20 +8,27 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "./node_modules/jasmine-node/bin/jasmine-node --color spec"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:imhotep/cordova-client.git"
+    "url": "https://github.com/imhotep/cordova-client.git"
   },
   "keywords": [
     "cordova",
     "client",
     "cli"
   ],
-  "devDependencies": {"mocha":"*"},
-  "dependencies": {"colors":">=0.6.0"},
+  "dependencies": {
+    "colors":">=0.6.0"
+  },
+  "devDependencies": {
+    "jasmine-node":">=1.0.0"
+  },
   "author": "Anis Kadri",
-  "contributors": [{"name": "Brian LeRoux","email": "b@brian.io"}],
-  "license": "Apache"
+  "contributors": [
+    {"name": "Brian LeRoux","email": "b@brian.io"},
+    {"name": "Fil Maj", "email": "filmaj@apache.org"}
+  ],
+  "license": "Apache version 2.0"
 }
