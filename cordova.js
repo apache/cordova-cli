@@ -81,5 +81,6 @@ module.exports = {
     },
     platform:require('./src/platform'),
     build:require('./src/build'),
-    emulate:require('./src/emulate')
+    emulate:require('./src/emulate'),
+    plugin:require('./src/plugin')
 };

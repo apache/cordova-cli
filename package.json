@@ -22,7 +22,8 @@
   "dependencies": {
     "colors":">=0.6.0",
     "wrench":"",
-    "elementtree":""
+    "elementtree":"",
+    "pluginstall":"git+https://github.com/filmaj/pluginstall.git"
   },
   "devDependencies": {
     "jasmine-node":">=1.0.0"
