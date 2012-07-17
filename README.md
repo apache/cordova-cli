@@ -101,3 +101,14 @@ launch for.
 ## Creating a sample project
 
     $ cordova create
+
+# Contributing
+
+## Running Tests
+
+    $ npm test
+
+## TO-DO
+
+- clean up build + emulate commands
+- add plugin integration via pluginstall
