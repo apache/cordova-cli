@@ -7,50 +7,33 @@ var fs            = require('fs')
 ,   wrench        = require('wrench')
 ,   config_parser = require('./src/config_parser')
 
-// Runs up the directory chain looking for a .cordova directory.
-// IF it is found we are in a Cordova project.
-// If not.. we're not.
-function isCordova(dir) {
-    if (dir) {
-        var contents = fs.readdirSync(dir);
-        if (contents && contents.length && (contents.indexOf('.cordova') > -1)) {
-            return dir;
-        } else {
-            var parent = path.join(dir, '..');
-            if (parent && parent.length > 1) {
-                return isCordova(parent);
-            } else return false;
-        }
-    } else return false;
-}
 
 module.exports = {
     help: function help () {
-        var raw = fs.readFileSync(path.join(__dirname, 'doc', 'help.txt')).toString('utf8').split("\n")
+        var raw = fs.readFileSync(path.join(__dirname, 'doc', 'help.txt')).toString('utf8').split("\n");
         console.log(raw.map(function(line) {
             if (line.match('    ')) {
                 var prompt = '    $ '
-                ,   isPromptLine = !!(line.indexOf(prompt) != -1)
+                ,   isPromptLine = !!(line.indexOf(prompt) != -1);
                 if (isPromptLine) {
-                    return prompt.green + line.replace(prompt, '')
+                    return prompt.green + line.replace(prompt, '');
                 }
                 else {
                     return line.split(/\./g).map( function(char) { 
                         if (char === '') {
-                            return '.'.grey
+                            return '.'.grey;
                         }
                         else {
-                            return char
+                            return char;
                         }
-                    }).join('')
+                    }).join('');
                 }
             }
             else {
-                return line.magenta
+                return line.magenta;
             }
-        }).join("\n"))
-    }
-    ,
+        }).join("\n"));
+    },
     docs: function docs () {
 
         var express = require('express')
@@ -59,19 +42,18 @@ module.exports = {
         ,   server  = express.createServer();
         
         server.configure(function() {
-            server.use(express.static(static))
-            server.use(express.errorHandler({ dumpExceptions: true, showStack: true }))
-        })
+            server.use(express.static(static));
+            server.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+        });
 
         server.get('/', function(req, res) {
-            return res.render('index.html')
-        })
+            return res.render('index.html');
+        });
 
-        console.log("\nServing Cordova/Docs at: ".grey + 'http://localhost:2222'.blue.underline + "\n")
-        console.log('Hit ctrl + c to terminate the process.'.cyan)
-        server.listen(parseInt(port, 10))
-    }
-    ,
+        console.log("\nServing Cordova/Docs at: ".grey + 'http://localhost:2222'.blue.underline + "\n");
+        console.log('Hit ctrl + c to terminate the process.'.cyan);
+        server.listen(parseInt(port, 10));
+    },
     create: function create (dir) {
         var mkdirp = wrench.mkdirSyncRecursive,
             cpr = wrench.copyDirSyncRecursive;
@@ -96,61 +78,17 @@ module.exports = {
 
         // Copy in base template
         cpr(path.join(__dirname, 'templates', 'www'), path.join(dir, 'www'));
-    }
-    ,
-    platform: function platform(command, target) {
-        var projectRoot = isCordova(process.cwd());
-
-        if (!projectRoot) {
-            console.error('Current working directory is not a Cordova-based project.');
-            return;
-        }
-        if (arguments.length === 0) command = 'ls';
-
-        var xml = path.join(projectRoot, 'www', 'config.xml');
-        var cfg = new config_parser(xml);
-
-        switch(command) {
-            case 'ls':
-                var platforms = cfg.ls_platforms();
-                if (platforms.length) {
-                    platforms.map(function(p) {
-                        console.log(p);
-                    });
-                } else console.log('No platforms added. Use `cordova platforms add <platform>`.');
-                break;
-            case 'add':
-                cfg.add_platform(target);
-                break;
-            case 'remove':
-                cfg.remove_platform(target);
-                break;
-            default:
-                console.error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.');
-                break;
-        }
-    }
-    ,
-    build: function build () {
-        var cmd = util.format("%s/cordova/debug", process.cwd())
-        exec(cmd, function(err, stderr, stdout) {
-            if (err) 
-                console.error('An error occurred while building project.', err)
-            
-            console.log(stdout)
-            console.log(stderr)
-        })
-    }
-    ,
+    },
+    platform:require('./src/platform'),
+    build:require('./src/build'),
     emulate: function emulate() {
-        var cmd = util.format("%s/cordova/emulate", process.cwd())
+        var cmd = util.format("%s/cordova/emulate", process.cwd());
         exec(cmd, function(err, stderr, stdout) {
             if (err) 
-                console.error('An error occurred attempting to start emulator.', err)
+                console.error('An error occurred attempting to start emulator.', err);
             
-            console.log(stdout)
-            console.log(stderr)
-        })
+            console.log(stdout);
+            console.log(stderr);
+        });
    }
-   // end of module defn
-}
+};

@@ -77,9 +77,10 @@ project.
 
 #### Removing A Platform
 
+    $ cordova platform remove [platform]
+
 Removes the platform as a build target from the current Cordova-based
 project.
-
 
 ### Building Your Project
 
@@ -94,7 +95,6 @@ You can call `cordova build` with no arguments if you are inside a cordova based
 Will compile and launch your app on all platforms added to your
 Cordova project. You can optionally specify a specific platform to
 launch for.
-
 
 # Examples
 

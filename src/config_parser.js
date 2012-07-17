@@ -1,5 +1,5 @@
 var et = require('elementtree'),
-    platforms = require('./platforms'),
+    platforms = require('./../platforms'),
     fs = require('fs');
 
 function config_parser(xmlPath) {
