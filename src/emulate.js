@@ -5,7 +5,7 @@ var cordova_util = require('./util'),
     fs = require('fs'),
     util = require('util');
 
-module.exports = function build () {
+module.exports = function emulate () {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -19,10 +19,12 @@ module.exports = function build () {
 
     // Iterate over each added platform and shell out to debug command
     platforms.map(function(platform) {
-        var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'debug');
+        var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'emulate');
         exec(cmd, function(err, stderr, stdout) {
             if (err) 
-                console.error('An error occurred while building the ' + platform + ' project.', err);
+                console.error('An error occurred while emulating/deploying the ' + platform + ' project.', err);
+            console.log(stdout);
         });
     });
 };
+

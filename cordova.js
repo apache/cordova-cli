@@ -81,14 +81,5 @@ module.exports = {
     },
     platform:require('./src/platform'),
     build:require('./src/build'),
-    emulate: function emulate() {
-        var cmd = util.format("%s/cordova/emulate", process.cwd());
-        exec(cmd, function(err, stderr, stdout) {
-            if (err) 
-                console.error('An error occurred attempting to start emulator.', err);
-            
-            console.log(stdout);
-            console.log(stderr);
-        });
-   }
+    emulate:require('./src/emulate')
 };

@@ -112,3 +112,4 @@ launch for.
 - clean up build + emulate commands
 - add plugin integration via pluginstall
 - `grep` through this project for 'TODO'
+- moar tests
