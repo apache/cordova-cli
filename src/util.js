@@ -17,5 +17,18 @@ module.exports = {
                 } else return false;
             }
         } else return false;
+    },
+    // Determines whether the library has a copy of the specified
+    // Cordova implementation
+    havePlatformLib: function havePlatformLib(platform) {
+        var dir = path.join(__dirname, '..', 'lib', platform);
+        try {
+            fs.lstatSync(dir);
+            // Have it!
+            return true;
+        } catch(e) {
+            // Don't have it.
+            return false;
+        }
     }
 };

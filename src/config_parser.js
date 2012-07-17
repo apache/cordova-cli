@@ -30,6 +30,12 @@ config_parser.prototype = {
             psEl.remove(null, pEl);
             fs.writeFileSync(this.path, this.doc.write(), 'utf-8');
         }
+    },
+    packageName:function() {
+        return this.doc.getroot().attrib.id;
+    },
+    name:function() {
+        return this.doc.find('name').text;
     }
 };
 
