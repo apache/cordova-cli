@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<widget xmlns=     "http://www.w3.org/ns/widgets"
-        xmlns:gap= "http://phonegap.com/ns/1.0"
-        id=        "org.apache.cordova.sampleapp"
-        version=   "1.0.0">
+<widget xmlns="http://www.w3.org/ns/widgets"
+        xmlns:rim="http://www.blackberry.com/ns/widgets"
+        id="org.apache.cordova.sampleapp"
+        version="1.0.0">
 
   <name>Cordova Sample Application</name>
 
@@ -14,8 +14,45 @@
     Anonymous
   </author>
 
-  <gap:platforms>
-	</gap:platforms>
+  <platforms>
+  </platforms>
 
-  <icon src="blurry.png" />
+  <!-- Cordova API -->
+  <feature id="org.apache.cordova" required="true" version="1.0.0" />
+  <!-- BlackBerry-specific -->
+  <feature id="blackberry.system" required="true" version="1.0.0.0" />
+  <feature id="blackberry.find" required="true" version="1.0.0.0" />
+  <feature id="blackberry.identity" required="true" version="1.0.0.0" />
+  <feature id="blackberry.pim.Address" required="true" version="1.0.0.0" />
+  <feature id="blackberry.pim.Contact" required="true" version="1.0.0.0" />
+  <feature id="blackberry.io.file" required="true" version="1.0.0.0" />
+  <feature id="blackberry.utils" required="true" version="1.0.0.0" />
+  <feature id="blackberry.io.dir" required="true" version="1.0.0.0" />
+  <feature id="blackberry.app" required="true" version="1.0.0.0" />
+  <feature id="blackberry.app.event" required="true" version="1.0.0.0" />
+  <feature id="blackberry.system.event" required="true" version="1.0.0.0"/>
+  <feature id="blackberry.widgetcache" required="true" version="1.0.0.0"/>
+  <feature id="blackberry.media.camera" />
+  <feature id="blackberry.ui.dialog" />
+  <feature id="blackberry.media.microphone" required="true" version="1.0.0.0"/>
+  
+  <!-- Cordova API -->
+  <access subdomains="true" uri="file:///store/home" />
+  <access subdomains="true" uri="file:///SDCard" />
+  <!-- Expose access to all URIs, including the file and http protocols -->
+  <access subdomains="true" uri="*" />
+
+  <!-- potential icon stuff
+  <icon src="blurry.png" /> -->
+
+  <!-- Starting Page -->
+  <content src="index.html" />
+
+  <rim:permissions>
+    <rim:permit>use_camera</rim:permit>
+    <rim:permit>read_device_identifying_information</rim:permit>
+    <rim:permit>access_shared</rim:permit>
+    <rim:permit>read_geolocation</rim:permit>
+    <rim:permit>record_audio</rim:permit> 
+  </rim:permissions>
 </widget>

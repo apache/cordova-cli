@@ -1,11 +1,11 @@
-var fs        = require('fs')
-,   path      = require('path')
-,   util      = require('util')
-,   exec      = require('child_process').exec
-,   platforms = ['ios', 'android']
-,   dist      = process.env.CORDOVA_HOME != undefined ? process.env.CORDOVA_HOME : path.join(__dirname, 'lib', 'cordova-1.9.0')
-,   colors    = require('colors')
-,   wrench    = require('wrench')
+var fs            = require('fs')
+,   path          = require('path')
+,   util          = require('util')
+,   exec          = require('child_process').exec
+,   dist          = process.env.CORDOVA_HOME != undefined ? process.env.CORDOVA_HOME : path.join(__dirname, 'lib', 'cordova-1.9.0')
+,   colors        = require('colors')
+,   wrench        = require('wrench')
+,   config_parser = require('./src/config_parser')
 
 // Runs up the directory chain looking for a .cordova directory.
 // IF it is found we are in a Cordova project.
@@ -25,7 +25,6 @@ function isCordova(dir) {
 }
 
 module.exports = {
-
     help: function help () {
         var raw = fs.readFileSync(path.join(__dirname, 'doc', 'help.txt')).toString('utf8').split("\n")
         console.log(raw.map(function(line) {
@@ -101,29 +100,32 @@ module.exports = {
     ,
     platform: function platform(command, target) {
         var projectRoot = isCordova(process.cwd());
+
         if (!projectRoot) {
             console.error('Current working directory is not a Cordova-based project.');
             return;
         }
         if (arguments.length === 0) command = 'ls';
 
+        var xml = path.join(projectRoot, 'www', 'config.xml');
+        var cfg = new config_parser(xml);
+
         switch(command) {
             case 'ls':
-                var contents = fs.readdirSync(path.join(projectRoot, 'platforms'));
-                if (contents.length) {
-                    contents.map(function(p) {
+                var platforms = cfg.ls_platforms();
+                if (platforms.length) {
+                    platforms.map(function(p) {
                         console.log(p);
                     });
-                } else {
-                    console.log('No platforms. Use `cordova platform add <platform>`.');
-                }
+                } else console.log('No platforms added. Use `cordova platforms add <platform>`.');
                 break;
             case 'add':
                 break;
             case 'remove':
+
                 break;
             default:
-                console.error('Unrecognized command "' + command '". Use either `add`, `remove`, or `ls`.');
+                console.error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.');
                 break;
         }
     }

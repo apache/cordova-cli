@@ -21,7 +21,8 @@
   ],
   "dependencies": {
     "colors":">=0.6.0",
-    "wrench":""
+    "wrench":"",
+    "elementtree":""
   },
   "devDependencies": {
     "jasmine-node":">=1.0.0"
