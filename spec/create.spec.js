@@ -2,20 +2,16 @@ var cordova = require('../cordova'),
     wrench = require('wrench'),
     mkdirp = wrench.mkdirSyncRecursive,
     path = require('path'),
-    rmrf = require('rimraf'),
+    rmrf = wrench.rmdirSyncRecursive,
     fs = require('fs'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 describe('create command', function () {
     beforeEach(function() {
         // Make a temp directory
+        try { rmrf(tempDir); } catch(e) {}
         mkdirp(tempDir);
     });
-
-    afterEach(function() {
-        // Delete the temp directory
-        rmrf(tempDir, function(){});
-    });    
 
     it('should create a cordova project in the current directory if no parameter is provided', function() {
         var cwd = process.cwd();

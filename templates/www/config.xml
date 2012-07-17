@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<widget xmlns		= "http://www.w3.org/ns/widgets"
-  id		= "org.apache.sampleapp"
-  version 	= "1.0.0">
+<widget xmlns=     "http://www.w3.org/ns/widgets"
+        xmlns:gap= "http://phonegap.com/ns/1.0"
+        id=        "org.apache.cordova.sampleapp"
+        version=   "1.0.0">
 
   <name>Cordova Sample Application</name>
 
@@ -12,6 +13,9 @@
   <author>
     Anonymous
   </author>
+
+  <gap:platforms>
+	</gap:platforms>
 
   <icon src="blurry.png" />
 </widget>

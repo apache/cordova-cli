@@ -30,11 +30,11 @@ via:
 
     $ ./bin/cordova
 
-## Creating A Project
+## Creating A Cordova-Based Project
 
     $ cordova create [directory]
 
-Creates a Cordova application. When called with no arguments, `cordova create` will generate an example project for each supported platform in the current directory.
+Creates a Cordova application. When called with no arguments, `cordova create` will generate a Cordova-based project in the current directory.
 
 A Cordova application built with cordova-client will have the following
 directory structure:
@@ -51,13 +51,43 @@ directory structure:
 - `plugins`: any added plugins will be extracted into this directory
 - `www`: your main application assets
 
-## Building Your Project
+From here, you have a Cordova-based project whose state you can
+manipulate using the below project-level commands.
+
+## Project-Level Commands
+
+Inside a Cordova-based project, you can use `cordova` with the
+`platform`, `plugin`, `build` and `emulate` sub-commands.
+
+### Managing Platforms
+
+#### Listing All Platforms
+
+    $ cordova platform [ls]
+
+Lists out all platforms that the Cordova-based project is currently
+being built to.
+
+#### Adding A Platform
+
+    $ cordova platform add [platform]
+
+Adds the platform as a build target for the current Cordova-based
+project.
+
+#### Removing A Platform
+
+Removes the platform as a build target from the current Cordova-based
+project.
+
+
+### Building Your Project
 
     $ cordova build [platform]
 
 You can call `cordova build` with no arguments if you are inside a cordova based project. This will compile your app for all platforms added to your Cordova project.
 
-## Emulating Your Project
+### Emulating Your Project
 
     $ cordova emulate [platform]
 

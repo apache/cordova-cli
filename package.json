@@ -24,8 +24,7 @@
     "wrench":""
   },
   "devDependencies": {
-    "jasmine-node":">=1.0.0",
-    "rimraf":">=1.0.0"
+    "jasmine-node":">=1.0.0"
   },
   "author": "Anis Kadri",
   "contributors": [

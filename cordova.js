@@ -7,6 +7,23 @@ var fs        = require('fs')
 ,   colors    = require('colors')
 ,   wrench    = require('wrench')
 
+// Runs up the directory chain looking for a .cordova directory.
+// IF it is found we are in a Cordova project.
+// If not.. we're not.
+function isCordova(dir) {
+    if (dir) {
+        var contents = fs.readdirSync(dir);
+        if (contents && contents.length && (contents.indexOf('.cordova') > -1)) {
+            return dir;
+        } else {
+            var parent = path.join(dir, '..');
+            if (parent && parent.length > 1) {
+                return isCordova(parent);
+            } else return false;
+        }
+    } else return false;
+}
+
 module.exports = {
 
     help: function help () {
@@ -80,6 +97,35 @@ module.exports = {
 
         // Copy in base template
         cpr(path.join(__dirname, 'templates', 'www'), path.join(dir, 'www'));
+    }
+    ,
+    platform: function platform(command, target) {
+        var projectRoot = isCordova(process.cwd());
+        if (!projectRoot) {
+            console.error('Current working directory is not a Cordova-based project.');
+            return;
+        }
+        if (arguments.length === 0) command = 'ls';
+
+        switch(command) {
+            case 'ls':
+                var contents = fs.readdirSync(path.join(projectRoot, 'platforms'));
+                if (contents.length) {
+                    contents.map(function(p) {
+                        console.log(p);
+                    });
+                } else {
+                    console.log('No platforms. Use `cordova platform add <platform>`.');
+                }
+                break;
+            case 'add':
+                break;
+            case 'remove':
+                break;
+            default:
+                console.error('Unrecognized command "' + command '". Use either `add`, `remove`, or `ls`.');
+                break;
+        }
     }
     ,
     build: function build () {
