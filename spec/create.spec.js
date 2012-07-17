@@ -1,5 +1,6 @@
 var cordova = require('../cordova'),
-    mkdirp = require('mkdirp'),
+    wrench = require('wrench'),
+    mkdirp = wrench.mkdirSyncRecursive,
     path = require('path'),
     rmrf = require('rimraf'),
     fs = require('fs'),
@@ -13,7 +14,7 @@ describe('create command', function () {
 
     afterEach(function() {
         // Delete the temp directory
-            rmrf(tempDir, function(){});
+        rmrf(tempDir, function(){});
     });    
 
     it('should create a cordova project in the current directory if no parameter is provided', function() {
@@ -34,17 +35,10 @@ describe('create command', function () {
 
         var cb = jasmine.createSpy();
 
-        runs(function () {
-            console.log('here?');
-            mkdirp(path.join(tempDir, '.cordova'), cb);
-            console.log('what about here?');
-        });
+        mkdirp(path.join(tempDir, '.cordova'));
 
-        waitsFor(function() { return cb.wasCalled; });
+        cordova.create(tempDir);
 
-        runs(function() {
-            cordova.create(tempDir);
-            expect(console.error).toHaveBeenCalled();
-        });
+        expect(console.error).toHaveBeenCalled();
     });
 });

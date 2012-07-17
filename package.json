@@ -21,8 +21,7 @@
   ],
   "dependencies": {
     "colors":">=0.6.0",
-    "mkdirp":"0.2.2",
-    "ncp":"0.2.6"
+    "wrench":""
   },
   "devDependencies": {
     "jasmine-node":">=1.0.0",

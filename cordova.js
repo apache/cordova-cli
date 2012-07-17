@@ -5,8 +5,7 @@ var fs        = require('fs')
 ,   platforms = ['ios', 'android']
 ,   dist      = process.env.CORDOVA_HOME != undefined ? process.env.CORDOVA_HOME : path.join(__dirname, 'lib', 'cordova-1.9.0')
 ,   colors    = require('colors')
-,   mkdirp    = require('mkdirp')
-,   ncp       = require('ncp').ncp
+,   wrench    = require('wrench')
 
 module.exports = {
 
@@ -58,6 +57,8 @@ module.exports = {
     }
     ,
     create: function create (dir) {
+        var mkdirp = wrench.mkdirSyncRecursive,
+            cpr = wrench.copyDirSyncRecursive;
         if (dir && (dir[0] == '~' || dir[0] == '/')) {
         } else {
             dir = dir ? path.join(process.cwd(), dir) : process.cwd();
@@ -78,9 +79,7 @@ module.exports = {
         mkdirp(path.join(dir, 'www'));
 
         // Copy in base template
-        ncp(path.join(__dirname, 'templates', 'www'), path.join(dir, 'www'), function(err) {
-            if (err) return console.error(err);
-        });
+        cpr(path.join(__dirname, 'templates', 'www'), path.join(dir, 'www'));
     }
     ,
     build: function build () {
