@@ -1,86 +1,73 @@
-cordova-client
-==============
+# cordova-client
 
-Cordova client allows you to create, build and emulate Cordova projects.
+> Build, deploy and manage [Cordova](http://cordova.io)-based applications.
 
-Cordova client uses the platform specific scripts for creating, building and emulating projects. Your projects have to be created using either the platform specific create script or the cordova client master script.
+## Supported Platforms
 
-Cordova client supports iOS and Android for now. More platforms will be added soon!
+- iOS
+- Android
+- BlackBerry
 
-Cordova client requires:
+# Requirements
 
-- [nodejs](http://nodejs.org/)
+Cordova client requires [nodejs](http://nodejs.org/).
+
+For every platform that Cordova supports and you want to use with
+cordova-client, you will need to install the SDK for that platform. See:
+
 - [iOS SDK](http://developer.apple.com)
 - [Android SDK](http://developer.android.com)
+- [BlackBerry WebWorks SDK](http://developer.blackberry.com)
 
 Cordova client has been tested on Windows, Linux and Mas OS X.
 
+# Getting Started
 
-Using cordova client
-====================
+You should (eventually) be able to `npm install cordova-client -g`.
+Until then, after you clone this code, run `npm install` from inside this
+directory. After that you will be able to access the client interface
+via:
 
-Creating projects
------------------
+    $ ./bin/cordova
 
-    cordova create [[platform:[directory]:[package_name]:[project_name]] [platform:[directory]:[package_name]:[project_name]]...|cordova.conf]
-<!-- -->
+## Creating A Project
 
-- `directory`: path to your new Cordova based project
-- `package_name`: following reverse-domain style convention
-- `project_name`: Cordova based project name
+    $ cordova create [directory]
 
-When called with no arguments, `cordova create` will generate a `cordova-ios-example` and `cordova-android-example` in the current directory
+Creates a Cordova application. When called with no arguments, `cordova create` will generate an example project for each supported platform in the current directory.
 
-cordova.conf format
--------------------
+A Cordova application built with cordova-client will have the following
+directory structure:
 
-cordova.conf should be formatted this way:
+    myApp
+    |-.cordova
+    |- platforms
+    |- plugins
+    `- www
 
-    platform directory package_name project_name
-    platform directory package_name project_name
+- `.cordova`: contains meta-data related to your application
+- `platforms`: platforms added to your application will have the native
+  application project structures laid out within this directory
+- `plugins`: any added plugins will be extracted into this directory
+- `www`: your main application assets
 
-Default cordova.conf:
+## Building Your Project
 
-    ios ~/Projects/ios-example com.example.cordovaexample CordovaExample
-    android ~/Projects/android-example com.example.cordovaexample CordovaExample
+    $ cordova build [platform]
 
-Building projects
------------------
+You can call `cordova build` with no arguments if you are inside a cordova based project. This will compile your app for all platforms added to your Cordova project.
 
-    cordova build [[directory] [directory]...|cordova.conf]
+## Emulating Your Project
 
-You can call `cordova build` with no arguments if you are inside a cordova based project. `cordova build` will just call the `./cordova/debug` script.
+    $ cordova emulate [platform]
 
-
-Emulating projects
-------------------
-
-    cordova emulate [directory] [directory]...|cordova.conf
-
-Will launch the platform's emulator
+Will compile and launch your app on all platforms added to your
+Cordova project. You can optionally specify a specific platform to
+launch for.
 
 
-Examples:
-=========
+# Examples
 
-Creating a sample iOS and android project
------------------------------------------
+## Creating a sample project
 
-    cordova create
-
-this will generate two projects in the current directory: `ios-example` and `android-example`
-
-Creating a sample iOS project and android project with specific arguments
--------------------------------------------------------------------------
-    
-    cordova create ios:./my-ios-project:com.example.myiospackage:CordovaExample android:./my-android-project:com.example.myandroidpackage:CordovaActivity
-
-Building projects (platform does not matter)
---------------------------------------------
-
-    cordova build ./ios-example ./android-example
-
-Emulating projects (platform does not matter)
---------------------------------------------
-
-    cordova emulate ./ios-example ./android-example
+    $ cordova create

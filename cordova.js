@@ -5,6 +5,8 @@ var fs        = require('fs')
 ,   platforms = ['ios', 'android']
 ,   dist      = process.env.CORDOVA_HOME != undefined ? process.env.CORDOVA_HOME : path.join(__dirname, 'lib', 'cordova-1.9.0')
 ,   colors    = require('colors')
+,   mkdirp    = require('mkdirp')
+,   ncp       = require('ncp').ncp
 
 module.exports = {
 
@@ -55,25 +57,30 @@ module.exports = {
         server.listen(parseInt(port, 10))
     }
     ,
-    create: function create (platform, package, name) {
-        var projectPath = path.join(process.cwd(), name)
-        ,   args        = [].slice.call(arguments)
-        ,   cmd         = util.format("%s/lib/%s/bin/create %s %s %s", dist, platform, projectPath, package, name)
-        
-        if (args.length != 3) {
-            console.error('Invalid number of arguments.')
-            process.exit(1)
+    create: function create (dir) {
+        if (dir && (dir[0] == '~' || dir[0] == '/')) {
+        } else {
+            dir = dir ? path.join(process.cwd(), dir) : process.cwd();
         }
-        
-        exec(cmd, function(err, stdout, stderr) {
-            if (err) {
-                console.error('An error occurred while creating project!', err)
-            } 
-            else {
-                console.log(stdout)
-                console.log( platform + ' project successfully created.')
+
+        // Check for existing cordova project
+        try {
+            if (fs.lstatSync(path.join(dir, '.cordova')).isDirectory()) {
+                console.error('Cordova project already exists at ' + dir + ', aborting.');
+                return;
             }
-        })
+        } catch(e) { /* no dirs, we're fine */ }
+
+        // Create basic project structure.
+        mkdirp(path.join(dir, '.cordova'));
+        mkdirp(path.join(dir, 'platforms'));
+        mkdirp(path.join(dir, 'plugins'));
+        mkdirp(path.join(dir, 'www'));
+
+        // Copy in base template
+        ncp(path.join(__dirname, 'templates', 'www'), path.join(dir, 'www'), function(err) {
+            if (err) return console.error(err);
+        });
     }
     ,
     build: function build () {
