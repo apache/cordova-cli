@@ -49,11 +49,87 @@ describe('platform command', function() {
     });
 
     describe('ls', function() {
+        var cwd = process.cwd();
+
+        beforeEach(function() {
+            cordova.create(tempDir);
+        });
+
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+
+        it('should list out no platforms for a fresh project', function() {
+            spyOn(console, 'error');
+            spyOn(console, 'log');
+
+            process.chdir(tempDir);
+            cordova.platform('ls');
+
+            expect(console.error).not.toHaveBeenCalled();
+            expect(console.log).toHaveBeenCalledWith('No platforms added. Use `cordova platforms add <platform>`.');
+        });
+
+        it('should list out added platforms in a project', function() {
+            spyOn(console, 'error');
+            spyOn(console, 'log');
+
+            process.chdir(tempDir);
+            cordova.platform('add', 'android');
+            cordova.platform('ls');
+
+            expect(console.error).not.toHaveBeenCalled();
+            expect(console.log).toHaveBeenCalledWith('android');
+        });
     });
 
     describe('add', function() {
+        var cwd = process.cwd();
+
+        beforeEach(function() {
+            cordova.create(tempDir);
+        });
+
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+
+        it('should add a supported platform', function() {
+            spyOn(console, 'error');
+            spyOn(console, 'log');
+
+            process.chdir(tempDir);
+            cordova.platform('add', 'android');
+            cordova.platform('ls');
+
+            expect(console.error).not.toHaveBeenCalled();
+            expect(console.log).toHaveBeenCalledWith('android');
+        });
     });
 
     describe('remove', function() {
+        var cwd = process.cwd();
+
+        beforeEach(function() {
+            cordova.create(tempDir);
+        });
+
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+
+        it('should remove a supported and added platform', function() {
+            spyOn(console, 'error');
+            spyOn(console, 'log');
+
+            process.chdir(tempDir);
+            cordova.platform('add', 'android');
+            cordova.platform('remove', 'android');
+
+            cordova.platform('ls');
+
+            expect(console.error).not.toHaveBeenCalled();
+            expect(console.log).toHaveBeenCalledWith('No platforms added. Use `cordova platforms add <platform>`.');
+        });
     });
 });

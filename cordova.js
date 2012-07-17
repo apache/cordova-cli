@@ -120,9 +120,10 @@ module.exports = {
                 } else console.log('No platforms added. Use `cordova platforms add <platform>`.');
                 break;
             case 'add':
+                cfg.add_platform(target);
                 break;
             case 'remove':
-
+                cfg.remove_platform(target);
                 break;
             default:
                 console.error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.');
