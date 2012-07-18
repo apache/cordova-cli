@@ -4,12 +4,15 @@ var cordova = require('./../cordova')
 ,   opts    = process.argv.slice(3, process.argv.length)
 
 if (cordova.hasOwnProperty(cmd)) {
-    cordova[cmd].apply(this, opts)
+    try {
+        console.log(cordova[cmd].apply(this, opts));
+    } catch(e) {
+        console.error(e);
+    }
 }
 else if (cmd === undefined) {
-    cordova.help()
+    console.log(cordova.help());
 }
 else {
     console.error('Cordova does not know ' + cmd + '; try help for a list of all the available commands.')
 }
-

@@ -9,8 +9,7 @@ module.exports = function emulate () {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        console.error('Current working directory is not a Cordova-based project.');
-        return;
+        throw 'Current working directory is not a Cordova-based project.';
     }
 
     var xml = path.join(projectRoot, 'www', 'config.xml');
@@ -21,9 +20,7 @@ module.exports = function emulate () {
     platforms.map(function(platform) {
         var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'emulate');
         exec(cmd, function(err, stderr, stdout) {
-            if (err) 
-                console.error('An error occurred while emulating/deploying the ' + platform + ' project.', err);
-            console.log(stdout);
+            if (err) throw 'An error occurred while emulating/deploying the ' + platform + ' project.' + err;
         });
     });
 };

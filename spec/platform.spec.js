@@ -14,9 +14,6 @@ describe('platform command', function() {
     });
 
     it('should run inside a Cordova-based project', function() {
-        spyOn(console, 'error');
-        spyOn(console, 'log');
-
         var cwd = process.cwd();
         this.after(function() {
             process.chdir(cwd);
@@ -26,15 +23,11 @@ describe('platform command', function() {
 
         process.chdir(tempDir);
 
-        cordova.platform();
-
-        expect(console.log).toHaveBeenCalled();
-        expect(console.error).not.toHaveBeenCalled();
+        expect(function() {
+            cordova.platform();
+        }).not.toThrow();
     });
     it('should not run outside of a Cordova-based project', function() {
-        spyOn(console, 'error');
-        spyOn(console, 'log');
-
         var cwd = process.cwd();
         this.after(function() {
             process.chdir(cwd);
@@ -42,10 +35,9 @@ describe('platform command', function() {
 
         process.chdir(tempDir);
 
-        cordova.platform();
-
-        expect(console.log).not.toHaveBeenCalled();
-        expect(console.error).toHaveBeenCalled();
+        expect(function() {
+            cordova.platform();
+        }).toThrow();
     });
 
     describe('ls', function() {
@@ -60,26 +52,21 @@ describe('platform command', function() {
         });
 
         it('should list out no platforms for a fresh project', function() {
-            spyOn(console, 'error');
-            spyOn(console, 'log');
-
             process.chdir(tempDir);
-            cordova.platform('ls');
 
-            expect(console.error).not.toHaveBeenCalled();
-            expect(console.log).toHaveBeenCalledWith('No platforms added. Use `cordova platforms add <platform>`.');
+            expect(cordova.platform('ls')).toEqual('No platforms added. Use `cordova platform add <platform>`.');
         });
 
         it('should list out added platforms in a project', function() {
-            spyOn(console, 'error');
-            spyOn(console, 'log');
+            var cb = jasmine.createSpy().andCallFake(function() {
+                expect(cordova.platform('ls')).toEqual('android');
+            });
 
             process.chdir(tempDir);
-            cordova.platform('add', 'android');
-            cordova.platform('ls');
-
-            expect(console.error).not.toHaveBeenCalled();
-            expect(console.log).toHaveBeenCalledWith('android');
+            runs(function() {
+                cordova.platform('add', 'android', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, "create callback", 17500);
         });
     });
 
@@ -95,15 +82,15 @@ describe('platform command', function() {
         });
 
         it('should add a supported platform', function() {
-            spyOn(console, 'error');
-            spyOn(console, 'log');
+            var cb = jasmine.createSpy().andCallFake(function() {
+                expect(cordova.platform('ls')).toEqual('android');
+            });
 
             process.chdir(tempDir);
-            cordova.platform('add', 'android');
-            cordova.platform('ls');
-
-            expect(console.error).not.toHaveBeenCalled();
-            expect(console.log).toHaveBeenCalledWith('android');
+            runs(function() {
+                cordova.platform('add', 'android', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, "create callback", 17500);
         });
     });
 
@@ -119,17 +106,16 @@ describe('platform command', function() {
         });
 
         it('should remove a supported and added platform', function() {
-            spyOn(console, 'error');
-            spyOn(console, 'log');
+            var cb = jasmine.createSpy().andCallFake(function() {
+                cordova.platform('remove', 'android');
+                expect(cordova.platform('ls')).toEqual('No platforms added. Use `cordova platform add <platform>`.');
+            });
 
             process.chdir(tempDir);
-            cordova.platform('add', 'android');
-            cordova.platform('remove', 'android');
-
-            cordova.platform('ls');
-
-            expect(console.error).not.toHaveBeenCalled();
-            expect(console.log).toHaveBeenCalledWith('No platforms added. Use `cordova platforms add <platform>`.');
+            runs(function() {
+                cordova.platform('add', 'android', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, "create callback", 17500);
         });
     });
 });

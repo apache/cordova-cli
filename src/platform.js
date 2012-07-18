@@ -16,7 +16,7 @@ var repos = {
 // each repo.
 // TODO: eventually refactor to allow multiple versions to be created.
 // Currently only checks out HEAD.
-function create(target, dir, cfg) {
+function create(target, dir, cfg, callback) {
     // Check if it already exists.
     try {
         fs.lstatSync(dir);
@@ -29,18 +29,17 @@ function create(target, dir, cfg) {
         exec(cmd, function(err, stderr, stdout) {
             if (err) {
                 cfg.remove_platform(target);
-                console.error('An error occured during creation of ' + target + ' sub-project, ', err);
-            }
+                throw 'An error occured during creation of ' + target + ' sub-project. ' + err;
+            } else if (callback) callback();
         });
     }
 }
 
-module.exports = function platform(command, target) {
+module.exports = function platform(command, target, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        console.error('Current working directory is not a Cordova-based project.');
-        return;
+        throw 'Current working directory is not a Cordova-based project.';
     }
     if (arguments.length === 0) command = 'ls';
 
@@ -51,10 +50,8 @@ module.exports = function platform(command, target) {
         case 'ls':
             var platforms = cfg.ls_platforms();
             if (platforms.length) {
-                platforms.map(function(p) {
-                    console.log(p);
-                });
-            } else console.log('No platforms added. Use `cordova platform add <platform>`.');
+                return platforms.join('\n');
+            } else return 'No platforms added. Use `cordova platform add <platform>`.';
             break;
         case 'add':
             // Add the platform to the config.xml
@@ -70,14 +67,13 @@ module.exports = function platform(command, target) {
                 console.log('Cloning ' + repos[target] + ', this may take a while...');
                 exec(cmd, function(err, stderr, stdout) {
                     if (err) {
-                        console.error('An error occured during git-clone of ' + repos[target] + ', ', err);
                         cfg.remove_platform(target);
-                        return;
+                        throw 'An error occured during git-clone of ' + repos[target] + '. ' + err;
                     }
-                    create(target, output, cfg);
+                    create(target, output, cfg, callback);
                 });
             } else {
-                create(target, output, cfg);
+                create(target, output, cfg, callback);
             }
             break;
         case 'remove':
@@ -90,7 +86,6 @@ module.exports = function platform(command, target) {
             } catch(e) {}
             break;
         default:
-            console.error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.');
-            break;
+            throw 'Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.';
     }
 };

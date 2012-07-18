@@ -11,7 +11,7 @@ var fs            = require('fs')
 module.exports = {
     help: function help () {
         var raw = fs.readFileSync(path.join(__dirname, 'doc', 'help.txt')).toString('utf8').split("\n");
-        console.log(raw.map(function(line) {
+        raw.map(function(line) {
             if (line.match('    ')) {
                 var prompt = '    $ '
                 ,   isPromptLine = !!(line.indexOf(prompt) != -1);
@@ -32,7 +32,7 @@ module.exports = {
             else {
                 return line.magenta;
             }
-        }).join("\n"));
+        }).join("\n");
     },
     docs: function docs () {
 

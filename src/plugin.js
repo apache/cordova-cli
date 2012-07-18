@@ -11,8 +11,7 @@ module.exports = function plugin(command, target) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        console.error('Current working directory is not a Cordova-based project.');
-        return;
+        throw 'Current working directory is not a Cordova-based project.';
     }
     if (arguments.length === 0) command = 'ls';
 
@@ -30,24 +29,20 @@ module.exports = function plugin(command, target) {
     switch(command) {
         case 'ls':
             if (plugins.length) {
-                plugins.map(function(plugin) {
-                    console.log(plugin);
-                });
-            } else console.log('No plugins added. Use `cordova plugin add <plugin>.');
+                return plugins.join('\n');
+            } else return 'No plugins added. Use `cordova plugin add <plugin>.';
             break;
         case 'add':
             // Check if we already have the plugin.
             if (plugins.indexOf(targetName) > -1) {
-                console.error('Plugin "' + targetName + '" already added to project.');
-                return;
+                throw 'Plugin "' + targetName + '" already added to project.';
             }
             
             // Check if the plugin has a plugin.xml in the root of the
             // specified dir.
             var pluginContents = ls(target);
             if (pluginContents.indexOf('plugin.xml') == -1) {
-                console.error('Plugin "' + targetName + '" does not have a plugin.xml in the root. Plugin must support the Cordova Plugin Specification: https://github.com/alunny/cordova-plugin-spec');
-                return;
+                throw 'Plugin "' + targetName + '" does not have a plugin.xml in the root. Plugin must support the Cordova Plugin Specification: https://github.com/alunny/cordova-plugin-spec';
             }
 
             // Iterate over all platforms in the project and install the
@@ -55,22 +50,18 @@ module.exports = function plugin(command, target) {
             var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
             platforms.map(function(platform) {
                 var cmd = util.format('%s %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
-                console.log(cmd);
                 exec(cmd, function(err, stderr, stdout) {
                     if (err) {
-                        console.error('An error occured during plugin installation. ', err);
                         console.error(stderr);
+                        throw 'An error occured during plugin installation. ' + err;
                     }
                 });
             });
 
             break;
         case 'remove':
-            console.error('Plugin removal not supported yet! sadface');
-            break;
+            throw 'Plugin removal not supported yet! sadface';
         default:
-            console.error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.');
-            break;
+            throw 'Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.';
     }
-    
 };

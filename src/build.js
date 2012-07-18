@@ -12,8 +12,7 @@ module.exports = function build () {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        console.error('Current working directory is not a Cordova-based project.');
-        return;
+        throw 'Current working directory is not a Cordova-based project.';
     }
 
     var xml = path.join(projectRoot, 'www', 'config.xml');
@@ -52,8 +51,7 @@ module.exports = function build () {
         // shell out to debug command
         var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'debug');
         exec(cmd, function(err, stderr, stdout) {
-            if (err) 
-                console.error('An error occurred while building the ' + platform + ' project.', err);
+            if (err) throw 'An error occurred while building the ' + platform + ' project. ' + err;
         });
     });
 };
