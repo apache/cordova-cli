@@ -83,17 +83,42 @@ project.
 
 ### Building Your Project
 
-    $ cordova build [platform]
+    $ cordova build
 
 You can call `cordova build` with no arguments if you are inside a cordova based project. This will compile your app for all platforms added to your Cordova project.
 
 ### Emulating Your Project
 
-    $ cordova emulate [platform]
+    $ cordova emulate
 
-Will compile and launch your app on all platforms added to your
-Cordova project. You can optionally specify a specific platform to
-launch for.
+Will launch emulators for all platforms added to your
+Cordova project.
+
+### Managing Plugins
+
+Plugin integration hinges on:
+
+- You having the plugin code locally on your computer
+- The plugin code adheres to the [Cordova Plugin Specification](https://github.com/alunny/cordova-plugin-spec)
+
+#### Listing All Plugins
+
+    $ cordova plugin [ls]
+
+Lists out all plugins added to the current Cordova-based project.
+
+#### Adding A Plugin
+
+    $ cordova plugin add [path-to-plugin]
+
+Adds the platform as a build target for the current Cordova-based
+project.
+
+#### Removing A Plugin
+
+    $ cordova plugin remove [plugin]
+
+**NOT IMPLEMENTED!**
 
 # Examples
 
@@ -106,6 +131,10 @@ launch for.
 ## Running Tests
 
     $ npm test
+
+**WARNING**: If you run tests and don't have any sub-directories under
+`./lib`, be prepared to see some failing tests as then this project will
+start cloning any necessary Cordova libraries (which may take a while).
 
 ## TO-DO
 
