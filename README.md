@@ -138,6 +138,8 @@ start cloning any necessary Cordova libraries (which may take a while).
 
 ## TO-DO
 
+- fix pluginstall for ios 2.0
+- interpolating proper app name and shit from config.xml
 - `grep` through this project for 'TODO'
 - blackberry support
 - moar tests
