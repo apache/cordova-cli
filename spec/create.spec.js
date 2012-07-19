@@ -13,14 +13,13 @@ describe('create command', function () {
         mkdirp(tempDir);
     });
 
-    it('should create a cordova project in the current directory if no parameter is provided', function() {
+    it('should print out help txt if no directory is provided', function() {
         var cwd = process.cwd();
         this.after(function() {
             process.chdir(cwd);
         });
         process.chdir(tempDir);
-        cordova.create();
-        expect(fs.lstatSync(path.join(tempDir, '.cordova')).isDirectory()).toBe(true);
+        expect(cordova.create()).toMatch(/synopsis/i);
     });
     it('should create a cordova project in the specified directory if parameter is provided', function() {
         cordova.create(tempDir);

@@ -49,7 +49,7 @@ module.exports = function build () {
         fs.writeFileSync(jsPath, fs.readFileSync(js));
 
         // shell out to debug command
-        var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'debug');
+        var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'debug > /dev/null');
         exec(cmd, function(err, stderr, stdout) {
             if (err) throw 'An error occurred while building the ' + platform + ' project. ' + err;
         });

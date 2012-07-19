@@ -11,7 +11,7 @@ var fs            = require('fs')
 module.exports = {
     help: function help () {
         var raw = fs.readFileSync(path.join(__dirname, 'doc', 'help.txt')).toString('utf8').split("\n");
-        raw.map(function(line) {
+        return raw.map(function(line) {
             if (line.match('    ')) {
                 var prompt = '    $ '
                 ,   isPromptLine = !!(line.indexOf(prompt) != -1);
@@ -55,6 +55,11 @@ module.exports = {
         server.listen(parseInt(port, 10));
     },
     create: function create (dir) {
+        if (dir === undefined) {
+            return module.exports.help();
+        }
+
+
         var mkdirp = wrench.mkdirSyncRecursive,
             cpr = wrench.copyDirSyncRecursive;
         if (dir && (dir[0] == '~' || dir[0] == '/')) {
