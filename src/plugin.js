@@ -8,7 +8,7 @@ var cordova_util = require('./util'),
     exec = require('child_process').exec,
     ls = fs.readdirSync;
 
-module.exports = function plugin(command, target) {
+module.exports = function plugin(command, target, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -32,7 +32,7 @@ module.exports = function plugin(command, target) {
         case 'ls':
             if (plugins.length) {
                 return plugins.join('\n');
-            } else return 'No plugins added. Use `cordova plugin add <plugin>.';
+            } else return 'No plugins added. Use `cordova plugin add <plugin>`.';
             break;
         case 'add':
             // Check if we already have the plugin.
