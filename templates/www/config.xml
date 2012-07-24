@@ -13,6 +13,9 @@
         Apache Cordova Team
     </author>
 
+    <platforms>
+    </platforms>
+
     <icon src="res/icon/cordova_512.png"        width="512" height="512" />
     <icon src="res/icon/cordova_android_96.png" width="96"  height="96"  gap:platform="android" />
     <icon src="res/icon/cordova_bb_80.png"      width="80"  height="80"  gap:platform="blackberry" />
