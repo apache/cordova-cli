@@ -58,67 +58,12 @@ describe('plugin command', function() {
 
             expect(cordova.plugin('ls')).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
         });
-
-        it('should list out added plugins in a project', function() {
-            var cb = jasmine.createSpy().andCallFake(function() {
-                expect(cordova.plugin('ls')).toEqual('android');
-            });
-
-            process.chdir(tempDir);
-            runs(function() {
-                cordova.plugin('add', '', cb);
-            });
-            waitsFor(function() { return cb.wasCalled; }, "create callback", 17500);
-        });
     });
 
     describe('add', function() {
-        var cwd = process.cwd();
-
-        beforeEach(function() {
-            cordova.create(tempDir);
-        });
-
-        afterEach(function() {
-            process.chdir(cwd);
-        });
-
-        it('should add a supported platform', function() {
-            var cb = jasmine.createSpy().andCallFake(function() {
-                expect(cordova.platform('ls')).toEqual('android');
-            });
-
-            process.chdir(tempDir);
-            runs(function() {
-                cordova.platform('add', 'android', cb);
-            });
-            waitsFor(function() { return cb.wasCalled; }, "create callback", 17500);
-        });
     });
 
     describe('remove', function() {
-        var cwd = process.cwd();
-
-        beforeEach(function() {
-            cordova.create(tempDir);
-        });
-
-        afterEach(function() {
-            process.chdir(cwd);
-        });
-
-        it('should remove a supported and added platform', function() {
-            var cb = jasmine.createSpy().andCallFake(function() {
-                cordova.platform('remove', 'android');
-                expect(cordova.platform('ls')).toEqual('No platforms added. Use `cordova platform add <platform>`.');
-            });
-
-            process.chdir(tempDir);
-            runs(function() {
-                cordova.platform('add', 'android', cb);
-            });
-            waitsFor(function() { return cb.wasCalled; }, "create callback", 17500);
-        });
     });
 });
 
