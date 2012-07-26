@@ -16,13 +16,9 @@ module.exports = function create (dir) {
     }
 
     // Check for existing cordova project
-    // TODO: this should throw...
-    try {
-        if (fs.lstatSync(path.join(dir, '.cordova')).isDirectory()) {
-            console.error('Cordova project already exists at ' + dir + ', aborting.');
-            return;
-        }
-    } catch(e) { /* no dirs, we're fine */ }
+    if (fs.existsSync(path.join(dir, '.cordova'))) {
+        throw 'Cordova project already exists at ' + dir + ', aborting.';
+    }
 
     // Create basic project structure.
     mkdirp(path.join(dir, '.cordova'));
