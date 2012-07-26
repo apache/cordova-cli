@@ -1,16 +1,3 @@
-// Spy on exec so we can mock out certain CLI calls (and speed up
-// testing)
-var _exec = require('child_process').exec;
-require('child_process').exec = function(cmd, cb){
-    var space = cmd.indexOf(' ');
-    // Just invoke callback for create calls.
-    if (Array.prototype.slice.call(cmd, space-6, space).join('') == 'create') {
-        cb();
-    } else {
-        _exec(cmd, cb);
-    }
-};
-
 var cordova = require('../cordova'),
     wrench = require('wrench'),
     mkdirp = wrench.mkdirSyncRecursive,
@@ -18,7 +5,6 @@ var cordova = require('../cordova'),
     rmrf = wrench.rmdirSyncRecursive,
     fs = require('fs'),
     tempDir = path.join(__dirname, '..', 'temp');
-
 
 describe('platform command', function() {
     beforeEach(function() {
@@ -80,7 +66,7 @@ describe('platform command', function() {
             runs(function() {
                 cordova.platform('add', 'android', cb);
             });
-            waitsFor(function() { return cb.wasCalled; }, "create callback", 17500);
+            waitsFor(function() { return cb.wasCalled; }, "create callback", 500);
         });
     });
 
@@ -104,7 +90,7 @@ describe('platform command', function() {
             runs(function() {
                 cordova.platform('add', 'android', cb);
             });
-            waitsFor(function() { return cb.wasCalled; }, "create callback", 17500);
+            waitsFor(function() { return cb.wasCalled; }, "create callback", 500);
         });
     });
 
@@ -129,7 +115,7 @@ describe('platform command', function() {
             runs(function() {
                 cordova.platform('add', 'android', cb);
             });
-            waitsFor(function() { return cb.wasCalled; }, "create callback", 17500);
+            waitsFor(function() { return cb.wasCalled; }, "create callback", 500);
         });
     });
 });

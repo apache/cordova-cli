@@ -1,13 +1,15 @@
 var cordova_util = require('./util'),
     util = require('util'),
     wrench = require('wrench'),
+    cpr = wrench.copyDirSyncRecursive,
     fs = require('fs'),
     path = require('path'),
+    nCalls = require('ncallbacks'),
     config_parser = require('./config_parser'),
     exec = require('child_process').exec,
     ls = fs.readdirSync;
 
-module.exports = function plugin(command, target) {
+module.exports = function plugin(command, target, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -17,20 +19,24 @@ module.exports = function plugin(command, target) {
 
     // Grab config info for the project
     var xml = path.join(projectRoot, 'www', 'config.xml');
+    var projectWww = path.join(projectRoot, 'www');
     var cfg = new config_parser(xml);
     var platforms = cfg.ls_platforms();
 
     // Massage plugin name / path
-    var pluginPath = path.join(projectRoot, 'plugins');
-    var plugins = ls(pluginPath);
-    var targetName = target.substr(target.lastIndexOf('/') + 1);
-    if (targetName[targetName.length-1] == '/') targetName = targetName.substr(0, targetName.length-1);
+    var pluginPath, plugins, targetName;
+    pluginPath = path.join(projectRoot, 'plugins');
+    plugins = ls(pluginPath);
+    if (target) { 
+        targetName = target.substr(target.lastIndexOf('/') + 1);
+        if (targetName[targetName.length-1] == '/') targetName = targetName.substr(0, targetName.length-1);
+    }
 
     switch(command) {
         case 'ls':
             if (plugins.length) {
                 return plugins.join('\n');
-            } else return 'No plugins added. Use `cordova plugin add <plugin>.';
+            } else return 'No plugins added. Use `cordova plugin add <plugin>`.';
             break;
         case 'add':
             // Check if we already have the plugin.
@@ -45,21 +51,49 @@ module.exports = function plugin(command, target) {
                 throw 'Plugin "' + targetName + '" does not have a plugin.xml in the root. Plugin must support the Cordova Plugin Specification: https://github.com/alunny/cordova-plugin-spec';
             }
 
+            var pluginWww = path.join(target, 'www');
+            var wwwContents = ls(pluginWww);
+
+            var n = wwwContents.length + platforms.length;
+            var end = nCalls(n, callback || function(){});
+
             // Iterate over all platforms in the project and install the
             // plugin.
             var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
-            platforms.map(function(platform) {
+            platforms.forEach(function(platform) {
                 var cmd = util.format('%s %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
+                console.log('executing ' + cmd);
                 exec(cmd, function(err, stderr, stdout) {
+                    end();
                     if (err) {
                         console.error(stderr);
+                        // TODO: remove plugin. requires pluginstall to
+                        // support removal.
                         throw 'An error occured during plugin installation. ' + err;
                     }
                 });
             });
+            
+            // Add the plugin web assets to the www folder as well
+            // TODO: assumption that web assets go under www folder
+            // inside plugin dir; instead should read plugin.xml
+            wwwContents.forEach(function(asset) {
+                asset = path.resolve(path.join(pluginWww, asset));
+                var info = fs.lstatSync(asset);
+                var name = asset.substr(asset.lastIndexOf('/')+1);
+                var wwwPath = path.join(projectWww, name);
+                if (info.isDirectory()) {
+                    cpr(asset, wwwPath);
+                } else {
+                    fs.writeFileSync(wwwPath, fs.readFileSync(asset));
+                }
+                end();
+            });
 
             break;
         case 'remove':
+            // TODO: remove plugin. requires pluginstall to
+            // support removal.
             throw 'Plugin removal not supported yet! sadface';
         default:
             throw 'Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.';
