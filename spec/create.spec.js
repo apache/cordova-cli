@@ -26,14 +26,10 @@ describe('create command', function () {
         expect(fs.lstatSync(path.join(tempDir, '.cordova')).isDirectory()).toBe(true);
     });
     it('should warn if the directory is already a cordova project', function() {
-        spyOn(console, 'error');
-
-        var cb = jasmine.createSpy();
-
         mkdirp(path.join(tempDir, '.cordova'));
-
-        cordova.create(tempDir);
-
-        expect(console.error).toHaveBeenCalled();
+        
+        expect(function() {
+            cordova.create(tempDir);
+        }).toThrow();
     });
 });
