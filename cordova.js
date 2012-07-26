@@ -1,20 +1,19 @@
-var fs            = require('fs')
-,   path          = require('path')
-,   util          = require('util')
-,   exec          = require('child_process').exec
-,   dist          = process.env.CORDOVA_HOME != undefined ? process.env.CORDOVA_HOME : path.join(__dirname, 'lib', 'cordova-1.9.0')
-,   colors        = require('colors')
-,   wrench        = require('wrench')
-,   config_parser = require('./src/config_parser')
-
+var fs            = require('fs'),
+    path          = require('path'),
+    util          = require('util'),
+    exec          = require('child_process').exec,
+    dist          = process.env.CORDOVA_HOME !== undefined ? process.env.CORDOVA_HOME : path.join(__dirname, 'lib', 'cordova-1.9.0'),
+    colors        = require('colors'),
+    wrench        = require('wrench'),
+    config_parser = require('./src/config_parser');
 
 module.exports = {
     help: function help () {
         var raw = fs.readFileSync(path.join(__dirname, 'doc', 'help.txt')).toString('utf8').split("\n");
         return raw.map(function(line) {
             if (line.match('    ')) {
-                var prompt = '    $ '
-                ,   isPromptLine = !!(line.indexOf(prompt) != -1);
+                var prompt = '    $ ',
+                    isPromptLine = !(!(line.indexOf(prompt) != -1));
                 if (isPromptLine) {
                     return prompt.green + line.replace(prompt, '');
                 }
@@ -36,10 +35,10 @@ module.exports = {
     },
     docs: function docs () {
 
-        var express = require('express')
-        ,   port    = 2222
-        ,   static  = path.join(dist, 'doc')
-        ,   server  = express.createServer();
+        var express = require('express'),
+            port    = 2222,
+            static  = path.join(dist, 'doc'),
+            server  = express.createServer();
         
         server.configure(function() {
             server.use(express.static(static));
@@ -68,6 +67,7 @@ module.exports = {
         }
 
         // Check for existing cordova project
+        // TODO: this should throw...
         try {
             if (fs.lstatSync(path.join(dir, '.cordova')).isDirectory()) {
                 console.error('Cordova project already exists at ' + dir + ', aborting.');
