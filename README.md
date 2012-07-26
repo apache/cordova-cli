@@ -24,7 +24,7 @@ Cordova client has been tested on Windows, Linux and Mas OS X.
 
 You should (eventually) be able to `npm install cordova-client -g`.
 Until then, after you clone this code, run `npm install` from inside this
-directory. After that you will be able to access the client interface
+directory (you may want to run that with `sudo`). After that you will be able to access the client interface
 via:
 
     $ ./bin/cordova
@@ -32,8 +32,12 @@ via:
 ## Creating A Cordova-Based Project
 
     $ cordova create [directory]
+    $ cordova create [directory name]
+    $ cordova create [directory id name]
 
-Creates a Cordova application. When called with no arguments, `cordova create` will generate a Cordova-based project in the current directory.
+Creates a Cordova application. You can optionally specify just a name
+for your application, or both an id (package name or reverse-domain
+style id) and a name.
 
 A Cordova application built with cordova-client will have the following
 directory structure:
@@ -124,7 +128,7 @@ project.
 
 ## Creating a sample project
 
-    $ cordova create
+    $ cordova create ~/src/myNewApp
 
 # Contributing
 
@@ -139,7 +143,6 @@ start cloning any necessary Cordova libraries (which may take a while).
 ## TO-DO
 
 - fix pluginstall for ios 2.0
-- interpolating proper app name and shit from config.xml
 - `grep` through this project for 'TODO'
 - blackberry support
 - moar tests

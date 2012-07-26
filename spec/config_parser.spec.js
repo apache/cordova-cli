@@ -26,6 +26,46 @@ describe('config parser', function () {
         expect(cfg.doc).toBeDefined();
     });
 
+    describe('package name / id', function() {
+        var cfg;
+
+        beforeEach(function() {
+            cfg = new config_parser(xml);
+        });
+
+        it('should get the packagename', function() {
+            expect(cfg.packageName()).toEqual('io.cordova.hello-cordova');
+        });
+        it('should allow setting the packagename', function() {
+            cfg.packageName('this.is.bat.country');
+            expect(cfg.packageName()).toEqual('this.is.bat.country');
+        });
+        it('should write to disk after setting the packagename', function() {
+            cfg.packageName('this.is.bat.country');
+            expect(fs.readFileSync(xml, 'utf-8')).toMatch(/id="this\.is\.bat\.country"/);
+        });
+    });
+
+    describe('app name', function() {
+        var cfg;
+
+        beforeEach(function() {
+            cfg = new config_parser(xml);
+        });
+
+        it('should get the app name', function() {
+            expect(cfg.packageName()).toEqual('io.cordova.hello-cordova');
+        });
+        it('should allow setting the app name', function() {
+            cfg.name('this.is.bat.country');
+            expect(cfg.name()).toEqual('this.is.bat.country');
+        });
+        it('should write to disk after setting the name', function() {
+            cfg.name('one toke over the line');
+            expect(fs.readFileSync(xml, 'utf-8')).toMatch(/<name>one toke over the line<\/name>/);
+        });
+    });
+
     describe('platforms', function() {
         describe('ls command', function() {
             it('should return an empty array if there are no platforms specified in the document', function() {
@@ -36,7 +76,7 @@ describe('config parser', function () {
             it('should return a populated array if there are platforms specified in the document', function() {
                 var doc = new et.ElementTree(et.XML(fs.readFileSync(xml, 'utf-8')));
                 var p = new et.Element('platform');
-                p.attrib['name'] = 'android';
+                p.attrib.name = 'android';
                 doc.find('platforms').append(p);
                 fs.writeFileSync(xml, doc.write(), 'utf-8');
 
@@ -52,7 +92,7 @@ describe('config parser', function () {
                 cfg.add_platform('android');
                 
                 var doc = new et.ElementTree(et.XML(fs.readFileSync(xml, 'utf-8')));
-                expect(doc.find('platforms').getchildren()[0].attrib['name']).toEqual('android');
+                expect(doc.find('platforms').getchildren()[0].attrib.name).toEqual('android');
             });
             it('should ignore existing platforms', function() {
                 var cfg = new config_parser(xml);
