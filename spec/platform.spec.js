@@ -66,7 +66,7 @@ describe('platform command', function() {
             runs(function() {
                 cordova.platform('add', 'android', cb);
             });
-            waitsFor(function() { return cb.wasCalled; }, "create callback", 500);
+            waitsFor(function() { return cb.wasCalled; }, "create callback");
         });
     });
 
@@ -90,7 +90,7 @@ describe('platform command', function() {
             runs(function() {
                 cordova.platform('add', 'android', cb);
             });
-            waitsFor(function() { return cb.wasCalled; }, "create callback", 500);
+            waitsFor(function() { return cb.wasCalled; }, "create callback");
         });
     });
 
@@ -115,7 +115,7 @@ describe('platform command', function() {
             runs(function() {
                 cordova.platform('add', 'android', cb);
             });
-            waitsFor(function() { return cb.wasCalled; }, "create callback", 500);
+            waitsFor(function() { return cb.wasCalled; }, "create callback");
         });
     });
 });

@@ -140,6 +140,9 @@ project.
 `./lib`, be prepared to see some failing tests as then this project will
 start cloning any necessary Cordova libraries (which may take a while).
 
+Also note that the the `spec/helper.js` file contains all of the
+mocks/stubs that we override for testing purposes.
+
 ## TO-DO
 
 - fix pluginstall for ios 2.0
