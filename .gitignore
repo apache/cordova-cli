@@ -1,2 +1,5 @@
 # OS X
 .DS_Store
+lib
+node_modules
+temp

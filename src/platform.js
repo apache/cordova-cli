@@ -29,7 +29,7 @@ function create(target, dir, cfg, callback) {
         exec(cmd, function(err, stderr, stdout) {
             if (err) {
                 cfg.remove_platform(target);
-                throw 'An error occured during creation of ' + target + ' sub-project. ' + err;
+                throw 'An error occured during creation of ' + target + ' sub-project. ' + err + ' ' + stderr;
             } else if (callback) callback();
         });
     }
