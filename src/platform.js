@@ -65,12 +65,6 @@ module.exports = function platform(command, target, callback) {
                 var outPath = path.join(__dirname, '..', 'lib', target);
                 var cmd = util.format('git clone %s %s', repos[target], outPath);
                 
-                // TODO: refactor post-clone hooks
-                // make sure we run "make install" if we're cloning ios
-                if (target == 'ios') {
-                    cmd += ' && cd "' + output + '" && make install';
-                }
-
                 console.log('Cloning ' + repos[target] + ', this may take a while...');
                 exec(cmd, function(err, stderr, stdout) {
                     if (err) {

@@ -20,6 +20,9 @@ cordova-client, you will need to install the SDK for that platform. See:
 
 Cordova client has been tested on Windows, Linux and Mas OS X.
 
+In it's prototype stages, cordova-client will only work on Cordova v2.1
+and above.
+
 # Getting Started
 
 You should (eventually) be able to `npm install cordova-client -g`.

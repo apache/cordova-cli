@@ -3,7 +3,7 @@ var express = require('express'),
     colors  = require('colors'),
     port    = 2222,
     statik  = path.join(__dirname, '..', 'doc'),
-    server  = express.createServer();
+    server  = express();
 
 module.exports = function docs () {
     server.configure(function() {
