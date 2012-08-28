@@ -148,7 +148,9 @@ mocks/stubs that we override for testing purposes.
 
 ## TO-DO
 
-- fix pluginstall for ios 2.0
-- `grep` through this project for 'TODO'
+- verify android 2.1 support
+- verify ios 2.1 support
+- figure out versioning
+- tests!!!!
 - blackberry support
-- moar tests
+- windows phone support

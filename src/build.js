@@ -6,6 +6,7 @@ var cordova_util  = require('./util'),
     cpr           = wrench.copyDirSyncRecursive,
     config_parser = require('./config_parser'),
     fs            = require('fs'),
+    asyncblock    = require('asyncblock'),
     util          = require('util');
 
 module.exports = function build () {
@@ -55,8 +56,12 @@ module.exports = function build () {
 
         // shell out to debug command
         var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'debug > /dev/null');
-        exec(cmd, function(err, stderr, stdout) {
-            if (err) throw 'An error occurred while building the ' + platform + ' project. ' + err;
-        });
+        exec(cmd, flow.set({
+          key:'debug',
+          firstArgIsError:false,
+          responseFormat:['err', 'stdout', 'stderr']
+        }));
+        var buffers = flow.get('debug');
+        if (buffers.err) throw 'An error occurred while building the ' + platform + ' project. ' + buffers.err;
     });
 };
