@@ -1,13 +1,13 @@
-var cordova_util = require('./util'),
-    util = require('util'),
-    wrench = require('wrench'),
-    cpr = wrench.copyDirSyncRecursive,
-    fs = require('fs'),
-    path = require('path'),
+var cordova_util  = require('./util'),
+    util          = require('util'),
+    wrench        = require('wrench'),
+    cpr           = wrench.copyDirSyncRecursive,
+    fs            = require('fs'),
+    path          = require('path'),
     config_parser = require('./config_parser'),
-    exec = require('child_process').exec,
-    asyncblock = require('asyncblock'),
-    ls = fs.readdirSync;
+    exec          = require('child_process').exec,
+    asyncblock    = require('asyncblock'),
+    ls            = fs.readdirSync;
 
 module.exports = function plugin(command, target, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());

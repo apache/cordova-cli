@@ -1,5 +1,5 @@
-var fs = require('fs'),
-    path = require('path');
+var fs         = require('fs'),
+    path       = require('path');
 
 module.exports = {
     // Runs up the directory chain looking for a .cordova directory.
