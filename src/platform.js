@@ -36,7 +36,6 @@ module.exports = function platform(command, target, callback) {
             asyncblock(function(flow) {
                 // Add the platform to the config.xml
                 cfg.add_platform(target);
-
                 var output = path.join(projectRoot, 'platforms', target);
 
                 // Do we have the cordova library for this platform?
@@ -95,6 +94,7 @@ module.exports = function platform(command, target, callback) {
                         throw ('An error occured during creation of ' + target + ' sub-project. ' + bfrs.err);
                     }
                 }
+                callback();
             });
             break;
         case 'remove':

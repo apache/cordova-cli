@@ -1,9 +1,9 @@
 var cordova = require('../cordova'),
-    wrench = require('wrench'),
-    mkdirp = wrench.mkdirSyncRecursive,
-    path = require('path'),
-    rmrf = wrench.rmdirSyncRecursive,
-    fs = require('fs'),
+    wrench  = require('wrench'),
+    mkdirp  = wrench.mkdirSyncRecursive,
+    path    = require('path'),
+    rmrf    = wrench.rmdirSyncRecursive,
+    fs      = require('fs'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 describe('create command', function () {

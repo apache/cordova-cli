@@ -9,19 +9,18 @@
 
 # Requirements
 
-Cordova client requires [nodejs](http://nodejs.org/).
+cordova-client requires [nodejs](http://nodejs.org/).
 
 For every platform that Cordova supports and you want to use with
 cordova-client, you will need to install the SDK for that platform. See:
 
 - [iOS SDK](http://developer.apple.com)
 - [Android SDK](http://developer.android.com)
-- [BlackBerry WebWorks SDK](http://developer.blackberry.com)
 
-Cordova client has been tested on Mas OS X _only_. Sorry.
+cordova-client has been tested on Mas OS X _only_. Sorry.
 
-In it's prototype stages, cordova-client will only work on Cordova v2.1
-and above.
+In it's prototype stages, cordova-client will only work on Cordova
+v2.1.0rc1 and above.
 
 # Getting Started
 
@@ -148,9 +147,6 @@ mocks/stubs that we override for testing purposes.
 
 ## TO-DO
 
-- verify android 2.1 support
-- verify ios 2.1 support
-- figure out versioning
-- tests!!!!
+- figure out versioning. for now: 2.1.0 minimum.
 - blackberry support
 - windows phone support
