@@ -18,7 +18,7 @@ cordova-client, you will need to install the SDK for that platform. See:
 - [Android SDK](http://developer.android.com)
 - [BlackBerry WebWorks SDK](http://developer.blackberry.com)
 
-Cordova client has been tested on Windows, Linux and Mas OS X.
+Cordova client has been tested on Mas OS X _only_. Sorry.
 
 In it's prototype stages, cordova-client will only work on Cordova v2.1
 and above.
