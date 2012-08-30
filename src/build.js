@@ -7,6 +7,7 @@ var cordova_util  = require('./util'),
     config_parser = require('./config_parser'),
     fs            = require('fs'),
     asyncblock    = require('asyncblock'),
+    et            = require('elementtree'),
     util          = require('util');
 
 module.exports = function build () {
@@ -33,15 +34,17 @@ module.exports = function build () {
                     assetsPath = path.join(projectRoot, 'platforms', 'android', 'assets', 'www');
                     js = path.join(__dirname, '..', 'lib', 'android', 'framework', 'assets', 'js', 'cordova.android.js');
 
-                    // TODO: drop activity name and package name into
-                    // appropriate places in android
+                    // update activity name
+                    var stringsXml = path.join(projectRoot, 'platforms', 'android', 'res', 'values', 'strings.xml');
+                    var strings = new et.ElementTree(et.XML(fs.readFileSync(stringsXml, 'utf-8')));
+                    strings.find('string[@name="app_name"]').text = name;
+                    fs.writeFileSync(stringsXml, strings.write(), 'utf-8');
                     break;
                 case 'ios':
                     assetsPath = path.join(projectRoot, 'platforms', 'ios', 'www');
                     js = path.join(__dirname, '..', 'lib', 'ios', 'CordovaLib', 'javascript', 'cordova.ios.js');
 
-                    // TODO: drop app name and id into
-                    // appropriate places in ios
+                    // TODO: update activity name
                     break;
             } 
 

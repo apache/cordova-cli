@@ -148,5 +148,6 @@ mocks/stubs that we override for testing purposes.
 ## TO-DO
 
 - figure out versioning. for now: 2.1.0 minimum.
+- properly extracting info from config.xml
 - blackberry support
 - windows phone support
