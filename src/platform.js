@@ -79,7 +79,7 @@ module.exports = function platform(command, target, callback) {
                 } catch(e) {
                     // Doesn't exist, continue.
                     var bin = path.join(__dirname, '..', 'lib', target, 'bin', 'create');
-                    var pkg = cfg.packageName();
+                    var pkg = cfg.packageName().replace(/\W/g,'_');
                     var name = cfg.name().replace(/\W/g,'_');
                     var command = util.format('%s "%s" "%s" "%s"', bin, output, pkg, name);
                     exec(command, flow.set({
