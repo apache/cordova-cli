@@ -148,6 +148,8 @@ mocks/stubs that we override for testing purposes.
 
 ## TO-DO
 
+- installing only supported platforms for the app vs. the plugin (and
+  vice-versa).
 - figure out versioning. for now: 2.1.0 minimum.
 - properly extracting info from config.xml
 - blackberry support
