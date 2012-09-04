@@ -10,20 +10,23 @@ var cordova_util  = require('./util'),
     et            = require('elementtree'),
     util          = require('util');
 
-module.exports = function build () {
+module.exports = function build (callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
         throw 'Current working directory is not a Cordova-based project.';
     }
 
+    var xml = path.join(projectRoot, 'www', 'config.xml');
+    var assets = path.join(projectRoot, 'www');
+    var cfg = new config_parser(xml);
+    var name = cfg.name();
+    var id = cfg.packageName();
+    var platforms = cfg.ls_platforms();
+
+    if (platforms.length === 0) throw 'No platforms added to this project. Please use `cordova platform add <platform>`.';
+
     asyncblock(function(flow) {
-        var xml = path.join(projectRoot, 'www', 'config.xml');
-        var assets = path.join(projectRoot, 'www');
-        var cfg = new config_parser(xml);
-        var name = cfg.name();
-        var id = cfg.packageName();
-        var platforms = cfg.ls_platforms();
 
         // Iterate over each added platform 
         platforms.map(function(platform) {
@@ -67,6 +70,7 @@ module.exports = function build () {
             }));
             var buffers = flow.get('debug');
             if (buffers.err) throw 'An error occurred while building the ' + platform + ' project. ' + buffers.err;
+            if (callback) callback();
         });
     });
 };

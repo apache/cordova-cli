@@ -13,7 +13,6 @@ var repos = {
     android:'https://git-wip-us.apache.org/repos/asf/incubator-cordova-android.git'
 };
 
-
 module.exports = function platform(command, target, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
@@ -81,20 +80,20 @@ module.exports = function platform(command, target, callback) {
                     var bin = path.join(__dirname, '..', 'lib', target, 'bin', 'create');
                     var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
                     var name = cfg.name().replace(/\W/g,'_');
-                    var command = util.format('%s "%s" "%s" "%s"', bin, output, pkg, name);
-                    exec(command, flow.set({
+                    var command = util.format('"%s" "%s" "%s" "%s"', bin, output, pkg, name);
+                    child = exec(command, flow.set({
                         key:'create',
                         firstArgIsError:false,
                         responseFormat:['err', 'stdout', 'stderr']
                     }));
-
                     var bfrs = flow.get('create');
                     if (bfrs.err) {
                         cfg.remove_platform(target);
                         throw ('An error occured during creation of ' + target + ' sub-project. ' + bfrs.err);
+                    } else {
+                        if (callback) callback();
                     }
                 }
-                if (callback) callback();
             });
             break;
         case 'remove':

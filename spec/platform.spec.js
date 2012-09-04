@@ -6,6 +6,8 @@ var cordova = require('../cordova'),
     fs = require('fs'),
     tempDir = path.join(__dirname, '..', 'temp');
 
+var cwd = process.cwd();
+
 describe('platform command', function() {
     beforeEach(function() {
         // Make a temp directory
@@ -14,7 +16,6 @@ describe('platform command', function() {
     });
 
     it('should run inside a Cordova-based project', function() {
-        var cwd = process.cwd();
         this.after(function() {
             process.chdir(cwd);
         });
@@ -28,7 +29,6 @@ describe('platform command', function() {
         }).not.toThrow();
     });
     it('should not run outside of a Cordova-based project', function() {
-        var cwd = process.cwd();
         this.after(function() {
             process.chdir(cwd);
         });
@@ -41,8 +41,6 @@ describe('platform command', function() {
     });
 
     describe('`ls`', function() {
-        var cwd = process.cwd();
-
         beforeEach(function() {
             cordova.create(tempDir);
         });
@@ -77,9 +75,34 @@ describe('platform command', function() {
         });
     });
 
-    describe('remove', function() {
-        var cwd = process.cwd();
+    describe('`add`', function() {
+        beforeEach(function() {
+            cordova.create(tempDir);
+        });
 
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+
+        describe('android', function() {
+            it('should add a basic android project', function() {
+                var cb = jasmine.createSpy().andCallFake(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'platforms', 'android', 'AndroidManifest.xml'))).toBe(true);
+                });
+
+                process.chdir(tempDir);
+                runs(function() {
+                    cordova.platform('add', 'android', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, "platform add android callback");
+            });
+        });
+
+        describe('ios', function() {
+        });
+    });
+
+    describe('remove', function() {
         beforeEach(function() {
             cordova.create(tempDir);
         });

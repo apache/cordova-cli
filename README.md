@@ -15,7 +15,8 @@ For every platform that Cordova supports and you want to use with
 cordova-client, you will need to install the SDK for that platform. See:
 
 - [iOS SDK](http://developer.apple.com)
-- [Android SDK](http://developer.android.com)
+- [Android SDK](http://developer.android.com) - **NOTE** MAKE SURE YOU
+  HAVE THE LATEST _EVERYTHING_ !!!!!
 
 cordova-client has been tested on Mas OS X _only_. Sorry.
 
