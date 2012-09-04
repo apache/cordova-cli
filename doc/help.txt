@@ -1,4 +1,3 @@
-
 Synopsis
     
     cordova command [options]
@@ -20,5 +19,5 @@ Example usage
     $ cordova create Baz
     $ cd Baz
     $ cordova platform add android
-    $ codova build && cordova emulate 
+    $ cordova build && cordova emulate 
 
