@@ -84,6 +84,13 @@ describe('platform command', function() {
             process.chdir(cwd);
         });
 
+        describe('without any libraries cloned', function() {
+            it('should clone down and checkout the correct android library');
+            it('should clone down and checkout the correct ios library');
+            it('should add a basic android project');
+            it('should add a basic ios project');
+        });
+
         describe('android', function() {
             it('should add a basic android project', function() {
                 var cb = jasmine.createSpy().andCallFake(function() {
@@ -99,6 +106,17 @@ describe('platform command', function() {
         });
 
         describe('ios', function() {
+            it('should add a basic ios project', function() {
+                var cb = jasmine.createSpy().andCallFake(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'platforms', 'ios', 'www'))).toBe(true);
+                });
+
+                process.chdir(tempDir);
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, "platform add ios callback");
+            });
         });
     });
 
