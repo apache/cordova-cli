@@ -18,19 +18,31 @@ cordova-client, you will need to install the SDK for that platform. See:
 - [Android SDK](http://developer.android.com) - **NOTE** MAKE SURE YOU
   HAVE THE LATEST _EVERYTHING_ !!!!!
 
+> MikeR: would be nice to elaborate on what "everything" means. And why it's important…has it resulted in breakage? If so, what are some clues this might be the cause?
+
+
+> MikeR: possible to determine if SDKs are present, with compatible versions, and provide descriptive errors if missing?
+> 
+
 cordova-client has been tested on Mas OS X _only_. Sorry.
 
 In it's prototype stages, cordova-client will only work on Cordova
 v2.1.0rc1 and above.
 
+
+
 # Getting Started
 
-You should (eventually) be able to `npm install cordova-client -g`.
-Until then, after you clone this code, run `npm install` from inside this
-directory (you may want to run that with `sudo`). After that you will be able to access the client interface
-via:
+Eventually this will be available via npm but for now you must install manually:
 
-    $ ./bin/cordova
+```
+clone https://github.com/filmaj/cordova-client.git
+cd cordova-client
+sudo npm install
+```
+
+You will be able to access the client interface
+via: ``` $ ./bin/cordova```
 
 ## Creating A Cordova-Based Project
 
@@ -65,41 +77,20 @@ manipulate using the below project-level commands.
 Inside a Cordova-based project, you can use `cordova` with the
 `platform`, `plugin`, `build` and `emulate` sub-commands.
 
-### Managing Platforms
 
-#### Listing All Platforms
+subcommand | description 
+------------ | -------------
+`init` | initialize the current directory as a cordova project 
+`create [directory] --id --name` | create a new cordova project with optional name and id
+`platform [ls]` | list all platforms the project will build
+`platform add [platform]` | add a platform as a build target for the project
+`platform remove [platform]` | removes a platform as a build target for the project
+`build` | compile the app for all platforms added to the project
+`emulate` | launch emulators for all platforms added to the project
+`plugin [ls]` | list all plugins added to the project
+`plugin add [path-to-plugin]` | add a plugin to the project
+`plugin remove [plugin]` | **NOT IMPLEMENTED!**
 
-    $ cordova platform [ls]
-
-Lists out all platforms that the Cordova-based project is currently
-being built to.
-
-#### Adding A Platform
-
-    $ cordova platform add [platform]
-
-Adds the platform as a build target for the current Cordova-based
-project.
-
-#### Removing A Platform
-
-    $ cordova platform remove [platform]
-
-Removes the platform as a build target from the current Cordova-based
-project.
-
-### Building Your Project
-
-    $ cordova build
-
-You can call `cordova build` with no arguments if you are inside a cordova based project. This will compile your app for all platforms added to your Cordova project.
-
-### Emulating Your Project
-
-    $ cordova emulate
-
-Will launch emulators for all platforms added to your
-Cordova project.
 
 ### Managing Plugins
 
@@ -108,24 +99,8 @@ Plugin integration hinges on:
 - You having the plugin code locally on your computer
 - The plugin code adheres to the [Cordova Plugin Specification](https://github.com/alunny/cordova-plugin-spec)
 
-#### Listing All Plugins
 
-    $ cordova plugin [ls]
 
-Lists out all plugins added to the current Cordova-based project.
-
-#### Adding A Plugin
-
-    $ cordova plugin add [path-to-plugin]
-
-Adds the platform as a build target for the current Cordova-based
-project.
-
-#### Removing A Plugin
-
-    $ cordova plugin remove [plugin]
-
-**NOT IMPLEMENTED!**
 
 # Examples
 
