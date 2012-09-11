@@ -84,7 +84,7 @@ Contains the project's web artifacts, such as .html, .css and .js files. These a
 # Examples
 
 ## Creating a new cordova project
-This example shows how to create a project from scratch named KewlApp with iOS and android platform support, and includes a plugin called Kewlio. the project will livein ~/MyProjects/KewlApp
+This example shows how to create a project from scratch named KewlApp with iOS and Android platform support, and includes a plugin named Kewlio. The project will live in ~/MyProjects/KewlApp
 
 ```
 $ cordova create ~/KewlApp
@@ -152,16 +152,12 @@ It would be useful to support Bash command-line completions, in the [same manner
 - it would force us into some consistency to maintain an easy completion script
 
 ### Random Notes
-posted to the m/l by BrianL
+posted to the mailing list by BrianL
 
-yah. there is tonnes of prior art for this stuff. I will update the wiki but quickly, this was stable:
+yah. there is tonnes of prior art for this stuff. I will update the wiki but quickly, this was stable: [https://github.com/brianleroux/Cordova/tree/b816aacfb7583174be9f44f71dc32c8465d1319]()
 
-[https://github.com/brianleroux/Cordova/tree/b816aacfb7583174be9f44f71dc32c8465d1319]()
+then other things happened. Those scripts ended up in the mainline projects. The idea was a standard package format for a project and upgrading would consist only of swapping out the bin directory. The scripts would live local the project avoiding version hell between releases.
 
-then other things happened. those scripts ended up in the mainline projects. the idea was a standard package format for a project and upgrading would consist only of swapping out the bin directory. the scripts would live local the project avoiding version hell between releases.
+This new thinking is different. We now think the native project as it were should host its own scripts. Upgrading not a consideration. Maybe it should be. You're thinking of a master global script, which is cool and something I've always wanted, but the version thing needs to be considered. perhaps not an issue between releases if the native project (the target of www) deals with the version itself...
 
-this new thinking is different. we now think the native project as it were should host its own scripts. upgrading not a consideration. maybe it should be. you're thinking of a master global script, which is cool and something I've always wanted, but the version thing needs to be considered. perhaps not an issue between releases if the native project (the target of www) deals with the version itself...
-
-also check the old wiki and andrew lunny has a tool called plugin-install for ios/android
-
-[https://github.com/alunny/pluginstall]()
+cordova-client internally depends on pluginstall, a tool written by Andrew Lunny to support installing plugins for the iOS and Android platforms [https://github.com/alunny/pluginstall]()
