@@ -28,14 +28,14 @@ cd cordova-client
 sudo npm install -g
 ```
 
-the -g flag installs cordova globally, so you can access the tool via `scordova`
+the -g flag installs cordova globally, so you can access the tool via `cordova`
 
 
 ## Subcommands
 
 format | description 
 :------------ | :-------------
-`create <directory> [<id> []<name>]]` | create a new cordova project with optional name and id
+`create <directory> [<id> [<name>]]` | create a new cordova project with optional name and id
 `platform ls` | list all platforms the project will build
 `platform add <platform>` | add a platform as a build target for the project
 `platform remove <platform>` | removes a platform as a build target for the project
@@ -103,7 +103,7 @@ cordova build
 The directory structure of KewlApp now looks like this:
 
     KewlApp/
-    |-.cordova/
+    |- .cordova/
     |- platforms/
        |- android/
        |  `- …
