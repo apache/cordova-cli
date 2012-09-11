@@ -28,20 +28,20 @@ cd cordova-client
 sudo npm install -g
 ```
 
-the -g flag installs cordova globally, so you can access the tool via `$ cordova`
+the -g flag installs cordova globally, so you can access the tool via `scordova`
 
 
 ## Subcommands
 
 format | description 
 :------------ | :-------------
-`create [directory] <[id]> <[name]>` | create a new cordova project with optional name and id
-`platform [ls]` | list all platforms the project will build
-`platform add [platform]` | add a platform as a build target for the project
-`platform remove [platform]` | removes a platform as a build target for the project
-`plugin [ls]` | list all plugins added to the project
-`plugin add [path-to-plugin]` | add a plugin to the project
-`plugin remove [plugin]` | **NOT IMPLEMENTED!**
+`create <directory> [<id> []<name>]]` | create a new cordova project with optional name and id
+`platform ls` | list all platforms the project will build
+`platform add <platform>` | add a platform as a build target for the project
+`platform remove <platform>` | removes a platform as a build target for the project
+`plugin ls` | list all plugins added to the project
+`plugin add <path-to-plugin>` | add a plugin to the project
+`plugin remove <plugin>` | **NOT IMPLEMENTED!**
 `build` | compile the app for all platforms added to the project
 `emulate` | launch emulators for all platforms added to the project
 
@@ -87,17 +87,17 @@ Contains the project's web artifacts, such as .html, .css and .js files. These a
 This example shows how to create a project from scratch named KewlApp with iOS and Android platform support, and includes a plugin named Kewlio. The project will live in ~/MyProjects/KewlApp
 
 ```
-$ cordova create ~/KewlApp
+cordova create ~/KewlApp
 
-$ cd ~/KewlApp
+cd ~/KewlApp
 
-$ cordova platform add ios
+cordova platform add ios
 
-$ cordova platform add android
+cordova platform add android
 
-$ cordova plugin add http://example.org/Kewlio-1.2.3.tar.gz
+cordova plugin add http://example.org/Kewlio-1.2.3.tar.gz
 
-$ cordova build 
+cordova build 
 ```
 
 The directory structure of KewlApp now looks like this:
@@ -118,7 +118,7 @@ The directory structure of KewlApp now looks like this:
 
 ## Running Tests
 
-    $ npm test
+    npm test
 
 **WARNING**: If you run tests and don't have any sub-directories under
 `./lib`, be prepared to see some failing tests as then this project will
