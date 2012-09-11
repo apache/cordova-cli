@@ -9,23 +9,14 @@
 * [git](https://help.github.com/articles/set-up-git)
 * SDKs for every platform you wish to support
   - [iOS SDK](http://developer.apple.com)
-  - [Android SDK](http://developer.android.com) - **NOTE** MAKE SURE YOU
-  HAVE THE LATEST _EVERYTHING_ !!!!!
-
-```
-MikeR: vague but interesting. I'm guessing this has caused issues using parts of the tool. More details would be helpful. Some clues on symptoms of everything not being up to date would be helpful for people experiencing issues related to this.
-```
-
-```
-MikeR: possible to determine if SDKs are present, with compatible versions, and provide descriptive errors if missing/out of date?
-```
+  - [Android SDK](http://developer.android.com) - **NOTE** This tool
+    will not work unless you have the absolute latest updates for all
+    Android SDK components.
 
 cordova-client has been tested on Mas OS X _only_. Sorry.
 
 In it's prototype stages, cordova-client will only work on Cordova
 v2.1.0rc1 and above.
-
-
 
 # Install
 
@@ -34,20 +25,17 @@ Eventually this will be available via npm. For now you must install manually:
 ```
 git clone https://github.com/filmaj/cordova-client.git
 cd cordova-client
-sudo npm install
+sudo npm install -g
 ```
 
-You will be able to access the client interface
-via: ``` $ ./bin/cordova```
-
+the -g flag installs cordova globally, so you can access the tool via `$ cordova`
 
 
 ## Subcommands
 
 format | description 
 :------------ | :-------------
-`init` | initialize the current directory as a cordova project 
-`create [directory] [id] [name]` | create a new cordova project with optional name and id
+`create [directory] <[id]> <[name]>` | create a new cordova project with optional name and id
 `platform [ls]` | list all platforms the project will build
 `platform add [platform]` | add a platform as a build target for the project
 `platform remove [platform]` | removes a platform as a build target for the project
@@ -62,23 +50,23 @@ format | description
 A Cordova application built with cordova-client will have the following
 directory structure:
 
-    myApp
-    |-.cordova
-    |- platforms
-    |- plugins
-    `- www
+    myApp/
+    |-.cordova/
+    |- platforms/
+    |- plugins/
+    `- www/
 
 ### .cordova/
-The .cordova directory contains the project's baked-in plugins and platforms, and meta-data used by the rest of the commands. The root project directory has a .cordova directory inside of it, and that directory identifies the parent as a cordova project. Project directories may not be nested. A Cordova project directory is recognized as such when it has a .cordova directory.  This data is generated when calling `cordova init`. It's modified when adding/removing platforms or plugins to the project.
+The .cordova directory contains the project's baked-in plugins and platforms, and meta-data used by the rest of the commands. The root project directory has a .cordova directory inside of it, and that directory identifies the parent as a cordova project. Project directories may not be nested. A Cordova project directory is recognized as such when it has a .cordova directory.  This data is generated when calling `cordova create`. It's modified when adding/removing platforms or plugins to the project.
 
 
-Commands other than init and create operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find the project directory. Thus, any command (other than init and create) can be used from any subdirectory whose parent is a cordova project directory (same as git).
+Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find the project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a cordova project directory (same as git).
 
 ### platforms/ and plugins/
 platforms added to your application will have the native
  application project structures laid out within this directory
   
-Additional platforms and projects can be installed, and removed, with the cordova platform/plugin add/remove subcommands. The add versions of these subcommands take a URI as a parameter. If the URI does not contain a protocol/scheme, it's assumed to be a 'backed in' platform/plugin. Otherwise, it's assumed to be a URL to a gzipped tar archive of the platform/plugin, in the shape of an npm package.
+Additional platforms and projects can be installed, and removed, with the cordova platform/plugin add/remove subcommands. The add versions of these subcommands take a URI as a parameter. If the URI does not contain a protocol/scheme, it's assumed to be a 'baked in' platform/plugin. Otherwise, it's assumed to be a URL to a gzipped tar archive of the platform/plugin, in the shape of an npm package.
 
 Platforms and projects are expected to be "CommonJS packages" (loosely), similar to the way npm packages are structured. The main requirement is that there be a package.json file available in the 'root directory' of the archive. The package.json file will contain additional meta-data for platforms and plugins, including pointers to such things as native code that needs to be compiled/linked/added to the application during a build.
 
@@ -113,17 +101,18 @@ $ cordova build
 ```
 
 The directory structure of KewlApp now looks like this:
-* KewlApp/
-  * .cordova/
-  * plugins/
-  * platforms/
-  * android/
-    * …
-  * ios/
-    * …
-  * www
-    * index.html
 
+    KewlApp/
+    |-.cordova/
+    |- platforms/
+       |- android/
+       |  `- …
+       `- ios/
+          `- …
+    |- plugins/
+       `- Kewlio/
+    `- www/
+       `- index.html
 
 # Contributing
 
@@ -134,9 +123,6 @@ The directory structure of KewlApp now looks like this:
 **WARNING**: If you run tests and don't have any sub-directories under
 `./lib`, be prepared to see some failing tests as then this project will
 start cloning any necessary Cordova libraries (which may take a while).
-
-Also note that the the `spec/helper.js` file contains all of the
-mocks/stubs that we override for testing purposes.
 
 ## Managing Plugins
 
@@ -151,10 +137,10 @@ Plugin integration hinges on:
 - installing only supported platforms for the app vs. the plugin (and
   vice-versa)
 - npm package
-- example demonstrating use of `cordova init`
 - figure out versioning. for now: 2.1.0 minimum
 - properly extracting info from config.xml
 - testing on machines other than Mac OS X
+- checking SDK compatibility
 - blackberry support
 - windows phone support
 
@@ -179,5 +165,3 @@ this new thinking is different. we now think the native project as it were shoul
 also check the old wiki and andrew lunny has a tool called plugin-install for ios/android
 
 [https://github.com/alunny/pluginstall]()
-
-
