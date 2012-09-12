@@ -137,6 +137,7 @@ Plugin integration hinges on:
 - installing only supported platforms for the app vs. the plugin (and
   vice-versa)
 - npm package
+- bootstrapping the tests
 - figure out versioning. for now: 2.1.0 minimum
 - properly extracting info from config.xml
 - testing on machines other than Mac OS X
