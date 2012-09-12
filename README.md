@@ -138,12 +138,12 @@ Plugin integration hinges on:
   vice-versa)
 - npm package
 - bootstrapping the tests
-- figure out versioning. for now: 2.1.0 minimum
 - properly extracting info from config.xml
-- testing on machines other than Mac OS X
 - checking SDK compatibility
 - blackberry support
 - windows phone support
+- testing on machines other than Mac OS X
+- figure out versioning. for now: 2.1.0 minimum
 
 ### Bash Completions
 

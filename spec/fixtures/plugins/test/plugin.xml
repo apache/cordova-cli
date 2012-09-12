@@ -7,5 +7,11 @@
     <name>Test Plugin</name>
 
     <asset src="www/test.js" target="test.js" />
+    <platform name="android">
+    </platform>
+    <platform name="ios">
+    </platform>
+    <platform name="blackberry">
+    </platform>
 </plugin>
 

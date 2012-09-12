@@ -42,7 +42,7 @@ describe('plugin command', function() {
         }).toThrow();
     });
 
-    describe('ls', function() {
+    describe('`ls`', function() {
         var cwd = process.cwd();
 
         beforeEach(function() {
@@ -60,10 +60,10 @@ describe('plugin command', function() {
         });
     });
 
-    describe('add', function() {
+    describe('`add`', function() {
     });
 
-    describe('remove', function() {
+    describe('`remove`', function() {
     });
 });
 

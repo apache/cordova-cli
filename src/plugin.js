@@ -40,6 +40,8 @@ module.exports = function plugin(command, target, callback) {
             break;
         case 'add':
             // Check if we already have the plugin.
+            // TODO edge case: if a new platform is added, then you want
+            // to re-add the plugin to the new platform.
             if (plugins.indexOf(targetName) > -1) {
                 throw 'Plugin "' + targetName + '" already added to project.';
             }

@@ -9,7 +9,7 @@ var cordova = require('../cordova'),
     et = require('elementtree'),
     xml = path.join(tempDir, 'www', 'config.xml');
 
-describe('config parser', function () {
+describe('config.xml parser', function () {
     beforeEach(function() {
         // Make a temp directory
         try { rmrf(tempDir); } catch(e) {}
