@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "preferGlobal": "true",
   "description": "Cordova client tool",
   "main": "cordova",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/imhotep/cordova-client.git"
+    "url": "https://github.com/filmaj/cordova-client.git"
   },
   "keywords": [
     "cordova",

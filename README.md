@@ -134,9 +134,6 @@ Plugin integration hinges on:
 
 ## TO-DO
 
-- installing only supported platforms for the app vs. the plugin (and
-  vice-versa)
-- npm package
 - bootstrapping the tests
 - properly extracting info from config.xml
 - checking SDK compatibility
