@@ -6,7 +6,10 @@ var cordova = require('../cordova'),
     fs = require('fs'),
     tempDir = path.join(__dirname, '..', 'temp'),
     fixturesDir = path.join(__dirname, 'fixtures'),
-    testPlugin = path.join(fixturesDir, 'plugins', 'test');
+    testPlugin = path.join(fixturesDir, 'plugins', 'test'),
+    androidPlugin = path.join(fixturesDir, 'plugins', 'android');
+
+var cwd = process.cwd();
 
 describe('plugin command', function() {
     beforeEach(function() {
@@ -16,7 +19,6 @@ describe('plugin command', function() {
     });
 
     it('should run inside a Cordova-based project', function() {
-        var cwd = process.cwd();
         this.after(function() {
             process.chdir(cwd);
         });
@@ -30,7 +32,6 @@ describe('plugin command', function() {
         }).not.toThrow();
     });
     it('should not run outside of a Cordova-based project', function() {
-        var cwd = process.cwd();
         this.after(function() {
             process.chdir(cwd);
         });
@@ -43,8 +44,6 @@ describe('plugin command', function() {
     });
 
     describe('`ls`', function() {
-        var cwd = process.cwd();
-
         beforeEach(function() {
             cordova.create(tempDir);
         });
@@ -61,6 +60,94 @@ describe('plugin command', function() {
     });
 
     describe('`add`', function() {
+        beforeEach(function() {
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+        });
+
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+        describe('failure', function() {
+            it('should throw if your app has no platforms added', function() {
+                expect(function() {
+                    cordova.plugin('add', testPlugin);
+                }).toThrow('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
+            });
+            it('should throw if plugin does not support any app platforms', function() {
+                var cb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
+                    expect(function() {
+                        cordova.plugin('add', androidPlugin);
+                    }).toThrow('Plugin "android" does not support any of your application\'s platforms. Plugin platforms: android; your application\'s platforms: ios');
+                });
+            });
+            it('should throw if plugin is already added to project', function() {
+                var cb = jasmine.createSpy();
+                var pluginCb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
+                    cordova.plugin('add', testPlugin, pluginCb);
+                });
+                waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
+                runs(function() {
+                    expect(function() {
+                        cordova.plugin('add', testPlugin, pluginCb);
+                    }).toThrow('Plugin "test" already added to project.');
+                });
+            });
+            it('should throw if plugin does not have a plugin.xml', function() {
+                var cb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
+                    expect(function() {
+                        cordova.plugin('add', fixturesDir);
+                    }).toThrow('Plugin "fixtures" does not have a plugin.xml in the root. Plugin must support the Cordova Plugin Specification: https://github.com/alunny/cordova-plugin-spec');
+                });
+            });
+        });
+        describe('success', function() {
+            it('should add plugin www assets to project www folder', function() {
+                var cb = jasmine.createSpy();
+                var pluginCb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
+                    cordova.plugin('add', testPlugin, pluginCb);
+                });
+                waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
+                runs(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'www', 'test.js'))).toBe(true);
+                });
+            });
+            it('should add the full plugin to the plugins directory', function() {
+                var cb = jasmine.createSpy();
+                var pluginCb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
+                    cordova.plugin('add', testPlugin, pluginCb);
+                });
+                waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
+                runs(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(true);
+                });
+            });
+        });
     });
 
     describe('`remove`', function() {

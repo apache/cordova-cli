@@ -10,6 +10,7 @@
     <platform name="android">
     </platform>
     <platform name="ios">
+        <plugins-plist key="TestPlugin" string="Test" />
     </platform>
     <platform name="blackberry">
     </platform>
