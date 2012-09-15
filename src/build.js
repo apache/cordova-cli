@@ -49,7 +49,7 @@ module.exports = function build (callback) {
 
                     // TODO: update activity name
                     break;
-            } 
+            }
 
             // Clean out the existing www.
             rmrf(assetsPath);

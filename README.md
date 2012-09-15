@@ -21,14 +21,16 @@ v2.1.0rc1 and above.
 # Install
 
 Eventually this will be available via npm. For now you must install manually:
-
+ 
 ```
 git clone https://github.com/filmaj/cordova-client.git
 cd cordova-client
-sudo npm install -g
+npm install -g
 ```
 
 the -g flag installs cordova globally, so you can access the tool via `cordova`
+
+**NOTE**: on Mac OS X, you may want to change the owner of the cordova directory that npm installs to. This will allow you to run cordova as local user without requiring root permissions. Assuming your node_modules directory is in `/usr/local/lib/`, you can do this by running: `sudo chown -R <username> /usr/local/lib/node_modules/cordova`
 
 
 ## Subcommands

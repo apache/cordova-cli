@@ -22,13 +22,6 @@ module.exports = {
     // Cordova implementation
     havePlatformLib: function havePlatformLib(platform) {
         var dir = path.join(__dirname, '..', 'lib', platform);
-        try {
-            fs.lstatSync(dir);
-            // Have it!
-            return true;
-        } catch(e) {
-            // Don't have it.
-            return false;
-        }
+        return fs.existsSync(dir);
     }
 };

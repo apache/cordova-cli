@@ -15,6 +15,54 @@ var repos = {
     android:'https://git-wip-us.apache.org/repos/asf/incubator-cordova-android.git'
 };
 
+/**
+ * checkout a platform from the git repo
+ * @param target string platform to get (enum of 'ios' or 'android' for now)
+ * @param cfg project configuration object
+ * @param flow I/O object to handle synchronous sys calls
+ * @throws Javascript Error on failure
+ */
+function get_platform_lib(target, cfg, flow) {
+    if (!repos[target]) {
+        // TODO: this is really a pretty terrible pattern because it kills 
+        //       excecution immediately and prevents cleanup routines. However,
+        //       I don't want to just spew a stack trace to the user either. 
+        console.error('platform "' + target + '" not found.');
+        process.exit(1);
+    }
+    // specify which project tag to check out. minimum tag is 2.1.0rc1
+    var cordova_lib_tag = '2.1.0';
+
+    // Shell out to git.
+    var outPath = path.join(__dirname, '..', 'lib', target);
+    var cmd = util.format('git clone %s %s', repos[target], outPath);
+
+    console.log('Cloning ' + repos[target] + ', this may take a while...');
+    exec(cmd, flow.set({
+        key:'cloning',
+        firstArgIsError:false,
+        responseFormat:['err', 'stdout', 'stderr']
+    }));
+    var buffers = flow.get('cloning');
+    if (buffers.err) {
+        cfg.remove_platform(target);
+        throw ('An error occured during git-clone of ' + repos[target] + '. ' + buffers.err);
+    }
+
+    // Check out the right version.
+    cmd = util.format('cd "%s" && git checkout %s', outPath, cordova_lib_tag);
+    exec(cmd, flow.set({
+        key:'tagcheckout',
+        firstArgIsError:false,
+        responseFormat:['err', 'stdout', 'stderr']
+    }));
+    buffers = flow.get('tagcheckout');
+    if (buffers.err) {
+        cfg.remove_platform(target);
+        throw ('An error occured during git-checkout of ' + outPath + ' to tag ' + cordova_lib_tag + '. ' + buffers.err);
+    }
+}
+
 module.exports = function platform(command, target, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
@@ -37,46 +85,18 @@ module.exports = function platform(command, target, callback) {
             asyncblock(function(flow) {
                 var output = path.join(projectRoot, 'platforms', target);
 
-                // Do we have the cordova library for this platform?
+                // If the Cordova library for this platform is missing, get it.
                 if (!cordova_util.havePlatformLib(target)) {
-                    // Shell out to git.
-                    var outPath = path.join(__dirname, '..', 'lib', target);
-                    var cmd = util.format('git clone %s %s', repos[target], outPath);
-
-                    console.log('Cloning ' + repos[target] + ', this may take a while...');
-                    exec(cmd, flow.set({
-                        key:'cloning',
-                        firstArgIsError:false,
-                        responseFormat:['err', 'stdout', 'stderr']
-                    }));
-                    var buffers = flow.get('cloning');
-                    if (buffers.err) {
-                        throw ('An error occured during git-clone of ' + repos[target] + '. ' + buffers.err);
-                    }
-
-                    // Check out the right version. Currently: 2.1.0.
-                    cmd = 'cd "%s" && git checkout 2.1.0';
-                    if (target == "android") cmd = 'cd "%s" && git checkout 47daaaf';
-                    cmd = util.format(cmd, outPath);
-                    exec(cmd, flow.set({
-                        key:'tagcheckout',
-                        firstArgIsError:false,
-                        responseFormat:['err', 'stdout', 'stderr']
-                    }));
-                    buffers = flow.get('tagcheckout');
-                    if (buffers.err) {
-                        throw ('An error occured during git-checkout of ' + outPath + ' to tag 2.1.0rc1. ' + buffers.err);
-                    }
+                    get_platform_lib(target, cfg, flow);
                 }
 
                 // Create a platform app using the ./bin/create scripts that exist in each repo.
                 // TODO: eventually refactor to allow multiple versions to be created.
-                // Check if output dir already exists.
-                try {
-                    fs.lstatSync(output);
-                    // TODO: this platform dir already exists. what do we do?
-                } catch(e) {
-                    // Doesn't exist, continue.
+                // Check if output directory already exists.
+                if (fs.existsSync(output)) {
+                    throw 'Platform "' + target + '" already exists' 
+                } else {
+                    // directory doesn't exist, run platform's create script
                     var bin = path.join(__dirname, '..', 'lib', target, 'bin', 'create');
                     var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
                     var name = cfg.name().replace(/\W/g,'_');
