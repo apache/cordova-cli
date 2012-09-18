@@ -23,7 +23,9 @@ describe('create command', function () {
     });
     it('should create a cordova project in the specified directory if parameter is provided', function() {
         cordova.create(tempDir);
-        expect(fs.lstatSync(path.join(tempDir, '.cordova')).isFile()).toBe(true);
+        var dotc = path.join(tempDir, '.cordova');
+        expect(fs.lstatSync(dotc).isFile()).toBe(true);
+        expect(JSON.parse(fs.readFileSync(dotc, 'utf8')).name).toBe("Hello Cordova");
     });
     it('should throw if the directory is already a cordova project', function() {
         mkdirp(path.join(tempDir, '.cordova'));

@@ -147,6 +147,11 @@ describe('plugin command', function() {
                     expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(true);
                 });
             });
+            describe('on Android', function() {
+                it('should properly change any imports of ".R" to match the app\'s package name', function() {
+                    
+                });
+            });
         });
     });
 

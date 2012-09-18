@@ -44,7 +44,11 @@ module.exports = function create (dir, id, name) {
     mkdirp(path.join(dir, 'plugins'));
     mkdirp(path.join(dir, 'www'));
 
-    fs.writeFileSync(dotCordova, 'do or do not. there is no try.');
+    // Write out .cordova file with a simple json manifest
+    fs.writeFileSync(dotCordova, JSON.stringify({
+        id:id,
+        name:name
+    }));
 
     // Copy in base template
     cpr(path.join(__dirname, '..', 'templates', 'www'), path.join(dir, 'www'));
