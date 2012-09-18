@@ -55,8 +55,10 @@ module.exports = function platform(command, target, callback) {
                         throw ('An error occured during git-clone of ' + repos[target] + '. ' + buffers.err);
                     }
 
-                    // Check out the right version. Currently: 2.1.0rc1.
-                    cmd = util.format('cd "%s" && git checkout 2.1.0rc1', outPath);
+                    // Check out the right version. Currently: 2.1.0.
+                    cmd = 'cd "%s" && git checkout 2.1.0';
+                    if (target == "android") cmd = 'cd "%s" && git checkout 47daaaf';
+                    cmd = util.format(cmd, outPath);
                     exec(cmd, flow.set({
                         key:'tagcheckout',
                         firstArgIsError:false,

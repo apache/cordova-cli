@@ -2,9 +2,9 @@ var et = require('elementtree'),
     platforms = require('./../platforms'),
     fs = require('fs');
 
-function config_parser(xmlPath) {
-    this.path = xmlPath;
-    this.doc = new et.ElementTree(et.XML(fs.readFileSync(xmlPath, 'utf-8')));
+function config_parser(path) {
+    this.path = path;
+    this.doc = new et.ElementTree(et.XML(fs.readFileSync(path, 'utf-8')));
 }
 
 config_parser.prototype = {

@@ -134,8 +134,8 @@ Plugin integration hinges on:
 
 ## TO-DO
 
-- bootstrapping the tests
 - properly extracting info from config.xml
+- bootstrapping the tests
 - checking SDK compatibility
 - blackberry support
 - windows phone support
@@ -149,13 +149,3 @@ It would be useful to support Bash command-line completions, in the [same manner
 - it would be useful
 - it would force us into some consistency to maintain an easy completion script
 
-### Random Notes
-posted to the mailing list by BrianL
-
-yah. there is tonnes of prior art for this stuff. I will update the wiki but quickly, this was stable: [https://github.com/brianleroux/Cordova/tree/b816aacfb7583174be9f44f71dc32c8465d1319]()
-
-then other things happened. Those scripts ended up in the mainline projects. The idea was a standard package format for a project and upgrading would consist only of swapping out the bin directory. The scripts would live local the project avoiding version hell between releases.
-
-This new thinking is different. We now think the native project as it were should host its own scripts. Upgrading not a consideration. Maybe it should be. You're thinking of a master global script, which is cool and something I've always wanted, but the version thing needs to be considered. perhaps not an issue between releases if the native project (the target of www) deals with the version itself...
-
-cordova-client internally depends on pluginstall, a tool written by Andrew Lunny to support installing plugins for the iOS and Android platforms [https://github.com/alunny/pluginstall]()
