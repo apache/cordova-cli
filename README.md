@@ -132,15 +132,9 @@ Plugin integration hinges on:
 - The plugin code adheres to the [Cordova Plugin Specification](https://github.com/alunny/cordova-plugin-spec)
 
 
-## TO-DO
+## TO-DO + Issues
 
-- properly extracting info from config.xml
-- bootstrapping the tests
-- checking SDK compatibility
-- blackberry support
-- windows phone support
-- testing on machines other than Mac OS X
-- figure out versioning. for now: 2.1.0 minimum
+Please check [cordova-client on GitHub](http://github.com/filmaj/cordova-client).
 
 ### Bash Completions
 
