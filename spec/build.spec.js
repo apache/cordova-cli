@@ -4,6 +4,7 @@ var cordova = require('../cordova'),
     path = require('path'),
     rmrf = wrench.rmdirSyncRecursive,
     fs = require('fs'),
+    config_parser = require('../src/config_parser'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 var cwd = process.cwd();
@@ -115,12 +116,45 @@ describe('build command', function() {
         });
     });
 
-    describe('should interpolate config.xml app metadata', function() {
+    describe('before each run it should interpolate config.xml app metadata', function() {
+        var cfg;
+        beforeEach(function() {
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+            cfg = config_parser(path.join(tempDir, 'www', 'config.xml'));
+        });
+
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+
         describe('into Android builds', function() {
-          it('should interpolate app name');
+          it('should interpolate app name', function () {
+              /*
+              var buildcb = jasmine.createSpy();
+              var cb = jasmine.createSpy();
+              var newName = "devil ether";
+
+              runs(function() {
+                  cordova.platform('add', 'android', cb);
+              });
+              waitsFor(function() { return cb.wasCalled; }, 'platform add android callback');
+
+              runs(function() {
+                  cfg.name(newName); // set a new name in the config.xml
+                  cordova.build(buildcb);
+              });
+              waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
+              runs(function() {
+                  // TODO
+              });
+              */
+          });
+          it('should interpolate package name');
         });
         describe('into iOS builds', function() {
           it('should interpolate app name');
+          it('should interpolate package name');
         });
     });
 });
