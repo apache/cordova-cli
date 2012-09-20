@@ -33,8 +33,6 @@ module.exports = function platform(command, target, callback) {
             break;
         case 'add':
             asyncblock(function(flow) {
-                // Add the platform to the config.xml
-                cfg.add_platform(target);
                 var output = path.join(projectRoot, 'platforms', target);
 
                 // Do we have the cordova library for this platform?
@@ -51,7 +49,6 @@ module.exports = function platform(command, target, callback) {
                     }));
                     var buffers = flow.get('cloning');
                     if (buffers.err) {
-                        cfg.remove_platform(target);
                         throw ('An error occured during git-clone of ' + repos[target] + '. ' + buffers.err);
                     }
 
@@ -66,7 +63,6 @@ module.exports = function platform(command, target, callback) {
                     }));
                     buffers = flow.get('tagcheckout');
                     if (buffers.err) {
-                        cfg.remove_platform(target);
                         throw ('An error occured during git-checkout of ' + outPath + ' to tag 2.1.0rc1. ' + buffers.err);
                     }
                 }
@@ -90,9 +86,16 @@ module.exports = function platform(command, target, callback) {
                     }));
                     var bfrs = flow.get('create');
                     if (bfrs.err) {
-                        cfg.remove_platform(target);
                         throw ('An error occured during creation of ' + target + ' sub-project. ' + bfrs.err);
                     } else {
+                        switch(target) {
+                            case 'android':
+                                break;
+                            case 'ios':
+                                break;
+                        }
+                        // Add the platform to config.xml
+                        cfg.add_platform(target);
                         if (callback) callback();
                     }
                 }
