@@ -4,6 +4,8 @@ var cordova = require('../cordova'),
     path = require('path'),
     rmrf = wrench.rmdirSyncRecursive,
     fs = require('fs'),
+    et = require('elementtree'),
+    config_parser = require('../src/config_parser'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 var cwd = process.cwd();
@@ -14,7 +16,6 @@ describe('platform command', function() {
         try { rmrf(tempDir); } catch(e) {}
         mkdirp(tempDir);
     });
-
     it('should run inside a Cordova-based project', function() {
         this.after(function() {
             process.chdir(cwd);
@@ -43,6 +44,7 @@ describe('platform command', function() {
     describe('`ls`', function() {
         beforeEach(function() {
             cordova.create(tempDir);
+            process.chdir(tempDir);
         });
 
         afterEach(function() {
@@ -50,8 +52,6 @@ describe('platform command', function() {
         });
 
         it('should list out no platforms for a fresh project', function() {
-            process.chdir(tempDir);
-
             expect(cordova.platform('ls')).toEqual('No platforms added. Use `cordova platform add <platform>`.');
         });
 
@@ -59,7 +59,6 @@ describe('platform command', function() {
             var cbtwo = jasmine.createSpy();
             var cb = jasmine.createSpy();
 
-            process.chdir(tempDir);
             runs(function() {
                 cordova.platform('add', 'android', cb);
             });
@@ -78,6 +77,7 @@ describe('platform command', function() {
     describe('`add`', function() {
         beforeEach(function() {
             cordova.create(tempDir);
+            process.chdir(tempDir);
         });
 
         afterEach(function() {
@@ -85,6 +85,7 @@ describe('platform command', function() {
         });
 
         describe('without any libraries cloned', function() {
+            // TODO!
             it('should clone down and checkout the correct android library');
             it('should clone down and checkout the correct ios library');
             it('should add a basic android project');
@@ -95,7 +96,6 @@ describe('platform command', function() {
             it('should add a basic android project', function() {
                 var cb = jasmine.createSpy();
 
-                process.chdir(tempDir);
                 runs(function() {
                     cordova.platform('add', 'android', cb);
                 });
@@ -104,13 +104,26 @@ describe('platform command', function() {
                     expect(fs.existsSync(path.join(tempDir, 'platforms', 'android', 'AndroidManifest.xml'))).toBe(true);
                 });
             });
-        });
+            it('should use the correct application name based on what is in config.xml', function() {
+                var cfg = new config_parser(path.join(tempDir, 'www', 'config.xml'));
+                var cb = jasmine.createSpy();
 
+                runs(function() {
+                    cfg.name('chim chim');
+                    cordova.platform('add', 'android', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, "platform add android callback");
+                runs(function() {
+                    var strings = new et.ElementTree(et.XML(fs.readFileSync(path.join(tempDir, 'platforms', 'android', 'res', 'values', 'strings.xml'), 'utf-8')));
+                    var app_name = strings.find('string[@name="app_name"]').text;
+                    expect(app_name).toBe('chim chim');
+                });
+            });
+        });
         describe('ios', function() {
             it('should add a basic ios project', function() {
                 var cb = jasmine.createSpy();
 
-                process.chdir(tempDir);
                 runs(function() {
                     cordova.platform('add', 'ios', cb);
                 });
@@ -121,10 +134,10 @@ describe('platform command', function() {
             });
         });
     });
-
     describe('remove', function() {
         beforeEach(function() {
             cordova.create(tempDir);
+            process.chdir(tempDir);
         });
 
         afterEach(function() {
@@ -135,7 +148,6 @@ describe('platform command', function() {
             var cb = jasmine.createSpy();
             var cbone = jasmine.createSpy();
 
-            process.chdir(tempDir);
             runs(function() {
                 cordova.platform('add', 'ios', cbone);
             });

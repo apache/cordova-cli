@@ -6,6 +6,7 @@ var config_parser = require('./config_parser'),
     rmrf          = wrench.rmdirSyncRecursive,
     exec          = require('child_process').exec,
     path          = require('path'),
+    android_parser= require('./metadata/android_parser'),
     asyncblock    = require('asyncblock');
 
 var repos = {
@@ -90,6 +91,8 @@ module.exports = function platform(command, target, callback) {
                     } else {
                         switch(target) {
                             case 'android':
+                                var android = new android_parser(output);
+                                android.update_from_config(cfg);
                                 break;
                             case 'ios':
                                 break;
