@@ -40,12 +40,22 @@ describe('ios project parser', function() {
             }).toThrow();
         });
         it('should update the application name properly', function() {
-            config.name('bond. james bond.');
-            project.update_from_config(config);
+            var cb = jasmine.createSpy();
+            this.after(function() {
+                fs.writeFileSync(ios_pbx, original_pbx, 'utf-8');
+            });
 
-            var pbx_contents = fs.readFileSync(ios_pbx, 'utf-8');
+            runs(function() {
+                config.name('bond. james bond.');
+                project.update_from_config(config, cb);
+            });
 
-            expect(pbx_contents.match(/PRODUCT_NAME\s*=\s*"bond. james bond."/)[0]).toBe('PRODUCT_NAME = "bond. james bond."');
+            waitsFor(function() { return cb.wasCalled; }, "update_from_config callback");
+
+            runs(function() {
+                var pbx_contents = fs.readFileSync(ios_pbx, 'utf-8');
+                expect(pbx_contents.match(/PRODUCT_NAME\s*=\s*"bond. james bond."/)[0]).toBe('PRODUCT_NAME = "bond. james bond."');
+            });
         });
         it('should update the application package name properly');
     });

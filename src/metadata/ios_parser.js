@@ -16,7 +16,7 @@ module.exports = function ios_parser(project) {
     this.pbxproj = path.join(this.xcodeproj, 'project.pbxproj');
 };
 module.exports.prototype = {
-    update_from_config:function(config) {
+    update_from_config:function(config, callback) {
         if (config instanceof config_parser) {
         } else throw 'update_from_config requires a config_parser object';
 
@@ -35,6 +35,7 @@ module.exports.prototype = {
             else {
                 proj.updateProductName(name);
                 fs.writeFileSync(parser.pbxproj, proj.writeSync(), 'utf-8');
+                if (callback) callback();
             }
         });
     }

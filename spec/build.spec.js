@@ -110,7 +110,7 @@ describe('build command', function() {
                 var binaryPath = path.join(tempDir, 'platforms','ios','build');
                 expect(fs.existsSync(binaryPath)).toBe(true);
 
-                var appPath = path.join(binaryPath,"Hello_Cordova.app");
+                var appPath = path.join(binaryPath,"Hello Cordova.app");
                 expect(fs.existsSync(appPath)).toBe(true);
             });
         });

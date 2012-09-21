@@ -90,19 +90,18 @@ module.exports = function platform(command, target, callback) {
                     if (bfrs.err) {
                         throw ('An error occured during creation of ' + target + ' sub-project. ' + bfrs.err);
                     } else {
+                        cfg.add_platform(target);
                         switch(target) {
                             case 'android':
                                 var android = new android_parser(output);
                                 android.update_from_config(cfg);
+                                if (callback) callback();
                                 break;
                             case 'ios':
                                 var ios = new ios_parser(output);
-                                ios.update_from_config(cfg);
+                                ios.update_from_config(cfg, callback);
                                 break;
                         }
-                        // Add the platform to config.xml
-                        cfg.add_platform(target);
-                        if (callback) callback();
                     }
                 }
             });

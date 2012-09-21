@@ -153,7 +153,7 @@ describe('platform command', function() {
                 waitsFor(function() { return cb.wasCalled; }, "platform add ios callback");
                 runs(function() {
                     var pbxproj = fs.readFileSync(path.join(tempDir, 'platforms', 'ios', 'upon_closer_inspection_they_appear_to_be_loafers.xcodeproj', 'project.pbxproj'), 'utf-8');
-                    expect(pbxproj.match(/PRODUCT_NAME\s*=\s*"upon futher inspection they appear to be loafers"/)).toBe(true);
+                    expect(pbxproj.match(/PRODUCT_NAME\s*=\s*"upon closer inspection they appear to be loafers"/)[0]).toBe('PRODUCT_NAME = "upon closer inspection they appear to be loafers"');
                 });
             });
         });
