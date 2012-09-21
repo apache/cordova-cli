@@ -105,7 +105,12 @@ describe('platform command', function() {
                 });
             });
             it('should use the correct application name based on what is in config.xml', function() {
-                var cfg = new config_parser(path.join(tempDir, 'www', 'config.xml'));
+                var cfg_path = path.join(tempDir, 'www', 'config.xml');
+                var orig_cfg_contents = fs.readFileSync(cfg_path, 'utf-8');
+                this.after(function() {
+                    fs.writeFileSync(cfg_path, orig_cfg_contents, 'utf-8');
+                });
+                var cfg = new config_parser(cfg_path);
                 var cb = jasmine.createSpy();
 
                 runs(function() {
@@ -130,6 +135,25 @@ describe('platform command', function() {
                 waitsFor(function() { return cb.wasCalled; }, "platform add ios callback");
                 runs(function() {
                     expect(fs.existsSync(path.join(tempDir, 'platforms', 'ios', 'www'))).toBe(true);
+                });
+            });
+            it('should use the correct application name based on what is in config.xml', function() {
+                var cfg_path = path.join(tempDir, 'www', 'config.xml');
+                var orig_cfg_contents = fs.readFileSync(cfg_path, 'utf-8');
+                this.after(function() {
+                    fs.writeFileSync(cfg_path, orig_cfg_contents, 'utf-8');
+                });
+                var cfg = new config_parser(cfg_path);
+                var cb = jasmine.createSpy();
+
+                runs(function() {
+                    cfg.name('upon closer inspection they appear to be loafers');
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, "platform add ios callback");
+                runs(function() {
+                    var pbxproj = fs.readFileSync(path.join(tempDir, 'platforms', 'ios', 'upon_closer_inspection_they_appear_to_be_loafers.xcodeproj', 'project.pbxproj'), 'utf-8');
+                    expect(pbxproj.match(/PRODUCT_NAME\s*=\s*"upon futher inspection they appear to be loafers"/)).toBe(true);
                 });
             });
         });

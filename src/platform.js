@@ -7,6 +7,7 @@ var config_parser = require('./config_parser'),
     exec          = require('child_process').exec,
     path          = require('path'),
     android_parser= require('./metadata/android_parser'),
+    ios_parser    = require('./metadata/ios_parser'),
     asyncblock    = require('asyncblock');
 
 var repos = {
@@ -95,6 +96,8 @@ module.exports = function platform(command, target, callback) {
                                 android.update_from_config(cfg);
                                 break;
                             case 'ios':
+                                var ios = new ios_parser(output);
+                                ios.update_from_config(cfg);
                                 break;
                         }
                         // Add the platform to config.xml
