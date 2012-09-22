@@ -41,7 +41,7 @@ module.exports = function build (callback) {
                     var stringsXml = path.join(projectRoot, 'platforms', 'android', 'res', 'values', 'strings.xml');
                     var strings = new et.ElementTree(et.XML(fs.readFileSync(stringsXml, 'utf-8')));
                     strings.find('string[@name="app_name"]').text = name;
-                    fs.writeFileSync(stringsXml, strings.write(), 'utf-8');
+                    fs.writeFileSync(stringsXml, strings.write({indent: 4}), 'utf-8');
                     break;
                 case 'ios':
                     assetsPath = path.join(projectRoot, 'platforms', 'ios', 'www');

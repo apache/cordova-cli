@@ -19,6 +19,6 @@ module.exports.prototype = {
         var name = config.name();
         var strings = new et.ElementTree(et.XML(fs.readFileSync(this.strings, 'utf-8')));
         strings.find('string[@name="app_name"]').text = name;
-        fs.writeFileSync(this.strings, strings.write(), 'utf-8');
+        fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
     }
 };
