@@ -1,14 +1,33 @@
 var cordova_util  = require('./util'),
     path          = require('path'),
     exec          = require('child_process').exec,
-    wrench        = require('wrench'),
-    rmrf          = wrench.rmdirSyncRecursive,
-    cpr           = wrench.copyDirSyncRecursive,
     config_parser = require('./config_parser'),
     fs            = require('fs'),
-    asyncblock    = require('asyncblock'),
+    shell         = require('shelljs'),
+    wrench        = require('wrench'),
+    cpr           = wrench.copyDirSyncRecursive,
     et            = require('elementtree'),
+    android_parser= require('./metadata/android_parser'),
+    ios_parser    = require('./metadata/ios_parser'),
+    n             = require('ncallbacks'),
     util          = require('util');
+
+function shell_out_to_debug(projectRoot, platform,  www_target, js) {
+    // Clean out the existing www.
+    shell.rm('-rf', www_target);
+
+    // Copy app assets into native package
+    cpr(path.join(projectRoot, 'www'), www_target);
+
+    // Copy in the appropriate JS
+    var jsPath = path.join(www_target, 'cordova.js');
+    fs.writeFileSync(jsPath, fs.readFileSync(js));
+
+    // shell out to debug command
+    var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'debug > /dev/null');
+    var response = shell.exec(cmd, {silent:true});
+    if (response.code > 0) throw 'An error occurred while building the ' + platform + ' project. ' + response.output;
+}
 
 module.exports = function build (callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
@@ -20,57 +39,39 @@ module.exports = function build (callback) {
     var xml = path.join(projectRoot, 'www', 'config.xml');
     var assets = path.join(projectRoot, 'www');
     var cfg = new config_parser(xml);
-    var name = cfg.name();
-    var id = cfg.packageName();
     var platforms = cfg.ls_platforms();
 
     if (platforms.length === 0) throw 'No platforms added to this project. Please use `cordova platform add <platform>`.';
 
-    asyncblock(function(flow) {
+    var end = n(platforms.length, function() {
+        if (callback) callback();
+    });
 
-        // Iterate over each added platform 
-        platforms.map(function(platform) {
-            // Figure out paths based on platform
-            var assetsPath, js;
-            switch (platform) {
-                case 'android':
-                    assetsPath = path.join(projectRoot, 'platforms', 'android', 'assets', 'www');
-                    js = path.join(__dirname, '..', 'lib', 'android', 'framework', 'assets', 'js', 'cordova.android.js');
+    // Iterate over each added platform 
+    platforms.forEach(function(platform) {
+        // Figure out paths based on platform
+        var assetsPath, js, parser;
+        switch (platform) {
+            case 'android':
+                assetsPath = path.join(projectRoot, 'platforms', 'android', 'assets', 'www');
+                js = path.join(__dirname, '..', 'lib', 'android', 'framework', 'assets', 'js', 'cordova.android.js');
+                parser = new android_parser(path.join(projectRoot, 'platforms', 'android'));
+                // Update the related platform project from the config
+                parser.update_from_config(cfg);
+                shell_out_to_debug(projectRoot, 'android', assetsPath, js);
+                end();
+                break;
+            case 'ios':
+                assetsPath = path.join(projectRoot, 'platforms', 'ios', 'www');
+                js = path.join(__dirname, '..', 'lib', 'ios', 'CordovaLib', 'javascript', 'cordova.ios.js');
+                parser = new ios_parser(path.join(projectRoot, 'platforms', 'ios'));
+                // Update the related platform project from the config
+                parser.update_from_config(cfg, function() {
+                    shell_out_to_debug(projectRoot, 'ios', assetsPath, js);
+                    end();
+                });
+                break;
+        }
 
-                    // update activity name
-                    var stringsXml = path.join(projectRoot, 'platforms', 'android', 'res', 'values', 'strings.xml');
-                    var strings = new et.ElementTree(et.XML(fs.readFileSync(stringsXml, 'utf-8')));
-                    strings.find('string[@name="app_name"]').text = name;
-                    fs.writeFileSync(stringsXml, strings.write({indent: 4}), 'utf-8');
-                    break;
-                case 'ios':
-                    assetsPath = path.join(projectRoot, 'platforms', 'ios', 'www');
-                    js = path.join(__dirname, '..', 'lib', 'ios', 'CordovaLib', 'javascript', 'cordova.ios.js');
-
-                    // TODO: update activity name
-                    break;
-            }
-
-            // Clean out the existing www.
-            rmrf(assetsPath);
-
-            // Copy app assets into native package
-            cpr(assets, assetsPath);
-
-            // Copy in the appropriate JS
-            var jsPath = path.join(assetsPath, 'cordova.js');
-            fs.writeFileSync(jsPath, fs.readFileSync(js));
-
-            // shell out to debug command
-            var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'debug > /dev/null');
-            exec(cmd, flow.set({
-                key:'debug',
-                firstArgIsError:false,
-                responseFormat:['err', 'stdout', 'stderr']
-            }));
-            var buffers = flow.get('debug');
-            if (buffers.err) throw 'An error occurred while building the ' + platform + ' project. ' + buffers.err;
-            if (callback) callback();
-        });
     });
 };

@@ -26,7 +26,9 @@
     "pluginstall":"git://github.com/imhotep/pluginstall.git",
     "node-xcode":"git://github.com/imhotep/node-xcode.git",
     "express":"3.0",
-    "asyncblock":"2.1.4"
+    "asyncblock":"2.1.4",
+    "shelljs":"0.0.4",
+    "ncallbacks":"1.0.0"
   },
   "devDependencies": {
     "jasmine-node":">=1.0.0"

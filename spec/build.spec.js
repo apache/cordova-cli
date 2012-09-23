@@ -44,9 +44,11 @@ describe('build command', function() {
         waitsFor(function() { return cb.wasCalled; }, 'platform add android callback');
 
         runs(function() {
+            var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
             expect(function() {
                 cordova.build(buildcb);
             }).not.toThrow();
+            expect(s).toHaveBeenCalled();
         });
         waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
     });
@@ -81,37 +83,28 @@ describe('build command', function() {
             waitsFor(function() { return cb.wasCalled; }, 'platform add android callback');
 
             runs(function() {
+                var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
                 cordova.build(buildcb);
-            });
-            waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
-            runs(function() {
-                var binaryPath = path.join(tempDir, 'platforms','android','bin');
-                // Check that "bin" dir of android native proj has at
-                // least one file ennding in ".apk"
-                expect(fs.readdirSync(binaryPath)
-                  .filter(function(e) {
-                    return e.indexOf('.apk', e.length - 4) !== -1;
-                  }).length > 0).toBe(true);
+                expect(s.mostRecentCall.args[0].match(/android\/cordova\/debug > \/dev\/null$/)).not.toBeNull();
             });
         });
         it('should shelll out to debug command on iOS', function() {
             var buildcb = jasmine.createSpy();
             var cb = jasmine.createSpy();
+            var s;
 
             runs(function() {
                 cordova.platform('add', 'ios', cb);
             });
             waitsFor(function() { return cb.wasCalled; }, 'platform add ios callback');
             runs(function() {
+                s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
                 cordova.build(buildcb);
             });
             waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
             runs(function() {
-                var binaryPath = path.join(tempDir, 'platforms','ios','build');
-                expect(fs.existsSync(binaryPath)).toBe(true);
-
-                var appPath = path.join(binaryPath,"Hello Cordova.app");
-                expect(fs.existsSync(appPath)).toBe(true);
+                expect(s).toHaveBeenCalled();
+                expect(s.mostRecentCall.args[0].match(/ios\/cordova\/debug > \/dev\/null$/)).not.toBeNull();
             });
         });
     });
