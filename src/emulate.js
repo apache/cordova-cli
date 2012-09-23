@@ -1,6 +1,6 @@
 var cordova_util = require('./util'),
     path = require('path'),
-    exec = require('child_process').exec,
+    shell = require('shelljs'),
     config_parser = require('./config_parser'),
     fs = require('fs'),
     util = require('util');
@@ -19,9 +19,8 @@ module.exports = function emulate () {
     // Iterate over each added platform and shell out to debug command
     platforms.map(function(platform) {
         var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'emulate');
-        exec(cmd, function(err, stderr, stdout) {
-            if (err) throw 'An error occurred while emulating/deploying the ' + platform + ' project.' + err;
-        });
+        var em = shell.exec(cmd, {silent:true});
+        if (em.code > 0) throw 'An error occurred while emulating/deploying the ' + platform + ' project.' + em.output;
     });
 };
 

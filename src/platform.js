@@ -4,12 +4,10 @@ var config_parser = require('./config_parser'),
     fs            = require('fs'),
     wrench        = require('wrench'),
     rmrf          = wrench.rmdirSyncRecursive,
-    exec          = require('child_process').exec,
     path          = require('path'),
     android_parser= require('./metadata/android_parser'),
     ios_parser    = require('./metadata/ios_parser'),
-    asyncblock    = require('asyncblock');
-
+    shell         = require('shelljs');
 
 module.exports = function platform(command, target, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
@@ -30,49 +28,42 @@ module.exports = function platform(command, target, callback) {
             } else return 'No platforms added. Use `cordova platform add <platform>`.';
             break;
         case 'add':
-            asyncblock(function(flow) {
-                var output = path.join(projectRoot, 'platforms', target);
+            var output = path.join(projectRoot, 'platforms', target);
 
-                // If the Cordova library for this platform is missing, get it.
-                if (!cordova_util.havePlatformLib(target)) {
-                    cordova_util.getPlatformLib(target, flow);
-                }
+            // If the Cordova library for this platform is missing, get it.
+            if (!cordova_util.havePlatformLib(target)) {
+                cordova_util.getPlatformLib(target);
+            }
 
-                // Create a platform app using the ./bin/create scripts that exist in each repo.
-                // TODO: eventually refactor to allow multiple versions to be created.
-                // Check if output directory already exists.
-                if (fs.existsSync(output)) {
-                    throw 'Platform "' + target + '" already exists' 
+            // Create a platform app using the ./bin/create scripts that exist in each repo.
+            // TODO: eventually refactor to allow multiple versions to be created.
+            // Check if output directory already exists.
+            if (fs.existsSync(output)) {
+                throw 'Platform "' + target + '" already exists' 
+            } else {
+                // directory doesn't exist, run platform's create script
+                var bin = path.join(__dirname, '..', 'lib', target, 'bin', 'create');
+                var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
+                var name = cfg.name().replace(/\W/g,'_');
+                var command = util.format('"%s" "%s" "%s" "%s"', bin, output, pkg, name);
+                var create = shell.exec(command, {silent:true});
+                if (create.code > 0) {
+                    throw ('An error occured during creation of ' + target + ' sub-project. ' + create.output);
                 } else {
-                    // directory doesn't exist, run platform's create script
-                    var bin = path.join(__dirname, '..', 'lib', target, 'bin', 'create');
-                    var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
-                    var name = cfg.name().replace(/\W/g,'_');
-                    var command = util.format('"%s" "%s" "%s" "%s"', bin, output, pkg, name);
-                    child = exec(command, flow.set({
-                        key:'create',
-                        firstArgIsError:false,
-                        responseFormat:['err', 'stdout', 'stderr']
-                    }));
-                    var bfrs = flow.get('create');
-                    if (bfrs.err) {
-                        throw ('An error occured during creation of ' + target + ' sub-project. ' + bfrs.err);
-                    } else {
-                        cfg.add_platform(target);
-                        switch(target) {
-                            case 'android':
-                                var android = new android_parser(output);
-                                android.update_from_config(cfg);
-                                if (callback) callback();
-                                break;
-                            case 'ios':
-                                var ios = new ios_parser(output);
-                                ios.update_from_config(cfg, callback);
-                                break;
-                        }
+                    cfg.add_platform(target);
+                    switch(target) {
+                        case 'android':
+                            var android = new android_parser(output);
+                            android.update_from_config(cfg);
+                            if (callback) callback();
+                            break;
+                        case 'ios':
+                            var ios = new ios_parser(output);
+                            ios.update_from_config(cfg, callback);
+                            break;
                     }
                 }
-            });
+            }
             break;
         case 'remove':
             // Remove the platform from the config.xml

@@ -1,7 +1,6 @@
 var fs   = require('fs'),
     path = require('path'),
     xcode = require('xcode'),
-    asyncblock = require('asyncblock'),
     config_parser = require('../config_parser');
 
 module.exports = function ios_parser(project) {
@@ -14,6 +13,7 @@ module.exports = function ios_parser(project) {
     }
     this.path = project;
     this.pbxproj = path.join(this.xcodeproj, 'project.pbxproj');
+
 };
 module.exports.prototype = {
     update_from_config:function(config, callback) {
@@ -21,17 +21,11 @@ module.exports.prototype = {
         } else throw 'update_from_config requires a config_parser object';
 
         var name = config.name();
-
         var proj = new xcode.project(this.pbxproj);
+
         var parser = this;
-        asyncblock(function(flow) {
-            proj.parse(flow.set({
-                key:'parse',
-                firstArgIsError:false,
-                responseFormat:['err','hash']
-            }));
-            var parse = flow.get('parse');
-            if (parse.err) throw 'An error occured during parsing of project.pbxproj. Start weeping.';
+        proj.parse(function(err,hash) {
+            if (err) throw 'An error occured during parsing of project.pbxproj. Start weeping.';
             else {
                 proj.updateProductName(name);
                 fs.writeFileSync(parser.pbxproj, proj.writeSync(), 'utf-8');

@@ -1,7 +1,7 @@
 var fs         = require('fs'),
     path       = require('path'),
     util       = require('util'),
-    exec       = require('child_process').exec;
+    shell      = require('shelljs');
 
 var repos = {
     ios:'https://git-wip-us.apache.org/repos/asf/incubator-cordova-ios.git',
@@ -37,7 +37,7 @@ module.exports = {
      * @param flow I/O object to handle synchronous sys calls
      * @throws Javascript Error on failure
      */
-    getPlatformLib: function getPlatformLib(target, flow) {
+    getPlatformLib: function getPlatformLib(target) {
         if (!repos[target]) {
             // TODO: this is really a pretty terrible pattern because it kills 
             //       excecution immediately and prevents cleanup routines. However,
@@ -53,26 +53,16 @@ module.exports = {
         var cmd = util.format('git clone %s "%s"', repos[target], outPath);
 
         console.log('Cloning ' + repos[target] + ', this may take a while...');
-        exec(cmd, flow.set({
-            key:'cloning',
-            firstArgIsError:false,
-            responseFormat:['err', 'stdout', 'stderr']
-        }));
-        var buffers = flow.get('cloning');
-        if (buffers.err) {
-            throw ('An error occured during git-clone of ' + repos[target] + '. ' + buffers.err);
+        var clone = shell.exec(cmd, {silent:true});
+        if (clone.code > 0) {
+            throw ('An error occured during git-clone of ' + repos[target] + '. ' + clone.output);
         }
 
         // Check out the right version.
         cmd = util.format('cd "%s" && git checkout %s', outPath, cordova_lib_tag);
-        exec(cmd, flow.set({
-            key:'tagcheckout',
-            firstArgIsError:false,
-            responseFormat:['err', 'stdout', 'stderr']
-        }));
-        buffers = flow.get('tagcheckout');
-        if (buffers.err) {
-            throw ('An error occured during git-checkout of ' + outPath + ' to tag ' + cordova_lib_tag + '. ' + buffers.err);
+        var checkout = shell.exec(cmd, {silent:true});
+        if (checkout.code > 0) {
+            throw ('An error occured during git-checkout of ' + outPath + ' to tag ' + cordova_lib_tag + '. ' + checkout.output);
         }
     }
 };

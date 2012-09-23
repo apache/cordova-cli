@@ -1,6 +1,5 @@
 var cordova_util  = require('./util'),
     path          = require('path'),
-    exec          = require('child_process').exec,
     config_parser = require('./config_parser'),
     fs            = require('fs'),
     shell         = require('shelljs'),

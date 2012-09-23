@@ -4,10 +4,9 @@ var cordova_util  = require('./util'),
     cpr           = wrench.copyDirSyncRecursive,
     fs            = require('fs'),
     path          = require('path'),
+    shell         = require('shelljs'),
     config_parser = require('./config_parser'),
     plugin_parser = require('./plugin_parser'),
-    exec          = require('child_process').exec,
-    asyncblock    = require('asyncblock'),
     ls            = fs.readdirSync;
 
 module.exports = function plugin(command, target, callback) {
@@ -73,42 +72,33 @@ module.exports = function plugin(command, target, callback) {
             var wwwContents = ls(pluginWww);
             var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
 
-            asyncblock(function(flow) {
-                // Iterate over all matchin app-plugin platforms in the project and install the
-                // plugin.
-                intersection.forEach(function(platform) {
-                    var cmd = util.format('%s %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
-                    var key = 'pluginstall-' + platform;
-                    exec(cmd, flow.set({
-                      key:key,
-                      firstArgIsError:false,
-                      responseFormat:['err', 'stdout', 'stderr']
-                    }));
-                    var buffers = flow.get(key);
-                    if (buffers.err) throw 'An error occured during plugin installation for ' + platform + '. ' + buffers.err;
-                });
-                
-                // Add the plugin web assets to the www folder as well
-                // TODO: assumption that web assets go under www folder
-                // inside plugin dir; instead should read plugin.xml
-                wwwContents.forEach(function(asset) {
-                    asset = path.resolve(path.join(pluginWww, asset));
-                    var info = fs.lstatSync(asset);
-                    var name = asset.substr(asset.lastIndexOf('/')+1);
-                    var wwwPath = path.join(projectWww, name);
-                    if (info.isDirectory()) {
-                        cpr(asset, wwwPath);
-                    } else {
-                        fs.writeFileSync(wwwPath, fs.readFileSync(asset));
-                    }
-                });
-
-                // Finally copy the plugin into the project
-                cpr(target, path.join(pluginPath, targetName));
-
-                if (callback) callback();
+            // Iterate over all matchin app-plugin platforms in the project and install the
+            // plugin.
+            intersection.forEach(function(platform) {
+                var cmd = util.format('%s %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
+                var plugin_cli = shell.exec(cmd, {silent:true});
+                if (plugin_cli.code > 0) throw 'An error occured during plugin installation for ' + platform + '. ' + cli.output;
+            });
+            
+            // Add the plugin web assets to the www folder as well
+            // TODO: assumption that web assets go under www folder
+            // inside plugin dir; instead should read plugin.xml
+            wwwContents.forEach(function(asset) {
+                asset = path.resolve(path.join(pluginWww, asset));
+                var info = fs.lstatSync(asset);
+                var name = asset.substr(asset.lastIndexOf('/')+1);
+                var wwwPath = path.join(projectWww, name);
+                if (info.isDirectory()) {
+                    cpr(asset, wwwPath);
+                } else {
+                    fs.writeFileSync(wwwPath, fs.readFileSync(asset));
+                }
             });
 
+            // Finally copy the plugin into the project
+            cpr(target, path.join(pluginPath, targetName));
+
+            if (callback) callback();
             break;
         case 'remove':
             // TODO: remove plugin. requires pluginstall to
