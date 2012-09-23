@@ -62,7 +62,7 @@ describe('build command', function() {
             cordova.build();
         }).toThrow();
     });
-    describe('should shell out to the debug command and create a binary', function() {
+    describe('binary creation', function() {
         beforeEach(function() {
             cordova.create(tempDir);
             process.chdir(tempDir);
@@ -71,7 +71,7 @@ describe('build command', function() {
         afterEach(function() {
             process.chdir(cwd);
         });
-        it('on Android', function() {
+        it('should shell out to debug command on Android', function() {
             var buildcb = jasmine.createSpy();
             var cb = jasmine.createSpy();
 
@@ -94,7 +94,7 @@ describe('build command', function() {
                   }).length > 0).toBe(true);
             });
         });
-        it('on iOS', function() {
+        it('should shelll out to debug command on iOS', function() {
             var buildcb = jasmine.createSpy();
             var cb = jasmine.createSpy();
 
