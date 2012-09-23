@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "preferGlobal": "true",
   "description": "Cordova client tool",
   "main": "cordova",
@@ -35,7 +35,9 @@
   "author": "Anis Kadri",
   "contributors": [
     {"name": "Brian LeRoux","email": "b@brian.io"},
-    {"name": "Fil Maj", "email": "filmaj@apache.org"}
+    {"name": "Fil Maj", "email": "filmaj@apache.org"},
+    {"name": "Mike Reinstein", "email":""},
+    {"name": "Darry Pogue", "email":"darryl@dpogue.ca"}
   ],
   "license": "Apache version 2.0"
 }
