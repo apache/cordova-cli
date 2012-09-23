@@ -44,7 +44,7 @@ config_parser.prototype = {
         } else return this.doc.find('name').text;
     },
     update:function() {
-        fs.writeFileSync(this.path, this.doc.write(), 'utf-8');
+        fs.writeFileSync(this.path, this.doc.write({indent: 4}), 'utf-8');
     }
 };
 

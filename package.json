@@ -22,7 +22,7 @@
   "dependencies": {
     "colors":">=0.6.0",
     "wrench":"1.3.9",
-    "elementtree":"0.1.1",
+    "elementtree":"0.1.3",
     "pluginstall":"git://github.com/imhotep/pluginstall.git",
     "node-xcode":"git://github.com/imhotep/node-xcode.git",
     "express":"3.0",
