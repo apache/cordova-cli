@@ -2,6 +2,7 @@ var cordova_util  = require('./util'),
     util          = require('util'),
     wrench        = require('wrench'),
     cpr           = wrench.copyDirSyncRecursive,
+    rmrf          = wrench.rmdirSyncRecursive,
     fs            = require('fs'),
     path          = require('path'),
     shell         = require('shelljs'),
@@ -101,9 +102,52 @@ module.exports = function plugin(command, target, callback) {
             if (callback) callback();
             break;
         case 'remove':
-            // TODO: remove plugin. requires pluginstall to
-            // support removal.
-            throw 'Plugin removal not supported yet! sadface';
+            if (platforms.length === 0) {
+                throw 'You need at least one platform added to your app. Use `cordova platform add <platform>`.';
+            }
+            // Check if we have the plugin.
+            if (plugins.indexOf(targetName) > -1) {
+                var pluginWww = path.join(pluginPath, target, 'www');
+                var wwwContents = ls(pluginWww);
+                var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
+
+                // Check if there is at least one match between plugin
+                // supported platforms and app platforms
+                var pluginXml = new plugin_parser(path.join(pluginPath, target, 'plugin.xml'));
+                var intersection = pluginXml.platforms.filter(function(e) {
+                    if (platforms.indexOf(e) == -1) return false;
+                    else return true;
+                });
+
+                // Iterate over all matchin app-plugin platforms in the project and uninstall the
+                // plugin.
+                intersection.forEach(function(platform) {
+                    var cmd = util.format('%s -d %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), path.join(pluginPath, target));
+                    var plugin_cli = shell.exec(cmd, {silent:true});
+                    if (plugin_cli.code > 0) throw 'An error occured during plugin uninstallation for ' + platform + '. ' + cli.output;
+                });
+                
+                // Remove the plugin web assets to the www folder as well
+                // TODO: assumption that web assets go under www folder
+                // inside plugin dir; instead should read plugin.xml
+                wwwContents.forEach(function(asset) {
+                    asset = path.resolve(path.join(projectWww, asset));
+                    var info = fs.lstatSync(asset);
+                    if (info.isDirectory()) {
+                        rmrf(asset);
+                    } else {
+                        fs.unlinkSync(asset);
+                    }
+                });
+
+                // Finally remove the plugin dir from plugins/
+                rmrf(path.join(pluginPath, target));
+
+                if (callback) callback();
+            } else {
+                throw 'Plugin "' + targetName + '" not added to project.';
+            }
+            break;
         default:
             throw 'Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.';
     }

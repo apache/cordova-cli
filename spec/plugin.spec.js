@@ -103,6 +103,8 @@ describe('plugin command', function() {
                     }).toThrow('Plugin "test" already added to project.');
                 });
             });
+            it('should throw if plugin www assets collide with existing project www assets', function() {
+            });
             it('should throw if plugin does not have a plugin.xml', function() {
                 var cb = jasmine.createSpy();
                 runs(function() {
@@ -156,6 +158,75 @@ describe('plugin command', function() {
     });
 
     describe('`remove`', function() {
+        beforeEach(function() {
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+        });
+
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+        describe('failure', function() {
+            it('should throw if your app has no platforms added', function() {
+                expect(function() {
+                    cordova.plugin('remove', testPlugin);
+                }).toThrow('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
+            });
+            it('should throw if plugin is not added to project', function() {
+                var cb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
+                    expect(function() {
+                        cordova.plugin('remove', 'test', function() {});
+                    }).toThrow('Plugin "test" not added to project.');
+                });
+            });
+        });
+        describe('success', function() {
+            it('should remove plugin www assets from project www folder', function() {
+                var cb = jasmine.createSpy();
+                var pluginCb = jasmine.createSpy();
+                var removeCb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
+                    cordova.plugin('add', testPlugin, pluginCb);
+                });
+                waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
+                runs(function() {
+                    cordova.plugin('remove', 'test', removeCb);
+                });
+                waitsFor(function() { return removeCb.wasCalled; }, 'test plugin remove');
+                runs(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'www', 'test.js'))).toBe(false);
+                });
+            });
+            it('should remove the full plugin from the plugins directory', function() {
+                var cb = jasmine.createSpy();
+                var pluginCb = jasmine.createSpy();
+                var removeCb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
+                    cordova.plugin('add', testPlugin, pluginCb);
+                });
+                waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
+                runs(function() {
+                    cordova.plugin('remove', 'test', removeCb);
+                });
+                waitsFor(function() { return removeCb.wasCalled; }, 'test plugin remove');
+                runs(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(false);
+                });
+            });
+        });
     });
 });
 

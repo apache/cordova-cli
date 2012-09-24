@@ -1,5 +1,6 @@
 var cordova = require('../cordova'),
     wrench = require('wrench'),
+    et = require('elementtree'),
     mkdirp = wrench.mkdirSyncRecursive,
     path = require('path'),
     rmrf = wrench.rmdirSyncRecursive,
@@ -114,7 +115,6 @@ describe('build command', function() {
         beforeEach(function() {
             cordova.create(tempDir);
             process.chdir(tempDir);
-            cfg = config_parser(path.join(tempDir, 'www', 'config.xml'));
         });
 
         afterEach(function() {
@@ -122,32 +122,59 @@ describe('build command', function() {
         });
 
         describe('into Android builds', function() {
-          it('should interpolate app name', function () {
-              /*
-              var buildcb = jasmine.createSpy();
-              var cb = jasmine.createSpy();
-              var newName = "devil ether";
+            it('should interpolate app name', function () {
+                var buildcb = jasmine.createSpy();
+                var cb = jasmine.createSpy();
+                var newName = "devil ether", s;
 
-              runs(function() {
-                  cordova.platform('add', 'android', cb);
-              });
-              waitsFor(function() { return cb.wasCalled; }, 'platform add android callback');
+                runs(function() {
+                    cordova.platform('add', 'android', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'platform add android callback');
 
-              runs(function() {
-                  cfg.name(newName); // set a new name in the config.xml
-                  cordova.build(buildcb);
-              });
-              waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
-              runs(function() {
-                  // TODO
-              });
-              */
-          });
-          it('should interpolate package name');
+                runs(function() {
+                    // intercept call to ./cordova/debug to speed things up
+                    s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
+                    cfg = new config_parser(path.join(tempDir, 'www', 'config.xml'));
+                    cfg.name(newName); // set a new name in the config.xml
+                    cordova.build(buildcb);
+                });
+                waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
+
+                runs(function() {
+                    var strings = path.join(tempDir, 'platforms', 'android', 'res', 'values', 'strings.xml');
+                    var doc = new et.ElementTree(et.XML(fs.readFileSync(strings, 'utf-8')));
+                    expect(doc.find('string[@name="app_name"]').text).toBe('devil ether');
+                });
+            });
+            it('should interpolate package name');
         });
         describe('into iOS builds', function() {
-          it('should interpolate app name');
-          it('should interpolate package name');
+            it('should interpolate app name', function() {
+                var buildcb = jasmine.createSpy();
+                var cb = jasmine.createSpy();
+                var newName = "i keep getting older, they stay the same age", s;
+
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'platform add ios callback');
+
+                runs(function() {
+                    // intercept call to ./cordova/debug to speed things up
+                    s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
+                    cfg = new config_parser(path.join(tempDir, 'www', 'config.xml'));
+                    cfg.name(newName); // set a new name in the config.xml
+                    cordova.build(buildcb);
+                });
+                waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
+
+                runs(function() {
+                    var pbxproj = path.join(tempDir, 'platforms', 'ios', 'Hello_Cordova.xcodeproj', 'project.pbxproj');
+                    expect(fs.readFileSync(pbxproj, 'utf-8').match(/PRODUCT_NAME\s*=\s*"i keep getting older, they stay the same age"/)).not.toBeNull();
+                });
+            });
+            it('should interpolate package name');
         });
     });
 });
