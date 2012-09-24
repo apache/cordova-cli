@@ -37,14 +37,23 @@ module.exports = {
      * @throws Javascript Error on failure
      */
     getPlatformLib: function getPlatformLib(target) {
+        // TODO: process.exit(1) is a pretty terrible pattern because it kills 
+        //       excecution immediately and prevents cleanup routines. However,
+        //       I don't want to just spew a stack trace to the user either. 
+
+        // verify platform is supported
         if (!repos[target]) {
-            // TODO: this is really a pretty terrible pattern because it kills 
-            //       excecution immediately and prevents cleanup routines. However,
-            //       I don't want to just spew a stack trace to the user either. 
             console.error('platform "' + target + '" not found.');
             process.exit(1);
         }
-        // specify which project tag to check out. minimum tag is 2.1.0
+
+        // verify that git command line is available
+        if (!shell.which('git')) {
+            console.error('"git" command not found.');
+            process.exit(1);
+        }
+
+        // specify which project tag to check out. minimum tag is 2.1.0rc1
         var cordova_lib_tag = '2.1.0';
         if (target == 'android') {
             // FIXME: android hack. 2.1.0 tag messed up the create script
