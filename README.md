@@ -2,7 +2,6 @@
 
 > The command line tool to build, deploy and manage [Cordova](http://cordova.io)-based applications.
 
-
 # Requirements
 
 * [nodejs](http://nodejs.org/)
@@ -20,15 +19,11 @@ v2.1.0rc1 and above.
 
 # Install
 
-Eventually this will be available via npm. For now you must install manually:
- 
 ```
-git clone https://github.com/filmaj/cordova-client.git
-cd cordova-client
-npm install -g
+npm install -g cordova
 ```
 
-the -g flag installs cordova globally, so you can access the tool via `cordova`
+The -g flag installs cordova globally, so you can access the tool via `cordova`.
 
 **NOTE**: on Mac OS X, you may want to change the owner of the cordova directory that npm installs to. This will allow you to run cordova as local user without requiring root permissions. Assuming your node_modules directory is in `/usr/local/lib/`, you can do this by running: `sudo chown -R <username> /usr/local/lib/node_modules/cordova`
 
@@ -43,7 +38,7 @@ format | description
 `platform remove <platform>` | removes a platform as a build target for the project
 `plugin ls` | list all plugins added to the project
 `plugin add <path-to-plugin>` | add a plugin to the project
-`plugin remove <plugin>` | **NOT IMPLEMENTED!**
+`plugin remove <plugin-name>` | remove an added plugin
 `build` | compile the app for all platforms added to the project
 `emulate` | launch emulators for all platforms added to the project
 
@@ -61,26 +56,22 @@ directory structure:
 ### .cordova/
 The .cordova directory contains the project's baked-in plugins and platforms, and meta-data used by the rest of the commands. The root project directory has a .cordova directory inside of it, and that directory identifies the parent as a cordova project. Project directories may not be nested. A Cordova project directory is recognized as such when it has a .cordova directory.  This data is generated when calling `cordova create`. It's modified when adding/removing platforms or plugins to the project.
 
-
 Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find the project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a cordova project directory (same as git).
 
 ### platforms/ and plugins/
-platforms added to your application will have the native
- application project structures laid out within this directory
-  
-Additional platforms and projects can be installed, and removed, with the cordova platform/plugin add/remove subcommands. The add versions of these subcommands take a URI as a parameter. If the URI does not contain a protocol/scheme, it's assumed to be a 'baked in' platform/plugin. Otherwise, it's assumed to be a URL to a gzipped tar archive of the platform/plugin, in the shape of an npm package.
+Additional platforms and projects can be installed, and removed, with the `cordova platform/plugin add/remove` subcommands. The `add` versions of these subcommands take a URI as a parameter. If the URI does not contain a protocol/scheme, it's assumed to be a 'baked in' platform/plugin. Otherwise, it's assumed to be a URL to a gzipped tar archive of the platform/plugin, in the shape of an npm package.
 
 Platforms and projects are expected to be "CommonJS packages" (loosely), similar to the way npm packages are structured. The main requirement is that there be a package.json file available in the 'root directory' of the archive. The package.json file will contain additional meta-data for platforms and plugins, including pointers to such things as native code that needs to be compiled/linked/added to the application during a build.
 
 #### platforms/
-platforms added to your application will have the native
- application project structures laid out within this directory
+Platforms added to your application will have the native
+ application project structures laid out within this directory.
 
 #### plugins/
-any added plugins will be extracted into this directory
+Any added plugins will be extracted or copied into this directory.
 
 ### www/
-Contains the project's web artifacts, such as .html, .css and .js files. These are your main application assets.
+Contains the project's web artifacts, such as .html, .css and .js files. These are your main application assets. The config.xml file within this directory is very important; read on to the next section!
 
 #### Your Blanket: www/config.xml 
 
@@ -126,10 +117,6 @@ The directory structure of KewlApp now looks like this:
 ## Running Tests
 
     npm test
-
-**WARNING**: If you run tests and don't have any sub-directories under
-`./lib`, be prepared to see some failing tests as then this project will
-start cloning any necessary Cordova libraries (which may take a while).
 
 ## Managing Plugins
 

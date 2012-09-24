@@ -45,7 +45,7 @@ module.exports = {
             console.error('platform "' + target + '" not found.');
             process.exit(1);
         }
-        // specify which project tag to check out. minimum tag is 2.1.0rc1
+        // specify which project tag to check out. minimum tag is 2.1.0
         var cordova_lib_tag = '2.1.0';
 
         // Shell out to git.
