@@ -24,7 +24,9 @@ module.exports = function platform(command, target, callback) {
             var platforms = cfg.ls_platforms();
             if (platforms.length) {
                 return platforms.join('\n');
-            } else return 'No platforms added. Use `cordova platform add <platform>`.';
+            } else {
+                return 'No platforms added. Use `cordova platform add <platform>`.';
+            }
             break;
         case 'add':
             var output = path.join(projectRoot, 'platforms', target);
@@ -38,30 +40,28 @@ module.exports = function platform(command, target, callback) {
             // TODO: eventually refactor to allow multiple versions to be created.
             // Check if output directory already exists.
             if (fs.existsSync(output)) {
-                throw 'Platform "' + target + '" already exists' 
-            } else {
-                // directory doesn't exist, run platform's create script
-                var bin = path.join(__dirname, '..', 'lib', target, 'bin', 'create');
-                var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
-                var name = cfg.name().replace(/\W/g,'_');
-                var command = util.format('"%s" "%s" "%s" "%s"', bin, output, pkg, name);
-                var create = shell.exec(command, {silent:true});
-                if (create.code > 0) {
-                    throw ('An error occured during creation of ' + target + ' sub-project. ' + create.output);
-                } else {
-                    cfg.add_platform(target);
-                    switch(target) {
-                        case 'android':
-                            var android = new android_parser(output);
-                            android.update_from_config(cfg);
-                            if (callback) callback();
-                            break;
-                        case 'ios':
-                            var ios = new ios_parser(output);
-                            ios.update_from_config(cfg, callback);
-                            break;
-                    }
-                }
+                throw new Error('Platform "' + target + '" already exists' );
+            }
+            // directory doesn't exist, run platform's create script
+            var bin = path.join(__dirname, '..', 'lib', target, 'bin', 'create');
+            var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
+            var name = cfg.name().replace(/\W/g,'_');
+            var command = util.format('"%s" "%s" "%s" "%s"', bin, output, pkg, name);
+            var create = shell.exec(command, {silent:true});
+            if (create.code > 0) {
+                throw new Error('An error occured during creation of ' + target + ' sub-project. ' + create.output);
+            }
+            cfg.add_platform(target);
+            switch(target) {
+                case 'android':
+                    var android = new android_parser(output);
+                    android.update_from_config(cfg);
+                    if (callback) callback();
+                    break;
+                case 'ios':
+                    var ios = new ios_parser(output);
+                    ios.update_from_config(cfg, callback);
+                    break;
             }
             break;
         case 'remove':

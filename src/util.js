@@ -37,20 +37,14 @@ module.exports = {
      * @throws Javascript Error on failure
      */
     getPlatformLib: function getPlatformLib(target) {
-        // TODO: process.exit(1) is a pretty terrible pattern because it kills 
-        //       excecution immediately and prevents cleanup routines. However,
-        //       I don't want to just spew a stack trace to the user either. 
-
         // verify platform is supported
         if (!repos[target]) {
-            console.error('platform "' + target + '" not found.');
-            process.exit(1);
+            throw new Error('platform "' + target + '" not found.');
         }
 
-        // verify that git command line is available
+        // verify git command line is available
         if (!shell.which('git')) {
-            console.error('"git" command not found.');
-            process.exit(1);
+            throw new Error('"git" command not found.');
         }
 
         // specify which project tag to check out. minimum tag is 2.1.0rc1

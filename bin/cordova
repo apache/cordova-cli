@@ -3,6 +3,12 @@ var cordova = require('./../cordova')
 ,   cmd     = process.argv[2]
 ,   opts    = process.argv.slice(3, process.argv.length)
 
+// provide clean output on exceptions rather than dumping a stack trace
+process.on('uncaughtException', function(error){
+	console.error(err);
+    process.exit(1);
+});
+
 if (cmd === undefined)  {
     console.log(cordova.help());
 } else if (cordova.hasOwnProperty(cmd)) {
