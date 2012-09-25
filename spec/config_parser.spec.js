@@ -1,9 +1,7 @@
 var cordova = require('../cordova'),
-    wrench = require('wrench'),
-    mkdirp = wrench.mkdirSyncRecursive,
     path = require('path'),
-    rmrf = wrench.rmdirSyncRecursive,
     fs = require('fs'),
+    shell = require('shelljs'),
     config_parser = require('../src/config_parser'),
     tempDir = path.join(__dirname, '..', 'temp'),
     et = require('elementtree'),
@@ -12,8 +10,8 @@ var cordova = require('../cordova'),
 describe('config.xml parser', function () {
     beforeEach(function() {
         // Make a temp directory
-        try { rmrf(tempDir); } catch(e) {}
-        mkdirp(tempDir);
+        try { shell.rm('-rf', tempDir); } catch(e) {}
+        shell.mkdir('-p', tempDir);
         cordova.create(tempDir);
     });
 

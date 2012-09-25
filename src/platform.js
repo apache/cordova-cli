@@ -2,9 +2,8 @@ var config_parser = require('./config_parser'),
     cordova_util  = require('./util'),
     util          = require('util'),
     fs            = require('fs'),
-    wrench        = require('wrench'),
-    rmrf          = wrench.rmdirSyncRecursive,
     path          = require('path'),
+    shell         = require('shelljs'),
     android_parser= require('./metadata/android_parser'),
     ios_parser    = require('./metadata/ios_parser'),
     shell         = require('shelljs');
@@ -71,7 +70,7 @@ module.exports = function platform(command, target, callback) {
 
             // Remove the Cordova project for the platform.
             try {
-                rmrf(path.join(projectRoot, 'platforms', target));
+                shell.rm('-rf', path.join(projectRoot, 'platforms', target));
             } catch(e) {}
             break;
         default:

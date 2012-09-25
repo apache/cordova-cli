@@ -1,16 +1,14 @@
 var cordova = require('../cordova'),
-    wrench  = require('wrench'),
-    mkdirp  = wrench.mkdirSyncRecursive,
     path    = require('path'),
-    rmrf    = wrench.rmdirSyncRecursive,
+    shell   = require('shelljs'),
     fs      = require('fs'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 describe('create command', function () {
     beforeEach(function() {
         // Make a temp directory
-        try { rmrf(tempDir); } catch(e) {}
-        mkdirp(tempDir);
+        try { shell.rm('-rf', tempDir); } catch(e) {}
+        shell.mkdir('-p', tempDir);
     });
 
     it('should print out help txt if no directory is provided', function() {
@@ -28,7 +26,7 @@ describe('create command', function () {
         expect(JSON.parse(fs.readFileSync(dotc, 'utf8')).name).toBe("Hello Cordova");
     });
     it('should throw if the directory is already a cordova project', function() {
-        mkdirp(path.join(tempDir, '.cordova'));
+        shell.mkdir('-p', path.join(tempDir, '.cordova'));
         
         expect(function() {
             cordova.create(tempDir);

@@ -1,10 +1,8 @@
-var wrench        = require('wrench'),
-    path          = require('path'),
+var path          = require('path'),
     fs            = require('fs'),
+    shell         = require('shelljs'),
     help          = require('./help'),
-    config_parser = require('./config_parser'),
-    mkdirp        = wrench.mkdirSyncRecursive,
-    cpr           = wrench.copyDirSyncRecursive;
+    config_parser = require('./config_parser');
 
 var DEFAULT_NAME = "Hello Cordova",
     DEFAULT_ID   = "io.cordova.hello-cordova";
@@ -40,9 +38,8 @@ module.exports = function create (dir, id, name) {
     }
 
     // Create basic project structure.
-    mkdirp(path.join(dir, 'platforms'));
-    mkdirp(path.join(dir, 'plugins'));
-    mkdirp(path.join(dir, 'www'));
+    shell.mkdir('-p', path.join(dir, 'platforms'));
+    shell.mkdir('-p', path.join(dir, 'plugins'));
 
     // Write out .cordova file with a simple json manifest
     fs.writeFileSync(dotCordova, JSON.stringify({
@@ -51,7 +48,7 @@ module.exports = function create (dir, id, name) {
     }));
 
     // Copy in base template
-    cpr(path.join(__dirname, '..', 'templates', 'www'), path.join(dir, 'www'));
+    shell.cp('-r', path.join(__dirname, '..', 'templates', 'www'), dir);
 
     // Write out id and name to config.xml
     var configPath = path.join(dir, 'www', 'config.xml');

@@ -3,8 +3,6 @@ var cordova_util  = require('./util'),
     config_parser = require('./config_parser'),
     fs            = require('fs'),
     shell         = require('shelljs'),
-    wrench        = require('wrench'),
-    cpr           = wrench.copyDirSyncRecursive,
     et            = require('elementtree'),
     android_parser= require('./metadata/android_parser'),
     ios_parser    = require('./metadata/ios_parser'),
@@ -13,10 +11,10 @@ var cordova_util  = require('./util'),
 
 function shell_out_to_debug(projectRoot, platform,  www_target, js) {
     // Clean out the existing www.
-    shell.rm('-rf', www_target);
+    shell.rm('-rf', path.join(www_target, 'www'));
 
     // Copy app assets into native package
-    cpr(path.join(projectRoot, 'www'), www_target);
+    shell.cp('-r', path.join(projectRoot, 'www'), www_target);
 
     // Copy in the appropriate JS
     var jsPath = path.join(www_target, 'cordova.js');
@@ -52,7 +50,7 @@ module.exports = function build (callback) {
         var assetsPath, js, parser;
         switch (platform) {
             case 'android':
-                assetsPath = path.join(projectRoot, 'platforms', 'android', 'assets', 'www');
+                assetsPath = path.join(projectRoot, 'platforms', 'android', 'assets');
                 js = path.join(__dirname, '..', 'lib', 'android', 'framework', 'assets', 'js', 'cordova.android.js');
                 parser = new android_parser(path.join(projectRoot, 'platforms', 'android'));
                 // Update the related platform project from the config
@@ -61,7 +59,7 @@ module.exports = function build (callback) {
                 end();
                 break;
             case 'ios':
-                assetsPath = path.join(projectRoot, 'platforms', 'ios', 'www');
+                assetsPath = path.join(projectRoot, 'platforms', 'ios');
                 js = path.join(__dirname, '..', 'lib', 'ios', 'CordovaLib', 'javascript', 'cordova.ios.js');
                 parser = new ios_parser(path.join(projectRoot, 'platforms', 'ios'));
                 // Update the related platform project from the config

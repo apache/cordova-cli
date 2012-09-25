@@ -1,8 +1,6 @@
 var cordova = require('../cordova'),
-    wrench = require('wrench'),
-    mkdirp = wrench.mkdirSyncRecursive,
     path = require('path'),
-    rmrf = wrench.rmdirSyncRecursive,
+    shell = require('shelljs'),
     fs = require('fs'),
     tempDir = path.join(__dirname, '..', 'temp'),
     fixturesDir = path.join(__dirname, 'fixtures'),
@@ -14,8 +12,8 @@ var cwd = process.cwd();
 describe('plugin command', function() {
     beforeEach(function() {
         // Make a temp directory
-        try { rmrf(tempDir); } catch(e) {}
-        mkdirp(tempDir);
+        try { shell.rm('-rf', tempDir); } catch(e) {}
+        shell.mkdir('-p', tempDir);
     });
 
     it('should run inside a Cordova-based project', function() {
@@ -102,8 +100,6 @@ describe('plugin command', function() {
                         cordova.plugin('add', testPlugin, pluginCb);
                     }).toThrow('Plugin "test" already added to project.');
                 });
-            });
-            it('should throw if plugin www assets collide with existing project www assets', function() {
             });
             it('should throw if plugin does not have a plugin.xml', function() {
                 var cb = jasmine.createSpy();

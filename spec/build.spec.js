@@ -1,9 +1,7 @@
 var cordova = require('../cordova'),
-    wrench = require('wrench'),
     et = require('elementtree'),
-    mkdirp = wrench.mkdirSyncRecursive,
+    shell = require('shelljs'),
     path = require('path'),
-    rmrf = wrench.rmdirSyncRecursive,
     fs = require('fs'),
     config_parser = require('../src/config_parser'),
     tempDir = path.join(__dirname, '..', 'temp');
@@ -13,8 +11,8 @@ var cwd = process.cwd();
 describe('build command', function() {
     beforeEach(function() {
         // Make a temp directory
-        try { rmrf(tempDir); } catch(e) {}
-        mkdirp(tempDir);
+        try { shell.rm('-rf', tempDir); } catch(e) {}
+        shell.mkdir('-p', tempDir);
     });
 
     it('should not run inside a Cordova-based project with no added platforms', function() {

@@ -1,9 +1,7 @@
 var cordova_util  = require('./util'),
     util          = require('util'),
-    wrench        = require('wrench'),
-    cpr           = wrench.copyDirSyncRecursive,
-    rmrf          = wrench.rmdirSyncRecursive,
     fs            = require('fs'),
+    shell         = require('shelljs'),
     path          = require('path'),
     shell         = require('shelljs'),
     config_parser = require('./config_parser'),
@@ -90,14 +88,14 @@ module.exports = function plugin(command, target, callback) {
                 var name = asset.substr(asset.lastIndexOf('/')+1);
                 var wwwPath = path.join(projectWww, name);
                 if (info.isDirectory()) {
-                    cpr(asset, wwwPath);
+                    shell.cp('-r', asset, projectWww);
                 } else {
                     fs.writeFileSync(wwwPath, fs.readFileSync(asset));
                 }
             });
 
             // Finally copy the plugin into the project
-            cpr(target, path.join(pluginPath, targetName));
+            shell.cp('-r', target, pluginPath);
 
             if (callback) callback();
             break;
@@ -134,14 +132,14 @@ module.exports = function plugin(command, target, callback) {
                     asset = path.resolve(path.join(projectWww, asset));
                     var info = fs.lstatSync(asset);
                     if (info.isDirectory()) {
-                        rmrf(asset);
+                        shell.rm('-rf', asset);
                     } else {
                         fs.unlinkSync(asset);
                     }
                 });
 
                 // Finally remove the plugin dir from plugins/
-                rmrf(path.join(pluginPath, target));
+                shell.rm('-rf', path.join(pluginPath, target));
 
                 if (callback) callback();
             } else {
