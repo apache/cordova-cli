@@ -34,7 +34,6 @@ module.exports = {
     /**
      * checkout a platform from the git repo
      * @param target string platform to get (enum of 'ios' or 'android' for now)
-     * @param flow I/O object to handle synchronous sys calls
      * @throws Javascript Error on failure
      */
     getPlatformLib: function getPlatformLib(target) {
@@ -47,6 +46,10 @@ module.exports = {
         }
         // specify which project tag to check out. minimum tag is 2.1.0
         var cordova_lib_tag = '2.1.0';
+        if (target == 'android') {
+            // FIXME: android hack. 2.1.0 tag messed up the create script
+            cordova_lib_tag = '47daaaf';
+        }
 
         // Shell out to git.
         var outPath = path.join(__dirname, '..', 'lib', target);

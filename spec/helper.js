@@ -7,15 +7,29 @@ var shell = require('shelljs'),
 
 var orig_exec = shell.exec;
 
-shell.exec = function(cmd, opts) {
-    // Match various commands to exec
-    if (cmd.match(/android.bin.create/)) {
-        var r = new RegExp(/android.bin.create"\s"([\/\\\w-_\.]*)"/);
-        var dir = r.exec(cmd)[1];
-        shell.cp('-r', android_project, path.join(dir, '..'));
-        fs.chmodSync(path.join(dir, 'cordova', 'debug'), '754');
-        return {code:0};
+module.exports = {
+    enabled:false,
+    enable:function() {
+        module.exports.enabled = true;
+        require('shelljs').exec = function(cmd, opts) {
+            // Match various commands to exec
+            if (cmd.match(/android.bin.create/)) {
+                var r = new RegExp(/android.bin.create"\s"([\/\\\w-_\.]*)"/);
+                var dir = r.exec(cmd)[1];
+                shell.cp('-r', android_project, path.join(dir, '..'));
+                fs.chmodSync(path.join(dir, 'cordova', 'debug'), '754');
+                return {code:0};
+            }
+            // Fire off to original exec
+            return orig_exec.apply(null, arguments);
+        }
+    },
+    disable:function() {
+        module.exports.enabled = false;
+        require('shelljs').exec = orig_exec;
     }
-    // Fire off to original exec
-    return orig_exec.apply(null, arguments);
+};
+
+if (!module.exports.enabled) {
+    module.exports.enable();
 }

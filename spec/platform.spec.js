@@ -4,6 +4,7 @@ var cordova = require('../cordova'),
     fs = require('fs'),
     et = require('elementtree'),
     config_parser = require('../src/config_parser'),
+    helper = require('./helper'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 var cwd = process.cwd();
@@ -83,9 +84,43 @@ describe('platform command', function() {
         });
 
         describe('without any libraries cloned', function() {
-            // TODO!
-            it('should clone down and checkout the correct android library');
-            it('should clone down and checkout the correct ios library');
+            var lib = path.join(__dirname, '..', 'lib');
+            
+            beforeEach(function() {
+                ['ios','android'].forEach(function(p) {
+                    var s = path.join(lib, p);
+                    var d = path.join(lib, p + '-bkup');
+                    shell.mv(s, d);
+                });
+            });
+            afterEach(function() {
+                ['ios','android'].forEach(function(p) {
+                    var s = path.join(lib, p + '-bkup');
+                    var d = path.join(lib, p);
+                    shell.mv(s, d);
+                });
+            });
+            it('should clone down the android library and checkout appropriate tag', function() {
+                var s = spyOn(shell, 'exec').andReturn({code:0});
+                try {
+                    cordova.platform('add', 'android', function() {});
+                } catch(e) {}
+
+                expect(s).toHaveBeenCalled();
+                expect(s.calls[0].args[0].match(/^git clone.*cordova-android/)).not.toBeNull();
+                expect(s.calls[1].args[0].match(/git checkout 47daaaf/)).not.toBeNull();
+            });
+            it('should clone down the ios library and checkout appropriate tag', function() {
+                var s = spyOn(shell, 'exec').andReturn({code:0});
+
+                try {
+                    cordova.platform('add', 'ios', function() {});
+                } catch(e) {}
+
+                expect(s).toHaveBeenCalled();
+                expect(s.calls[0].args[0].match(/^git clone.*cordova-ios/)).not.toBeNull();
+                expect(s.calls[1].args[0].match(/git checkout 2.1.0/)).not.toBeNull();
+            });
             it('should add a basic android project');
             it('should add a basic ios project');
         });
