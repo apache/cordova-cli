@@ -15,8 +15,9 @@ function shell_out_to_debug(projectRoot, platform) {
     var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'debug > /dev/null');
     // TODO: wait for https://issues.apache.org/jira/browse/CB-1548 to be fixed before we axe this
     // TODO: this is bb10 only for now
+    // TODO: this hsould be in emualte, we should use the load-device command
     if (platform.indexOf('blackberry') > -1) {
-        cmd = 'ant -f ' + path.join(projectRoot, 'platforms', platform, 'build.xml') + ' qnx build';
+        cmd = 'ant -f ' + path.join(projectRoot, 'platforms', platform, 'build.xml') + ' qnx load-simulator';
     }
     var response = shell.exec(cmd, {silent:true});
     if (response.code > 0) throw 'An error occurred while building the ' + platform + ' project. ' + response.output;
@@ -28,7 +29,7 @@ function copy_www(projectRoot, platformRoot) {
     shell.rm('-rf', target);
 
     // Copy app assets into native package
-    shell.cp('-r', path.join(projectRoot, 'www'), target);
+    shell.cp('-r', path.join(projectRoot, 'www'), platformRoot);
 }
 
 function copy_js(jsPath, platformPath) {
@@ -38,12 +39,12 @@ function copy_js(jsPath, platformPath) {
 function write_project_properties(cordovaConfig, projFile) {
     // TODO: eventually support all blackberry sub-platforms
     var props = fs.readFileSync(projFile, 'utf-8');
-    props.replace(/qnx\.bbwp\.dir=.*$/, 'qnx.bbwp.dir=' + cordovaConfig.qnx.bbwp);
-    props.replace(/qnx\.sigtool\.password=.*$/, 'qnx.sigtool.password=' + cordovaConfig.qnx.signing_password);
-    props.replace(/qnx\.device\.ip=.*$/, 'qnx.device.ip=' + cordovaConfig.qnx.device_ip);
-    props.replace(/qnx\.device\.password=.*$/, 'qnx.device.password=' + cordovaConfig.qnx.device_password);
-    props.replace(/qnx\.sim\.ip=.*$/, 'qnx.sim.ip=' + cordovaConfig.qnx.sim_ip);
-    props.replace(/qnx\.sim\.password=.*$/, 'qnx.sim.password=' + cordovaConfig.qnx.sim_password);
+    props = props.replace(/qnx\.bbwp\.dir=.*\n/, 'qnx.bbwp.dir=' + cordovaConfig.blackberry.qnx.bbwp + '\n');
+    props = props.replace(/qnx\.sigtool\.password=.*\n/, 'qnx.sigtool.password=' + cordovaConfig.blackberry.qnx.signing_password + '\n');
+    props = props.replace(/qnx\.device\.ip=.*\n/, 'qnx.device.ip=' + cordovaConfig.blackberry.qnx.device_ip + '\n');
+    props = props.replace(/qnx\.device\.password=.*\n/, 'qnx.device.password=' + cordovaConfig.blackberry.qnx.device_password + '\n');
+    props = props.replace(/qnx\.sim\.ip=.*\n/, 'qnx.sim.ip=' + cordovaConfig.blackberry.qnx.sim_ip + '\n');
+    props = props.replace(/qnx\.sim\.password=.*\n/, 'qnx.sim.password=' + cordovaConfig.blackberry.qnx.sim_password + '\n');
     fs.writeFileSync(projFile, props, 'utf-8');
 }
 
@@ -90,7 +91,22 @@ module.exports = function build (callback) {
                 
                 // Update the related platform project from the config
                 parser.update_from_config(cfg);
-                copy_www(projectRoot, platformPath);
+
+                // Copy everything over except config.xml
+                var cfg_www = path.join(projectRoot, 'www', 'config.xml');
+                var temp_cfg = path.join(projectRoot, 'config.xml');
+                shell.mv(cfg_www, temp_cfg);
+                shell.cp('-rf', path.join(projectRoot, 'www', '*'), path.join(platformPath, 'www'));
+                shell.mv(temp_cfg, cfg_www);
+
+                // Move the js to just cordova.js
+                shell.mv('-f', path.join(platformPath, 'www', 'qnx', 'cordova-*.js'), path.join(platformPath, 'www', 'cordova.js'));
+
+                // Add the webworks.js script file
+                var index = path.join(platformPath, 'www', 'index.html');
+                var contents = fs.readFileSync(index, 'utf-8');
+                contents = contents.replace(/<script type="text\/javascript" src="cordova\.js"><\/script>/, '<script type="text/javascript" src="js/webworks.js"></script><script type="text/javascript" src="cordova.js"></script>');
+                fs.writeFileSync(index, contents, 'utf-8');
 
                 // Do we have BB config?
                 var dotFile = path.join(projectRoot, '.cordova');
