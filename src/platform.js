@@ -5,6 +5,7 @@ var config_parser = require('./config_parser'),
     path          = require('path'),
     shell         = require('shelljs'),
     android_parser= require('./metadata/android_parser'),
+    blackberry_parser= require('./metadata/blackberry_parser'),
     ios_parser    = require('./metadata/ios_parser'),
     shell         = require('shelljs');
 
@@ -46,12 +47,13 @@ module.exports = function platform(command, target, callback) {
             var bin = path.join(__dirname, '..', 'lib', target, 'bin', 'create');
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
             var name = cfg.name().replace(/\W/g,'_');
-            var command = util.format('"%s" "%s" "%s" "%s"', bin, output, pkg, name);
+            var command = util.format('"%s" "%s" "%s" "%s"', bin, output, (target=='blackberry'?name:pkg), name);
             var create = shell.exec(command, {silent:true});
             if (create.code > 0) {
                 throw new Error('An error occured during creation of ' + target + ' sub-project. ' + create.output);
             }
             cfg.add_platform(target);
+            // TODO: this is fugly
             switch(target) {
                 case 'android':
                     var android = new android_parser(output);
@@ -61,6 +63,11 @@ module.exports = function platform(command, target, callback) {
                 case 'ios':
                     var ios = new ios_parser(output);
                     ios.update_from_config(cfg, callback);
+                    break;
+                case 'blackberry':
+                    var bb = new blackberry_parser(output);
+                    bb.update_from_config(cfg);
+                    if (callback) callback();
                     break;
             }
             break;

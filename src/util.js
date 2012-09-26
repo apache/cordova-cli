@@ -5,7 +5,8 @@ var fs         = require('fs'),
 
 var repos = {
     ios:'https://git-wip-us.apache.org/repos/asf/incubator-cordova-ios.git',
-    android:'https://git-wip-us.apache.org/repos/asf/incubator-cordova-android.git'
+    android:'https://git-wip-us.apache.org/repos/asf/incubator-cordova-android.git',
+    blackberry:'https://git-wip-us.apache.org/repos/asf/incubator-cordova-blackberry-webworks.git'
 };
 
 module.exports = {

@@ -5,6 +5,7 @@ var cordova = require('../cordova'),
     et = require('elementtree'),
     config_parser = require('../src/config_parser'),
     helper = require('./helper'),
+    platforms = require('../platforms'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 var cwd = process.cwd();
@@ -87,14 +88,14 @@ describe('platform command', function() {
             var lib = path.join(__dirname, '..', 'lib');
             
             beforeEach(function() {
-                ['ios','android'].forEach(function(p) {
+                platforms.forEach(function(p) {
                     var s = path.join(lib, p);
                     var d = path.join(lib, p + '-bkup');
                     shell.mv(s, d);
                 });
             });
             afterEach(function() {
-                ['ios','android'].forEach(function(p) {
+                platforms.forEach(function(p) {
                     var s = path.join(lib, p + '-bkup');
                     var d = path.join(lib, p);
                     shell.mv(s, d);
@@ -121,8 +122,20 @@ describe('platform command', function() {
                 expect(s.calls[0].args[0].match(/^git clone.*cordova-ios/)).not.toBeNull();
                 expect(s.calls[1].args[0].match(/git checkout 2.1.0/)).not.toBeNull();
             });
+            it('should clone down the blackberry library and checkout appropriate tag', function() {
+                var s = spyOn(shell, 'exec').andReturn({code:0});
+
+                try {
+                    cordova.platform('add', 'blackberry', function() {});
+                } catch(e) {}
+
+                expect(s).toHaveBeenCalled();
+                expect(s.calls[0].args[0].match(/^git clone.*cordova-blackberry/)).not.toBeNull();
+                expect(s.calls[1].args[0].match(/git checkout 2.1.0/)).not.toBeNull();
+            });
             it('should add a basic android project');
             it('should add a basic ios project');
+            it('should add a basic blackberry project');
         });
 
         describe('android', function() {
@@ -187,6 +200,38 @@ describe('platform command', function() {
                 runs(function() {
                     var pbxproj = fs.readFileSync(path.join(tempDir, 'platforms', 'ios', 'upon_closer_inspection_they_appear_to_be_loafers.xcodeproj', 'project.pbxproj'), 'utf-8');
                     expect(pbxproj.match(/PRODUCT_NAME\s*=\s*"upon closer inspection they appear to be loafers"/)[0]).toBe('PRODUCT_NAME = "upon closer inspection they appear to be loafers"');
+                });
+            });
+        });
+        describe('blackberry', function() {
+            it('should add a basic blackberry project', function() {
+                var cb = jasmine.createSpy();
+
+                runs(function() {
+                    cordova.platform('add', 'blackberry', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, "platform add blackberry callback");
+                runs(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'platforms', 'blackberry', 'www'))).toBe(true);
+                });
+            });
+            it('should use the correct application name based on what is in config.xml', function() {
+                var cfg_path = path.join(tempDir, 'www', 'config.xml');
+                var orig_cfg_contents = fs.readFileSync(cfg_path, 'utf-8');
+                this.after(function() {
+                    fs.writeFileSync(cfg_path, orig_cfg_contents, 'utf-8');
+                });
+                var cfg = new config_parser(cfg_path);
+                var cb = jasmine.createSpy();
+
+                runs(function() {
+                    cfg.name('upon closer inspection they appear to be loafers');
+                    cordova.platform('add', 'blackberry', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, "platform add blackberry callback");
+                runs(function() {
+                    var bb_cfg = new config_parser(path.join(tempDir, 'platforms', 'blackberry', 'www', 'config.xml'));
+                    expect(bb_cfg.name()).toBe(cfg.name());
                 });
             });
         });
