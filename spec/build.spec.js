@@ -87,7 +87,7 @@ describe('build command', function() {
                 expect(s.mostRecentCall.args[0].match(/android\/cordova\/debug > \/dev\/null$/)).not.toBeNull();
             });
         });
-        it('should shelll out to debug command on iOS', function() {
+        it('should shell out to debug command on iOS', function() {
             var buildcb = jasmine.createSpy();
             var cb = jasmine.createSpy();
             var s;
@@ -104,6 +104,28 @@ describe('build command', function() {
             runs(function() {
                 expect(s).toHaveBeenCalled();
                 expect(s.mostRecentCall.args[0].match(/ios\/cordova\/debug > \/dev\/null$/)).not.toBeNull();
+            });
+        });
+        it('should shell out to ant command on blackberry-10', function() {
+            var buildcb = jasmine.createSpy();
+            var cb = jasmine.createSpy();
+            var s, t;
+
+            runs(function() {
+                cordova.platform('add', 'blackberry-10', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, 'platform add blackberry callback');
+            runs(function() {
+                s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
+                t = spyOn(require('prompt'), 'get').andReturn(true);
+                cordova.build(buildcb);
+                // Fake prompt invoking its callback
+                t.mostRecentCall.args[1](null, {});
+            });
+            waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
+            runs(function() {
+                expect(s).toHaveBeenCalled();
+                expect(s.mostRecentCall.args[0].match(/ant -f .*build\.xml qnx load-device/)).not.toBeNull();
             });
         });
     });
@@ -170,6 +192,36 @@ describe('build command', function() {
                 runs(function() {
                     var pbxproj = path.join(tempDir, 'platforms', 'ios', 'Hello_Cordova.xcodeproj', 'project.pbxproj');
                     expect(fs.readFileSync(pbxproj, 'utf-8').match(/PRODUCT_NAME\s*=\s*"i keep getting older, they stay the same age"/)).not.toBeNull();
+                });
+            });
+            it('should interpolate package name');
+        });
+        describe('into BB10 builds', function() {
+            it('should interpolate app name', function() {
+                var buildcb = jasmine.createSpy();
+                var cb = jasmine.createSpy();
+                var newName = "fuck it dude. let's go bowling.", s, t;
+
+                runs(function() {
+                    cordova.platform('add', 'blackberry-10', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'platform add blackberry callback');
+
+                runs(function() {
+                    // intercept call to ./cordova/debug to speed things up
+                    s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
+                    cfg = new config_parser(path.join(tempDir, 'www', 'config.xml'));
+                    cfg.name(newName); // set a new name in the config.xml
+                    t = spyOn(require('prompt'), 'get').andReturn(true);
+                    cordova.build(buildcb);
+                    t.mostRecentCall.args[1](null, {});
+                });
+                waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
+
+                runs(function() {
+                    var bbcfg = path.join(tempDir, 'platforms', 'blackberry-10', 'www', 'config.xml');
+                    var doc = new et.ElementTree(et.XML(fs.readFileSync(bbcfg, 'utf-8')));
+                    expect(doc.find('name').text).toBe(newName);
                 });
             });
             it('should interpolate package name');
