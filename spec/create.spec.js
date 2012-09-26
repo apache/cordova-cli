@@ -7,7 +7,7 @@ var cordova = require('../cordova'),
 describe('create command', function () {
     beforeEach(function() {
         // Make a temp directory
-        try { shell.rm('-rf', tempDir); } catch(e) {}
+        shell.rm('-rf', tempDir);
         shell.mkdir('-p', tempDir);
     });
 

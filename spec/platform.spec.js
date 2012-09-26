@@ -12,7 +12,7 @@ var cwd = process.cwd();
 describe('platform command', function() {
     beforeEach(function() {
         // Make a temp directory
-        try { shell.rm('-rf', tempDir); } catch(e) {}
+        shell.rm('-rf', tempDir);
         shell.mkdir('-p', tempDir);
     });
     it('should run inside a Cordova-based project', function() {
