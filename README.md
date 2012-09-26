@@ -7,6 +7,7 @@
 * [nodejs](http://nodejs.org/)
 * [git](https://help.github.com/articles/set-up-git)
 * SDKs for every platform you wish to support
+  - [BlackBerry WebWorks SDK](http://developer.blackberry.com)
   - [iOS SDK](http://developer.apple.com)
   - [Android SDK](http://developer.android.com) - **NOTE** This tool
     will not work unless you have the absolute latest updates for all

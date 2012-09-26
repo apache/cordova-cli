@@ -26,7 +26,8 @@
     "node-xcode":"git://github.com/imhotep/node-xcode.git",
     "express":"3.0",
     "shelljs":"0.0.7",
-    "ncallbacks":"1.0.0"
+    "ncallbacks":"1.0.0",
+    "prompt":"0.2.7"
   },
   "devDependencies": {
     "jasmine-node":">=1.0.0"

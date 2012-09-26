@@ -1,1 +1,1 @@
-module.exports = ['ios', 'android', 'blackberry'];
+module.exports = ['ios', 'android', 'blackberry-10'];

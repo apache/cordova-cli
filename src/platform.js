@@ -44,17 +44,17 @@ module.exports = function platform(command, target, callback) {
                 throw new Error('Platform "' + target + '" already exists' );
             }
             // directory doesn't exist, run platform's create script
-            var bin = path.join(__dirname, '..', 'lib', target, 'bin', 'create');
+            var bin = path.join(__dirname, '..', 'lib', cordova_util.underlyingLib(target), 'bin', 'create');
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
             var name = cfg.name().replace(/\W/g,'_');
-            var command = util.format('"%s" "%s" "%s" "%s"', bin, output, (target=='blackberry'?name:pkg), name);
+            var command = util.format('"%s" "%s" "%s" "%s"', bin, output, (cordova_util.underlyingLib(target)=='blackberry'?name:pkg), name);
             var create = shell.exec(command, {silent:true});
             if (create.code > 0) {
                 throw new Error('An error occured during creation of ' + target + ' sub-project. ' + create.output);
             }
             cfg.add_platform(target);
             // TODO: this is fugly
-            switch(target) {
+            switch(cordova_util.underlyingLib(target)) {
                 case 'android':
                     var android = new android_parser(output);
                     android.update_from_config(cfg);

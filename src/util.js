@@ -9,6 +9,7 @@ var repos = {
     blackberry:'https://git-wip-us.apache.org/repos/asf/incubator-cordova-blackberry-webworks.git'
 };
 
+
 module.exports = {
     // Runs up the directory chain looking for a .cordova directory.
     // IF it is found we are in a Cordova project.
@@ -29,7 +30,7 @@ module.exports = {
     // Determines whether the library has a copy of the specified
     // Cordova implementation
     havePlatformLib: function havePlatformLib(platform) {
-        var dir = path.join(__dirname, '..', 'lib', platform);
+        var dir = path.join(__dirname, '..', 'lib', module.exports.underlyingLib(platform));
         return fs.existsSync(dir);
     },
     /**
@@ -39,6 +40,7 @@ module.exports = {
      */
     getPlatformLib: function getPlatformLib(target) {
         // verify platform is supported
+        target = module.exports.underlyingLib(target);
         if (!repos[target]) {
             throw new Error('platform "' + target + '" not found.');
         }
@@ -71,5 +73,12 @@ module.exports = {
         if (checkout.code > 0) {
             throw ('An error occured during git-checkout of ' + outPath + ' to tag ' + cordova_lib_tag + '. ' + checkout.output);
         }
+    },
+    underlyingLib:function underlyingLib(name) {
+        var pos = name.indexOf('-');
+        if (pos > -1) {
+            name = name.substr(0, pos);
+        }
+        return name;
     }
 };

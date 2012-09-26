@@ -5,25 +5,46 @@ var cordova_util  = require('./util'),
     shell         = require('shelljs'),
     et            = require('elementtree'),
     android_parser= require('./metadata/android_parser'),
+    blackberry_parser= require('./metadata/blackberry_parser'),
     ios_parser    = require('./metadata/ios_parser'),
     n             = require('ncallbacks'),
+    prompt        = require('prompt'),
     util          = require('util');
 
-function shell_out_to_debug(projectRoot, platform,  www_target, js) {
-    // Clean out the existing www.
-    shell.rm('-rf', path.join(www_target, 'www'));
-
-    // Copy app assets into native package
-    shell.cp('-r', path.join(projectRoot, 'www'), www_target);
-
-    // Copy in the appropriate JS
-    var jsPath = path.join(www_target, 'cordova.js');
-    fs.writeFileSync(jsPath, fs.readFileSync(js));
-
-    // shell out to debug command
+function shell_out_to_debug(projectRoot, platform) {
     var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'debug > /dev/null');
+    // TODO: wait for https://issues.apache.org/jira/browse/CB-1548 to be fixed before we axe this
+    // TODO: this is bb10 only for now
+    if (platform.indexOf('blackberry') > -1) {
+        cmd = 'ant -f ' + path.join(projectRoot, 'platforms', platform, 'build.xml') + ' qnx build';
+    }
     var response = shell.exec(cmd, {silent:true});
     if (response.code > 0) throw 'An error occurred while building the ' + platform + ' project. ' + response.output;
+}
+
+function copy_www(projectRoot, platformRoot) {
+    // Clean out the existing www.
+    var target = path.join(platformRoot, 'www');
+    shell.rm('-rf', target);
+
+    // Copy app assets into native package
+    shell.cp('-r', path.join(projectRoot, 'www'), target);
+}
+
+function copy_js(jsPath, platformPath) {
+    fs.writeFileSync(path.join(platformPath, 'www', 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
+}
+
+function write_project_properties(cordovaConfig, projFile) {
+    // TODO: eventually support all blackberry sub-platforms
+    var props = fs.readFileSync(projFile, 'utf-8');
+    props.replace(/qnx\.bbwp\.dir=.*$/, 'qnx.bbwp.dir=' + cordovaConfig.qnx.bbwp);
+    props.replace(/qnx\.sigtool\.password=.*$/, 'qnx.sigtool.password=' + cordovaConfig.qnx.signing_password);
+    props.replace(/qnx\.device\.ip=.*$/, 'qnx.device.ip=' + cordovaConfig.qnx.device_ip);
+    props.replace(/qnx\.device\.password=.*$/, 'qnx.device.password=' + cordovaConfig.qnx.device_password);
+    props.replace(/qnx\.sim\.ip=.*$/, 'qnx.sim.ip=' + cordovaConfig.qnx.sim_ip);
+    props.replace(/qnx\.sim\.password=.*$/, 'qnx.sim.password=' + cordovaConfig.qnx.sim_password);
+    fs.writeFileSync(projFile, props, 'utf-8');
 }
 
 module.exports = function build (callback) {
@@ -47,24 +68,95 @@ module.exports = function build (callback) {
     // Iterate over each added platform 
     platforms.forEach(function(platform) {
         // Figure out paths based on platform
-        var assetsPath, js, parser;
+        // TODO this is fugly, lots of repetition.
+        var assetsPath, js, parser, platformPath;
         switch (platform) {
             case 'android':
-                assetsPath = path.join(projectRoot, 'platforms', 'android', 'assets');
-                js = path.join(__dirname, '..', 'lib', 'android', 'framework', 'assets', 'js', 'cordova.android.js');
-                parser = new android_parser(path.join(projectRoot, 'platforms', 'android'));
+                platformPath = path.join(projectRoot, 'platforms', 'android');
+                assetsPath = path.join(platformPath, 'assets');
+                parser = new android_parser(platformPath);
                 // Update the related platform project from the config
                 parser.update_from_config(cfg);
-                shell_out_to_debug(projectRoot, 'android', assetsPath, js);
+                copy_www(projectRoot, assetsPath);
+                js = path.join(__dirname, '..', 'lib', 'android', 'framework', 'assets', 'js', 'cordova.android.js');
+                copy_js(js, assetsPath);
+                shell_out_to_debug(projectRoot, 'android');
+                end();
+                break;
+            case 'blackberry-10':
+                platformPath = path.join(projectRoot, 'platforms', 'blackberry-10');
+                js = path.join(__dirname, '..', 'lib', 'android', 'framework', 'assets', 'js', 'cordova.android.js');
+                parser = new blackberry_parser(platformPath);
+                
+                // Update the related platform project from the config
+                parser.update_from_config(cfg);
+                copy_www(projectRoot, platformPath);
+
+                // Do we have BB config?
+                var dotFile = path.join(projectRoot, '.cordova');
+                var dot = JSON.parse(fs.readFileSync(dotFile, 'utf-8'));
+                if (dot.blackberry === undefined || dot.blackberry.qnx === undefined) {
+                    // Let's save relevant BB SDK + signing info to .cordova
+                    console.log('Looks like we need some of your BlackBerry development environment information. We\'ll just ask you a few questions and we\'ll be on our way to building.');
+                    prompt.start();
+                    prompt.get([{
+                        name:'bbwp',
+                        required:true,
+                        description:'Enter the full path to your BB10 bbwp executable'
+                    },{
+                        name:'signing_password',
+                        required:true,
+                        description:'Enter your BlackBerry signing password',
+                        hidden:true
+                    },{
+                        name:'device_ip',
+                        description:'Enter the IP to your BB10 device'
+                    },{
+                        name:'device_password',
+                        description:'Enter the password for your BB10 device'
+                    },{
+                        name:'sim_ip',
+                        description:'Enter the IP to your BB10 simulator'
+                    },{
+                        name:'sim_password',
+                        description:'Enter the password for your BB10 simulator'
+                    }
+                    ], function(err, results) {
+                        if (err) throw 'Error during BlackBerry configuration retrieval';
+                        // Write out .cordova file
+                        if (dot.blackberry === undefined) dot.blackberry = {};
+                        if (dot.blackberry.qnx === undefined) dot.blackberry.qnx = {};
+                        dot.blackberry.qnx.bbwp = results.bbwp;
+                        dot.blackberry.qnx.signing_password = results.signing_password;
+                        dot.blackberry.qnx.device_ip = results.device_ip;
+                        dot.blackberry.qnx.device_password = results.device_password;
+                        dot.blackberry.qnx.sim_ip = results.sim_ip;
+                        dot.blackberry.qnx.sim_password = results.sim_password;
+                        fs.writeFileSync(dotFile, JSON.stringify(dot), 'utf-8');
+                        console.log('Perfect! If you need to change any of these properties, just edit the .cordova file in the root of your cordova project (it\'s just JSON, you\'ll be OK).');
+                        // Update project.properties
+                        write_project_properties(dot, path.join(platformPath, 'project.properties'));
+                        // shell it
+                        shell_out_to_debug(projectRoot, 'blackberry-10');
+                        end();
+                    });
+                    return;
+                }
+                // Write out config stuff to project.properties file
+                write_project_properties(dot, path.join(platformPath, 'project.properties'));
+                // Shell it
+                shell_out_to_debug(projectRoot, 'blackberry-10');
                 end();
                 break;
             case 'ios':
-                assetsPath = path.join(projectRoot, 'platforms', 'ios');
+                platformPath = path.join(projectRoot, 'platforms', 'ios');
                 js = path.join(__dirname, '..', 'lib', 'ios', 'CordovaLib', 'javascript', 'cordova.ios.js');
-                parser = new ios_parser(path.join(projectRoot, 'platforms', 'ios'));
+                parser = new ios_parser(platformPath);
                 // Update the related platform project from the config
                 parser.update_from_config(cfg, function() {
-                    shell_out_to_debug(projectRoot, 'ios', assetsPath, js);
+                    copy_www(projectRoot, platformPath);
+                    copy_js(js, platformPath);
+                    shell_out_to_debug(projectRoot, 'ios');
                     end();
                 });
                 break;
