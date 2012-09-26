@@ -17,7 +17,7 @@ function shell_out_to_debug(projectRoot, platform) {
     // TODO: this is bb10 only for now
     // TODO: this hsould be in emualte, we should use the load-device command
     if (platform.indexOf('blackberry') > -1) {
-        cmd = 'ant -f ' + path.join(projectRoot, 'platforms', platform, 'build.xml') + ' qnx load-simulator';
+        cmd = 'ant -f ' + path.join(projectRoot, 'platforms', platform, 'build.xml') + ' qnx load-device';
     }
     var response = shell.exec(cmd, {silent:true});
     if (response.code > 0) throw 'An error occurred while building the ' + platform + ' project. ' + response.output;
@@ -177,6 +177,5 @@ module.exports = function build (callback) {
                 });
                 break;
         }
-
     });
 };

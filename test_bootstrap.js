@@ -10,7 +10,7 @@ var fs = require('fs'),
 
 // If a platform library dependency does not exist, will clone it down.
 platforms.forEach(function(p) {
-    if (!fs.existsSync(path.join(__dirname, 'lib', p))) {
+    if (!util.havePlatformLib(p)) {
         util.getPlatformLib(p);
     }
 });

@@ -5,6 +5,7 @@ var cordova = require('../cordova'),
     et = require('elementtree'),
     config_parser = require('../src/config_parser'),
     helper = require('./helper'),
+    util = require('../src/util'),
     platforms = require('../platforms'),
     tempDir = path.join(__dirname, '..', 'temp');
 
@@ -86,16 +87,17 @@ describe('platform command', function() {
 
         describe('without any libraries cloned', function() {
             var lib = path.join(__dirname, '..', 'lib');
+            var libs = fs.readdirSync(lib);
             
             beforeEach(function() {
-                platforms.forEach(function(p) {
+                libs.forEach(function(p) {
                     var s = path.join(lib, p);
                     var d = path.join(lib, p + '-bkup');
                     shell.mv(s, d);
                 });
             });
             afterEach(function() {
-                platforms.forEach(function(p) {
+                libs.forEach(function(p) {
                     var s = path.join(lib, p + '-bkup');
                     var d = path.join(lib, p);
                     shell.mv(s, d);
@@ -203,16 +205,16 @@ describe('platform command', function() {
                 });
             });
         });
-        describe('blackberry', function() {
+        describe('blackberry-10', function() {
             it('should add a basic blackberry project', function() {
                 var cb = jasmine.createSpy();
 
                 runs(function() {
-                    cordova.platform('add', 'blackberry', cb);
+                    cordova.platform('add', 'blackberry-10', cb);
                 });
-                waitsFor(function() { return cb.wasCalled; }, "platform add blackberry callback");
+                waitsFor(function() { return cb.wasCalled; }, "platform add blackberry");
                 runs(function() {
-                    expect(fs.existsSync(path.join(tempDir, 'platforms', 'blackberry', 'www'))).toBe(true);
+                    expect(fs.existsSync(path.join(tempDir, 'platforms', 'blackberry-10', 'www'))).toBe(true);
                 });
             });
             it('should use the correct application name based on what is in config.xml', function() {
@@ -226,11 +228,11 @@ describe('platform command', function() {
 
                 runs(function() {
                     cfg.name('upon closer inspection they appear to be loafers');
-                    cordova.platform('add', 'blackberry', cb);
+                    cordova.platform('add', 'blackberry-10', cb);
                 });
                 waitsFor(function() { return cb.wasCalled; }, "platform add blackberry callback");
                 runs(function() {
-                    var bb_cfg = new config_parser(path.join(tempDir, 'platforms', 'blackberry', 'www', 'config.xml'));
+                    var bb_cfg = new config_parser(path.join(tempDir, 'platforms', 'blackberry-10', 'www', 'config.xml'));
                     expect(bb_cfg.name()).toBe(cfg.name());
                 });
             });
