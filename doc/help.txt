@@ -5,6 +5,7 @@ Synopsis
 Global Commands
 
     create [path]...................... creates a cordova project in the specified directory
+    -v ................................ prints out this utility's version
 
 Project-Level Commands
 
