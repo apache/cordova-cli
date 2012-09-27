@@ -11,6 +11,11 @@ process.on('uncaughtException', function(err){
 
 if (cmd === undefined)  {
     console.log(cordova.help());
+} else if (cmd[0] == '-') {
+    // options
+    if (cmd[1].toLowerCase() == 'v') {
+        console.log(require('../package').version);
+    }
 } else if (cordova.hasOwnProperty(cmd)) {
     try {
         var r = cordova[cmd].apply(this, opts);
