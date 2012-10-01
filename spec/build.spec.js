@@ -4,6 +4,9 @@ var cordova = require('../cordova'),
     path = require('path'),
     fs = require('fs'),
     config_parser = require('../src/config_parser'),
+    android_parser = require('../src/metadata/android_parser'),
+    ios_parser = require('../src/metadata/ios_parser'),
+    blackberry_parser = require('../src/metadata/blackberry_parser'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 var cwd = process.cwd();
@@ -35,21 +38,15 @@ describe('build command', function() {
         var buildcb = jasmine.createSpy();
         var cb = jasmine.createSpy();
 
-        runs(function() {
-            cordova.create(tempDir);
-            process.chdir(tempDir);
-            cordova.platform('add', 'android', cb);
-        });
-        waitsFor(function() { return cb.wasCalled; }, 'platform add android callback');
+        cordova.create(tempDir);
+        process.chdir(tempDir);
+        cordova.platform('add', 'android', cb);
 
-        runs(function() {
-            var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
-            expect(function() {
-                cordova.build(buildcb);
-            }).not.toThrow();
-            expect(s).toHaveBeenCalled();
-        });
-        waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
+        var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
+        expect(function() {
+            cordova.build(buildcb);
+        }).not.toThrow();
+        expect(s).toHaveBeenCalled();
     });
     
     it('should not run outside of a Cordova-based project', function() {
@@ -63,7 +60,7 @@ describe('build command', function() {
             cordova.build();
         }).toThrow();
     });
-    describe('binary creation', function() {
+    describe('per platform', function() {
         beforeEach(function() {
             cordova.create(tempDir);
             process.chdir(tempDir);
@@ -71,160 +68,100 @@ describe('build command', function() {
 
         afterEach(function() {
             process.chdir(cwd);
+            shell.rm('-rf', tempDir);
         });
-        it('should shell out to debug command on Android', function() {
-            var buildcb = jasmine.createSpy();
-            var cb = jasmine.createSpy();
-
-            runs(function() {
-                cordova.platform('add', 'android', cb);
+       
+        describe('Android', function() {
+            beforeEach(function() {
+                cordova.platform('add', 'android');
             });
-            waitsFor(function() { return cb.wasCalled; }, 'platform add android callback');
 
-            runs(function() {
+            it('should shell out to debug command on Android', function() {
                 var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
-                cordova.build(buildcb);
+                cordova.build();
                 expect(s.mostRecentCall.args[0].match(/android\/cordova\/debug > \/dev\/null$/)).not.toBeNull();
             });
-        });
-        it('should shell out to debug command on iOS', function() {
-            var buildcb = jasmine.createSpy();
-            var cb = jasmine.createSpy();
-            var s;
-
-            runs(function() {
-                cordova.platform('add', 'ios', cb);
-            });
-            waitsFor(function() { return cb.wasCalled; }, 'platform add ios callback');
-            runs(function() {
-                s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
-                cordova.build(buildcb);
-            });
-            waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
-            runs(function() {
+            it('should call android_parser\'s update_project', function() {
+                spyOn(require('shelljs'), 'exec').andReturn({code:0});
+                var s = spyOn(android_parser.prototype, 'update_project');
+                cordova.build();
                 expect(s).toHaveBeenCalled();
-                expect(s.mostRecentCall.args[0].match(/ios\/cordova\/debug > \/dev\/null$/)).not.toBeNull();
             });
         });
-        it('should shell out to ant command on blackberry-10', function() {
-            var buildcb = jasmine.createSpy();
-            var cb = jasmine.createSpy();
-            var s, t;
-
-            runs(function() {
-                cordova.platform('add', 'blackberry-10', cb);
-            });
-            waitsFor(function() { return cb.wasCalled; }, 'platform add blackberry callback');
-            runs(function() {
-                s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
-                t = spyOn(require('prompt'), 'get').andReturn(true);
-                cordova.build(buildcb);
-                // Fake prompt invoking its callback
-                t.mostRecentCall.args[1](null, {});
-            });
-            waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
-            runs(function() {
-                expect(s).toHaveBeenCalled();
-                expect(s.mostRecentCall.args[0].match(/ant -f .*build\.xml qnx load-device/)).not.toBeNull();
-            });
-        });
-    });
-
-    describe('before each run it should interpolate config.xml app metadata', function() {
-        var cfg;
-        beforeEach(function() {
-            cordova.create(tempDir);
-            process.chdir(tempDir);
-        });
-
-        afterEach(function() {
-            process.chdir(cwd);
-        });
-
-        describe('into Android builds', function() {
-            it('should interpolate app name', function () {
-                var buildcb = jasmine.createSpy();
+        describe('iOS', function() {
+            it('should shell out to debug command on iOS', function() {
                 var cb = jasmine.createSpy();
-                var newName = "devil ether", s;
-
-                runs(function() {
-                    cordova.platform('add', 'android', cb);
-                });
-                waitsFor(function() { return cb.wasCalled; }, 'platform add android callback');
-
-                runs(function() {
-                    // intercept call to ./cordova/debug to speed things up
-                    s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
-                    cfg = new config_parser(path.join(tempDir, 'www', 'config.xml'));
-                    cfg.name(newName); // set a new name in the config.xml
-                    cordova.build(buildcb);
-                });
-                waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
-
-                runs(function() {
-                    var strings = path.join(tempDir, 'platforms', 'android', 'res', 'values', 'strings.xml');
-                    var doc = new et.ElementTree(et.XML(fs.readFileSync(strings, 'utf-8')));
-                    expect(doc.find('string[@name="app_name"]').text).toBe('devil ether');
-                });
-            });
-            it('should interpolate package name');
-        });
-        describe('into iOS builds', function() {
-            it('should interpolate app name', function() {
                 var buildcb = jasmine.createSpy();
-                var cb = jasmine.createSpy();
-                var newName = "i keep getting older, they stay the same age", s;
+                var s;
 
                 runs(function() {
                     cordova.platform('add', 'ios', cb);
                 });
                 waitsFor(function() { return cb.wasCalled; }, 'platform add ios callback');
+                runs(function() {
+                    s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
+                    cordova.build(buildcb);
+                });
+                waitsFor(function() { return buildcb.wasCalled; }, 'ios build');
+                runs(function() {
+                    expect(s).toHaveBeenCalled();
+                    expect(s.mostRecentCall.args[0].match(/ios\/cordova\/debug > \/dev\/null$/)).not.toBeNull();
+                });
+            });
+            it('should call ios_parser\'s update_project', function() {
+                var s;
+                var cb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios add platform');
+                runs(function() {
+                    s = spyOn(ios_parser.prototype, 'update_project');
+                    cordova.build();
+                    expect(s).toHaveBeenCalled();
+                });
+            });
+        });
+        describe('BlackBerry', function() {
+            it('should shell out to ant command on blackberry-10', function() {
+                var buildcb = jasmine.createSpy();
+                var cb = jasmine.createSpy();
+                var s;
 
                 runs(function() {
-                    // intercept call to ./cordova/debug to speed things up
+                    var t = spyOn(require('prompt'), 'get').andReturn(true);
+                    cordova.platform('add', 'blackberry-10', cb);
+                    // Fake prompt invoking its callback
+                    t.mostRecentCall.args[1](null, {});
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'platform add blackberry callback');
+                runs(function() {
                     s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
-                    cfg = new config_parser(path.join(tempDir, 'www', 'config.xml'));
-                    cfg.name(newName); // set a new name in the config.xml
                     cordova.build(buildcb);
                 });
                 waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
-
                 runs(function() {
-                    var pbxproj = path.join(tempDir, 'platforms', 'ios', 'Hello_Cordova.xcodeproj', 'project.pbxproj');
-                    expect(fs.readFileSync(pbxproj, 'utf-8').match(/PRODUCT_NAME\s*=\s*"i keep getting older, they stay the same age"/)).not.toBeNull();
+                    expect(s).toHaveBeenCalled();
+                    expect(s.mostRecentCall.args[0].match(/ant -f .*build\.xml qnx load-device/)).not.toBeNull();
                 });
             });
-            it('should interpolate package name');
-        });
-        describe('into BB10 builds', function() {
-            it('should interpolate app name', function() {
-                var buildcb = jasmine.createSpy();
+            it('should call blackberry_parser\'s update_project', function() {
                 var cb = jasmine.createSpy();
-                var newName = "fuck it dude. let's go bowling.", s, t;
-
+                fs.writeFileSync(path.join(tempDir, '.cordova'), JSON.stringify({
+                    blackberry:{
+                        qnx:{}
+                    }
+                }), 'utf-8');
                 runs(function() {
                     cordova.platform('add', 'blackberry-10', cb);
                 });
-                waitsFor(function() { return cb.wasCalled; }, 'platform add blackberry callback');
-
+                waitsFor(function() { return cb.wasCalled; }, 'bb add platform');
                 runs(function() {
-                    // intercept call to ./cordova/debug to speed things up
-                    s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
-                    cfg = new config_parser(path.join(tempDir, 'www', 'config.xml'));
-                    cfg.name(newName); // set a new name in the config.xml
-                    t = spyOn(require('prompt'), 'get').andReturn(true);
-                    cordova.build(buildcb);
-                    t.mostRecentCall.args[1](null, {});
-                });
-                waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
-
-                runs(function() {
-                    var bbcfg = path.join(tempDir, 'platforms', 'blackberry-10', 'www', 'config.xml');
-                    var doc = new et.ElementTree(et.XML(fs.readFileSync(bbcfg, 'utf-8')));
-                    expect(doc.find('name').text).toBe(newName);
+                    var s = spyOn(blackberry_parser.prototype, 'update_project');
+                    cordova.build();
+                    expect(s).toHaveBeenCalled();
                 });
             });
-            it('should interpolate package name');
         });
     });
 });

@@ -5,6 +5,7 @@ var cordova_util  = require('./util'),
     path          = require('path'),
     shell         = require('shelljs'),
     config_parser = require('./config_parser'),
+    platform      = require('./platform'),
     plugin_parser = require('./plugin_parser'),
     ls            = fs.readdirSync;
 
@@ -21,7 +22,7 @@ module.exports = function plugin(command, target, callback) {
     // Grab config info for the project
     var xml = path.join(projectWww, 'config.xml');
     var cfg = new config_parser(xml);
-    var platforms = cfg.ls_platforms();
+    var platforms = platform('ls');
 
     // Massage plugin name / path
     var pluginPath, plugins, targetName;
@@ -35,7 +36,7 @@ module.exports = function plugin(command, target, callback) {
     switch(command) {
         case 'ls':
             if (plugins.length) {
-                return plugins.join('\n');
+                return plugins;
             } else return 'No plugins added. Use `cordova plugin add <plugin>`.';
             break;
         case 'add':
