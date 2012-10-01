@@ -7,7 +7,7 @@ var cordova_util = require('./util'),
     blackberry_parser = require('./metadata/blackberry_parser'),
     platform = require('./platform'),
     fs = require('fs'),
-    n = require('nCallbacks'),
+    n = require('ncallbacks'),
     util = require('util');
 
 function shell_out_to_emulate(root, platform) {
