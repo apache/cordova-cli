@@ -1,9 +1,12 @@
 var ios_parser = require('../../src/metadata/ios_parser'),
     config_parser = require('../../src/config_parser'),
+    cordova = require('../../cordova'),
     path = require('path'),
+    shell = require('shelljs'),
     fs = require('fs'),
     cfg_path = path.join(__dirname, '..', 'fixtures', 'projects', 'test', 'www', 'config.xml'),
     ios_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'ios'),
+    tempDir = path.join(__dirname, '..', '..', 'temp'),
     ios_pbx = path.join(ios_path, 'balls.xcodeproj', 'project.pbxproj');
 
 var cwd = process.cwd();
@@ -58,5 +61,95 @@ describe('ios project parser', function() {
             });
         });
         it('should update the application package name properly');
+    });
+
+    describe('update_www method', function() {
+        var parser, ios_platform = path.join(tempDir, 'platforms', 'ios');
+
+        beforeEach(function() {
+            shell.rm('-rf', tempDir);
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+        });
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+
+        it('should update all www assets', function() {
+            var cb = jasmine.createSpy();
+            runs(function() {
+                cordova.platform('add', 'ios', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, 'platform add ios');
+            runs(function() {
+                parser = new ios_parser(ios_platform);
+                var newFile = path.join(tempDir, 'www', 'somescript.js');
+                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
+                parser.update_www();
+                expect(fs.existsSync(path.join(ios_platform, 'www', 'somescript.js'))).toBe(true);
+            });
+        });
+        it('should write out ios js to cordova.js', function() {
+            var cb = jasmine.createSpy();
+            runs(function() {
+                cordova.platform('add', 'ios', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, 'platform add ios');
+            runs(function() {
+                parser = new ios_parser(ios_platform);
+                parser.update_www();
+                expect(fs.readFileSync(path.join(ios_platform, 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'ios', 'CordovaLib', 'javascript', 'cordova.ios.js'), 'utf-8'));
+            });
+        });
+    });
+
+    describe('update_project method', function() {
+        var parser, ios_platform, cfg;
+
+        beforeEach(function() {
+            shell.rm('-rf', tempDir);
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+        });
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+        it('should invoke update_www', function() {
+            var cb = jasmine.createSpy();
+            var updatecb = jasmine.createSpy();
+            var spyWww;
+            runs(function() {
+                cordova.platform('add', 'ios', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, 'platform add ios');
+            runs(function() {
+                ios_platform = path.join(tempDir, 'platforms', 'ios');
+                parser = new ios_parser(ios_platform);
+                cfg = new config_parser(cfg_path);
+                spyWww = spyOn(parser, 'update_www');
+                parser.update_project(cfg, updatecb);
+            });
+            waitsFor(function() { return updatecb.wasCalled; }, 'update project callback');
+            runs(function() {
+                expect(spyWww).toHaveBeenCalled();
+            });
+        });
+        it('should invoke update_from_config', function() {
+            var cb = jasmine.createSpy();
+            var updatecb = jasmine.createSpy();
+            var spyConfig;
+            ios_platform = path.join(tempDir, 'platforms', 'ios');
+            runs(function() {
+                cordova.platform('add', 'ios', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, 'platform add ios');
+            runs(function() {
+                parser = new ios_parser(ios_platform);
+                cfg = new config_parser(cfg_path);
+                spyConfig = spyOn(parser, 'update_from_config');
+                parser.update_project(cfg, updatecb);
+                expect(spyConfig).toHaveBeenCalled();
+            });
+        });
     });
 });
