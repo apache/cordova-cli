@@ -9,6 +9,11 @@ var cordova = require('../cordova'),
     platforms = require('../platforms'),
     tempDir = path.join(__dirname, '..', 'temp');
 
+// globals for crazy spy hax
+android_parser = require('../src/metadata/android_parser');
+ios_parser = require('../src/metadata/ios_parser');
+blackberry_parser = require('../src/metadata/blackberry_parser');
+
 var cwd = process.cwd();
 
 describe('platform command', function() {
@@ -53,7 +58,7 @@ describe('platform command', function() {
         });
 
         it('should list out no platforms for a fresh project', function() {
-            expect(cordova.platform('ls')).toEqual('No platforms added. Use `cordova platform add <platform>`.');
+            expect(cordova.platform('ls').length).toEqual(0);
         });
 
         it('should list out added platforms in a project', function() {
@@ -65,12 +70,12 @@ describe('platform command', function() {
             });
             waitsFor(function() { return cb.wasCalled; }, "create callback");
             runs(function() {
-                expect(cordova.platform('ls')).toEqual('android');
+                expect(cordova.platform('ls')[0]).toEqual('android');
                 cordova.platform('add', 'ios', cbtwo);
             });
             waitsFor(function() { return cbtwo.wasCalled; }, "create callback number two");
             runs(function() {
-                expect(cordova.platform('ls')).toEqual('android\nios');
+                expect(cordova.platform('ls')[1]).toEqual('ios');
             });
         });
     });
@@ -142,35 +147,13 @@ describe('platform command', function() {
 
         describe('android', function() {
             it('should add a basic android project', function() {
-                var cb = jasmine.createSpy();
-
-                runs(function() {
-                    cordova.platform('add', 'android', cb);
-                });
-                waitsFor(function() { return cb.wasCalled; }, "platform add android callback");
-                runs(function() {
-                    expect(fs.existsSync(path.join(tempDir, 'platforms', 'android', 'AndroidManifest.xml'))).toBe(true);
-                });
+                cordova.platform('add', 'android');
+                expect(fs.existsSync(path.join(tempDir, 'platforms', 'android', 'AndroidManifest.xml'))).toBe(true);
             });
-            it('should use the correct application name based on what is in config.xml', function() {
-                var cfg_path = path.join(tempDir, 'www', 'config.xml');
-                var orig_cfg_contents = fs.readFileSync(cfg_path, 'utf-8');
-                this.after(function() {
-                    fs.writeFileSync(cfg_path, orig_cfg_contents, 'utf-8');
-                });
-                var cfg = new config_parser(cfg_path);
-                var cb = jasmine.createSpy();
-
-                runs(function() {
-                    cfg.name('chim chim');
-                    cordova.platform('add', 'android', cb);
-                });
-                waitsFor(function() { return cb.wasCalled; }, "platform add android callback");
-                runs(function() {
-                    var strings = new et.ElementTree(et.XML(fs.readFileSync(path.join(tempDir, 'platforms', 'android', 'res', 'values', 'strings.xml'), 'utf-8')));
-                    var app_name = strings.find('string[@name="app_name"]').text;
-                    expect(app_name).toBe('chim chim');
-                });
+            it('should call android_parser\'s update_project', function() {
+                var s = spyOn(android_parser.prototype, 'update_project');
+                cordova.platform('add', 'android');
+                expect(s).toHaveBeenCalled();
             });
         });
         describe('ios', function() {
@@ -185,56 +168,30 @@ describe('platform command', function() {
                     expect(fs.existsSync(path.join(tempDir, 'platforms', 'ios', 'www'))).toBe(true);
                 });
             });
-            it('should use the correct application name based on what is in config.xml', function() {
-                var cfg_path = path.join(tempDir, 'www', 'config.xml');
-                var orig_cfg_contents = fs.readFileSync(cfg_path, 'utf-8');
-                this.after(function() {
-                    fs.writeFileSync(cfg_path, orig_cfg_contents, 'utf-8');
-                });
-                var cfg = new config_parser(cfg_path);
-                var cb = jasmine.createSpy();
-
-                runs(function() {
-                    cfg.name('upon closer inspection they appear to be loafers');
-                    cordova.platform('add', 'ios', cb);
-                });
-                waitsFor(function() { return cb.wasCalled; }, "platform add ios callback");
-                runs(function() {
-                    var pbxproj = fs.readFileSync(path.join(tempDir, 'platforms', 'ios', 'upon_closer_inspection_they_appear_to_be_loafers.xcodeproj', 'project.pbxproj'), 'utf-8');
-                    expect(pbxproj.match(/PRODUCT_NAME\s*=\s*"upon closer inspection they appear to be loafers"/)[0]).toBe('PRODUCT_NAME = "upon closer inspection they appear to be loafers"');
-                });
+            it('should call ios_parser\'s update_project', function() {
+                var s = spyOn(ios_parser.prototype, 'update_project');
+                cordova.platform('add', 'ios');
+                expect(s).toHaveBeenCalled();
             });
         });
         describe('blackberry-10', function() {
             it('should add a basic blackberry project', function() {
                 var cb = jasmine.createSpy();
+                var s = spyOn(require('prompt'), 'get').andReturn(true);
 
                 runs(function() {
                     cordova.platform('add', 'blackberry-10', cb);
+                    s.mostRecentCall.args[1](null, {}); // fake out prompt
                 });
                 waitsFor(function() { return cb.wasCalled; }, "platform add blackberry");
                 runs(function() {
                     expect(fs.existsSync(path.join(tempDir, 'platforms', 'blackberry-10', 'www'))).toBe(true);
                 });
             });
-            it('should use the correct application name based on what is in config.xml', function() {
-                var cfg_path = path.join(tempDir, 'www', 'config.xml');
-                var orig_cfg_contents = fs.readFileSync(cfg_path, 'utf-8');
-                this.after(function() {
-                    fs.writeFileSync(cfg_path, orig_cfg_contents, 'utf-8');
-                });
-                var cfg = new config_parser(cfg_path);
-                var cb = jasmine.createSpy();
-
-                runs(function() {
-                    cfg.name('upon closer inspection they appear to be loafers');
-                    cordova.platform('add', 'blackberry-10', cb);
-                });
-                waitsFor(function() { return cb.wasCalled; }, "platform add blackberry callback");
-                runs(function() {
-                    var bb_cfg = new config_parser(path.join(tempDir, 'platforms', 'blackberry-10', 'www', 'config.xml'));
-                    expect(bb_cfg.name()).toBe(cfg.name());
-                });
+            it('should call blackberry_parser\'s update_project', function() {
+                var s = spyOn(blackberry_parser.prototype, 'update_project');
+                cordova.platform('add', 'blackberry-10');
+                expect(s).toHaveBeenCalled();
             });
         });
     });
@@ -262,7 +219,8 @@ describe('platform command', function() {
             waitsFor(function() { return cb.wasCalled; }, "android create callback");
             runs(function() {
                 cordova.platform('remove', 'android');
-                expect(cordova.platform('ls')).toEqual('ios');
+                expect(cordova.platform('ls').length).toEqual(1);
+                expect(cordova.platform('ls')[0]).toEqual('ios');
             });
         });
     });

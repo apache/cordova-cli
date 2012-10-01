@@ -1,5 +1,4 @@
 var et = require('elementtree'),
-    platforms = require('./../platforms'),
     fs = require('fs');
 
 function config_parser(path) {
@@ -8,29 +7,6 @@ function config_parser(path) {
 }
 
 config_parser.prototype = {
-    ls_platforms:function() {
-        return this.doc.find('platforms').getchildren().map(function(p) {
-            return p.attrib.name;
-        });
-    },
-    add_platform:function(platform) {
-        if ((platforms.indexOf(platform) == -1) || this.doc.find('platforms/platform[@name="' + platform + '"]')) return;
-        else {
-            var p = new et.Element('platform');
-            p.attrib.name = platform;
-            this.doc.find('platforms').append(p);
-            this.update();
-        }
-    },
-    remove_platform:function(platform) {
-        if ((platforms.indexOf(platform) == -1) || !(this.doc.find('platforms/platform[@name="' + platform + '"]'))) return;
-        else {
-            var psEl = this.doc.find('platforms');
-            var pEl = psEl.find('platform[@name="' + platform + '"]');
-            psEl.remove(null, pEl);
-            this.update();
-        }
-    },
     packageName:function(id) {
         if (id) {
             this.doc.getroot().attrib.id = id;

@@ -3,7 +3,6 @@ var config_parser = require('./config_parser'),
     util          = require('util'),
     fs            = require('fs'),
     path          = require('path'),
-    shell         = require('shelljs'),
     android_parser= require('./metadata/android_parser'),
     blackberry_parser= require('./metadata/blackberry_parser'),
     ios_parser    = require('./metadata/ios_parser'),
@@ -22,12 +21,7 @@ module.exports = function platform(command, target, callback) {
 
     switch(command) {
         case 'ls':
-            var platforms = cfg.ls_platforms();
-            if (platforms.length) {
-                return platforms.join('\n');
-            } else {
-                return 'No platforms added. Use `cordova platform add <platform>`.';
-            }
+            return fs.readdirSync(path.join(projectRoot, 'platforms'));
             break;
         case 'add':
             var output = path.join(projectRoot, 'platforms', target);
@@ -43,42 +37,36 @@ module.exports = function platform(command, target, callback) {
             if (fs.existsSync(output)) {
                 throw new Error('Platform "' + target + '" already exists' );
             }
-            // directory doesn't exist, run platform's create script
+
+            // Run platform's create script
             var bin = path.join(__dirname, '..', 'lib', cordova_util.underlyingLib(target), 'bin', 'create');
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
             var name = cfg.name().replace(/\W/g,'_');
             var command = util.format('"%s" "%s" "%s" "%s"', bin, output, (cordova_util.underlyingLib(target)=='blackberry'?name:pkg), name);
+
             var create = shell.exec(command, {silent:true});
             if (create.code > 0) {
                 throw new Error('An error occured during creation of ' + target + ' sub-project. ' + create.output);
             }
-            cfg.add_platform(target);
-            // TODO: this is fugly
+
             switch(cordova_util.underlyingLib(target)) {
                 case 'android':
                     var android = new android_parser(output);
-                    android.update_from_config(cfg);
+                    android.update_project(cfg);
                     if (callback) callback();
                     break;
                 case 'ios':
                     var ios = new ios_parser(output);
-                    ios.update_from_config(cfg, callback);
+                    ios.update_project(cfg, callback);
                     break;
                 case 'blackberry':
                     var bb = new blackberry_parser(output);
-                    bb.update_from_config(cfg);
-                    if (callback) callback();
+                    bb.update_project(cfg, callback);
                     break;
             }
             break;
         case 'remove':
-            // Remove the platform from the config.xml
-            cfg.remove_platform(target);
-
-            // Remove the Cordova project for the platform.
-            try {
-                shell.rm('-rf', path.join(projectRoot, 'platforms', target));
-            } catch(e) {}
+            shell.rm('-rf', path.join(projectRoot, 'platforms', target));
             break;
         default:
             throw ('Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.');
