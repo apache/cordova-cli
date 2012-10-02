@@ -37,7 +37,7 @@
     {"name": "Brian LeRoux","email": "b@brian.io"},
     {"name": "Fil Maj", "email": "maj.fil@gmail.com"},
     {"name": "Mike Reinstein", "email":"reinstein.mike@gmail.com"},
-    {"name": "Darry Pogue", "email":"darryl@dpogue.ca"}
+    {"name": "Darry Pogue", "email":"darryl@dpogue.ca"},
     {"name": "Michael Brooks", "email":"michael@michaelbrooks.ca"}
   ],
   "license": "Apache version 2.0"
