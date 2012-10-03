@@ -20,7 +20,7 @@ function shell_out_to_emulate(root, platform) {
     if (em.code > 0) throw 'An error occurred while emulating/deploying the ' + platform + ' project.' + em.output;
 }
 
-module.exports = function emulate (callback) {
+module.exports = function emulate (platforms, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -29,7 +29,23 @@ module.exports = function emulate (callback) {
 
     var xml = path.join(projectRoot, 'www', 'config.xml');
     var cfg = new config_parser(xml);
-    var platforms = platform('ls');
+
+    if (arguments.length === 0) {
+        platforms = platform('ls');
+    } else {
+        if (arguments[arguments.length-1] instanceof Function) {
+            // Called through JS, check platforms param
+            if (platforms instanceof Function) {
+                callback = platforms;
+                platforms = platform('ls');
+            } else if (!(platforms instanceof Array)) platforms = [platforms];
+        } else {
+            // Called through CLI; no callback 
+            if (arguments[0] instanceof Array) platforms = arguments[0];
+            else platforms = Array.prototype.slice.call(arguments, 0);
+            callback = undefined;
+        }
+    }
 
     if (platforms.length === 0) throw 'No platforms added to this project. Please use `cordova platform add <platform>`.';
 

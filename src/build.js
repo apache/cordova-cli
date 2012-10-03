@@ -36,8 +36,19 @@ module.exports = function build (platforms, callback) {
 
     if (arguments.length === 0) {
         platforms = platform('ls');
-    } else if (!(platforms instanceof Array)) {
-        platforms = [platforms];
+    } else {
+        if (arguments[arguments.length-1] instanceof Function) {
+            // Called through JS, check platforms param
+            if (platforms instanceof Function) {
+                callback = platforms;
+                platforms = platform('ls');
+            } else if (!(platforms instanceof Array)) platforms = [platforms];
+        } else {
+            // Called through CLI; no callback 
+            if (arguments[0] instanceof Array) platforms = arguments[0];
+            else platforms = Array.prototype.slice.call(arguments, 0);
+            callback = undefined;
+        }
     }
 
     if (platforms.length === 0) throw 'No platforms added to this project. Please use `cordova platform add <platform>`.';

@@ -164,4 +164,75 @@ describe('build command', function() {
             });
         });
     });
+
+    describe('specifying platforms to build', function() {
+        beforeEach(function() {
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+            cordova.platform('add', 'android');
+        });
+
+        afterEach(function() {
+            process.chdir(cwd);
+            shell.rm('-rf', tempDir);
+        });
+        it('should only build the specified platform (array notation)', function() {
+            var cb = jasmine.createSpy();
+            var buildcb = jasmine.createSpy();
+            var s;
+            runs(function() {
+                cordova.platform('add', 'ios', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, 'platform add ios');
+            runs(function() {
+                s = spyOn(shell, 'exec').andReturn({code:0});
+                cordova.build(['android'], buildcb);
+            });
+            waitsFor(function() { return buildcb.wasCalled; }, 'build android');
+            runs(function() {
+                expect(s.callCount).toEqual(1);
+            });
+        });
+        it('should only build the specified platform (string notation)', function() {
+            var cb = jasmine.createSpy();
+            var buildcb = jasmine.createSpy();
+            var s;
+            runs(function() {
+                cordova.platform('add', 'ios', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, 'platform add ios');
+            runs(function() {
+                s = spyOn(shell, 'exec').andReturn({code:0});
+                cordova.build('android', buildcb);
+            });
+            waitsFor(function() { return buildcb.wasCalled; }, 'build android');
+            runs(function() {
+                expect(s.callCount).toEqual(1);
+            });
+        });
+        it('should handle multiple platforms to be built', function() {
+            var cb = jasmine.createSpy();
+            var bbcb = jasmine.createSpy();
+            var buildcb = jasmine.createSpy();
+            var s;
+            runs(function() {
+                cordova.platform('add', 'ios', cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, 'platform add ios');
+            runs(function() {
+                var g = spyOn(require('prompt'), 'get');
+                cordova.platform('add', 'blackberry-10', bbcb);
+                g.mostRecentCall.args[1](null, {}); // fake out prompt io
+            });
+            waitsFor(function() { return bbcb.wasCalled; }, 'platform add bb');
+            runs(function() {
+                s = spyOn(shell, 'exec').andReturn({code:0});
+                cordova.build(['android','ios'], buildcb);
+            });
+            waitsFor(function() { return buildcb.wasCalled; }, 'build android+ios');
+            runs(function() {
+                expect(s.callCount).toEqual(2);
+            });
+        });
+    });
 });
