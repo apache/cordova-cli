@@ -13,10 +13,10 @@
     will not work unless you have the absolute latest updates for all
     Android SDK components.
 
-cordova-client has been tested on Mas OS X _only_. Sorry.
+cordova-client has been tested on Mas OS X and Linux.
 
 In it's prototype stages, cordova-client will only work on Cordova
-v2.1.0rc1 and above.
+v2.1.0.
 
 # Install
 
@@ -24,24 +24,24 @@ v2.1.0rc1 and above.
 npm install -g cordova
 ```
 
-The -g flag installs cordova globally, so you can access the tool via `cordova`.
+# Getting Started
 
-**NOTE**: on Mac OS X, you may want to change the owner of the cordova directory that npm installs to. This will allow you to run cordova as local user without requiring root permissions. Assuming your node_modules directory is in `/usr/local/lib/`, you can do this by running: `sudo chown -R <username> /usr/local/lib/node_modules/cordova`
+cordova-client has a single global `create` command that creates new cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
 
+## Global Command
 
-## Subcommands
+- `create <directory> [<id> [<name>]]` create a new cordova project with optional name and id (package name, reverse-domain style)
 
-format | description 
-:------------ | :-------------
-`create <directory> [<id> [<name>]]` | create a new cordova project with optional name and id
-`platform ls` | list all platforms the project will build
-`platform add <platform>` | add a platform as a build target for the project
-`platform remove <platform>` | removes a platform as a build target for the project
-`plugin ls` | list all plugins added to the project
-`plugin add <path-to-plugin>` | add a plugin to the project
-`plugin remove <plugin-name>` | remove an added plugin
-`build` | compile the app for all platforms added to the project
-`emulate` | launch emulators for all platforms added to the project
+## Project Commands
+
+- `platform [ls | list]` list all platforms the project will build to
+- `platform add <platform>` add a platform as a build target for the project
+- `platform [rm | remove] <platform>` removes a platform as a build target for the project
+- `plugin [ls | list]` list all plugins added to the project
+- `plugin add <path-to-plugin>` add a plugin to the project
+- `plugin [rm | remove] <plugin-name>` remove an added plugin
+- `build [<platform> [<platform> [...]]]` compile the app and deploy to a connected + compatible device. With no parameters builds for all platforms added to the project, otherwise builds for the specified platforms
+- `emulate [<platform> [<platform> [...]]]` launch emulators and deploy app to them. With no parameters emulates for all platforms added to the project, otherwise emulates for the specified platforms
 
 
 ## File and Directory Structure
@@ -55,20 +55,15 @@ directory structure:
     `- www/
 
 ### .cordova/
-The .cordova directory contains the project's baked-in plugins and platforms, and meta-data used by the rest of the commands. The root project directory has a .cordova directory inside of it, and that directory identifies the parent as a cordova project. Project directories may not be nested. A Cordova project directory is recognized as such when it has a .cordova directory.  This data is generated when calling `cordova create`. It's modified when adding/removing platforms or plugins to the project.
+This file identifies a tree as a cordova project. Simple configuration information is stored in here (such as BlackBerry environment variables).
 
 Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find the project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a cordova project directory (same as git).
 
-### platforms/ and plugins/
-Additional platforms and projects can be installed, and removed, with the `cordova platform/plugin add/remove` subcommands. The `add` versions of these subcommands take a URI as a parameter. If the URI does not contain a protocol/scheme, it's assumed to be a 'baked in' platform/plugin. Otherwise, it's assumed to be a URL to a gzipped tar archive of the platform/plugin, in the shape of an npm package.
-
-Platforms and projects are expected to be "CommonJS packages" (loosely), similar to the way npm packages are structured. The main requirement is that there be a package.json file available in the 'root directory' of the archive. The package.json file will contain additional meta-data for platforms and plugins, including pointers to such things as native code that needs to be compiled/linked/added to the application during a build.
-
-#### platforms/
+### platforms/
 Platforms added to your application will have the native
  application project structures laid out within this directory.
 
-#### plugins/
+### plugins/
 Any added plugins will be extracted or copied into this directory.
 
 ### www/
@@ -86,7 +81,7 @@ This file is what you should be editing to modify your application's metadata. A
 This example shows how to create a project from scratch named KewlApp with iOS and Android platform support, and includes a plugin named Kewlio. The project will live in ~/MyProjects/KewlApp
 
 ```
-cordova create ~/KewlApp
+cordova create ~/KewlApp KewlApp
 
 cd ~/KewlApp
 
@@ -131,10 +126,6 @@ Plugin integration hinges on:
 
 Please check [cordova-client on GitHub](http://github.com/filmaj/cordova-client).
 
-### Bash Completions
+## Contributors
 
-It would be useful to support Bash command-line completions, in the [same manner as git](http://en.newinstance.it/2010/05/23/git-autocompletion-and-enhanced-bash-prompt/). Completions on subcommands, plugins, platforms, files, etc.
-
-- it would be useful
-- it would force us into some consistency to maintain an easy completion script
-
+A big thank you to all people who have made this project possible. For a list of people involved, please see the `package.json` file.
