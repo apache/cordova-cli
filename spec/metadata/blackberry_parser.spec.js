@@ -115,14 +115,14 @@ describe('blackberry project parser', function() {
             ioFake();
             expect(spyConfig).toHaveBeenCalled();
         });
-        it('should invoke get_blackberry_environment if .cordova file has no BB config', function() {
+        it('should invoke get_blackberry_environment if .cordova/config.json file has no BB config', function() {
             var spyEnv = spyOn(parser, 'get_blackberry_environment');
             parser.update_project(cfg);
             expect(spyEnv).toHaveBeenCalled();
         });
-        it('should not invoke get_blackberry_environment if .cordova file has BB config', function() {
+        it('should not invoke get_blackberry_environment if .cordova/config.json file has BB config', function() {
             var spyEnv = spyOn(parser, 'get_blackberry_environment');
-            fs.writeFileSync(path.join(tempDir, '.cordova'), JSON.stringify({
+            fs.writeFileSync(path.join(tempDir, '.cordova', 'config.json'), JSON.stringify({
                 blackberry:{
                     qnx:{
                     }
@@ -131,7 +131,7 @@ describe('blackberry project parser', function() {
             parser.update_project(cfg);
             expect(spyEnv).not.toHaveBeenCalled();
         });
-        it('should write out project properties with no BB config in .cordova', function() {
+        it('should write out project properties with no BB config in .cordova/config.json', function() {
             var spyProps = spyOn(parser, 'write_project_properties');
             var cb = jasmine.createSpy();
             runs(function() {
@@ -143,10 +143,10 @@ describe('blackberry project parser', function() {
                 expect(spyProps).toHaveBeenCalled();
             });
         });
-        it('should write out project properties with BB config in .cordova', function() {
+        it('should write out project properties with BB config in .cordova/config.json', function() {
             var spyProps = spyOn(parser, 'write_project_properties');
             var cb = jasmine.createSpy();
-            fs.writeFileSync(path.join(tempDir, '.cordova'), JSON.stringify({
+            fs.writeFileSync(path.join(tempDir, '.cordova/config.json'), JSON.stringify({
                 blackberry:{
                     qnx:{
                     }

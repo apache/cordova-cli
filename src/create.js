@@ -38,11 +38,34 @@ module.exports = function create (dir, id, name) {
     }
 
     // Create basic project structure.
+    shell.mkdir('-p', dotCordova);
     shell.mkdir('-p', path.join(dir, 'platforms'));
     shell.mkdir('-p', path.join(dir, 'plugins'));
+    var hooks = path.join(dotCordova, 'hooks');
+    shell.mkdir('-p', hooks);
 
-    // Write out .cordova file with a simple json manifest
-    fs.writeFileSync(dotCordova, JSON.stringify({
+    // Add directories for hooks
+    shell.mkdir(path.join(hooks, 'after_build'));
+    shell.mkdir(path.join(hooks, 'after_docs'));
+    shell.mkdir(path.join(hooks, 'after_emulate'));
+    shell.mkdir(path.join(hooks, 'after_platform_add'));
+    shell.mkdir(path.join(hooks, 'after_platform_rm'));
+    shell.mkdir(path.join(hooks, 'after_platform_ls'));
+    shell.mkdir(path.join(hooks, 'after_plugin_add'));
+    shell.mkdir(path.join(hooks, 'after_plugin_ls'));
+    shell.mkdir(path.join(hooks, 'after_plugin_rm'));
+    shell.mkdir(path.join(hooks, 'before_build'));
+    shell.mkdir(path.join(hooks, 'before_docs'));
+    shell.mkdir(path.join(hooks, 'before_emulate'));
+    shell.mkdir(path.join(hooks, 'before_platform_add'));
+    shell.mkdir(path.join(hooks, 'before_platform_rm'));
+    shell.mkdir(path.join(hooks, 'before_platform_ls'));
+    shell.mkdir(path.join(hooks, 'before_plugin_add'));
+    shell.mkdir(path.join(hooks, 'before_plugin_ls'));
+    shell.mkdir(path.join(hooks, 'before_plugin_rm'));
+
+    // Write out .cordova/config.json file with a simple json manifest
+    fs.writeFileSync(path.join(dotCordova, 'config.json'), JSON.stringify({
         id:id,
         name:name
     }));

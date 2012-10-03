@@ -28,7 +28,7 @@ module.exports.prototype = {
 
         // Do we have BB config?
         var projectRoot = util.isCordova(this.path);
-        var dotFile = path.join(projectRoot, '.cordova');
+        var dotFile = path.join(projectRoot, '.cordova', 'config.json');
         var dot = JSON.parse(fs.readFileSync(dotFile, 'utf-8'));
         if (dot.blackberry === undefined || dot.blackberry.qnx === undefined) {
             this.get_blackberry_environment(function() {
@@ -73,7 +73,7 @@ module.exports.prototype = {
         var projFile = path.join(this.path, 'project.properties');
         var props = fs.readFileSync(projFile, 'utf-8');
 
-        var dotFile = path.join(projectRoot, '.cordova');
+        var dotFile = path.join(projectRoot, '.cordova', 'config.json');
         var dot = JSON.parse(fs.readFileSync(dotFile, 'utf-8'));
 
         props = props.replace(/qnx\.bbwp\.dir=.*\n/, 'qnx.bbwp.dir=' + dot.blackberry.qnx.bbwp + '\n');
@@ -87,9 +87,9 @@ module.exports.prototype = {
     get_blackberry_environment:function(callback) {
         // TODO: add other blackberry sub-platforms
         var projectRoot = util.isCordova(this.path);
-        var dotFile = path.join(projectRoot, '.cordova');
+        var dotFile = path.join(projectRoot, '.cordova', 'config.json');
         var dot = JSON.parse(fs.readFileSync(dotFile, 'utf-8'));
-        // Let's save relevant BB SDK + signing info to .cordova
+        // Let's save relevant BB SDK + signing info to .cordova/config.json
         console.log('Looks like we need some of your BlackBerry development environment information. We\'ll just ask you a few questions and we\'ll be on our way to building.');
         prompt.start();
         prompt.get([{
@@ -116,7 +116,7 @@ module.exports.prototype = {
         }
         ], function(err, results) {
             if (err) throw 'Error during BlackBerry environment config retrieval';
-            // Write out .cordova file
+            // Write out .cordova/config.json file
             if (dot.blackberry === undefined) dot.blackberry = {};
             if (dot.blackberry.qnx === undefined) dot.blackberry.qnx = {};
             dot.blackberry.qnx.bbwp = results.bbwp;
@@ -126,7 +126,7 @@ module.exports.prototype = {
             dot.blackberry.qnx.sim_ip = results.sim_ip;
             dot.blackberry.qnx.sim_password = results.sim_password;
             fs.writeFileSync(dotFile, JSON.stringify(dot), 'utf-8');
-            console.log('Perfect! If you need to change any of these properties, just edit the .cordova file in the root of your cordova project (it\'s just JSON, you\'ll be OK).');
+            console.log('Perfect! If you need to change any of these properties, just edit the .cordova/config.json file in the root of your cordova project.');
             if (callback) callback();
         });
     }

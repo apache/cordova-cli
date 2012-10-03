@@ -7,6 +7,8 @@ var cordova = require('../cordova'),
     android_parser = require('../src/metadata/android_parser'),
     ios_parser = require('../src/metadata/ios_parser'),
     blackberry_parser = require('../src/metadata/blackberry_parser'),
+    fixtures = path.join(__dirname, 'fixtures'),
+    hooks = path.join(fixtures, 'hooks'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 var cwd = process.cwd();
@@ -147,7 +149,7 @@ describe('build command', function() {
             });
             it('should call blackberry_parser\'s update_project', function() {
                 var cb = jasmine.createSpy();
-                fs.writeFileSync(path.join(tempDir, '.cordova'), JSON.stringify({
+                fs.writeFileSync(path.join(tempDir, '.cordova', 'config.json'), JSON.stringify({
                     blackberry:{
                         qnx:{}
                     }
@@ -234,5 +236,20 @@ describe('build command', function() {
                 expect(s.callCount).toEqual(2);
             });
         });
+    });
+
+    describe('hooks', function() {
+        beforeEach(function() {
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+            cordova.platform('add', 'android');
+        });
+
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+
+        it('should delegate before hooks to the hooker module');
+        it('should delegate after hooks to the hooker module');
     });
 });
