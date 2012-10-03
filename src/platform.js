@@ -21,6 +21,7 @@ module.exports = function platform(command, target, callback) {
 
     switch(command) {
         case 'ls':
+        case 'list':
             return fs.readdirSync(path.join(projectRoot, 'platforms'));
             break;
         case 'add':
@@ -65,10 +66,11 @@ module.exports = function platform(command, target, callback) {
                     break;
             }
             break;
+        case 'rm':
         case 'remove':
             shell.rm('-rf', path.join(projectRoot, 'platforms', target));
             break;
         default:
-            throw ('Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.');
+            throw ('Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.');
     }
 };
