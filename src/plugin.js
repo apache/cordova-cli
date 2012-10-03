@@ -35,6 +35,7 @@ module.exports = function plugin(command, target, callback) {
 
     switch(command) {
         case 'ls':
+        case 'list':
             if (plugins.length) {
                 return plugins;
             } else return 'No plugins added. Use `cordova plugin add <plugin>`.';
@@ -100,6 +101,7 @@ module.exports = function plugin(command, target, callback) {
 
             if (callback) callback();
             break;
+        case 'rm':
         case 'remove':
             if (platforms.length === 0) {
                 throw 'You need at least one platform added to your app. Use `cordova platform add <platform>`.';
@@ -148,6 +150,6 @@ module.exports = function plugin(command, target, callback) {
             }
             break;
         default:
-            throw 'Unrecognized command "' + command + '". Use either `add`, `remove`, or `ls`.';
+            throw 'Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.';
     }
 };
