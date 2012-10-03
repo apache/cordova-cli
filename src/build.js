@@ -23,7 +23,7 @@ function shell_out_to_debug(projectRoot, platform) {
     if (response.code > 0) throw 'An error occurred while building the ' + platform + ' project. ' + response.output;
 }
 
-module.exports = function build (callback) {
+module.exports = function build (platforms, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -33,7 +33,12 @@ module.exports = function build (callback) {
     var xml = path.join(projectRoot, 'www', 'config.xml');
     var assets = path.join(projectRoot, 'www');
     var cfg = new config_parser(xml);
-    var platforms = platform('ls');
+
+    if (arguments.length === 0) {
+        platforms = platform('ls');
+    } else if (!(platforms instanceof Array)) {
+        platforms = [platforms];
+    }
 
     if (platforms.length === 0) throw 'No platforms added to this project. Please use `cordova platform add <platform>`.';
 
