@@ -47,38 +47,42 @@ describe('platform command', function() {
         }).toThrow();
     });
 
-    describe('`ls`', function() {
-        beforeEach(function() {
-            cordova.create(tempDir);
-            process.chdir(tempDir);
-        });
-
-        afterEach(function() {
-            process.chdir(cwd);
-        });
-
-        it('should list out no platforms for a fresh project', function() {
-            expect(cordova.platform('ls').length).toEqual(0);
-        });
-
-        it('should list out added platforms in a project', function() {
-            var cbtwo = jasmine.createSpy();
-            var cb = jasmine.createSpy();
-
-            runs(function() {
-                cordova.platform('add', 'android', cb);
+    var listing_tests = function(_invocation) {
+        return function() {
+            beforeEach(function() {
+                cordova.create(tempDir);
+                process.chdir(tempDir);
             });
-            waitsFor(function() { return cb.wasCalled; }, "create callback");
-            runs(function() {
-                expect(cordova.platform('ls')[0]).toEqual('android');
-                cordova.platform('add', 'ios', cbtwo);
+
+            afterEach(function() {
+                process.chdir(cwd);
             });
-            waitsFor(function() { return cbtwo.wasCalled; }, "create callback number two");
-            runs(function() {
-                expect(cordova.platform('ls')[1]).toEqual('ios');
+
+            it('should list out no platforms for a fresh project', function() {
+                expect(cordova.platform(_invocation).length).toEqual(0);
             });
-        });
-    });
+
+            it('should list out added platforms in a project', function() {
+                var cbtwo = jasmine.createSpy();
+                var cb = jasmine.createSpy();
+
+                runs(function() {
+                    cordova.platform('add', 'android', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, "create callback");
+                runs(function() {
+                    expect(cordova.platform(_invocation)[0]).toEqual('android');
+                    cordova.platform('add', 'ios', cbtwo);
+                });
+                waitsFor(function() { return cbtwo.wasCalled; }, "create callback number two");
+                runs(function() {
+                    expect(cordova.platform(_invocation)[1]).toEqual('ios');
+                });
+            });
+        };
+    };
+    describe('`ls`', listing_tests('ls'));
+    describe('`list`', listing_tests('list'));
 
     describe('`add`', function() {
         beforeEach(function() {
@@ -195,33 +199,38 @@ describe('platform command', function() {
             });
         });
     });
-    describe('remove', function() {
-        beforeEach(function() {
-            cordova.create(tempDir);
-            process.chdir(tempDir);
-        });
 
-        afterEach(function() {
-            process.chdir(cwd);
-        });
+    var removing_tests = function(_invocation) {
+        return function() {
+            beforeEach(function() {
+                cordova.create(tempDir);
+                process.chdir(tempDir);
+            });
 
-        it('should remove a supported and added platform', function() {
-            var cb = jasmine.createSpy();
-            var cbone = jasmine.createSpy();
+            afterEach(function() {
+                process.chdir(cwd);
+            });
 
-            runs(function() {
-                cordova.platform('add', 'ios', cbone);
+            it('should remove a supported and added platform', function() {
+                var cb = jasmine.createSpy();
+                var cbone = jasmine.createSpy();
+
+                runs(function() {
+                    cordova.platform('add', 'ios', cbone);
+                });
+                waitsFor(function() { return cbone.wasCalled; }, "ios create callback");
+                runs(function() {
+                    cordova.platform('add', 'android', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, "android create callback");
+                runs(function() {
+                    cordova.platform(_invocation, 'android');
+                    expect(cordova.platform('ls').length).toEqual(1);
+                    expect(cordova.platform('ls')[0]).toEqual('ios');
+                });
             });
-            waitsFor(function() { return cbone.wasCalled; }, "ios create callback");
-            runs(function() {
-                cordova.platform('add', 'android', cb);
-            });
-            waitsFor(function() { return cb.wasCalled; }, "android create callback");
-            runs(function() {
-                cordova.platform('remove', 'android');
-                expect(cordova.platform('ls').length).toEqual(1);
-                expect(cordova.platform('ls')[0]).toEqual('ios');
-            });
-        });
-    });
+        };
+    };
+    describe('`rm`', removing_tests('rm'));
+    describe('`remove`', removing_tests('remove'));
 });
