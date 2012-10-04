@@ -78,7 +78,7 @@ This file is what you should be editing to modify your application's metadata. A
 
 # Hooks
 
-Projects created by cordova-client have `before` and `after` hooks for each [project command](#project_commands). These are located under the `.cordova/hooks` directory in the root of your cordova project. Any scripts you add to these directories will be executed before and after the appropriate commands. Useful for integrating your own build systems or integrating with version control systems.
+Projects created by cordova-client have `before` and `after` hooks for each [project command](#project_commands). These are located under the `.cordova/hooks` directory in the root of your cordova project. Any scripts you add to these directories will be executed before and after the appropriate commands. Useful for integrating your own build systems or integrating with version control systems. __Remember__: make your scripts executable.
 
 # Examples
 
