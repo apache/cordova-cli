@@ -24,6 +24,8 @@ v2.1.0.
 npm install -g cordova
 ```
 
+**NOTE**: on Mac OS X, you may want to change the owner of the cordova directory that npm installs to. This will allow you to run cordova as local user without requiring root permissions. Assuming your node_modules directory is in `/usr/local/lib/`, you can do this by running: `sudo chown -R <username> /usr/local/lib/node_modules/cordova`
+
 # Getting Started
 
 cordova-client has a single global `create` command that creates new cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
