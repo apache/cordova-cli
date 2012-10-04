@@ -273,7 +273,8 @@ describe('build command', function() {
                 expect(function() {
                     cordova.build();
                 }).toThrow();
-                expect(s).not.toHaveBeenCalled();
+                expect(s).not.toHaveBeenCalledWith('before_build');
+                expect(s).not.toHaveBeenCalledWith('after_build');
             });
         });
     });

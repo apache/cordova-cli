@@ -6,13 +6,12 @@ var cordova = require('../cordova'),
     config_parser = require('../src/config_parser'),
     helper = require('./helper'),
     util = require('../src/util'),
+    hooker = require('../src/hooker'),
     platforms = require('../platforms'),
     tempDir = path.join(__dirname, '..', 'temp');
-
-// globals for crazy spy hax
-android_parser = require('../src/metadata/android_parser');
-ios_parser = require('../src/metadata/ios_parser');
-blackberry_parser = require('../src/metadata/blackberry_parser');
+    android_parser = require('../src/metadata/android_parser'),
+    ios_parser = require('../src/metadata/ios_parser'),
+    blackberry_parser = require('../src/metadata/blackberry_parser');
 
 var cwd = process.cwd();
 
@@ -233,4 +232,48 @@ describe('platform command', function() {
     };
     describe('`rm`', removing_tests('rm'));
     describe('`remove`', removing_tests('remove'));
+
+    describe('hooks', function() {
+        var s;
+        beforeEach(function() {
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+            s = spyOn(hooker.prototype, 'fire').andReturn(true);
+        });
+        afterEach(function() {
+            process.chdir(cwd);
+            shell.rm('-rf', tempDir);
+        });
+
+        describe('list (ls) hooks', function() {
+            it('should fire before hooks through the hooker module', function() {
+                cordova.platform();
+                expect(s).toHaveBeenCalledWith('before_platform_ls');
+            });
+            it('should fire after hooks through the hooker module', function() {
+                cordova.platform();
+                expect(s).toHaveBeenCalledWith('after_platform_ls');
+            });
+        });
+        describe('remove (rm) hooks', function() {
+            it('should fire before hooks through the hooker module', function() {
+                cordova.platform('rm', 'android');
+                expect(s).toHaveBeenCalledWith('before_platform_rm');
+            });
+            it('should fire after hooks through the hooker module', function() {
+                cordova.platform('rm', 'android');
+                expect(s).toHaveBeenCalledWith('after_platform_rm');
+            });
+        });
+        describe('add hooks', function() {
+            it('should fire before hooks through the hooker module', function() {
+                cordova.platform('add', 'android');
+                expect(s).toHaveBeenCalledWith('before_platform_add');
+            });
+            it('should fire after hooks through the hooker module', function() {
+                cordova.platform('add', 'android');
+                expect(s).toHaveBeenCalledWith('after_platform_add');
+            });
+        });
+    });
 });

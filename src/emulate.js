@@ -8,6 +8,7 @@ var cordova_util = require('./util'),
     platform = require('./platform'),
     fs = require('fs'),
     n = require('ncallbacks'),
+    hooker = require('../src/hooker'),
     util = require('util');
 
 function shell_out_to_emulate(root, platform) {
@@ -49,7 +50,15 @@ module.exports = function emulate (platforms, callback) {
 
     if (platforms.length === 0) throw 'No platforms added to this project. Please use `cordova platform add <platform>`.';
 
+    var hooks = new hooker(projectRoot);
+    if (!(hooks.fire('before_emulate'))) {
+        throw 'before_emulate hooks exited with non-zero code. Aborting build.';
+    }
+
     var end = n(platforms.length, function() {
+        if (!(hooks.fire('after_emulate'))) {
+            throw 'after_emulate hooks exited with non-zero code. Aborting.';
+        }
         if (callback) callback();
     });
 

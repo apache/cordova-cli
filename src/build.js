@@ -58,13 +58,11 @@ module.exports = function build (platforms, callback) {
     if (!(hooks.fire('before_build'))) {
         throw 'before_build hooks exited with non-zero code. Aborting build.';
     }
-    var fire_after_hooks = function() {
+
+    var end = n(platforms.length, function() {
         if (!(hooks.fire('after_build'))) {
             throw 'after_build hooks exited with non-zero code. Aborting.';
         }
-    };
-
-    var end = n(platforms.length, function() {
         if (callback) callback();
     });
 
@@ -80,7 +78,6 @@ module.exports = function build (platforms, callback) {
                 // Update the related platform project from the config
                 parser.update_project(cfg);
                 shell_out_to_debug(projectRoot, 'android');
-                fire_after_hooks();
                 end();
                 break;
             case 'blackberry-10':
@@ -91,7 +88,6 @@ module.exports = function build (platforms, callback) {
                 parser.update_project(cfg, function() {
                     // Shell it
                     shell_out_to_debug(projectRoot, 'blackberry-10');
-                    fire_after_hooks();
                     end();
                 });
                 break;
@@ -102,7 +98,6 @@ module.exports = function build (platforms, callback) {
                 // Update the related platform project from the config
                 parser.update_project(cfg, function() {
                     shell_out_to_debug(projectRoot, 'ios');
-                    fire_after_hooks();
                     end();
                 });
                 break;

@@ -6,6 +6,7 @@ var config_parser = require('./config_parser'),
     android_parser= require('./metadata/android_parser'),
     blackberry_parser= require('./metadata/blackberry_parser'),
     ios_parser    = require('./metadata/ios_parser'),
+    hooker        = require('./hooker'),
     shell         = require('shelljs');
 
 module.exports = function platform(command, target, callback) {
@@ -14,6 +15,9 @@ module.exports = function platform(command, target, callback) {
     if (!projectRoot) {
         throw 'Current working directory is not a Cordova-based project.';
     }
+
+    var hooks = new hooker(projectRoot);
+
     if (arguments.length === 0) command = 'ls';
 
     var xml = path.join(projectRoot, 'www', 'config.xml');
@@ -22,9 +26,13 @@ module.exports = function platform(command, target, callback) {
     switch(command) {
         case 'ls':
         case 'list':
+            // TODO before+after hooks here are awkward
+            hooks.fire('before_platform_ls');
+            hooks.fire('after_platform_ls');
             return fs.readdirSync(path.join(projectRoot, 'platforms'));
             break;
         case 'add':
+            hooks.fire('before_platform_add');
             var output = path.join(projectRoot, 'platforms', target);
 
             // If the Cordova library for this platform is missing, get it.
@@ -54,21 +62,30 @@ module.exports = function platform(command, target, callback) {
                 case 'android':
                     var android = new android_parser(output);
                     android.update_project(cfg);
+                    hooks.fire('after_platform_add');
                     if (callback) callback();
                     break;
                 case 'ios':
                     var ios = new ios_parser(output);
-                    ios.update_project(cfg, callback);
+                    ios.update_project(cfg, function() {
+                        hooks.fire('after_platform_add');
+                        callback();
+                    });
                     break;
                 case 'blackberry':
                     var bb = new blackberry_parser(output);
-                    bb.update_project(cfg, callback);
+                    bb.update_project(cfg, function() {
+                        hooks.fire('after_platform_add');
+                        callback();
+                    });
                     break;
             }
             break;
         case 'rm':
         case 'remove':
+            hooks.fire('before_platform_rm');
             shell.rm('-rf', path.join(projectRoot, 'platforms', target));
+            hooks.fire('after_platform_rm');
             break;
         default:
             throw ('Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.');

@@ -7,6 +7,7 @@ var cordova = require('../cordova'),
     android_parser = require('../src/metadata/android_parser'),
     ios_parser = require('../src/metadata/ios_parser'),
     blackberry_parser = require('../src/metadata/blackberry_parser'),
+    hooker = require('../src/hooker'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 var cwd = process.cwd();
@@ -236,6 +237,46 @@ describe('emulate command', function() {
             waitsFor(function() { return buildcb.wasCalled; }, 'emulate android+ios');
             runs(function() {
                 expect(s.callCount).toEqual(2);
+            });
+        });
+    });
+
+    describe('hooks', function() {
+        var s;
+        beforeEach(function() {
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+            s = spyOn(hooker.prototype, 'fire').andReturn(true);
+        });
+        afterEach(function() {
+            process.chdir(cwd);
+            shell.rm('-rf', tempDir);
+        });
+
+        describe('when platforms are added', function() {
+            beforeEach(function() {
+                cordova.platform('add', 'android');
+                spyOn(shell, 'exec').andReturn({code:0});
+            });
+
+            it('should fire before hooks through the hooker module', function() {
+                cordova.emulate();
+                expect(s).toHaveBeenCalledWith('before_emulate');
+            });
+            it('should fire after hooks through the hooker module', function() {
+                cordova.emulate();
+                expect(s).toHaveBeenCalledWith('after_emulate');
+            });
+        });
+
+        describe('with no platforms added', function() {
+            it('should not fire the hooker', function() {
+                spyOn(shell, 'exec').andReturn({code:0});
+                expect(function() {
+                    cordova.emulate();
+                }).toThrow();
+                expect(s).not.toHaveBeenCalledWith('before_emulate');
+                expect(s).not.toHaveBeenCalledWith('after_emulate');
             });
         });
     });
