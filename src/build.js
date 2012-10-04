@@ -8,6 +8,7 @@ var cordova_util  = require('./util'),
     android_parser= require('./metadata/android_parser'),
     blackberry_parser= require('./metadata/blackberry_parser'),
     ios_parser    = require('./metadata/ios_parser'),
+    hooker        = require('./hooker'),
     n             = require('ncallbacks'),
     prompt        = require('prompt'),
     util          = require('util');
@@ -53,6 +54,16 @@ module.exports = function build (platforms, callback) {
 
     if (platforms.length === 0) throw 'No platforms added to this project. Please use `cordova platform add <platform>`.';
 
+    var hooks = new hooker(projectRoot);
+    if (!(hooks.fire('before_build'))) {
+        throw 'before_build hooks exited with non-zero code. Aborting build.';
+    }
+    var fire_after_hooks = function() {
+        if (!(hooks.fire('after_build'))) {
+            throw 'after_build hooks exited with non-zero code. Aborting.';
+        }
+    };
+
     var end = n(platforms.length, function() {
         if (callback) callback();
     });
@@ -69,6 +80,7 @@ module.exports = function build (platforms, callback) {
                 // Update the related platform project from the config
                 parser.update_project(cfg);
                 shell_out_to_debug(projectRoot, 'android');
+                fire_after_hooks();
                 end();
                 break;
             case 'blackberry-10':
@@ -79,6 +91,7 @@ module.exports = function build (platforms, callback) {
                 parser.update_project(cfg, function() {
                     // Shell it
                     shell_out_to_debug(projectRoot, 'blackberry-10');
+                    fire_after_hooks();
                     end();
                 });
                 break;
@@ -89,6 +102,7 @@ module.exports = function build (platforms, callback) {
                 // Update the related platform project from the config
                 parser.update_project(cfg, function() {
                     shell_out_to_debug(projectRoot, 'ios');
+                    fire_after_hooks();
                     end();
                 });
                 break;

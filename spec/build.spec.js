@@ -7,6 +7,7 @@ var cordova = require('../cordova'),
     android_parser = require('../src/metadata/android_parser'),
     ios_parser = require('../src/metadata/ios_parser'),
     blackberry_parser = require('../src/metadata/blackberry_parser'),
+    hooker = require('../src/hooker'),
     fixtures = path.join(__dirname, 'fixtures'),
     hooks = path.join(fixtures, 'hooks'),
     tempDir = path.join(__dirname, '..', 'temp');
@@ -239,17 +240,41 @@ describe('build command', function() {
     });
 
     describe('hooks', function() {
+        var s;
         beforeEach(function() {
             cordova.create(tempDir);
             process.chdir(tempDir);
-            cordova.platform('add', 'android');
+            s = spyOn(hooker.prototype, 'fire').andReturn(true);
         });
-
         afterEach(function() {
             process.chdir(cwd);
+            shell.rm('-rf', tempDir);
         });
 
-        it('should delegate before hooks to the hooker module');
-        it('should delegate after hooks to the hooker module');
+        describe('when platforms are added', function() {
+            beforeEach(function() {
+                cordova.platform('add', 'android');
+                spyOn(shell, 'exec').andReturn({code:0});
+            });
+
+            it('should fire before hooks through the hooker module', function() {
+                cordova.build();
+                expect(s).toHaveBeenCalledWith('before_build');
+            });
+            it('should fire after hooks through the hooker module', function() {
+                cordova.build();
+                expect(s).toHaveBeenCalledWith('after_build');
+            });
+        });
+
+        describe('with no platforms added', function() {
+            it('should not fire the hooker', function() {
+                spyOn(shell, 'exec').andReturn({code:0});
+                expect(function() {
+                    cordova.build();
+                }).toThrow();
+                expect(s).not.toHaveBeenCalled();
+            });
+        });
     });
 });
