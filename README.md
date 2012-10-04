@@ -11,7 +11,7 @@
   - [iOS SDK](http://developer.apple.com)
   - [Android SDK](http://developer.android.com) - **NOTE** This tool
     will not work unless you have the absolute latest updates for all
-    Android SDK components.
+    Android SDK components. Also you will need the SDK's `tools` and `platform-tools` directories on your __system path__ otherwise Android support will fail.
 
 cordova-client has been tested on Mas OS X and Linux.
 
