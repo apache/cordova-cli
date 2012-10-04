@@ -2,6 +2,7 @@ var cordova = require('../cordova'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
+    hooker = require('../src/hooker'),
     tempDir = path.join(__dirname, '..', 'temp'),
     fixturesDir = path.join(__dirname, 'fixtures'),
     testPlugin = path.join(fixturesDir, 'plugins', 'test'),
@@ -232,5 +233,59 @@ describe('plugin command', function() {
     };
     describe('`rm`', removing_tests('rm'));
     describe('`remove`', removing_tests('remove'));
+
+    describe('hooks', function() {
+        var s;
+        beforeEach(function() {
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+            s = spyOn(hooker.prototype, 'fire').andReturn(true);
+        });
+        afterEach(function() {
+            process.chdir(cwd);
+            shell.rm('-rf', tempDir);
+        });
+
+        describe('list (ls) hooks', function() {
+            it('should fire before hooks through the hooker module', function() {
+                cordova.plugin();
+                expect(s).toHaveBeenCalledWith('before_plugin_ls');
+            });
+            it('should fire after hooks through the hooker module', function() {
+                cordova.plugin();
+                expect(s).toHaveBeenCalledWith('after_plugin_ls');
+            });
+        });
+        describe('remove (rm) hooks', function() {
+            beforeEach(function() {
+                cordova.platform('add', 'android');
+                spyOn(shell, 'exec').andReturn({code:0}); // fake call to pluginstall
+                cordova.plugin('add', androidPlugin);
+                s.reset();
+            });
+            it('should fire before hooks through the hooker module', function() {
+                cordova.plugin('rm', 'android');
+                expect(s).toHaveBeenCalledWith('before_plugin_rm');
+            });
+            it('should fire after hooks through the hooker module', function() {
+                cordova.plugin('rm', 'android');
+                expect(s).toHaveBeenCalledWith('after_plugin_rm');
+            });
+        });
+        describe('add hooks', function() {
+            beforeEach(function() {
+                cordova.platform('add', 'android');
+                spyOn(shell, 'exec').andReturn({code:0}); // fake call to pluginstall
+            });
+            it('should fire before hooks through the hooker module', function() {
+                cordova.plugin('add', androidPlugin);
+                expect(s).toHaveBeenCalledWith('before_plugin_add');
+            });
+            it('should fire after hooks through the hooker module', function() {
+                cordova.plugin('add', androidPlugin);
+                expect(s).toHaveBeenCalledWith('after_plugin_add');
+            });
+        });
+    });
 });
 

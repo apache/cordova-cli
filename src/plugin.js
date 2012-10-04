@@ -5,6 +5,7 @@ var cordova_util  = require('./util'),
     path          = require('path'),
     shell         = require('shelljs'),
     config_parser = require('./config_parser'),
+    hooker        = require('./hooker'),
     platform      = require('./platform'),
     plugin_parser = require('./plugin_parser'),
     ls            = fs.readdirSync;
@@ -16,6 +17,8 @@ module.exports = function plugin(command, target, callback) {
         throw 'Current working directory is not a Cordova-based project.';
     }
     if (arguments.length === 0) command = 'ls';
+
+    var hooks = new hooker(projectRoot);
 
     var projectWww = path.join(projectRoot, 'www');
 
@@ -36,6 +39,9 @@ module.exports = function plugin(command, target, callback) {
     switch(command) {
         case 'ls':
         case 'list':
+            // TODO awkward before+after hooks here
+            hooks.fire('before_plugin_ls');
+            hooks.fire('after_plugin_ls');
             if (plugins.length) {
                 return plugins;
             } else return 'No plugins added. Use `cordova plugin add <plugin>`.';
@@ -69,6 +75,8 @@ module.exports = function plugin(command, target, callback) {
                 throw 'Plugin "' + targetName + '" does not support any of your application\'s platforms. Plugin platforms: ' + pluginXml.platforms.join(', ') + '; your application\'s platforms: ' + platforms.join(', ');
             }
 
+            hooks.fire('before_plugin_add');
+
             var pluginWww = path.join(target, 'www');
             var wwwContents = ls(pluginWww);
             var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
@@ -99,6 +107,7 @@ module.exports = function plugin(command, target, callback) {
             // Finally copy the plugin into the project
             shell.cp('-r', target, pluginPath);
 
+            hooks.fire('after_plugin_add');
             if (callback) callback();
             break;
         case 'rm':
@@ -108,6 +117,7 @@ module.exports = function plugin(command, target, callback) {
             }
             // Check if we have the plugin.
             if (plugins.indexOf(targetName) > -1) {
+                hooks.fire('before_plugin_rm');
                 var pluginWww = path.join(pluginPath, target, 'www');
                 var wwwContents = ls(pluginWww);
                 var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
@@ -144,6 +154,7 @@ module.exports = function plugin(command, target, callback) {
                 // Finally remove the plugin dir from plugins/
                 shell.rm('-rf', path.join(pluginPath, target));
 
+                hooks.fire('after_plugin_rm');
                 if (callback) callback();
             } else {
                 throw 'Plugin "' + targetName + '" not added to project.';
