@@ -123,7 +123,12 @@ The directory structure of KewlApp now looks like this:
 
 ## TO-DO + Issues
 
-Please check [cordova-client on GitHub](http://github.com/filmaj/cordova-client).
+Please check [cordova-client on GitHub](http://github.com/filmaj/cordova-client). If you find issues with this tool, please be so kind as to include relevant information needed to debug issues such as:
+
+- Your operating system and version
+- The application name, directory location, and identifier used with `create`
+- Which mobile SDKs you have installed, and which version. Related to this: which Xcode version if you are submitting issues related to iOS
+- Any error stack traces you received
 
 ## Contributors
 
