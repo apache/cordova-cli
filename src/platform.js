@@ -69,14 +69,14 @@ module.exports = function platform(command, target, callback) {
                     var ios = new ios_parser(output);
                     ios.update_project(cfg, function() {
                         hooks.fire('after_platform_add');
-                        callback();
+                        if (callback) callback();
                     });
                     break;
                 case 'blackberry':
                     var bb = new blackberry_parser(output);
                     bb.update_project(cfg, function() {
                         hooks.fire('after_platform_add');
-                        callback();
+                        if (callback) callback();
                     });
                     break;
             }
