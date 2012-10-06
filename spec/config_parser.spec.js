@@ -31,8 +31,8 @@ describe('config.xml parser', function () {
             cfg = new config_parser(xml);
         });
 
-        it('should get the packagename', function() {
-            expect(cfg.packageName()).toEqual('io.cordova.hello-cordova');
+        it('should get the (default) packagename', function() {
+            expect(cfg.packageName()).toEqual('io.cordova.hellocordova');
         });
         it('should allow setting the packagename', function() {
             cfg.packageName('this.is.bat.country');
@@ -51,8 +51,8 @@ describe('config.xml parser', function () {
             cfg = new config_parser(xml);
         });
 
-        it('should get the app name', function() {
-            expect(cfg.packageName()).toEqual('io.cordova.hello-cordova');
+        it('should get the (default) app name', function() {
+            expect(cfg.name()).toEqual('HelloCordova');
         });
         it('should allow setting the app name', function() {
             cfg.name('this.is.bat.country');

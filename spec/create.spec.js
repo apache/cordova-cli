@@ -16,7 +16,7 @@ describe('create command', function () {
         cordova.create(tempDir);
         var dotc = path.join(tempDir, '.cordova', 'config.json');
         expect(fs.lstatSync(dotc).isFile()).toBe(true);
-        expect(JSON.parse(fs.readFileSync(dotc, 'utf8')).name).toBe("Hello Cordova");
+        expect(JSON.parse(fs.readFileSync(dotc, 'utf8')).name).toBe("HelloCordova");
         var hooks = path.join(tempDir, '.cordova', 'hooks');
         expect(fs.existsSync(hooks)).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'before_platform_add'))).toBe(true);
