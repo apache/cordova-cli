@@ -80,7 +80,15 @@ This file is what you should be editing to modify your application's metadata. A
 
 # Hooks
 
-Projects created by cordova-client have `before` and `after` hooks for each [project command](#project_commands). These are located under the `.cordova/hooks` directory in the root of your cordova project. Any scripts you add to these directories will be executed before and after the appropriate commands. Useful for integrating your own build systems or integrating with version control systems. __Remember__: make your scripts executable.
+Projects created by cordova-client have `before` and `after` hooks for each [project command](#project_commands). There are two types of hooks: project-specific ones and module-level ones.
+
+## Project-specific Hooks
+
+These are located under the `.cordova/hooks` directory in the root of your cordova project. Any scripts you add to these directories will be executed before and after the appropriate commands. Useful for integrating your own build systems or integrating with version control systems. __Remember__: make your scripts executable.
+
+## Module-level Hooks
+
+If you are using cordova-client as a module within a larger node application, you can also use the standard `EventEmitter` methods to attach to the events. The events include `before_build`, `before_docs`, `before_emulate`, `before_platform_add`, `before_platform_ls`, `before_platform_rm`, `before_plugin_add`, `before_plugin_ls` and `before_plugin_rm`. Additionally, there are `after_` flavours of all the above events.
 
 # Examples
 
