@@ -1,6 +1,7 @@
 var shell = require('shelljs'),
     util  = require('./util'),
     fs    = require('fs'),
+    events= require('./events'),
     path  = require('path');
 
 module.exports = function hooker(root) {
@@ -13,6 +14,11 @@ module.exports.prototype = {
     fire:function fire(hook) {
         var dir = path.join(this.root, '.cordova', 'hooks', hook);
         if (!(fs.existsSync(dir))) throw 'Unrecognized hook "' + hook + '".';
+
+        // Fire JS hook/event
+        events.emit(hook);
+
+        // Fire script-based hooks
         var contents = fs.readdirSync(dir);
         contents.forEach(function(script) {
             var status = shell.exec(path.join(dir, script));

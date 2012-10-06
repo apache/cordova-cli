@@ -9,10 +9,10 @@ var cordova = require('../cordova'),
 
 describe('config.xml parser', function () {
     beforeEach(function() {
-        // Make a temp directory
-        shell.rm('-rf', tempDir);
-        shell.mkdir('-p', tempDir);
         cordova.create(tempDir);
+    });
+    afterEach(function() {
+        shell.rm('-rf', tempDir);
     });
 
     it('should create an instance based on an xml file', function() {

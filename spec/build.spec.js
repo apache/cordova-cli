@@ -17,8 +17,10 @@ var cwd = process.cwd();
 describe('build command', function() {
     beforeEach(function() {
         // Make a temp directory
-        shell.rm('-rf', tempDir);
         shell.mkdir('-p', tempDir);
+    });
+    afterEach(function() {
+        shell.rm('-rf', tempDir);
     });
 
     it('should not run inside a Cordova-based project with no added platforms', function() {
