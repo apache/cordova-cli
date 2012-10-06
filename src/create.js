@@ -4,8 +4,8 @@ var path          = require('path'),
     help          = require('./help'),
     config_parser = require('./config_parser');
 
-var DEFAULT_NAME = "Hello Cordova",
-    DEFAULT_ID   = "io.cordova.hello-cordova";
+var DEFAULT_NAME = "HelloCordova",
+    DEFAULT_ID   = "io.cordova.hellocordova";
 
 /**
  * Usage:
