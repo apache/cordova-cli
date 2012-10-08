@@ -197,6 +197,17 @@ describe('platform command', function() {
                 expect(s).toHaveBeenCalled();
             });
         });
+        it('should handle multiple platforms', function() {
+            var cb = jasmine.createSpy();
+            runs(function() {
+                cordova.platform('add', ['android', 'ios'], cb);
+            });
+            waitsFor(function() { return cb.wasCalled; }, "platform add ios+android callback");
+            runs(function() {
+                expect(fs.existsSync(path.join(tempDir, 'platforms', 'android', 'AndroidManifest.xml'))).toBe(true);
+                expect(fs.existsSync(path.join(tempDir, 'platforms', 'ios', 'www'))).toBe(true);
+            });
+        });
     });
 
     var removing_tests = function(_invocation) {
@@ -212,20 +223,27 @@ describe('platform command', function() {
 
             it('should remove a supported and added platform', function() {
                 var cb = jasmine.createSpy();
-                var cbone = jasmine.createSpy();
 
                 runs(function() {
-                    cordova.platform('add', 'ios', cbone);
+                    cordova.platform('add', ['android', 'ios'], cb);
                 });
-                waitsFor(function() { return cbone.wasCalled; }, "ios create callback");
-                runs(function() {
-                    cordova.platform('add', 'android', cb);
-                });
-                waitsFor(function() { return cb.wasCalled; }, "android create callback");
+                waitsFor(function() { return cb.wasCalled; }, "android+ios platfomr add callback");
                 runs(function() {
                     cordova.platform(_invocation, 'android');
                     expect(cordova.platform('ls').length).toEqual(1);
                     expect(cordova.platform('ls')[0]).toEqual('ios');
+                });
+            });
+            it('should be able to remove multiple platforms', function() {
+                var cb = jasmine.createSpy();
+
+                runs(function() {
+                    cordova.platform('add', ['android', 'ios'], cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, "android+ios platfomr add callback");
+                runs(function() {
+                    cordova.platform(_invocation, ['android','ios']);
+                    expect(cordova.platform('ls').length).toEqual(0);
                 });
             });
         };

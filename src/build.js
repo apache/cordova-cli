@@ -56,7 +56,7 @@ module.exports = function build (platforms, callback) {
 
     var hooks = new hooker(projectRoot);
     if (!(hooks.fire('before_build'))) {
-        throw 'before_build hooks exited with non-zero code. Aborting build.';
+        throw 'before_build hooks exited with non-zero code. Aborting.';
     }
 
     var end = n(platforms.length, function() {

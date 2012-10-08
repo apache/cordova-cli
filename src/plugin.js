@@ -10,7 +10,7 @@ var cordova_util  = require('./util'),
     plugin_parser = require('./plugin_parser'),
     ls            = fs.readdirSync;
 
-module.exports = function plugin(command, target, callback) {
+module.exports = function plugin(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -25,15 +25,19 @@ module.exports = function plugin(command, target, callback) {
     // Grab config info for the project
     var xml = path.join(projectWww, 'config.xml');
     var cfg = new config_parser(xml);
-    var platforms = platform('ls');
+    var platforms = ls(path.join(projectRoot, 'platforms'));
 
-    // Massage plugin name / path
-    var pluginPath, plugins, targetName;
+    // Massage plugin name(s) / path(s)
+    var pluginPath, plugins, names = [];
     pluginPath = path.join(projectRoot, 'plugins');
     plugins = ls(pluginPath);
-    if (target) { 
-        targetName = target.substr(target.lastIndexOf('/') + 1);
-        if (targetName[targetName.length-1] == '/') targetName = targetName.substr(0, targetName.length-1);
+    if (targets) { 
+        if (!(targets instanceof Array)) targets = [targets];
+        targets.forEach(function(target) {
+            var targetName = target.substr(target.lastIndexOf('/') + 1);
+            if (targetName[targetName.length-1] == '/') targetName = targetName.substr(0, targetName.length-1);
+            names.push(targetName);
+        });
     }
 
     switch(command) {
@@ -50,64 +54,66 @@ module.exports = function plugin(command, target, callback) {
             if (platforms.length === 0) {
                 throw 'You need at least one platform added to your app. Use `cordova platform add <platform>`.';
             }
-            // Check if we already have the plugin.
-            // TODO edge case: if a new platform is added, then you want
-            // to re-add the plugin to the new platform.
-            if (plugins.indexOf(targetName) > -1) {
-                throw 'Plugin "' + targetName + '" already added to project.';
-            }
-            
-            // Check if the plugin has a plugin.xml in the root of the
-            // specified dir.
-            var pluginContents = ls(target);
-            if (pluginContents.indexOf('plugin.xml') == -1) {
-                throw 'Plugin "' + targetName + '" does not have a plugin.xml in the root. Plugin must support the Cordova Plugin Specification: https://github.com/alunny/cordova-plugin-spec';
-            }
-
-            // Check if there is at least one match between plugin
-            // supported platforms and app platforms
-            var pluginXml = new plugin_parser(path.join(target, 'plugin.xml'));
-            var intersection = pluginXml.platforms.filter(function(e) {
-                if (platforms.indexOf(e) == -1) return false;
-                else return true;
-            });
-            if (intersection.length === 0) {
-                throw 'Plugin "' + targetName + '" does not support any of your application\'s platforms. Plugin platforms: ' + pluginXml.platforms.join(', ') + '; your application\'s platforms: ' + platforms.join(', ');
-            }
-
-            hooks.fire('before_plugin_add');
-
-            var pluginWww = path.join(target, 'www');
-            var wwwContents = ls(pluginWww);
-            var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
-
-            // Iterate over all matchin app-plugin platforms in the project and install the
-            // plugin.
-            intersection.forEach(function(platform) {
-                var cmd = util.format('%s %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
-                var plugin_cli = shell.exec(cmd, {silent:true});
-                if (plugin_cli.code > 0) throw 'An error occured during plugin installation for ' + platform + '. ' + cli.output;
-            });
-            
-            // Add the plugin web assets to the www folder as well
-            // TODO: assumption that web assets go under www folder
-            // inside plugin dir; instead should read plugin.xml
-            wwwContents.forEach(function(asset) {
-                asset = path.resolve(path.join(pluginWww, asset));
-                var info = fs.lstatSync(asset);
-                var name = asset.substr(asset.lastIndexOf('/')+1);
-                var wwwPath = path.join(projectWww, name);
-                if (info.isDirectory()) {
-                    shell.cp('-r', asset, projectWww);
-                } else {
-                    fs.writeFileSync(wwwPath, fs.readFileSync(asset));
+            targets.forEach(function(target, index) {
+                var pluginContents = ls(target);
+                var targetName = names[index];
+                // Check if we already have the plugin.
+                // TODO edge case: if a new platform is added, then you want
+                // to re-add the plugin to the new platform.
+                if (plugins.indexOf(targetName) > -1) {
+                    throw 'Plugin "' + targetName + '" already added to project.';
                 }
+                // Check if the plugin has a plugin.xml in the root of the
+                // specified dir.
+                if (pluginContents.indexOf('plugin.xml') == -1) {
+                    throw 'Plugin "' + targetName + '" does not have a plugin.xml in the root. Plugin must support the Cordova Plugin Specification: https://github.com/alunny/cordova-plugin-spec';
+                }
+
+                // Check if there is at least one match between plugin
+                // supported platforms and app platforms
+                var pluginXml = new plugin_parser(path.join(target, 'plugin.xml'));
+                var intersection = pluginXml.platforms.filter(function(e) {
+                    if (platforms.indexOf(e) == -1) return false;
+                    else return true;
+                });
+                if (intersection.length === 0) {
+                    throw 'Plugin "' + targetName + '" does not support any of your application\'s platforms. Plugin platforms: ' + pluginXml.platforms.join(', ') + '; your application\'s platforms: ' + platforms.join(', ');
+                }
+
+                hooks.fire('before_plugin_add');
+
+                var pluginWww = path.join(target, 'www');
+                var wwwContents = ls(pluginWww);
+                var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
+
+                // Iterate over all matchin app-plugin platforms in the project and install the
+                // plugin.
+                intersection.forEach(function(platform) {
+                    var cmd = util.format('%s %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
+                    var plugin_cli = shell.exec(cmd, {silent:true});
+                    if (plugin_cli.code > 0) throw 'An error occured during plugin installation for ' + platform + '. ' + cli.output;
+                });
+                
+                // Add the plugin web assets to the www folder as well
+                // TODO: assumption that web assets go under www folder
+                // inside plugin dir; instead should read plugin.xml
+                wwwContents.forEach(function(asset) {
+                    asset = path.resolve(path.join(pluginWww, asset));
+                    var info = fs.lstatSync(asset);
+                    var name = asset.substr(asset.lastIndexOf('/')+1);
+                    var wwwPath = path.join(projectWww, name);
+                    if (info.isDirectory()) {
+                        shell.cp('-r', asset, projectWww);
+                    } else {
+                        fs.writeFileSync(wwwPath, fs.readFileSync(asset));
+                    }
+                });
+
+                // Finally copy the plugin into the project
+                shell.cp('-r', target, pluginPath);
+
+                hooks.fire('after_plugin_add');
             });
-
-            // Finally copy the plugin into the project
-            shell.cp('-r', target, pluginPath);
-
-            hooks.fire('after_plugin_add');
             if (callback) callback();
             break;
         case 'rm':
@@ -115,50 +121,54 @@ module.exports = function plugin(command, target, callback) {
             if (platforms.length === 0) {
                 throw 'You need at least one platform added to your app. Use `cordova platform add <platform>`.';
             }
-            // Check if we have the plugin.
-            if (plugins.indexOf(targetName) > -1) {
-                hooks.fire('before_plugin_rm');
-                var pluginWww = path.join(pluginPath, target, 'www');
-                var wwwContents = ls(pluginWww);
-                var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
+            targets.forEach(function(target, index) {
+                var targetName = names[index];
+                // Check if we have the plugin.
+                if (plugins.indexOf(targetName) > -1) {
+                    var targetPath = path.join(pluginPath, targetName);
+                    hooks.fire('before_plugin_rm');
+                    var pluginWww = path.join(targetPath, 'www');
+                    var wwwContents = ls(pluginWww);
+                    var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
 
-                // Check if there is at least one match between plugin
-                // supported platforms and app platforms
-                var pluginXml = new plugin_parser(path.join(pluginPath, target, 'plugin.xml'));
-                var intersection = pluginXml.platforms.filter(function(e) {
-                    if (platforms.indexOf(e) == -1) return false;
-                    else return true;
-                });
+                    // Check if there is at least one match between plugin
+                    // supported platforms and app platforms
+                    var pluginXml = new plugin_parser(path.join(targetPath, 'plugin.xml'));
+                    var intersection = pluginXml.platforms.filter(function(e) {
+                        if (platforms.indexOf(e) == -1) return false;
+                        else return true;
+                    });
 
-                // Iterate over all matchin app-plugin platforms in the project and uninstall the
-                // plugin.
-                intersection.forEach(function(platform) {
-                    var cmd = util.format('%s -d %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), path.join(pluginPath, target));
-                    var plugin_cli = shell.exec(cmd, {silent:true});
-                    if (plugin_cli.code > 0) throw 'An error occured during plugin uninstallation for ' + platform + '. ' + cli.output;
-                });
-                
-                // Remove the plugin web assets to the www folder as well
-                // TODO: assumption that web assets go under www folder
-                // inside plugin dir; instead should read plugin.xml
-                wwwContents.forEach(function(asset) {
-                    asset = path.resolve(path.join(projectWww, asset));
-                    var info = fs.lstatSync(asset);
-                    if (info.isDirectory()) {
-                        shell.rm('-rf', asset);
-                    } else {
-                        fs.unlinkSync(asset);
-                    }
-                });
+                    // Iterate over all matchin app-plugin platforms in the project and uninstall the
+                    // plugin.
+                    intersection.forEach(function(platform) {
+                        var cmd = util.format('%s -d %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), targetPath);
+                        var plugin_cli = shell.exec(cmd, {silent:true});
+                        if (plugin_cli.code > 0) throw 'An error occured during plugin uninstallation for ' + platform + '. ' + cli.output;
+                    });
+                    
+                    // Remove the plugin web assets to the www folder as well
+                    // TODO: assumption that web assets go under www folder
+                    // inside plugin dir; instead should read plugin.xml
+                    wwwContents.forEach(function(asset) {
+                        asset = path.resolve(path.join(projectWww, asset));
+                        var info = fs.lstatSync(asset);
+                        if (info.isDirectory()) {
+                            shell.rm('-rf', asset);
+                        } else {
+                            fs.unlinkSync(asset);
+                        }
+                    });
 
-                // Finally remove the plugin dir from plugins/
-                shell.rm('-rf', path.join(pluginPath, target));
+                    // Finally remove the plugin dir from plugins/
+                    shell.rm('-rf', targetPath);
 
-                hooks.fire('after_plugin_rm');
-                if (callback) callback();
-            } else {
-                throw 'Plugin "' + targetName + '" not added to project.';
-            }
+                    hooks.fire('after_plugin_rm');
+                } else {
+                    throw 'Plugin "' + targetName + '" not added to project.';
+                }
+            });
+            if (callback) callback();
             break;
         default:
             throw 'Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.';

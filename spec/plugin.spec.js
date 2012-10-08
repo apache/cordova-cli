@@ -150,9 +150,16 @@ describe('plugin command', function() {
                     expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(true);
                 });
             });
-            describe('on Android', function() {
-                it('should properly change any imports of ".R" to match the app\'s package name', function() {
-                    
+            it('should be able to handle adding multiple plugins', function() {
+                cordova.platform('add', 'android');
+                var cb = jasmine.createSpy();
+                runs(function() {
+                    cordova.plugin('add', [testPlugin, androidPlugin], cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'test+android plugin add');
+                runs(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(true);
+                    expect(fs.existsSync(path.join(tempDir, 'plugins', 'android'))).toBe(true);
                 });
             });
         });
@@ -171,7 +178,7 @@ describe('plugin command', function() {
             describe('failure', function() {
                 it('should throw if your app has no platforms added', function() {
                     expect(function() {
-                        cordova.plugin('rm', testPlugin);
+                        cordova.plugin(_invocation, testPlugin);
                     }).toThrow('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
                 });
                 it('should throw if plugin is not added to project', function() {
@@ -182,7 +189,7 @@ describe('plugin command', function() {
                     waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
                     runs(function() {
                         expect(function() {
-                            cordova.plugin('rm', 'test', function() {});
+                            cordova.plugin(_invocation, 'test', function() {});
                         }).toThrow('Plugin "test" not added to project.');
                     });
                 });
@@ -201,7 +208,7 @@ describe('plugin command', function() {
                     });
                     waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
                     runs(function() {
-                        cordova.plugin('rm', 'test', removeCb);
+                        cordova.plugin(_invocation, 'test', removeCb);
                     });
                     waitsFor(function() { return removeCb.wasCalled; }, 'test plugin remove');
                     runs(function() {
@@ -221,11 +228,28 @@ describe('plugin command', function() {
                     });
                     waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
                     runs(function() {
-                        cordova.plugin('rm', 'test', removeCb);
+                        cordova.plugin(_invocation, 'test', removeCb);
                     });
                     waitsFor(function() { return removeCb.wasCalled; }, 'test plugin remove');
                     runs(function() {
                         expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(false);
+                    });
+                });
+                it('should be able to handle removing multiple plugins', function() {
+                    cordova.platform('add', 'android');
+                    var cb = jasmine.createSpy();
+                    var cbtwo = jasmine.createSpy();
+                    runs(function() {
+                        cordova.plugin('add', [testPlugin, androidPlugin], cb);
+                    });
+                    waitsFor(function() { return cb.wasCalled; }, 'test+android plugin add');
+                    runs(function() {
+                        cordova.plugin(_invocation, [testPlugin, androidPlugin], cbtwo);
+                    });
+                    waitsFor(function() { return cbtwo.wasCalled; }, 'test+android plugin rm');
+                    runs(function() {
+                        expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(false);
+                        expect(fs.existsSync(path.join(tempDir, 'plugins', 'android'))).toBe(false);
                     });
                 });
             });
