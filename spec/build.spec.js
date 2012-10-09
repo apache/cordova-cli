@@ -13,12 +13,9 @@ var cordova = require('../cordova'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 var cwd = process.cwd();
+shell.rm('-rf', tempDir);
 
 describe('build command', function() {
-    beforeEach(function() {
-        // Make a temp directory
-        shell.mkdir('-p', tempDir);
-    });
     afterEach(function() {
         shell.rm('-rf', tempDir);
     });
@@ -41,11 +38,10 @@ describe('build command', function() {
         });
 
         var buildcb = jasmine.createSpy();
-        var cb = jasmine.createSpy();
 
         cordova.create(tempDir);
         process.chdir(tempDir);
-        cordova.platform('add', 'android', cb);
+        cordova.platform('add', 'android');
 
         var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
         expect(function() {
@@ -59,6 +55,7 @@ describe('build command', function() {
             process.chdir(cwd);
         });
 
+        shell.mkdir('-p', tempDir);
         process.chdir(tempDir);
 
         expect(function() {
@@ -73,7 +70,6 @@ describe('build command', function() {
 
         afterEach(function() {
             process.chdir(cwd);
-            shell.rm('-rf', tempDir);
         });
        
         describe('Android', function() {
@@ -179,7 +175,6 @@ describe('build command', function() {
 
         afterEach(function() {
             process.chdir(cwd);
-            shell.rm('-rf', tempDir);
         });
         it('should only build the specified platform (array notation)', function() {
             var cb = jasmine.createSpy();
@@ -250,7 +245,6 @@ describe('build command', function() {
         });
         afterEach(function() {
             process.chdir(cwd);
-            shell.rm('-rf', tempDir);
         });
 
         describe('when platforms are added', function() {

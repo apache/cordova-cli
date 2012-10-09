@@ -7,6 +7,7 @@ var cordova_util = require('./util'),
     blackberry_parser = require('./metadata/blackberry_parser'),
     platform = require('./platform'),
     fs = require('fs'),
+    ls = fs.readdirSync,
     n = require('ncallbacks'),
     hooker = require('../src/hooker'),
     util = require('util');
@@ -31,21 +32,12 @@ module.exports = function emulate (platforms, callback) {
     var xml = path.join(projectRoot, 'www', 'config.xml');
     var cfg = new config_parser(xml);
 
-    if (arguments.length === 0) {
-        platforms = platform('ls');
-    } else {
-        if (arguments[arguments.length-1] instanceof Function) {
-            // Called through JS, check platforms param
-            if (platforms instanceof Function) {
-                callback = platforms;
-                platforms = platform('ls');
-            } else if (!(platforms instanceof Array)) platforms = [platforms];
-        } else {
-            // Called through CLI; no callback 
-            if (arguments[0] instanceof Array) platforms = arguments[0];
-            else platforms = Array.prototype.slice.call(arguments, 0);
-            callback = undefined;
-        }
+    if (arguments.length === 0 || (platforms instanceof Array && platforms.length === 0)) {
+        platforms = ls(path.join(projectRoot, 'platforms'));
+    } else if (platforms instanceof String) platforms = [platforms];
+    else if (platforms instanceof Function && callback === undefined) {
+        callback = platforms;
+        platforms = ls(path.join(projectRoot, 'platforms'));
     }
 
     if (platforms.length === 0) throw 'No platforms added to this project. Please use `cordova platform add <platform>`.';

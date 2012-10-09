@@ -17,12 +17,12 @@ module.exports = function platform(command, targets, callback) {
         throw 'Current working directory is not a Cordova-based project.';
     }
 
-    var hooks = new hooker(projectRoot);
+    var hooks = new hooker(projectRoot), end;
 
     if (arguments.length === 0) command = 'ls';
     if (targets) {
         if (!(targets instanceof Array)) targets = [targets];
-        var end = n(targets.length, function() {
+        end = n(targets.length, function() {
             if (callback) callback();
         });
     }

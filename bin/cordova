@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-var cordova = require('./../cordova')
-,   cmd     = process.argv[2]
-,   opts    = process.argv.slice(3, process.argv.length)
+var cordova = require('./../cordova'),
+    tokens  = process.argv.slice(2, process.argv.length);
 
 // provide clean output on exceptions rather than dumping a stack trace
 process.on('uncaughtException', function(err){
@@ -9,20 +8,39 @@ process.on('uncaughtException', function(err){
     process.exit(1);
 });
 
-if (cmd === undefined)  {
+var cmd, version, debug, current;
+
+while (current = tokens.shift()) {
+    if (current[0] == '-') {
+        if (current.indexOf('v') > -1) version = true;
+        if (current.indexOf('d') > -1) debug = true;
+    } else {
+        cmd = current;
+        break;
+    }
+}
+
+// TODO figure out how to incorporate -d logging
+if (version) {
+    console.log(require('../package').version);
+} else if (cmd === undefined)  {
     console.log(cordova.help());
-} else if (cmd[0] == '-') {
-    // options
-    if (cmd[1].toLowerCase() == 'v') {
-        console.log(require('../package').version);
-    }
 } else if (cordova.hasOwnProperty(cmd)) {
-    try {
-        var r = cordova[cmd].apply(this, opts);
-        if (r) console.log(r);
-    } catch(e) {
-        console.error(e);
+    var opts = Array.prototype.slice.call(tokens, 0);
+    var r;
+    if (cmd == 'create' || cmd == 'docs') {
+        r = cordova[cmd].apply(this, opts);
+    } else if (cmd == 'emulate' || cmd == 'build') {
+        r = cordova[cmd].call(this, opts);
+    } else {
+        // platform or plugin cmds
+        if (tokens.length > 2) {
+            opts = [tokens.shift()];
+            opts.push(tokens);
+        }
+        r = cordova[cmd].apply(this, opts);
     }
+    if (r) console.log(r);
 }
 else {
     console.error('Cordova does not know ' + cmd + '; try help for a list of all the available commands.')
