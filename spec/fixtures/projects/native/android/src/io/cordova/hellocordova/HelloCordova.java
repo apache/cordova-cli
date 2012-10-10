@@ -17,13 +17,13 @@
        under the License.
  */
 
-package org.apache.cordova.example;
+package io.cordova.hellocordova;
 
 import android.app.Activity;
 import android.os.Bundle;
 import org.apache.cordova.*;
 
-public class cordovaExample extends DroidGap
+public class HelloCordova extends DroidGap
 {
     @Override
     public void onCreate(Bundle savedInstanceState)

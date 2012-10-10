@@ -7,12 +7,15 @@ var android_parser = require('../../src/metadata/android_parser'),
     cfg_path = path.join(__dirname, '..', 'fixtures', 'projects', 'test', 'www', 'config.xml'),
     android_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'android'),
     android_strings = path.join(android_path, 'res', 'values', 'strings.xml'),
+    android_manifest = path.join(android_path, 'AndroidManifest.xml'),
     tempDir = path.join(__dirname, '..', '..', 'temp'),
     cordova = require('../../cordova');
 
 var cwd = process.cwd();
 
 var original_strings = fs.readFileSync(android_strings, 'utf-8');
+var original_manifest = fs.readFileSync(android_manifest, 'utf-8');
+var original_config = fs.readFileSync(cfg_path, 'utf-8');
 
 describe('android project parser', function() {
     it('should throw an exception with a path that is not a native android project', function() {
@@ -37,6 +40,8 @@ describe('android project parser', function() {
         });
         afterEach(function() {
             fs.writeFileSync(android_strings, original_strings, 'utf-8');
+            fs.writeFileSync(android_manifest, original_manifest, 'utf-8');
+            fs.writeFileSync(cfg_path, original_config, 'utf-8');
         });
         it('should throw an exception if a non config_parser object is passed into it', function() {
             expect(function() {
@@ -52,7 +57,23 @@ describe('android project parser', function() {
 
             expect(app_name).toBe('bond. james bond.');
         });
-        it('should update the application package name properly');
+        it('should update the application package name properly', function() {
+            var javs = path.join(android_path, 'src', 'ca', 'filmaj', 'dewd', 'HelloCordova.java');
+            var orig_javs = path.join(android_path, 'src', 'io', 'cordova', 'hellocordova', 'HelloCordova.java');
+            var orig_contents = fs.readFileSync(orig_javs, 'utf-8');
+            this.after(function() {
+                fs.writeFileSync(orig_javs, orig_contents, 'utf-8');
+                shell.rm('-rf', path.join(android_path, 'src', 'ca'));
+            });
+            config.packageName('ca.filmaj.dewd');
+            project.update_from_config(config);
+
+            var manifest = new et.ElementTree(et.XML(fs.readFileSync(android_manifest, 'utf-8')));
+            expect(manifest.getroot().attrib.package).toEqual('ca.filmaj.dewd');
+
+            expect(fs.existsSync(javs)).toBe(true);
+            expect(fs.readFileSync(javs, 'utf-8')).toMatch(/package ca.filmaj.dewd/i);
+        });
     });
 
     describe('update_www method', function() {

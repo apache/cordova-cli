@@ -10,7 +10,8 @@ module.exports = function android_parser(project) {
         throw 'The provided path is not an Android project.';
     }
     this.path = project;
-    this.strings = path.join(this.path, 'res', 'values', 'strings.xml')
+    this.strings = path.join(this.path, 'res', 'values', 'strings.xml');
+    this.manifest = path.join(this.path, 'AndroidManifest.xml');
 };
 
 module.exports.prototype = {
@@ -22,6 +23,21 @@ module.exports.prototype = {
         var strings = new et.ElementTree(et.XML(fs.readFileSync(this.strings, 'utf-8')));
         strings.find('string[@name="app_name"]').text = name;
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
+
+        var manifest = new et.ElementTree(et.XML(fs.readFileSync(this.manifest, 'utf-8')));
+        var pkg = config.packageName();
+        var orig_pkg = manifest.getroot().attrib.package;
+        manifest.getroot().attrib.package = pkg;
+        fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');
+        var orig_pkgDir = path.join(this.path, 'src', path.join.apply(null, orig_pkg.split('.')));
+        var orig_java_class = fs.readdirSync(orig_pkgDir)[0];
+        var pkgDir = path.join(this.path, 'src', path.join.apply(null, pkg.split('.')));
+        shell.mkdir('-p', pkgDir);
+        var orig_javs = path.join(orig_pkgDir, orig_java_class);
+        var new_javs = path.join(pkgDir, orig_java_class);
+        var javs_contents = fs.readFileSync(orig_javs, 'utf-8');
+        javs_contents = javs_contents.replace(/package [\w\.]*;/, 'package ' + pkg + ';');
+        fs.writeFileSync(new_javs, javs_contents, 'utf-8');
     },
     update_www:function() {
         var projectRoot = util.isCordova(process.cwd());
