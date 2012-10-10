@@ -13,6 +13,7 @@ var blackberry_parser = require('../../src/metadata/blackberry_parser'),
 var cwd = process.cwd();
 
 var original_config = fs.readFileSync(blackberry_config, 'utf-8');
+var orig_www_config = fs.readFileSync(cfg_path, 'utf-8');
 
 describe('blackberry project parser', function() {
     it('should throw an exception with a path that is not a native blackberry project', function() {
@@ -37,6 +38,7 @@ describe('blackberry project parser', function() {
         });
         afterEach(function() {
             fs.writeFileSync(blackberry_config, original_config, 'utf-8');
+            fs.writeFileSync(cfg_path, orig_www_config, 'utf-8');
         });
         it('should throw an exception if a non config_parser object is passed into it', function() {
             expect(function() {
@@ -51,7 +53,13 @@ describe('blackberry project parser', function() {
 
             expect(bb_cfg.name()).toBe('bond. james bond.');
         });
-        it('should update the application package name properly');
+        it('should update the application package name properly', function() {
+            config.packageName('sofa.king.awesome');
+            project.update_from_config(config);
+
+            var bb_cfg = new config_parser(blackberry_config);
+            expect(bb_cfg.packageName()).toBe('sofa.king.awesome');
+        });
     });
 
     describe('update_www method', function() {

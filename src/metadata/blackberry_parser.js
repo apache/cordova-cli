@@ -20,6 +20,7 @@ module.exports.prototype = {
         } else throw 'update_from_config requires a config_parser object';
 
         this.xml.name(config.name());
+        this.xml.packageName(config.packageName());
     },
     update_project:function(cfg, callback) {
         this.update_from_config(cfg);

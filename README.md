@@ -77,6 +77,7 @@ Contains the project's web artifacts, such as .html, .css and .js files. These a
 This file is what you should be editing to modify your application's metadata. Any time you run any cordova-client commands, the tool will look at the contents of `config.xml` and use all relevant info from this file to define native application information. cordova-client supports changing your application's data via the following elements inside the `config.xml` file:
 
 - The user-facing name can be modified via the contents of the `<name>` element.
+- The package name (AKA bundle identifier or application id) can be modified via the `id` attribute from the top-level `<widget>` element.
 
 # Hooks
 
