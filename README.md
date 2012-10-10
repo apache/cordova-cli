@@ -38,11 +38,11 @@ cordova-client has a single global `create` command that creates new cordova pro
 ## Project Commands
 
 - `platform [ls | list]` list all platforms the project will build to
-- `platform add <platform>` add a platform as a build target for the project
-- `platform [rm | remove] <platform>` removes a platform as a build target for the project
+- `platform add <platform> [<platform> ...]` add one (or more) platforms as a build target for the project
+- `platform [rm | remove] <platform> [<platform> ...]` removes one (or more) platforms as a build target for the project
 - `plugin [ls | list]` list all plugins added to the project
-- `plugin add <path-to-plugin>` add a plugin to the project
-- `plugin [rm | remove] <plugin-name>` remove an added plugin
+- `plugin add <path-to-plugin> [<path-to-plugin> ...]` add one (or more) plugins to the project
+- `plugin [rm | remove] <plugin-name> [<plugin-name> ...]` remove one (or more) added plugins
 - `build [<platform> [<platform> [...]]]` compile the app and deploy to a connected + compatible device. With no parameters builds for all platforms added to the project, otherwise builds for the specified platforms
 - `emulate [<platform> [<platform> [...]]]` launch emulators and deploy app to them. With no parameters emulates for all platforms added to the project, otherwise emulates for the specified platforms
 
