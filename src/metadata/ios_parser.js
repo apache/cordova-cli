@@ -1,6 +1,7 @@
 var fs   = require('fs'),
     path = require('path'),
     xcode = require('xcode'),
+    plist = require('plist'),
     util = require('../util'),
     shell = require('shelljs'),
     config_parser = require('../config_parser');
@@ -10,6 +11,8 @@ module.exports = function ios_parser(project) {
         var xcodeproj_dir = fs.readdirSync(project).filter(function(e) { return e.match(/\.xcodeproj$/i); })[0];
         if (!xcodeproj_dir) throw 'The provided path is not a Cordova iOS project.';
         this.xcodeproj = path.join(project, xcodeproj_dir);
+        this.originalName = this.xcodeproj.substring(this.xcodeproj.lastIndexOf('/'), this.xcodeproj.indexOf('.xcodeproj'));
+        this.cordovaproj = path.join(project, this.originalName);
     } catch(e) {
         throw 'The provided path is not a Cordova iOS project.';
     }
@@ -22,8 +25,16 @@ module.exports.prototype = {
         } else throw 'update_from_config requires a config_parser object';
 
         var name = config.name();
-        var proj = new xcode.project(this.pbxproj);
+        var pkg = config.packageName();
 
+        // Update package id (bundle id)
+        var plistFile = path.join(this.cordovaproj, this.originalName + '-Info.plist');
+        var plistObj = plist.parseFileSync(plistFile);
+        plistObj.CFBundleIdentifier = pkg;
+        fs.writeFileSync(plistFile, plist.build(plistObj));
+
+        // Update product name
+        var proj = new xcode.project(this.pbxproj);
         var parser = this;
         proj.parse(function(err,hash) {
             if (err) throw 'An error occured during parsing of project.pbxproj. Start weeping.';

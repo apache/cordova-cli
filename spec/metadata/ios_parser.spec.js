@@ -7,11 +7,14 @@ var ios_parser = require('../../src/metadata/ios_parser'),
     cfg_path = path.join(__dirname, '..', 'fixtures', 'projects', 'test', 'www', 'config.xml'),
     ios_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'ios'),
     tempDir = path.join(__dirname, '..', '..', 'temp'),
+    ios_plist = path.join(ios_path, 'balls', 'balls-Info.plist'),
     ios_pbx = path.join(ios_path, 'balls.xcodeproj', 'project.pbxproj');
 
 var cwd = process.cwd();
 
 var original_pbx = fs.readFileSync(ios_pbx, 'utf-8');
+var original_plist = fs.readFileSync(ios_plist, 'utf-8');
+var original_config = fs.readFileSync(cfg_path, 'utf-8');
 
 describe('ios project parser', function() {
     it('should throw an exception with a path that is not a native ios project', function() {
@@ -60,7 +63,25 @@ describe('ios project parser', function() {
                 expect(pbx_contents.match(/PRODUCT_NAME\s*=\s*"bond. james bond."/)[0]).toBe('PRODUCT_NAME = "bond. james bond."');
             });
         });
-        it('should update the application package name properly');
+        it('should update the application package name (bundle identifier) properly', function() {
+            var cb = jasmine.createSpy();
+            this.after(function() {
+                fs.writeFileSync(ios_plist, original_plist, 'utf-8');
+                fs.writeFileSync(cfg_path, original_config, 'utf-8');
+            });
+
+            runs(function() {
+                config.packageName('ca.filmaj.dewd');
+                project.update_from_config(config, cb);
+            });
+
+            waitsFor(function() { return cb.wasCalled; }, "update_from_config callback");
+
+            runs(function() {
+                var plist_contents = fs.readFileSync(ios_plist, 'utf-8');
+                expect(plist_contents.match(/<string>ca.filmaj.dewd/));
+            });
+        });
     });
 
     describe('update_www method', function() {
