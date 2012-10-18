@@ -84,12 +84,12 @@ module.exports = function plugin(command, targets, callback) {
 
                 var pluginWww = path.join(target, 'www');
                 var wwwContents = ls(pluginWww);
-                var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
+                var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'pluginstall.js');
 
                 // Iterate over all matchin app-plugin platforms in the project and install the
                 // plugin.
                 intersection.forEach(function(platform) {
-                    var cmd = util.format('%s %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
+                    var cmd = util.format('%s --platform %s --project "%s" --plugin "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
                     var plugin_cli = shell.exec(cmd, {silent:true});
                     if (plugin_cli.code > 0) throw 'An error occured during plugin installation for ' + platform + '. ' + cli.output;
                 });
@@ -129,7 +129,7 @@ module.exports = function plugin(command, targets, callback) {
                     hooks.fire('before_plugin_rm');
                     var pluginWww = path.join(targetPath, 'www');
                     var wwwContents = ls(pluginWww);
-                    var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'cli.js');
+                    var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'pluginstall.js');
 
                     // Check if there is at least one match between plugin
                     // supported platforms and app platforms
@@ -142,7 +142,7 @@ module.exports = function plugin(command, targets, callback) {
                     // Iterate over all matchin app-plugin platforms in the project and uninstall the
                     // plugin.
                     intersection.forEach(function(platform) {
-                        var cmd = util.format('%s -d %s "%s" "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), targetPath);
+                        var cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --remove', cli, platform, path.join(projectRoot, 'platforms', platform), targetPath);
                         var plugin_cli = shell.exec(cmd, {silent:true});
                         if (plugin_cli.code > 0) throw 'An error occured during plugin uninstallation for ' + platform + '. ' + cli.output;
                     });

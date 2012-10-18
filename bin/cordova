@@ -23,7 +23,7 @@ while (current = tokens.shift()) {
 // TODO figure out how to incorporate -d logging
 if (version) {
     console.log(require('../package').version);
-} else if (cmd === undefined)  {
+} else if (cmd === undefined) {
     console.log(cordova.help());
 } else if (cordova.hasOwnProperty(cmd)) {
     var opts = Array.prototype.slice.call(tokens, 0);
@@ -41,7 +41,6 @@ if (version) {
         r = cordova[cmd].apply(this, opts);
     }
     if (r) console.log(r);
-}
-else {
+} else {
     console.error('Cordova does not know ' + cmd + '; try help for a list of all the available commands.')
 }
