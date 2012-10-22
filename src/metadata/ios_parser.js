@@ -1,7 +1,6 @@
 var fs   = require('fs'),
     path = require('path'),
     xcode = require('xcode'),
-    plist = require('plist'),
     util = require('../util'),
     shell = require('shelljs'),
     config_parser = require('../config_parser');
@@ -29,9 +28,9 @@ module.exports.prototype = {
 
         // Update package id (bundle id)
         var plistFile = path.join(this.cordovaproj, this.originalName + '-Info.plist');
-        var plistObj = plist.parseFileSync(plistFile);
-        plistObj.CFBundleIdentifier = pkg;
-        fs.writeFileSync(plistFile, plist.build(plistObj));
+        var contents = fs.readFileSync(plistFile, 'utf-8');
+        contents = contents.replace(/<key>CFBundleIdentifier<\/key>\s*<string>.*<\/string>/i, '<key>CFBundleIdentifier</key><string>' + pkg + '</string>');
+        fs.writeFileSync(plistFile, contents, 'utf-8');
 
         // Update product name
         var proj = new xcode.project(this.pbxproj);

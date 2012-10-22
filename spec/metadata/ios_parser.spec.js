@@ -79,7 +79,7 @@ describe('ios project parser', function() {
 
             runs(function() {
                 var plist_contents = fs.readFileSync(ios_plist, 'utf-8');
-                expect(plist_contents.match(/<string>ca.filmaj.dewd/));
+                expect(plist_contents).toMatch(/<string>ca.filmaj.dewd/);
             });
         });
     });
