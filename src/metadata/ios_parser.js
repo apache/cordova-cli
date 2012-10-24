@@ -48,7 +48,7 @@ module.exports.prototype = {
         var projectRoot = util.isCordova(process.cwd());
         var www = path.join(projectRoot, 'www');
         shell.cp('-rf', www, this.path);
-        var jsPath = path.join(__dirname, '..', '..', 'lib', 'ios', 'CordovaLib', 'javascript', 'cordova.ios.js');
+        var jsPath = path.join(__dirname, '..', '..', 'lib', 'ios', 'bin', 'templates', 'project', 'www', 'cordova-2.2.0rc1.js');
         fs.writeFileSync(path.join(this.path, 'www', 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
     },
     update_project:function(cfg, callback) {

@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "preferGlobal": "true",
   "description": "Cordova client tool",
   "main": "cordova",
@@ -28,6 +28,8 @@
     "express":"3.0",
     "shelljs":"0.0.7",
     "ncallbacks":"1.0.0",
+    "adm-zip":"0.1.8",
+    "request":"2.11.4",
     "prompt":"0.2.7"
   },
   "devDependencies": {

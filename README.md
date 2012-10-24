@@ -5,7 +5,6 @@
 # Requirements
 
 * [nodejs](http://nodejs.org/)
-* [git](https://help.github.com/articles/set-up-git)
 * SDKs for every platform you wish to support
   - [BlackBerry WebWorks SDK](http://developer.blackberry.com)
   - [iOS SDK](http://developer.apple.com)
@@ -15,8 +14,10 @@
 
 cordova-client has been tested on Mas OS X and Linux.
 
-In it's prototype stages, cordova-client will only work on Cordova
-v2.1.0.
+If you are using cordova-client for building iOS applications, you will need to run the latest Mac OS with the latest XCode (4.5+) and XCode Command Line Tools.
+
+In it's prototype stages, cordova-client only works with Cordova
+v2.2.0rc1.
 
 # Install
 
@@ -96,19 +97,11 @@ If you are using cordova-client as a module within a larger node application, yo
 ## Creating a new cordova project
 This example shows how to create a project from scratch named KewlApp with iOS and Android platform support, and includes a plugin named Kewlio. The project will live in ~/MyProjects/KewlApp
 
-```
-cordova create ~/KewlApp KewlApp
-
-cd ~/KewlApp
-
-cordova platform add ios
-
-cordova platform add android
-
-cordova plugin add http://example.org/Kewlio-1.2.3.tar.gz
-
-cordova build 
-```
+    cordova create ~/KewlApp KewlApp
+    cd ~/KewlApp
+    cordova platform add ios android
+    cordova plugin add http://example.org/Kewlio-1.2.3.tar.gz
+    cordova build 
 
 The directory structure of KewlApp now looks like this:
 

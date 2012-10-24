@@ -1,6 +1,7 @@
 var cordova = require('../cordova'),
     path = require('path'),
     shell = require('shelljs'),
+    request = require('request'),
     fs = require('fs'),
     et = require('elementtree'),
     config_parser = require('../src/config_parser'),
@@ -106,42 +107,39 @@ describe('platform command', function() {
             });
             afterEach(function() {
                 libs.forEach(function(p) {
-                    var s = path.join(lib, p + '-bkup');
+                    var s = path.join(lib, p + '-bkup', '*');
                     var d = path.join(lib, p);
+                    shell.mkdir(d);
                     shell.mv(s, d);
+                    shell.rm('-rf', path.join(lib, p + '-bkup'));
                 });
             });
-            it('should clone down the android library and checkout appropriate tag', function() {
-                var s = spyOn(shell, 'exec').andReturn({code:0});
+            it('should download the android library', function() {
+                var s = spyOn(request, 'get');
                 try {
                     cordova.platform('add', 'android', function() {});
                 } catch(e) {}
 
                 expect(s).toHaveBeenCalled();
-                expect(s.calls[0].args[0].match(/^git clone.*cordova-android/)).not.toBeNull();
-                expect(s.calls[1].args[0].match(/git checkout 47daaaf/)).not.toBeNull();
+                expect(s.calls[0].args[0]).toMatch(/cordova-android\/zipball/);
             });
-            it('should clone down the ios library and checkout appropriate tag', function() {
-                var s = spyOn(shell, 'exec').andReturn({code:0});
-
+            it('should download the ios library', function() {
+                var s = spyOn(request, 'get');
                 try {
                     cordova.platform('add', 'ios', function() {});
                 } catch(e) {}
 
                 expect(s).toHaveBeenCalled();
-                expect(s.calls[0].args[0].match(/^git clone.*cordova-ios/)).not.toBeNull();
-                expect(s.calls[1].args[0].match(/git checkout 2.1.0/)).not.toBeNull();
+                expect(s.calls[0].args[0]).toMatch(/cordova-ios\/zipball/);
             });
-            it('should clone down the blackberry library and checkout appropriate tag', function() {
-                var s = spyOn(shell, 'exec').andReturn({code:0});
-
+            it('should download the blackberry library', function() {
+                var s = spyOn(request, 'get');
                 try {
                     cordova.platform('add', 'blackberry', function() {});
                 } catch(e) {}
 
                 expect(s).toHaveBeenCalled();
-                expect(s.calls[0].args[0].match(/^git clone.*cordova-blackberry/)).not.toBeNull();
-                expect(s.calls[1].args[0].match(/git checkout 2.1.0/)).not.toBeNull();
+                expect(s.calls[0].args[0]).toMatch(/cordova-blackberry-webworks\/zipball/);
             });
             it('should add a basic android project');
             it('should add a basic ios project');
