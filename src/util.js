@@ -11,6 +11,10 @@ var repos = {
     blackberry:'https://github.com/apache/incubator-cordova-blackberry-webworks/'
 };
 
+function chmod(path) {
+    shell.exec('chmod +x "' + path + '"', {silent:true});
+}
+
 module.exports = {
     // Runs up the directory chain looking for a .cordova directory.
     // IF it is found we are in a Cordova project.
@@ -68,11 +72,21 @@ module.exports = {
 
             // chmod the create file
             var create = path.join(outPath, 'bin', 'create');
-            shell.exec('chmod +x "' + create + '"', {silent:true});
+            chmod(create);
 
+            // chmod debug+emulate
             if (target == 'ios') {
-                shell.exec('chmod +x "' + path.join(outPath, 'bin', 'replaces') + '"', {silent:true});
-                shell.exec('chmod +x "' + path.join(outPath, 'bin', 'update_cordova_subproject') + '"', {silent:true});
+                chmod(path.join(outPath, 'bin', 'replaces'));
+                chmod(path.join(outPath, 'bin', 'update_cordova_subproject'));
+                chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'debug'));
+                chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'emulate'));
+            } else if (target == 'android') {
+                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'cordova'));
+                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'debug'));
+                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'emulate'));
+            } else if (target == 'blackberry') {
+                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'debug'));
+                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'emulate'));
             }
 
             // Clean up
