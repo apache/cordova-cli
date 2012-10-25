@@ -174,6 +174,18 @@ describe('platform command', function() {
                 cordova.platform('add', 'ios');
                 expect(s).toHaveBeenCalled();
             });
+            it('should error out if user does not have xcode 4.5 or above installed', function() {
+                var s = spyOn(shell, 'exec').andReturn({code:0,output:'Xcode 4.2.1'});
+                expect(function() {
+                    cordova.platform('add', 'ios');
+                }).toThrow();
+            });
+            it('should error out if user does not have xcode installed at all', function() {
+                var s = spyOn(shell, 'exec').andReturn({code:1});
+                expect(function() {
+                    cordova.platform('add', 'ios');
+                }).toThrow();
+            });
         });
         describe('blackberry-10', function() {
             it('should add a basic blackberry project', function() {

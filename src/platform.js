@@ -8,6 +8,7 @@ var config_parser = require('./config_parser'),
     ios_parser    = require('./metadata/ios_parser'),
     hooker        = require('./hooker'),
     n             = require('ncallbacks'),
+    semver        = require('semver'),
     shell         = require('shelljs');
 
 module.exports = function platform(command, targets, callback) {
@@ -44,6 +45,14 @@ module.exports = function platform(command, targets, callback) {
                 var output = path.join(projectRoot, 'platforms', target);
 
                 var shell_to_cordova = function() {
+                    if (target == 'ios') {
+                        // Check xcode + version.
+                        var xcode = shell.exec('xcodebuild -version', {silent:true});
+                        if (xcode.code != 0) throw 'Xcode is not installed. Cannot add iOS platform.';
+                        var xc_version = xcode.output.split('\n')[0].split(' ')[1];
+                        var MIN_XCODE_VERSION = '4.5.x';
+                        if (semver.lt(xc_version, MIN_XCODE_VERSION)) throw ('Xcode version installed is too old. Minimum: ' + MIN_XCODE_VERSION + ', yours: ' + xc_version);
+                    }
                     // Create a platform app using the ./bin/create scripts that exist in each repo.
                     // TODO: eventually refactor to allow multiple versions to be created.
                     // Check if output directory already exists.
