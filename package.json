@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "preferGlobal": "true",
   "description": "Cordova client tool",
   "main": "cordova",
