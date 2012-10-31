@@ -15,11 +15,13 @@ var cordova_util  = require('./util'),
     util          = require('util');
 
 function shell_out_to_debug(projectRoot, platform) {
-    var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'debug > /dev/null');
+    var cmd = path.join(projectRoot, 'platforms', platform);
     // TODO: wait for https://issues.apache.org/jira/browse/CB-1548 to be fixed before we axe this
     // TODO: this is bb10 only for now
     if (platform.indexOf('blackberry') > -1) {
-        cmd = 'ant -f ' + path.join(projectRoot, 'platforms', platform, 'build.xml') + ' qnx load-device';
+        cmd = 'ant -f "' + path.join(cmd, 'build.xml') + '" qnx load-device';
+    } else {
+        cmd = '"' + cmd + '/cordova/debug"';
     }
     var response = shell.exec(cmd, {silent:true});
     if (response.code > 0) throw 'An error occurred while building the ' + platform + ' project. ' + response.output;

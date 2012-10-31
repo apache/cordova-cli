@@ -15,13 +15,13 @@ module.exports = {
         require('shelljs').exec = function(cmd, opts) {
             // Match various commands to exec
             if (cmd.match(/android.bin.create/)) {
-                var r = new RegExp(/android.bin.create"\s"([\/\\\w-_\.]*)"/);
+                var r = new RegExp(/android.bin.create"\s"([\/\\\w-_\.\s]*)"/);
                 var dir = r.exec(cmd)[1];
                 shell.cp('-r', android_project, path.join(dir, '..'));
                 fs.chmodSync(path.join(dir, 'cordova', 'debug'), '754');
                 return {code:0};
             } else if (cmd.match(/blackberry.bin.create/)) {
-                var r = new RegExp(/blackberry.bin.create"\s"([\/\\\w-_\.]*)"/);
+                var r = new RegExp(/blackberry.bin.create"\s"([\/\\\w-_\.\s]*)"/);
                 var dir = r.exec(cmd)[1];
                 var platformsDir = path.join(dir, '..');
                 shell.cp('-r', bb_project, platformsDir);

@@ -49,7 +49,29 @@ describe('build command', function() {
         }).not.toThrow();
         expect(s).toHaveBeenCalled();
     });
-    
+    xit('should run inside a directory with a space', function() {
+        var spaceDir = path.join(__dirname, '..', 'foo proj');
+        var cb = jasmine.createSpy();
+        var buildcb = jasmine.createSpy();
+        this.after(function() {
+            process.chdir(cwd);
+            shell.rm('-rf', spaceDir);
+        });
+
+        runs(function() {
+            cordova.create(spaceDir);
+            process.chdir(spaceDir);
+            cordova.platform('add', 'ios', cb);
+        });
+        waitsFor(function() { return cb.wasCalled; }, 'ios create');
+
+        runs(function() {
+            expect(function() {
+                cordova.build(buildcb);
+            }).not.toThrow();
+        });
+        waitsFor(function() { return buildcb.wasCalled; }, 'ios build');
+    });
     it('should not run outside of a Cordova-based project', function() {
         this.after(function() {
             process.chdir(cwd);
@@ -80,7 +102,7 @@ describe('build command', function() {
             it('should shell out to debug command on Android', function() {
                 var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
                 cordova.build();
-                expect(s.mostRecentCall.args[0].match(/android\/cordova\/debug > \/dev\/null$/)).not.toBeNull();
+                expect(s.mostRecentCall.args[0].match(/\/cordova\/debug/)).not.toBeNull();
             });
             it('should call android_parser\'s update_project', function() {
                 spyOn(require('shelljs'), 'exec').andReturn({code:0});
@@ -106,7 +128,7 @@ describe('build command', function() {
                 waitsFor(function() { return buildcb.wasCalled; }, 'ios build');
                 runs(function() {
                     expect(s).toHaveBeenCalled();
-                    expect(s.mostRecentCall.args[0].match(/ios\/cordova\/debug > \/dev\/null$/)).not.toBeNull();
+                    expect(s.mostRecentCall.args[0].match(/\/cordova\/debug/)).not.toBeNull();
                 });
             });
             it('should call ios_parser\'s update_project', function() {
@@ -143,7 +165,7 @@ describe('build command', function() {
                 waitsFor(function() { return buildcb.wasCalled; }, 'build call', 20000);
                 runs(function() {
                     expect(s).toHaveBeenCalled();
-                    expect(s.mostRecentCall.args[0].match(/ant -f .*build\.xml qnx load-device/)).not.toBeNull();
+                    expect(s.mostRecentCall.args[0]).toMatch(/ant -f .*build\.xml" qnx load-device/);
                 });
             });
             it('should call blackberry_parser\'s update_project', function() {
