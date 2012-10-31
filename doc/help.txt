@@ -13,12 +13,12 @@ Project-Level Commands
     plugin [add|remove|ls [path]] ..... adds or removes a plugin (from the specified path), or lists all currently-added plugins
     build ............................. builds a cordova project
     emulate ........................... starts emulator for cordova project
-    docs .............................. serves docs at http://localhost:2222
+    help .............................. shows this!
 
 Example usage
 
     $ cordova create Baz
     $ cd Baz
     $ cordova platform add android
-    $ cordova build && cordova emulate 
+    $ cordova build
 

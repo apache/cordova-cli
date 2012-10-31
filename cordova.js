@@ -2,7 +2,6 @@ var cordova_events = require('./src/events');
 
 module.exports = {
     help:     require('./src/help'),
-    docs:     require('./src/docs'),
     create:   require('./src/create'),
     platform: require('./src/platform'),
     build:    require('./src/build'),
