@@ -13,7 +13,7 @@ module.exports = function hooker(root) {
 module.exports.prototype = {
     fire:function fire(hook) {
         var dir = path.join(this.root, '.cordova', 'hooks', hook);
-        if (!(fs.existsSync(dir))) throw 'Unrecognized hook "' + hook + '".';
+        if (!(fs.existsSync(dir))) return true; // hooks directory got axed post-create; ignore.
 
         // Fire JS hook/event
         events.emit(hook);

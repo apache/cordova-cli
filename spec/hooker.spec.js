@@ -42,10 +42,10 @@ describe('hooker', function() {
         });
 
         describe('failure', function() {
-            it('should throw if the hook is unrecognized', function() {
+            it('should not throw if the hook is unrecognized', function() {
                 expect(function() {
                     h.fire('CLEAN YOUR SHORTS GODDAMNIT LIKE A BIG BOY!');
-                }).toThrow();
+                }).not.toThrow();
             });
             it('should throw if any script exits with non-zero code', function() {
                 var script = path.join(tempDir, '.cordova', 'hooks', 'before_build', 'fail.sh');
