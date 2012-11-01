@@ -91,7 +91,7 @@ module.exports = function plugin(command, targets, callback) {
                 intersection.forEach(function(platform) {
                     var cmd = util.format('%s --platform %s --project "%s" --plugin "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
                     var plugin_cli = shell.exec(cmd, {silent:true});
-                    if (plugin_cli.code > 0) throw 'An error occured during plugin installation for ' + platform + '. ' + cli.output;
+                    if (plugin_cli.code > 0) throw 'An error occured during plugin installation for ' + platform + '. ' + plugin_cli.output;
                 });
                 
                 // Add the plugin web assets to the www folder as well
@@ -144,7 +144,7 @@ module.exports = function plugin(command, targets, callback) {
                     intersection.forEach(function(platform) {
                         var cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --remove', cli, platform, path.join(projectRoot, 'platforms', platform), targetPath);
                         var plugin_cli = shell.exec(cmd, {silent:true});
-                        if (plugin_cli.code > 0) throw 'An error occured during plugin uninstallation for ' + platform + '. ' + cli.output;
+                        if (plugin_cli.code > 0) throw 'An error occured during plugin uninstallation for ' + platform + '. ' + plugin_cli.output;
                     });
                     
                     // Remove the plugin web assets to the www folder as well
