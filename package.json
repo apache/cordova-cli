@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "preferGlobal": "true",
   "description": "Cordova client tool",
   "main": "cordova",
@@ -23,7 +23,7 @@
   "dependencies": {
     "colors":">=0.6.0",
     "elementtree":"0.1.3",
-    "pluginstall":"git://github.com/imhotep/pluginstall.git#0.3.4",
+    "pluginstall":"git://github.com/imhotep/pluginstall.git#0.5.2",
     "xcode":"0.5.1",
     "express":"3.0",
     "shelljs":"0.0.7",
