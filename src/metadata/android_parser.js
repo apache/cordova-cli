@@ -12,6 +12,7 @@ module.exports = function android_parser(project) {
     this.path = project;
     this.strings = path.join(this.path, 'res', 'values', 'strings.xml');
     this.manifest = path.join(this.path, 'AndroidManifest.xml');
+    this.android_config = path.join(this.path, 'res', 'xml', 'config.xml');
 };
 
 module.exports.prototype = {
@@ -19,11 +20,13 @@ module.exports.prototype = {
         if (config instanceof config_parser) {
         } else throw 'update_from_config requires a config_parser object';
 
+        // Update app name by editing res/values/strings.xml
         var name = config.name();
         var strings = new et.ElementTree(et.XML(fs.readFileSync(this.strings, 'utf-8')));
         strings.find('string[@name="app_name"]').text = name;
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
 
+        // Update package name by changing the AndroidManifest id and moving the entry class around to the proper package directory
         var manifest = new et.ElementTree(et.XML(fs.readFileSync(this.manifest, 'utf-8')));
         var pkg = config.packageName();
         var orig_pkg = manifest.getroot().attrib.package;
@@ -38,7 +41,19 @@ module.exports.prototype = {
         var javs_contents = fs.readFileSync(orig_javs, 'utf-8');
         javs_contents = javs_contents.replace(/package [\w\.]*;/, 'package ' + pkg + ';');
         fs.writeFileSync(new_javs, javs_contents, 'utf-8');
+
+        // Update whitelist by changing res/xml/config.xml
+        var android_cfg_xml = new config_parser(this.android_config);
+        // clean out all existing access elements first
+        android_cfg_xml.access.get().forEach(function(uri) {
+            android_cfg_xml.access.remove(uri);
+        });
+        // add only the ones specified in the www/config.xml file
+        config.access.get().forEach(function(uri) {
+            android_cfg_xml.access.add(uri);
+        });
     },
+
     update_www:function() {
         var projectRoot = util.isCordova(process.cwd());
         var www = path.join(projectRoot, 'www');

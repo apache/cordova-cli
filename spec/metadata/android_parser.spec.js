@@ -8,6 +8,7 @@ var android_parser = require('../../src/metadata/android_parser'),
     android_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'android'),
     android_strings = path.join(android_path, 'res', 'values', 'strings.xml'),
     android_manifest = path.join(android_path, 'AndroidManifest.xml'),
+    android_config = path.join(android_path, 'res', 'xml', 'config.xml'),
     tempDir = path.join(__dirname, '..', '..', 'temp'),
     cordova = require('../../cordova');
 
@@ -16,6 +17,7 @@ var cwd = process.cwd();
 var original_strings = fs.readFileSync(android_strings, 'utf-8');
 var original_manifest = fs.readFileSync(android_manifest, 'utf-8');
 var original_config = fs.readFileSync(cfg_path, 'utf-8');
+var original_android_config = fs.readFileSync(android_config, 'utf-8');
 
 describe('android project parser', function() {
     it('should throw an exception with a path that is not a native android project', function() {
@@ -42,6 +44,7 @@ describe('android project parser', function() {
             fs.writeFileSync(android_strings, original_strings, 'utf-8');
             fs.writeFileSync(android_manifest, original_manifest, 'utf-8');
             fs.writeFileSync(cfg_path, original_config, 'utf-8');
+            fs.writeFileSync(android_config, original_android_config, 'utf-8');
         });
         it('should throw an exception if a non config_parser object is passed into it', function() {
             expect(function() {
@@ -73,6 +76,18 @@ describe('android project parser', function() {
 
             expect(fs.existsSync(javs)).toBe(true);
             expect(fs.readFileSync(javs, 'utf-8')).toMatch(/package ca.filmaj.dewd/i);
+        });
+        it('should update the whitelist properly', function() {
+            config.access.remove('*');
+            config.access.add('http://apache.org');
+            config.access.add('http://github.com');
+            project.update_from_config(config);
+
+            var native_config = new et.ElementTree(et.XML(fs.readFileSync(android_config, 'utf-8')));
+            var as = native_config.findall('access');
+            expect(as.length).toEqual(2);
+            expect(as[0].attrib.origin).toEqual('http://apache.org');
+            expect(as[1].attrib.origin).toEqual('http://github.com');
         });
     });
 
