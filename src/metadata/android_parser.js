@@ -45,9 +45,7 @@ module.exports.prototype = {
         // Update whitelist by changing res/xml/config.xml
         var android_cfg_xml = new config_parser(this.android_config);
         // clean out all existing access elements first
-        android_cfg_xml.access.get().forEach(function(uri) {
-            android_cfg_xml.access.remove(uri);
-        });
+        android_cfg_xml.access.remove();
         // add only the ones specified in the www/config.xml file
         config.access.get().forEach(function(uri) {
             android_cfg_xml.access.add(uri);

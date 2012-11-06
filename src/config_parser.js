@@ -38,7 +38,10 @@ access.prototype = {
     },
     remove:function(uri) {
         var self = this;
-        this.config.doc.findall('access[@origin="' + uri + '"]').forEach(function(a) {
+        var els = [];
+        if (uri) els = this.config.doc.findall('access[@origin="' + uri + '"]');
+        else els = this.config.doc.findall('access');
+        els.forEach(function(a) {
             self.config.doc.getroot().remove(0, a);
         });
         this.config.update();

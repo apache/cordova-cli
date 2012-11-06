@@ -97,6 +97,12 @@ describe('config.xml parser', function () {
                 cfg.access.add('http://cordova.io');
                 expect(fs.readFileSync(xml, 'utf-8')).toMatch(/<access origin="http:\/\/cordova\.io/);
             });
+            it('should allow removing all access elements when no parameter is specified', function() {
+                cfg.access.add('http://cordova.io');
+                cfg.access.remove();
+
+                expect(fs.readFileSync(xml, 'utf-8')).not.toMatch(/<access.*\/>/);
+            });
         });
     });
 });

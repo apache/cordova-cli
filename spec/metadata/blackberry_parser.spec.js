@@ -60,6 +60,17 @@ describe('blackberry project parser', function() {
             var bb_cfg = new config_parser(blackberry_config);
             expect(bb_cfg.packageName()).toBe('sofa.king.awesome');
         });
+        it('should update the whitelist properly', function() {
+            config.access.remove('*');
+            config.access.add('http://blackberry.com');
+            config.access.add('http://rim.com');
+            project.update_from_config(config);
+
+            var bb_cfg = new config_parser(blackberry_config);
+            expect(bb_cfg.access.get().length).toEqual(2);
+            expect(bb_cfg.access.get()[0]).toEqual('http://blackberry.com');
+            expect(bb_cfg.access.get()[1]).toEqual('http://rim.com');
+        });
     });
 
     describe('update_www method', function() {

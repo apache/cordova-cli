@@ -21,6 +21,11 @@ module.exports.prototype = {
 
         this.xml.name(config.name());
         this.xml.packageName(config.packageName());
+        this.xml.access.remove();
+        var self = this;
+        config.access.get().forEach(function(uri) {
+            self.xml.access.add(uri);
+        });
     },
     update_project:function(cfg, callback) {
         this.update_from_config(cfg);
