@@ -8,13 +8,15 @@ var ios_parser = require('../../src/metadata/ios_parser'),
     ios_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'ios'),
     tempDir = path.join(__dirname, '..', '..', 'temp'),
     ios_plist = path.join(ios_path, 'balls', 'balls-Info.plist'),
-    ios_pbx = path.join(ios_path, 'balls.xcodeproj', 'project.pbxproj');
+    ios_pbx = path.join(ios_path, 'balls.xcodeproj', 'project.pbxproj'),
+    cordova_plist = path.join(ios_path, 'balls', 'Cordova.plist');
 
 var cwd = process.cwd();
 
 var original_pbx = fs.readFileSync(ios_pbx, 'utf-8');
 var original_plist = fs.readFileSync(ios_plist, 'utf-8');
 var original_config = fs.readFileSync(cfg_path, 'utf-8');
+var orig_cordova = fs.readFileSync(cordova_plist, 'utf-8');
 
 describe('ios project parser', function() {
     it('should throw an exception with a path that is not a native ios project', function() {
@@ -39,6 +41,9 @@ describe('ios project parser', function() {
         });
         afterEach(function() {
             fs.writeFileSync(ios_pbx, original_pbx, 'utf-8');
+            fs.writeFileSync(cordova_plist, orig_cordova, 'utf-8');
+            fs.writeFileSync(ios_plist, original_plist, 'utf-8');
+            fs.writeFileSync(cfg_path, original_config, 'utf-8');
         });
         it('should throw an exception if a non config_parser object is passed into it', function() {
             expect(function() {
@@ -47,9 +52,6 @@ describe('ios project parser', function() {
         });
         it('should update the application name properly', function() {
             var cb = jasmine.createSpy();
-            this.after(function() {
-                fs.writeFileSync(ios_pbx, original_pbx, 'utf-8');
-            });
 
             runs(function() {
                 config.name('bond. james bond.');
@@ -65,10 +67,6 @@ describe('ios project parser', function() {
         });
         it('should update the application package name (bundle identifier) properly', function() {
             var cb = jasmine.createSpy();
-            this.after(function() {
-                fs.writeFileSync(ios_plist, original_plist, 'utf-8');
-                fs.writeFileSync(cfg_path, original_config, 'utf-8');
-            });
 
             runs(function() {
                 config.packageName('ca.filmaj.dewd');
@@ -80,6 +78,20 @@ describe('ios project parser', function() {
             runs(function() {
                 var plist_contents = fs.readFileSync(ios_plist, 'utf-8');
                 expect(plist_contents).toMatch(/<string>ca.filmaj.dewd/);
+            });
+        });
+        it('should update the externalhosts whitelist properly', function() {
+            var cb = jasmine.createSpy();
+
+            runs(function() {
+                project.update_from_config(config, cb);
+            });
+
+            waitsFor(function() { return cb.wasCalled; }, "update_from_config callback");
+
+            runs(function() {
+                var plist_contents = fs.readFileSync(cordova_plist, 'utf-8');
+                expect(plist_contents).toMatch(/<key>ExternalHosts<\/key>\s*<array>\s*<string>\*<\/string>/);
             });
         });
     });

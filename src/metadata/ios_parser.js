@@ -3,6 +3,7 @@ var fs   = require('fs'),
     xcode = require('xcode'),
     util = require('../util'),
     shell = require('shelljs'),
+    plist = require('plist'),
     config_parser = require('../config_parser');
 
 module.exports = function ios_parser(project) {
@@ -28,9 +29,16 @@ module.exports.prototype = {
 
         // Update package id (bundle id)
         var plistFile = path.join(this.cordovaproj, this.originalName + '-Info.plist');
-        var contents = fs.readFileSync(plistFile, 'utf-8');
-        contents = contents.replace(/<key>CFBundleIdentifier<\/key>\s*<string>.*<\/string>/i, '<key>CFBundleIdentifier</key><string>' + pkg + '</string>');
-        fs.writeFileSync(plistFile, contents, 'utf-8');
+        var infoPlist = plist.parseFileSync(plistFile);
+        infoPlist['CFBundleIdentifier'] = pkg;
+        fs.writeFileSync(plistFile, plist.build(infoPlist), 'utf-8');
+
+        // Update whitelist
+        var cordovaPlist = path.join(this.cordovaproj, 'Cordova.plist');
+        var contents = plist.parseFileSync(cordovaPlist);
+        var whitelist = config.access.get();
+        contents['ExternalHosts'] = whitelist;
+        fs.writeFileSync(cordovaPlist, plist.build(contents), 'utf-8');
 
         // Update product name
         var proj = new xcode.project(this.pbxproj);
