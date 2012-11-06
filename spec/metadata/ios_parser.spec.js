@@ -131,7 +131,7 @@ describe('ios project parser', function() {
             runs(function() {
                 parser = new ios_parser(ios_platform);
                 parser.update_www();
-                expect(fs.readFileSync(path.join(ios_platform, 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'ios', 'bin', 'templates', 'project', 'www', 'cordova-2.2.0rc1.js'), 'utf-8'));
+                expect(fs.readFileSync(path.join(ios_platform, 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'ios', 'bin', 'templates', 'project', 'www', 'cordova-2.2.0.js'), 'utf-8'));
             });
         });
     });

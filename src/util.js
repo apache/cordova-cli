@@ -5,6 +5,8 @@ var fs         = require('fs'),
     admzip     = require('adm-zip'),
     shell      = require('shelljs');
 
+var cordova_lib_tag = '2.2.0';
+
 var repos = {
     ios:'https://github.com/apache/incubator-cordova-ios/',
     android:'https://github.com/apache/incubator-cordova-android/',
@@ -33,10 +35,18 @@ module.exports = {
         } else return false;
     },
     // Determines whether the library has a copy of the specified
-    // Cordova implementation
+    // Cordova implementation at the current proper version
     havePlatformLib: function havePlatformLib(platform, callback) {
         var dir = path.join(__dirname, '..', 'lib', module.exports.underlyingLib(platform));
-        return fs.existsSync(dir);
+        if (fs.existsSync(dir)) {
+            var versionFile = path.join(dir, 'VERSION');
+            if (platform == 'ios') versionFile = path.join(dir, 'CordovaLib', 'VERSION');
+            var version = fs.readFileSync(versionFile, 'utf-8').replace(/\s/g,'');
+            if (version != cordova_lib_tag) {
+                shell.rm('-rf', dir);
+                return false;
+            } else return true;
+        } else return false;
     },
     /**
      * checkout a platform from the git repo
@@ -49,9 +59,6 @@ module.exports = {
         if (!repos[target]) {
             throw new Error('platform "' + target + '" not found.');
         }
-
-        // specify which project tag to check out. minimum tag is 2.2.0rc1
-        var cordova_lib_tag = '2.2.0rc1';
 
         var outPath = path.join(__dirname, '..', 'lib', target);
         shell.mkdir('-p', outPath);
