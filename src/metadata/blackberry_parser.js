@@ -49,6 +49,12 @@ module.exports.prototype = {
         this.write_project_properties();
         if (callback) callback();
     },
+
+    // Returns the platform-specific www directory.
+    www_dir:function() {
+        return path.join(this.path, 'www');
+    },
+
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
         var www = path.join(projectRoot, 'www');

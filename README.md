@@ -46,6 +46,7 @@ cordova-client has a single global `create` command that creates new cordova pro
 - `plugin [rm | remove] <plugin-name> [<plugin-name> ...]` remove one (or more) added plugins
 - `build [<platform> [<platform> [...]]]` compile the app and deploy to a connected + compatible device. With no parameters builds for all platforms added to the project, otherwise builds for the specified platforms
 - `emulate [<platform> [<platform> [...]]]` launch emulators and deploy app to them. With no parameters emulates for all platforms added to the project, otherwise emulates for the specified platforms
+- `serve <platform> [port]` launch a local web server for that platform's www directory on the given port (default 8000).
 
 
 # Project Directory Structure

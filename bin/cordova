@@ -27,7 +27,7 @@ if (version) {
 } else if (cordova.hasOwnProperty(cmd)) {
     var opts = Array.prototype.slice.call(tokens, 0);
     var r;
-    if (cmd == 'create' || cmd == 'docs') {
+    if (cmd == 'create' || cmd == 'docs' || cmd == 'serve') {
         r = cordova[cmd].apply(this, opts);
     } else if (cmd == 'emulate' || cmd == 'build') {
         r = cordova[cmd].call(this, opts);
