@@ -23,7 +23,6 @@ module.exports.prototype = {
     update_from_config:function(config, callback) {
         if (config instanceof config_parser) {
         } else throw 'update_from_config requires a config_parser object';
-
         var name = config.name();
         var pkg = config.packageName();
 
@@ -31,15 +30,17 @@ module.exports.prototype = {
         var plistFile = path.join(this.cordovaproj, this.originalName + '-Info.plist');
         var infoPlist = plist.parseFileSync(plistFile);
         infoPlist['CFBundleIdentifier'] = pkg;
-        fs.writeFileSync(plistFile, plist.build(infoPlist), 'utf-8');
-
+        var info_contents = plist.build(infoPlist);
+        info_contents = info_contents.replace(/<string>\s*<\/string>/,'<string></string>');
+        fs.writeFileSync(plistFile, info_contents, 'utf-8');
+        
         // Update whitelist
         var cordovaPlist = path.join(this.cordovaproj, 'Cordova.plist');
         var contents = plist.parseFileSync(cordovaPlist);
         var whitelist = config.access.get();
         contents['ExternalHosts'] = whitelist;
         fs.writeFileSync(cordovaPlist, plist.build(contents), 'utf-8');
-
+        
         // Update product name
         var proj = new xcode.project(this.pbxproj);
         var parser = this;
