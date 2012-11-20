@@ -11,7 +11,8 @@ module.exports = function blackberry_parser(project) {
         throw 'The provided path is not a Cordova BlackBerry WebWorks project.';
     }
     this.path = project;
-    this.xml = new config_parser(path.join(this.path, 'www', 'config.xml'));
+    this.config_path = path.join(this.path, 'www', 'config.xml');
+    this.xml = new config_parser(this.config_path);
 };
 
 module.exports.prototype = {
@@ -23,9 +24,16 @@ module.exports.prototype = {
         this.xml.packageName(config.packageName());
         this.xml.access.remove();
         var self = this;
-        config.access.get().forEach(function(uri) {
-            self.xml.access.add(uri);
+        this.xml.doc.findall('access').forEach(function(a) {
+            self.xml.doc.getroot().remove(0, a);
         });
+        config.access.get().forEach(function(uri) {
+            var el = new et.Element('access');
+            el.attrib.uri = uri;
+            el.attrib.subdomains = 'true';
+            self.xml.doc.getroot().append(el);
+        });
+        this.xml.update();
     },
     update_project:function(cfg, callback) {
         this.update_from_config(cfg);

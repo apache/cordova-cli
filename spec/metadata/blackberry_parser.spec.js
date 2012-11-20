@@ -1,6 +1,7 @@
 var blackberry_parser = require('../../src/metadata/blackberry_parser'),
     config_parser = require('../../src/config_parser'),
     path = require('path'),
+    et = require('elementtree'),
     shell = require('shelljs'),
     cordova = require('../../cordova'),
     fs = require('fs'),
@@ -66,10 +67,11 @@ describe('blackberry project parser', function() {
             config.access.add('http://rim.com');
             project.update_from_config(config);
 
-            var bb_cfg = new config_parser(blackberry_config);
-            expect(bb_cfg.access.get().length).toEqual(2);
-            expect(bb_cfg.access.get()[0]).toEqual('http://blackberry.com');
-            expect(bb_cfg.access.get()[1]).toEqual('http://rim.com');
+            var bb_cfg = new et.ElementTree(et.XML(fs.readFileSync(blackberry_config, 'utf-8')));
+            var as = bb_cfg.getroot().findall('access');
+            expect(as.length).toEqual(2);
+            expect(as[0].attrib.uri).toEqual('http://blackberry.com');
+            expect(as[1].attrib.uri).toEqual('http://rim.com');
         });
     });
 
