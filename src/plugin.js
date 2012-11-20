@@ -110,7 +110,9 @@ module.exports = function plugin(command, targets, callback) {
                 });
 
                 // Finally copy the plugin into the project
-                shell.cp('-r', target, pluginPath);
+                var targetPath = path.join(pluginPath, targetName);
+                shell.mkdir('-p', targetPath);
+                shell.cp('-r', path.join(target, '*'), targetPath);
 
                 hooks.fire('after_plugin_add');
             });
