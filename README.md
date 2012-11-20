@@ -89,6 +89,10 @@ Projects created by cordova-client have `before` and `after` hooks for each [pro
 
 These are located under the `.cordova/hooks` directory in the root of your cordova project. Any scripts you add to these directories will be executed before and after the appropriate commands. Useful for integrating your own build systems or integrating with version control systems. __Remember__: make your scripts executable.
 
+### Examples
+
+- [`before_build` hook for jade template compiling](https://gist.github.com/4100866) courtesy of [dpogue](http://github.com/dpogue)
+
 ## Module-level Hooks
 
 If you are using cordova-client as a module within a larger node application, you can also use the standard `EventEmitter` methods to attach to the events. The events include `before_build`, `before_docs`, `before_emulate`, `before_platform_add`, `before_platform_ls`, `before_platform_rm`, `before_plugin_add`, `before_plugin_ls` and `before_plugin_rm`. Additionally, there are `after_` flavours of all the above events.
