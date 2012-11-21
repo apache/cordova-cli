@@ -11,39 +11,53 @@ var cordova_util = require('./util'),
     http = require("http"),
     url = require("url");
 
-function launch_server(www, port) {
+
+function launch_server(www, platform_www, port) {
     port = port || 8000;
 
-    http.createServer(function(request, response) {
-        var uri = url.parse(request.url).pathname;
-        var filename = path.join(www, uri);
+    // Searches these directories in order looking for the requested file.
+    var searchPath = [www, platform_www];
 
-        fs.exists(filename, function(exists) {
-            if(!exists) {
+    var server = http.createServer(function(request, response) {
+        var uri = url.parse(request.url).pathname;
+
+        function checkPath(pathIndex) {
+            if (searchPath.length <= pathIndex) {
                 response.writeHead(404, {"Content-Type": "text/plain"});
                 response.write("404 Not Found\n");
                 response.end();
                 return;
             }
 
-            if (fs.statSync(filename).isDirectory()) filename += path.sep + 'index.html';
+            var filename = path.join(searchPath[pathIndex], uri);
 
-            fs.readFile(filename, "binary", function(err, file) {
-                if(err) {
-                    response.writeHead(500, {"Content-Type": "text/plain"});
-                    response.write(err + "\n");
-                    response.end();
+            fs.exists(filename, function(exists) {
+                if(!exists) {
+                    checkPath(pathIndex+1);
                     return;
                 }
 
-                response.writeHead(200);
-                response.write(file, "binary");
-                response.end();
+                if (fs.statSync(filename).isDirectory()) filename += path.sep + 'index.html';
+
+                fs.readFile(filename, "binary", function(err, file) {
+                    if(err) {
+                        response.writeHead(500, {"Content-Type": "text/plain"});
+                        response.write(err + "\n");
+                        response.end();
+                        return;
+                    }
+
+                    response.writeHead(200);
+                    response.write(file, "binary");
+                    response.end();
+                });
             });
-        });
+        }
+        checkPath(0);
     }).listen(parseInt(''+port, 10));
 
     console.log("Static file server running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown");
+    return server;
 }
 
 module.exports = function serve (platform, port) {
@@ -59,14 +73,11 @@ module.exports = function serve (platform, port) {
     // Retrieve the platforms.
     var platforms = ls(path.join(projectRoot, 'platforms'));
     if (!platform) {
-        console.log('You need to specify a platform.');
-        process.exit(1);
+        throw 'You need to specify a platform.';
     } else if (platforms.length == 0) {
-        console.log('No platforms to serve.');
-        process.exit(1);
+        throw 'No platforms to serve.';
     } else if (platforms.filter(function(x) { return x == platform }).length == 0) {
-        console.log(platform + ' is not an installed platform.');
-        process.exit(1);
+        throw platform + ' is not an installed platform.';
     }
 
     // If we got to this point, the given platform is valid.
@@ -74,7 +85,13 @@ module.exports = function serve (platform, port) {
     // Default port is 8000 if not given. This is also the default of the Python module.
     port = port || 8000;
 
+    // Top-level www directory.
+    var www = projectRoot + path.sep + 'www';
+
     var parser, platformPath;
+
+    // Hack for testing despite its async nature.
+    var returnValue = {};
     switch (platform) {
         case 'android':
             platformPath = path.join(projectRoot, 'platforms', 'android');
@@ -82,8 +99,8 @@ module.exports = function serve (platform, port) {
 
             // Update the related platform project from the config
             parser.update_project(cfg);
-            var www = parser.www_dir();
-            launch_server(www, port);
+            var platform_www = parser.www_dir();
+            returnValue.server = launch_server(www, platform_www, port);
             break;
         case 'blackberry-10':
             platformPath = path.join(projectRoot, 'platforms', 'blackberry-10');
@@ -92,7 +109,7 @@ module.exports = function serve (platform, port) {
             // Update the related platform project from the config
             parser.update_project(cfg, function() {
                 // Shell it
-                launch_server(parser.www_dir(), port);
+                returnValue.server = launch_server(www, parser.www_dir(), port);
             });
             break;
         case 'ios':
@@ -101,9 +118,10 @@ module.exports = function serve (platform, port) {
             parser = new ios_parser(platformPath);
             // Update the related platform project from the config
             parser.update_project(cfg, function() {
-                launch_server(parser.www_dir(), port);
+                returnValue.server = launch_server(www, parser.www_dir(), port);
             });
             break;
     }
+    return returnValue;
 };
 
