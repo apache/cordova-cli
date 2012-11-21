@@ -52,6 +52,11 @@ module.exports.prototype = {
         });
     },
 
+    // Returns the platform-specific www directory.
+    www_dir:function() {
+        return path.join(this.path, 'assets', 'www');
+    },
+
     update_www:function() {
         var projectRoot = util.isCordova(process.cwd());
         var www = path.join(projectRoot, 'www');
@@ -65,3 +70,4 @@ module.exports.prototype = {
         this.update_www();
     }
 };
+

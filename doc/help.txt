@@ -13,6 +13,9 @@ Project-Level Commands
     plugin [add|remove|ls [path]] ..... adds or removes a plugin (from the specified path), or lists all currently-added plugins
     build ............................. builds a cordova project
     emulate ........................... starts emulator for cordova project
+    serve <platform> [port] ........... runs a local web server for the www/ directory of the given platform
+                                        the default port is 8000
+                                        note that you must edit the native code to point at the server!
     help .............................. shows this!
 
 Example usage
@@ -21,4 +24,5 @@ Example usage
     $ cd Baz
     $ cordova platform add android
     $ cordova build
+    $ cordova serve android
 
