@@ -47,7 +47,7 @@ access.prototype = {
         this.config.update();
     },
     get:function() {
-        return this.config.doc.findall('access').map(function(a) { return a.attrib.origin; });
+        return this.config.doc.findall('access').map(function(a) { return a.attrib.origin || a.attrib.uri; });
     }
 };
 

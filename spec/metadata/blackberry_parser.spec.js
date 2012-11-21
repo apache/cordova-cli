@@ -61,17 +61,29 @@ describe('blackberry project parser', function() {
             var bb_cfg = new config_parser(blackberry_config);
             expect(bb_cfg.packageName()).toBe('sofa.king.awesome');
         });
-        it('should update the whitelist properly', function() {
-            config.access.remove('*');
-            config.access.add('http://blackberry.com');
-            config.access.add('http://rim.com');
-            project.update_from_config(config);
+        describe('whitelist', function() {
+            it('should update the whitelist when using access elements with origin attribute', function() {
+                config.access.remove('*');
+                config.access.add('http://blackberry.com');
+                config.access.add('http://rim.com');
+                project.update_from_config(config);
 
-            var bb_cfg = new et.ElementTree(et.XML(fs.readFileSync(blackberry_config, 'utf-8')));
-            var as = bb_cfg.getroot().findall('access');
-            expect(as.length).toEqual(2);
-            expect(as[0].attrib.uri).toEqual('http://blackberry.com');
-            expect(as[1].attrib.uri).toEqual('http://rim.com');
+                var bb_cfg = new et.ElementTree(et.XML(fs.readFileSync(blackberry_config, 'utf-8')));
+                var as = bb_cfg.getroot().findall('access');
+                expect(as.length).toEqual(2);
+                expect(as[0].attrib.uri).toEqual('http://blackberry.com');
+                expect(as[1].attrib.uri).toEqual('http://rim.com');
+            });
+            it('should update the whitelist when using access elements with uri attributes', function() {
+                fs.writeFileSync(cfg_path, fs.readFileSync(cfg_path, 'utf-8').replace(/origin="\*/,'uri="http://rim.com'), 'utf-8');
+                config = new config_parser(cfg_path);
+                project.update_from_config(config);
+
+                var bb_cfg = new et.ElementTree(et.XML(fs.readFileSync(blackberry_config, 'utf-8')));
+                var as = bb_cfg.getroot().findall('access');
+                expect(as.length).toEqual(1);
+                expect(as[0].attrib.uri).toEqual('http://rim.com');
+            });
         });
     });
 
