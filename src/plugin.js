@@ -84,7 +84,7 @@ module.exports = function plugin(command, targets, callback) {
 
                 var pluginWww = path.join(target, 'www');
                 var wwwContents = ls(pluginWww);
-                var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'pluginstall.js');
+                var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
 
                 // Iterate over all matchin app-plugin platforms in the project and install the
                 // plugin.
@@ -131,7 +131,7 @@ module.exports = function plugin(command, targets, callback) {
                     hooks.fire('before_plugin_rm');
                     var pluginWww = path.join(targetPath, 'www');
                     var wwwContents = ls(pluginWww);
-                    var cli = path.join(__dirname, '..', 'node_modules', 'pluginstall', 'pluginstall.js');
+                    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
 
                     // Check if there is at least one match between plugin
                     // supported platforms and app platforms

@@ -5,12 +5,12 @@ var fs         = require('fs'),
     admzip     = require('adm-zip'),
     shell      = require('shelljs');
 
-var cordova_lib_tag = '2.2.0';
+var cordova_lib_tag = '2.3.0rc1';
 
 var repos = {
-    ios:'https://github.com/apache/incubator-cordova-ios/',
-    android:'https://github.com/apache/incubator-cordova-android/',
-    blackberry:'https://github.com/apache/incubator-cordova-blackberry-webworks/'
+    ios:'https://github.com/apache/cordova-ios/',
+    android:'https://github.com/apache/cordova-android/',
+    blackberry:'https://github.com/apache/cordova-blackberry/'
 };
 
 function chmod(path) {
