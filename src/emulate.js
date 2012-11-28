@@ -17,6 +17,8 @@ function shell_out_to_emulate(root, platform) {
     // TODO: bad bad bad
     if (platform.indexOf('blackberry') > -1) {
         cmd = 'ant -f ' + path.join(root, 'platforms', platform, 'build.xml') + ' qnx load-simulator';
+    } else if (platform.indexOf('android') > -1) {
+        cmd = path.join(root, 'platforms', platform, 'cordova', 'run');
     }
     var em = shell.exec(cmd, {silent:true});
     if (em.code > 0) throw 'An error occurred while emulating/deploying the ' + platform + ' project.' + em.output;

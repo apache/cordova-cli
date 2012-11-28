@@ -4,6 +4,7 @@ var fs   = require('fs'),
     util = require('../util'),
     shell = require('shelljs'),
     plist = require('plist'),
+    et = require('elementtree'),
     config_parser = require('../config_parser');
 
 module.exports = function ios_parser(project) {
@@ -34,13 +35,6 @@ module.exports.prototype = {
         info_contents = info_contents.replace(/<string>\s*<\/string>/,'<string></string>');
         fs.writeFileSync(plistFile, info_contents, 'utf-8');
         
-        // Update whitelist
-        var cordovaPlist = path.join(this.cordovaproj, 'Cordova.plist');
-        var contents = plist.parseFileSync(cordovaPlist);
-        var whitelist = config.access.get();
-        contents['ExternalHosts'] = whitelist;
-        fs.writeFileSync(cordovaPlist, plist.build(contents), 'utf-8');
-        
         // Update product name
         var proj = new xcode.project(this.pbxproj);
         var parser = this;
@@ -63,8 +57,10 @@ module.exports.prototype = {
         var projectRoot = util.isCordova(process.cwd());
         var www = path.join(projectRoot, 'www');
         shell.cp('-rf', www, this.path);
-        var jsPath = path.join(__dirname, '..', '..', 'lib', 'ios', 'bin', 'templates', 'project', 'www', 'cordova-2.2.0.js');
-        fs.writeFileSync(path.join(this.path, 'www', 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
+        //shell.cp('-f', path.join(www, 'config.xml'), path.join(this.cordovaproj, 'config.xml'));
+        var project_www = path.join(this.path, 'www');
+        var js = fs.readdirSync(project_www).filter(function(e) { return e.match(/\.js$/i); })[0];
+        shell.mv('-f', path.join(project_www, js), path.join(project_www, 'cordova.js'));
     },
     update_project:function(cfg, callback) {
         var self = this;

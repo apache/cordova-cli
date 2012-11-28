@@ -21,7 +21,7 @@ function shell_out_to_debug(projectRoot, platform) {
     if (platform.indexOf('blackberry') > -1) {
         cmd = 'ant -f "' + path.join(cmd, 'build.xml') + '" qnx load-device';
     } else {
-        cmd = '"' + cmd + '/cordova/debug"';
+        cmd = '"' + cmd + '/cordova/build"';
     }
     var response = shell.exec(cmd, {silent:true});
     if (response.code > 0) throw 'An error occurred while building the ' + platform + ' project. ' + response.output;

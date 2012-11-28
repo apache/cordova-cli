@@ -81,16 +81,20 @@ module.exports = {
             var create = path.join(outPath, 'bin', 'create');
             chmod(create);
 
-            // chmod debug+emulate
+            // chmod executable scripts 
             if (target == 'ios') {
                 chmod(path.join(outPath, 'bin', 'replaces'));
                 chmod(path.join(outPath, 'bin', 'update_cordova_subproject'));
-                chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'debug'));
+                chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'build'));
+                chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'run'));
+                chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'release'));
                 chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'emulate'));
             } else if (target == 'android') {
                 chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'cordova'));
-                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'debug'));
-                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'emulate'));
+                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'build'));
+                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'run'));
+                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'clean'));
+                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'release'));
             } else if (target == 'blackberry') {
                 chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'debug'));
                 chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'emulate'));

@@ -1,8 +1,8 @@
 {
   "name": "cordova",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "preferGlobal": "true",
-  "description": "Cordova client tool",
+  "description": "Cordova command line interface tool",
   "main": "cordova",
   "bin": {
     "cordova": "./bin/cordova"
@@ -27,7 +27,7 @@
     "plist":"git://github.com/filmaj/node-plist.git",
     "xcode":"0.5.1",
     "express":"3.0",
-    "shelljs":"0.0.7",
+    "shelljs":"0.0.8",
     "ncallbacks":"1.0.0",
     "adm-zip":"0.1.8",
     "request":"2.11.4",
