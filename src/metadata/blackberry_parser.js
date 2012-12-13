@@ -76,7 +76,7 @@ module.exports.prototype = {
         shell.mv(temp_cfg, cfg_www);
 
         // Move the js to just cordova.js
-        shell.mv('-f', path.join(platformWww, 'qnx', 'cordova-*.js'), path.join(platformWww, 'cordova.js'));
+        shell.mv('-f', path.join(platformWww, 'cordova-*.js'), path.join(platformWww, 'cordova.js'));
 
         // Add the webworks.js script file
         // TODO: assumption that index.html is only file that needs the hot webworks script injection
