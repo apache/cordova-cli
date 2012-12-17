@@ -1,4 +1,4 @@
-# cordova-client
+# cordova-cli
 
 > The command line tool to build, deploy and manage [Cordova](http://cordova.io)-based applications.
 
@@ -12,12 +12,12 @@
     will not work unless you have the absolute latest updates for all
     Android SDK components. Also you will need the SDK's `tools` and `platform-tools` directories on your __system path__ otherwise Android support will fail.
 
-cordova-client has been tested on Mas OS X and Linux.
+cordova-cli has been tested on Mas OS X and Linux.
 
-If you are using cordova-client for building iOS applications, you will need to run the latest Mac OS with the latest XCode (4.5+) and XCode Command Line Tools.
+If you are using cordova-cli for building iOS applications, you will need to run the latest Mac OS with the latest XCode (4.5+) and XCode Command Line Tools.
 
-In it's prototype stages, cordova-client only works with Cordova
-v2.2.0rc1.
+In it's prototype stages, cordova-cli only works with Cordova
+v2.3.0rc1.
 
 # Install
 
@@ -29,7 +29,7 @@ npm install -g cordova
 
 # Getting Started
 
-cordova-client has a single global `create` command that creates new cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
+cordova-cli has a single global `create` command that creates new cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
 
 ## Global Command
 
@@ -50,7 +50,7 @@ cordova-client has a single global `create` command that creates new cordova pro
 
 
 # Project Directory Structure
-A Cordova application built with cordova-client will have the following
+A Cordova application built with cordova-cli will have the following
 directory structure:
 
     myApp/
@@ -76,7 +76,7 @@ Contains the project's web artifacts, such as .html, .css and .js files. These a
 
 ### Your Blanket: www/config.xml 
 
-This file is what you should be editing to modify your application's metadata. Any time you run any cordova-client commands, the tool will look at the contents of `config.xml` and use all relevant info from this file to define native application information. cordova-client supports changing your application's data via the following elements inside the `config.xml` file:
+This file is what you should be editing to modify your application's metadata. Any time you run any cordova-cli commands, the tool will look at the contents of `config.xml` and use all relevant info from this file to define native application information. cordova-cli supports changing your application's data via the following elements inside the `config.xml` file:
 
 - The user-facing name can be modified via the contents of the `<name>` element.
 - The package name (AKA bundle identifier or application id) can be modified via the `id` attribute from the top-level `<widget>` element.
@@ -84,7 +84,7 @@ This file is what you should be editing to modify your application's metadata. A
 
 # Hooks
 
-Projects created by cordova-client have `before` and `after` hooks for each [project command](#project_commands). There are two types of hooks: project-specific ones and module-level ones.
+Projects created by cordova-cli have `before` and `after` hooks for each [project command](#project_commands). There are two types of hooks: project-specific ones and module-level ones.
 
 ## Project-specific Hooks
 
@@ -96,7 +96,7 @@ These are located under the `.cordova/hooks` directory in the root of your cordo
 
 ## Module-level Hooks
 
-If you are using cordova-client as a module within a larger node application, you can also use the standard `EventEmitter` methods to attach to the events. The events include `before_build`, `before_docs`, `before_emulate`, `before_platform_add`, `before_platform_ls`, `before_platform_rm`, `before_plugin_add`, `before_plugin_ls` and `before_plugin_rm`. Additionally, there are `after_` flavours of all the above events.
+If you are using cordova-cli as a module within a larger node application, you can also use the standard `EventEmitter` methods to attach to the events. The events include `before_build`, `before_docs`, `before_emulate`, `before_platform_add`, `before_platform_ls`, `before_platform_rm`, `before_plugin_add`, `before_plugin_ls` and `before_plugin_rm`. Additionally, there are `after_` flavours of all the above events.
 
 # Examples
 
@@ -131,7 +131,7 @@ The directory structure of KewlApp now looks like this:
 
 ## TO-DO + Issues
 
-Please check [cordova-client on GitHub](http://github.com/filmaj/cordova-client). If you find issues with this tool, please be so kind as to include relevant information needed to debug issues such as:
+Please check [Cordova issues with the CLI Component](http://issues.cordova.io). If you find issues with this tool, please be so kind as to include relevant information needed to debug issues such as:
 
 - Your operating system and version
 - The application name, directory location, and identifier used with `create`
