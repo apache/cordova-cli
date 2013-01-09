@@ -19,6 +19,7 @@ module.exports = function ios_parser(project) {
     }
     this.path = project;
     this.pbxproj = path.join(this.xcodeproj, 'project.pbxproj');
+    this.config = new config_parser(path.join(this.cordovaproj, 'config.xml'));
 };
 module.exports.prototype = {
     update_from_config:function(config, callback) {
@@ -34,6 +35,18 @@ module.exports.prototype = {
         var info_contents = plist.build(infoPlist);
         info_contents = info_contents.replace(/<string>\s*<\/string>/,'<string></string>');
         fs.writeFileSync(plistFile, info_contents, 'utf-8');
+
+        // Update whitelist
+        var self = this;
+        this.config.doc.findall('access').forEach(function(a) {
+            self.config.doc.getroot().remove(0, a);
+        });
+        config.access.get().forEach(function(uri) {
+            var el = new et.Element('access');
+            el.attrib.origin = uri;
+            self.config.doc.getroot().append(el);
+        });
+        this.config.update();
         
         // Update product name
         var proj = new xcode.project(this.pbxproj);

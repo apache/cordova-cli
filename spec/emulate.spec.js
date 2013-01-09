@@ -37,19 +37,25 @@ describe('emulate command', function() {
         });
 
         var cb = jasmine.createSpy();
+        var cbem = jasmine.createSpy();
+        var s;
 
         runs(function() {
             cordova.create(tempDir);
             process.chdir(tempDir);
-            cordova.platform('add', 'android', cb);
+            cordova.platform('add', 'ios', cb);
         });
-        waitsFor(function() { return cb.wasCalled; }, 'platform add android callback');
+        waitsFor(function() { return cb.wasCalled; }, 'platform add ios');
 
         runs(function() {
-            var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
+            s = spyOn(shell, 'exec').andReturn({code:0});
             expect(function() {
-                cordova.emulate();
+                cordova.emulate(cbem);
             }).not.toThrow();
+        });
+        waitsFor(function() { return cbem.wasCalled; }, 'ios emulate');
+
+        runs(function() {
             expect(s).toHaveBeenCalled();
         });
     });
@@ -81,10 +87,10 @@ describe('emulate command', function() {
                 cordova.platform('add', 'android');
             });
 
-            it('should shell out to emulate command on Android', function() {
+            it('should shell out to run command on Android', function() {
                 var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
                 cordova.emulate();
-                expect(s.mostRecentCall.args[0].match(/android\/cordova\/emulate/)).not.toBeNull();
+                expect(s.mostRecentCall.args[0].match(/android\/cordova\/run/)).not.toBeNull();
             });
             it('should call android_parser\'s update_project', function() {
                 spyOn(require('shelljs'), 'exec').andReturn({code:0});
@@ -130,17 +136,17 @@ describe('emulate command', function() {
             });
         });
         describe('BlackBerry', function() {
-            it('should shell out to ant command on blackberry-10', function() {
+            it('should shell out to ant command on blackberry', function() {
                 var buildcb = jasmine.createSpy();
                 var cb = jasmine.createSpy();
                 var s, t = spyOn(require('prompt'), 'get').andReturn(true);
 
                 runs(function() {
-                    cordova.platform('add', 'blackberry-10', cb);
+                    cordova.platform('add', 'blackberry', cb);
                     // Fake prompt invoking its callback
                     t.mostRecentCall.args[1](null, {});
                 });
-                waitsFor(function() { return cb.wasCalled; }, 'platform add blackberry callback');
+                waitsFor(function() { return cb.wasCalled; }, 'platform add blackberry');
                 runs(function() {
                     s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
                     cordova.emulate(buildcb);
@@ -158,10 +164,10 @@ describe('emulate command', function() {
 
                 runs(function() {
                     var p = spyOn(require('prompt'), 'get');
-                    cordova.platform('add', 'blackberry-10', cb);
+                    cordova.platform('add', 'blackberry', cb);
                     p.mostRecentCall.args[1](null, {});
                 });
-                waitsFor(function() { return cb.wasCalled; }, 'platform add bb callback');
+                waitsFor(function() { return cb.wasCalled; }, 'platform add bb');
                 runs(function() {
                     s = spyOn(blackberry_parser.prototype, 'update_project');
                     cordova.emulate(buildcb);
@@ -226,7 +232,7 @@ describe('emulate command', function() {
             waitsFor(function() { return cb.wasCalled; }, 'platform add ios');
             runs(function() {
                 var g = spyOn(require('prompt'), 'get');
-                cordova.platform('add', 'blackberry-10', bbcb);
+                cordova.platform('add', 'blackberry', bbcb);
                 g.mostRecentCall.args[1](null, {}); // fake out prompt io
             });
             waitsFor(function() { return bbcb.wasCalled; }, 'platform add bb');

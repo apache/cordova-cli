@@ -194,20 +194,7 @@ describe('cli interface', function() {
     });
 
     describe('build', function() {
-        beforeEach(function() {
-            cordova.create(tempDir);
-            process.chdir(tempDir);
-            cordova.platform('add', 'android');
-        });
-        afterEach(function() {
-            process.chdir(cwd);
-        });
-        it('should be able to build all platforms when none are specified', function() {
-            var result = shell.exec(bin + ' build', {silent:true});
-            expect(result.code).toEqual(0);
-            var buildContents = fs.readdirSync(path.join(tempDir, 'platforms', 'android', 'bin'));
-            expect(buildContents.length > 0).toBe(true);
-        });
+        xit('should be able to build all platforms when none are specified');
         xit('should be able to build a specific single platform');
         xit('should be able to build multiple, specific platforms from a single invocation');
     });

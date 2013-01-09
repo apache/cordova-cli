@@ -1,9 +1,6 @@
 node_modules
 npm-debug.log
 temp
-lib/**
-# OS X
 .DS_Store
 lib
-node_modules
-temp
+spec/fixtures/projects/native

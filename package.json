@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "preferGlobal": "true",
   "description": "Cordova command line interface tool",
   "main": "cordova",
@@ -8,8 +8,8 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "node test_bootstrap.js && ./node_modules/jasmine-node/bin/jasmine-node --color spec",
-    "install": "./bin/notice"
+    "test": "./node_modules/jasmine-node/bin/jasmine-node --color spec",
+    "install": "node test_bootstrap.js && ./bin/notice"
   },
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
     "express":"3.0",
     "shelljs":"0.0.8",
     "ncallbacks":"1.0.0",
-    "adm-zip":"0.1.8",
+    "unzip":"0.1.0",
     "request":"2.11.4",
     "semver":"1.1.0",
     "prompt":"0.2.7"

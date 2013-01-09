@@ -16,8 +16,7 @@ cordova-cli has been tested on Mas OS X and Linux.
 
 If you are using cordova-cli for building iOS applications, you will need to run the latest Mac OS with the latest XCode (4.5+) and XCode Command Line Tools.
 
-In it's prototype stages, cordova-cli only works with Cordova
-v2.3.0rc1.
+In it's prototype stages, cordova-cli only works with Cordova v2.3.0.
 
 # Install
 

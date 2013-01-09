@@ -1,22 +1,23 @@
 var ios_parser = require('../../src/metadata/ios_parser'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova'),
+    util = require('../../src/util'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
     cfg_path = path.join(__dirname, '..', 'fixtures', 'projects', 'test', 'www', 'config.xml'),
-    ios_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'ios'),
+    ios_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'ios_fixture'),
     tempDir = path.join(__dirname, '..', '..', 'temp'),
-    ios_plist = path.join(ios_path, 'balls', 'balls-Info.plist'),
-    ios_pbx = path.join(ios_path, 'balls.xcodeproj', 'project.pbxproj'),
-    cordova_plist = path.join(ios_path, 'balls', 'Cordova.plist');
+    ios_plist = path.join(ios_path, 'cordovaExample', 'cordovaExample-Info.plist'),
+    ios_pbx = path.join(ios_path, 'cordovaExample.xcodeproj', 'project.pbxproj'),
+    ios_config_xml = path.join(ios_path, 'cordovaExample', 'config.xml');
 
 var cwd = process.cwd();
 
 var original_pbx = fs.readFileSync(ios_pbx, 'utf-8');
 var original_plist = fs.readFileSync(ios_plist, 'utf-8');
 var original_config = fs.readFileSync(cfg_path, 'utf-8');
-var orig_cordova = fs.readFileSync(cordova_plist, 'utf-8');
+var orig_cordova = fs.readFileSync(ios_config_xml, 'utf-8');
 
 describe('ios project parser', function() {
     it('should throw an exception with a path that is not a native ios project', function() {
@@ -41,7 +42,7 @@ describe('ios project parser', function() {
         });
         afterEach(function() {
             fs.writeFileSync(ios_pbx, original_pbx, 'utf-8');
-            fs.writeFileSync(cordova_plist, orig_cordova, 'utf-8');
+            fs.writeFileSync(ios_config_xml, orig_cordova, 'utf-8');
             fs.writeFileSync(ios_plist, original_plist, 'utf-8');
             fs.writeFileSync(cfg_path, original_config, 'utf-8');
         });
@@ -80,7 +81,7 @@ describe('ios project parser', function() {
                 expect(plist_contents).toMatch(/<string>ca.filmaj.dewd/);
             });
         });
-        it('should update the externalhosts whitelist properly', function() {
+        it('should update the whitelist in the project config.xml', function() {
             var cb = jasmine.createSpy();
 
             runs(function() {
@@ -90,8 +91,8 @@ describe('ios project parser', function() {
             waitsFor(function() { return cb.wasCalled; }, "update_from_config callback");
 
             runs(function() {
-                var plist_contents = fs.readFileSync(cordova_plist, 'utf-8');
-                expect(plist_contents).toMatch(/<key>ExternalHosts<\/key>\s*<array>\s*<string>\*<\/string>/);
+                var config_contents = fs.readFileSync(ios_config_xml, 'utf-8');
+                expect(config_contents).toMatch(/<access origin="\*" \/>/);
             });
         });
     });
@@ -131,7 +132,7 @@ describe('ios project parser', function() {
             runs(function() {
                 parser = new ios_parser(ios_platform);
                 parser.update_www();
-                expect(fs.readFileSync(path.join(ios_platform, 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'ios', 'bin', 'templates', 'project', 'www', 'cordova-2.2.0.js'), 'utf-8'));
+                expect(fs.readFileSync(path.join(ios_platform, 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(util.libDirectory, 'cordova-ios', 'CordovaLib', 'cordova.ios.js'), 'utf-8'));
             });
         });
     });

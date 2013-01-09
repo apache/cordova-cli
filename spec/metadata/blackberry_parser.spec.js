@@ -6,9 +6,9 @@ var blackberry_parser = require('../../src/metadata/blackberry_parser'),
     cordova = require('../../cordova'),
     fs = require('fs'),
     tempDir = path.join(__dirname, '..', '..', 'temp'),
-    tempBb = path.join(tempDir, 'platforms', 'blackberry-10'),
+    tempBb = path.join(tempDir, 'platforms', 'blackberry'),
     cfg_path = path.join(__dirname, '..', 'fixtures', 'projects', 'test', 'www', 'config.xml'),
-    blackberry_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'blackberry'),
+    blackberry_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'blackberry_fixture'),
     blackberry_config = path.join(blackberry_path, 'www', 'config.xml');
 
 var cwd = process.cwd();
@@ -102,13 +102,6 @@ describe('blackberry project parser', function() {
             fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
             parser.update_www();
             expect(fs.existsSync(path.join(tempBb, 'www', 'somescript.js'))).toBe(true);
-        });
-        it('should write out bb qnx js to cordova.js', function() {
-            var qnx_dir = path.join(tempBb, 'www', 'qnx');
-            var qnx_js_path = path.join(qnx_dir, fs.readdirSync(qnx_dir)[0]);
-            var qnx_js = fs.readFileSync(qnx_js_path, 'utf-8');
-            parser.update_www();
-            expect(fs.readFileSync(path.join(tempBb, 'www', 'cordova.js'),'utf-8')).toBe(qnx_js);
         });
         it('should not overwrite the blackberry-specific config.xml', function() {
             var www_cfg = fs.readFileSync(path.join(tempDir, 'www', 'config.xml'), 'utf-8');

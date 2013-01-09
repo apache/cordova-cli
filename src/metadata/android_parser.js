@@ -1,8 +1,8 @@
-var fs   = require('fs'),
-    path = require('path'),
-    et = require('elementtree'),
-    util = require('../util'),
-    shell = require('shelljs'),
+var fs            = require('fs'),
+    path          = require('path'),
+    et            = require('elementtree'),
+    util          = require('../util'),
+    shell         = require('shelljs'),
     config_parser = require('../config_parser');
 
 module.exports = function android_parser(project) {
@@ -62,7 +62,7 @@ module.exports.prototype = {
         var www = path.join(projectRoot, 'www');
         var platformWww = path.join(this.path, 'assets');
         shell.cp('-rf', www, platformWww);
-        var jsPath = path.join(__dirname, '..', '..', 'lib', 'android', 'framework', 'assets', 'js', 'cordova.android.js');
+        var jsPath = path.join(util.libDirectory, 'cordova-android', 'framework', 'assets', 'js', 'cordova.android.js');
         fs.writeFileSync(path.join(platformWww, 'www', 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
     },
     update_project:function(cfg) {

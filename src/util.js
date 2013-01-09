@@ -2,22 +2,23 @@ var fs         = require('fs'),
     path       = require('path'),
     util       = require('util'),
     request    = require('request'),
-    admzip     = require('adm-zip'),
-    shell      = require('shelljs');
+    n          = require('ncallbacks'),
+    shell      = require('shelljs'),
+    unzip      = require('unzip'),
+    platforms  = require('../platforms');
 
-var cordova_lib_tag = '2.3.0rc1';
-
-var repos = {
-    ios:'https://github.com/apache/cordova-ios/',
-    android:'https://github.com/apache/cordova-android/',
-    blackberry:'https://github.com/apache/cordova-blackberry/'
-};
+var cordova_lib_tag = '2.3.0';
+var libs_path = path.join(__dirname, '..', 'lib')
+var lib_path = path.join(libs_path, 'cordova-' + cordova_lib_tag);
+var archive_path = path.join(libs_path, 'cordova-' + cordova_lib_tag + '-src.zip');
+var root_url = 'http://apache.org/dist/cordova/cordova-' + cordova_lib_tag + '-src.zip';
 
 function chmod(path) {
     shell.exec('chmod +x "' + path + '"', {silent:true});
 }
 
 module.exports = {
+    libDirectory:lib_path,
     // Runs up the directory chain looking for a .cordova directory.
     // IF it is found we are in a Cordova project.
     // If not.. we're not.
@@ -36,17 +37,16 @@ module.exports = {
     },
     // Determines whether the library has a copy of the specified
     // Cordova implementation at the current proper version
-    havePlatformLib: function havePlatformLib(platform, callback) {
-        var dir = path.join(__dirname, '..', 'lib', module.exports.underlyingLib(platform));
-        if (fs.existsSync(dir)) {
-            var versionFile = path.join(dir, 'VERSION');
-            if (platform == 'ios') versionFile = path.join(dir, 'CordovaLib', 'VERSION');
-            var version = fs.readFileSync(versionFile, 'utf-8').replace(/\s/g,'');
-            if (version != cordova_lib_tag) {
-                shell.rm('-rf', dir);
-                return false;
-            } else return true;
+    havePlatformLib: function havePlatformLib(platform) {
+        if (module.exports.haveCordovaLib()) {
+            var dir = path.join(lib_path, 'cordova-' + platform);
+            if (fs.existsSync(dir)) return true;
+            else return false;
         } else return false;
+    },
+    haveCordovaLib: function haveCordovaLib() {
+        if (fs.existsSync(lib_path)) return true;
+        else return false;
     },
     /**
      * checkout a platform from the git repo
@@ -55,64 +55,69 @@ module.exports = {
      */
     getPlatformLib: function getPlatformLib(target, callback) {
         // verify platform is supported
-        target = module.exports.underlyingLib(target);
-        if (!repos[target]) {
+        if (platforms.indexOf(target) == -1) {
             throw new Error('platform "' + target + '" not found.');
         }
 
-        var outPath = path.join(__dirname, '..', 'lib', target);
-        shell.mkdir('-p', outPath);
-
-        var tempPath = path.join(__dirname, '..', 'temp');
-        shell.mkdir('-p', tempPath);
-
-        var tempFile = path.join(tempPath, target + '-' + cordova_lib_tag + '.zip');
-
-        console.log('Downloading ' + target + ' library, this may take a while...');
-        request.get(repos[target] + 'zipball/' + cordova_lib_tag, function(err) {
-            if (err) throw ('Error during download of ' + target + 'library.');
-            var zip = new admzip(tempFile);
-            var extractPoint = path.join(tempPath, target);
-            zip.extractAllTo(extractPoint);
-            var tempDir = path.join(extractPoint, fs.readdirSync(extractPoint)[0]);
-            shell.mv('-f', path.join(tempDir, '*'), outPath);
-
-            // chmod the create file
-            var create = path.join(outPath, 'bin', 'create');
-            chmod(create);
-
-            // chmod executable scripts 
-            if (target == 'ios') {
-                chmod(path.join(outPath, 'bin', 'replaces'));
-                chmod(path.join(outPath, 'bin', 'update_cordova_subproject'));
-                chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'build'));
-                chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'run'));
-                chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'release'));
-                chmod(path.join(outPath, 'bin', 'templates', 'project', 'cordova', 'emulate'));
-            } else if (target == 'android') {
-                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'cordova'));
-                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'build'));
-                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'run'));
-                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'clean'));
-                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'release'));
-            } else if (target == 'blackberry') {
-                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'debug'));
-                chmod(path.join(outPath, 'bin', 'templates', 'cordova', 'emulate'));
-            }
-
-            // Clean up
-            shell.rm('-rf', tempFile);
-            shell.rm('-rf', extractPoint);
-
-            // Callback
-            if (callback) callback();
-        }).pipe(fs.createWriteStream(tempFile));
-    },
-    underlyingLib:function underlyingLib(name) {
-        var pos = name.indexOf('-');
-        if (pos > -1) {
-            name = name.substr(0, pos);
+        function movePlatform() {
         }
-        return name;
+
+        if (!module.exports.haveCordovaLib()) {
+            module.exports.getCordovaLib(movePlatform);
+        } else {
+            movePlatform();
+        }
+    },
+    extractCordovaLib:function(callback) {
+        console.log('Extracting cordova...');
+        var end = n(platforms.length, function() {
+            if (callback) callback();
+        });
+
+        fs.createReadStream(archive_path).pipe(unzip.Extract({ path: libs_path })).on('close', function() {
+        // Extract each platform lib too
+            platforms.forEach(function(platform) {
+                var archive = path.join(lib_path, 'cordova-' + platform + '.zip');
+                var out_path = path.join(lib_path, 'cordova-' + platform);
+                shell.mkdir('-p', out_path);
+                fs.createReadStream(archive).pipe(unzip.Extract({ path:out_path  })).on('close', function() {
+                    var platform_path = path.join(lib_path, 'cordova-' + platform);
+
+                    // chmod the create file
+                    var create = path.join(platform_path, 'bin', 'create');
+                    chmod(create);
+                    // chmod executable scripts 
+                    if (platform == 'ios') {
+                        chmod(path.join(platform_path, 'bin', 'replaces'));
+                        chmod(path.join(platform_path, 'bin', 'update_cordova_subproject'));
+                        chmod(path.join(platform_path, 'bin', 'templates', 'project', 'cordova', 'build'));
+                        chmod(path.join(platform_path, 'bin', 'templates', 'project', 'cordova', 'run'));
+                        chmod(path.join(platform_path, 'bin', 'templates', 'project', 'cordova', 'release'));
+                        chmod(path.join(platform_path, 'bin', 'templates', 'project', 'cordova', 'emulate'));
+                    } else if (platform == 'android') {
+                        chmod(path.join(platform_path, 'bin', 'templates', 'cordova', 'cordova'));
+                        chmod(path.join(platform_path, 'bin', 'templates', 'cordova', 'build'));
+                        chmod(path.join(platform_path, 'bin', 'templates', 'cordova', 'run'));
+                        chmod(path.join(platform_path, 'bin', 'templates', 'cordova', 'clean'));
+                        chmod(path.join(platform_path, 'bin', 'templates', 'cordova', 'release'));
+                    } else if (platform == 'blackberry') {
+                        chmod(path.join(platform_path, 'bin', 'templates', 'cordova', 'debug'));
+                        chmod(path.join(platform_path, 'bin', 'templates', 'cordova', 'emulate'));
+                    }
+                    end();
+                });
+            });
+        });
+    },
+    getCordovaLib:function (callback) {
+        if (!fs.existsSync(archive_path)) {
+            console.log('Downloading cordova-' + cordova_lib_tag + ', this may take a while...');
+            request.get(root_url, function(err) {
+                if (err) throw ('Error during cordova download!');
+                module.exports.extractCordovaLib(callback);
+            }).pipe(fs.createWriteStream(archive_path));
+        } else {
+            module.exports.extractCordovaLib(callback);
+        }
     }
 };

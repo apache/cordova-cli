@@ -1,19 +1,21 @@
 var android_parser = require('../../src/metadata/android_parser'),
     config_parser = require('../../src/config_parser'),
+    util = require('../../src/util'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
     et = require('elementtree'),
-    cfg_path = path.join(__dirname, '..', 'fixtures', 'projects', 'test', 'www', 'config.xml'),
-    android_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'android'),
-    android_strings = path.join(android_path, 'res', 'values', 'strings.xml'),
-    android_manifest = path.join(android_path, 'AndroidManifest.xml'),
-    android_config = path.join(android_path, 'res', 'xml', 'config.xml'),
     tempDir = path.join(__dirname, '..', '..', 'temp'),
     cordova = require('../../cordova');
+    cfg_path = path.join(__dirname, '..', 'fixtures', 'projects', 'test', 'www', 'config.xml'),
+    android_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'android_fixture'),
+    create = path.join(__dirname, '..', '..', 'lib', 'android', 'bin', 'create');
 
 var cwd = process.cwd();
 
+var android_strings = path.join(android_path, 'res', 'values', 'strings.xml');
+var android_manifest = path.join(android_path, 'AndroidManifest.xml');
+var android_config = path.join(android_path, 'res', 'xml', 'config.xml');
 var original_strings = fs.readFileSync(android_strings, 'utf-8');
 var original_manifest = fs.readFileSync(android_manifest, 'utf-8');
 var original_config = fs.readFileSync(cfg_path, 'utf-8');
@@ -61,8 +63,8 @@ describe('android project parser', function() {
             expect(app_name).toBe('bond. james bond.');
         });
         it('should update the application package name properly', function() {
-            var javs = path.join(android_path, 'src', 'ca', 'filmaj', 'dewd', 'HelloCordova.java');
-            var orig_javs = path.join(android_path, 'src', 'io', 'cordova', 'hellocordova', 'HelloCordova.java');
+            var javs = path.join(android_path, 'src', 'ca', 'filmaj', 'dewd', 'cordovaExample.java');
+            var orig_javs = path.join(android_path, 'src', 'io', 'cordova', 'hellocordova', 'cordovaExample.java');
             var orig_contents = fs.readFileSync(orig_javs, 'utf-8');
             this.after(function() {
                 fs.writeFileSync(orig_javs, orig_contents, 'utf-8');
@@ -114,7 +116,7 @@ describe('android project parser', function() {
         });
         it('should write out android js to cordova.js', function() {
             parser.update_www();
-            expect(fs.readFileSync(path.join(android_platform, 'assets', 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(__dirname, '..', '..', 'lib', 'android', 'framework', 'assets', 'js', 'cordova.android.js'), 'utf-8'));
+            expect(fs.readFileSync(path.join(android_platform, 'assets', 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(util.libDirectory, 'cordova-android', 'framework', 'assets', 'js', 'cordova.android.js'), 'utf-8'));
         });
     });
 

@@ -10,6 +10,7 @@ var cwd = process.cwd();
 
 describe('hooker', function() {
     it('should throw if provided directory is not a cordova project', function() {
+        shell.rm('-rf', tempDir);
         shell.mkdir('-p', tempDir); 
         this.after(function() {
             shell.rm('-rf', tempDir);

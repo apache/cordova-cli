@@ -42,25 +42,21 @@ describe('plugin command', function() {
         }).toThrow();
     });
 
-    var listing_tests = function(_invocation) {
-        return function() {
-            beforeEach(function() {
-                cordova.create(tempDir);
-            });
+    describe('`ls`', function() {
+        beforeEach(function() {
+            cordova.create(tempDir);
+        });
 
-            afterEach(function() {
-                process.chdir(cwd);
-            });
+        afterEach(function() {
+            process.chdir(cwd);
+        });
 
-            it('should list out no plugins for a fresh project', function() {
-                process.chdir(tempDir);
+        it('should list out no plugins for a fresh project', function() {
+            process.chdir(tempDir);
 
-                expect(cordova.plugin(_invocation)).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
-            });
-        };
-    };
-    describe('`ls`', listing_tests('ls'));
-    describe('`list`', listing_tests('list'));
+            expect(cordova.plugin('list')).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
+        });
+    });
 
     describe('`add`', function() {
         beforeEach(function() {
@@ -165,98 +161,94 @@ describe('plugin command', function() {
         });
     });
 
-    var removing_tests = function(_invocation) {
-        return function() {
-            beforeEach(function() {
-                cordova.create(tempDir);
-                process.chdir(tempDir);
-            });
+    describe('`rm`',function() {
+        beforeEach(function() {
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+        });
 
-            afterEach(function() {
-                process.chdir(cwd);
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+        describe('failure', function() {
+            it('should throw if your app has no platforms added', function() {
+                expect(function() {
+                    cordova.plugin(_invocation, testPlugin);
+                }).toThrow('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
             });
-            describe('failure', function() {
-                it('should throw if your app has no platforms added', function() {
+            it('should throw if plugin is not added to project', function() {
+                var cb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
                     expect(function() {
-                        cordova.plugin(_invocation, testPlugin);
-                    }).toThrow('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
-                });
-                it('should throw if plugin is not added to project', function() {
-                    var cb = jasmine.createSpy();
-                    runs(function() {
-                        cordova.platform('add', 'ios', cb);
-                    });
-                    waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
-                    runs(function() {
-                        expect(function() {
-                            cordova.plugin(_invocation, 'test', function() {});
-                        }).toThrow('Plugin "test" not added to project.');
-                    });
+                        cordova.plugin(_invocation, 'test', function() {});
+                    }).toThrow('Plugin "test" not added to project.');
                 });
             });
-            describe('success', function() {
-                it('should remove plugin www assets from project www folder', function() {
-                    var cb = jasmine.createSpy();
-                    var pluginCb = jasmine.createSpy();
-                    var removeCb = jasmine.createSpy();
-                    runs(function() {
-                        cordova.platform('add', 'ios', cb);
-                    });
-                    waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
-                    runs(function() {
-                        cordova.plugin('add', testPlugin, pluginCb);
-                    });
-                    waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
-                    runs(function() {
-                        cordova.plugin(_invocation, 'test', removeCb);
-                    });
-                    waitsFor(function() { return removeCb.wasCalled; }, 'test plugin remove');
-                    runs(function() {
-                        expect(fs.existsSync(path.join(tempDir, 'www', 'test.js'))).toBe(false);
-                    });
+        });
+        describe('success', function() {
+            it('should remove plugin www assets from project www folder', function() {
+                var cb = jasmine.createSpy();
+                var pluginCb = jasmine.createSpy();
+                var removeCb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
                 });
-                it('should remove the full plugin from the plugins directory', function() {
-                    var cb = jasmine.createSpy();
-                    var pluginCb = jasmine.createSpy();
-                    var removeCb = jasmine.createSpy();
-                    runs(function() {
-                        cordova.platform('add', 'ios', cb);
-                    });
-                    waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
-                    runs(function() {
-                        cordova.plugin('add', testPlugin, pluginCb);
-                    });
-                    waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
-                    runs(function() {
-                        cordova.plugin(_invocation, 'test', removeCb);
-                    });
-                    waitsFor(function() { return removeCb.wasCalled; }, 'test plugin remove');
-                    runs(function() {
-                        expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(false);
-                    });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
+                    cordova.plugin('add', testPlugin, pluginCb);
                 });
-                it('should be able to handle removing multiple plugins', function() {
-                    cordova.platform('add', 'android');
-                    var cb = jasmine.createSpy();
-                    var cbtwo = jasmine.createSpy();
-                    runs(function() {
-                        cordova.plugin('add', [testPlugin, androidPlugin], cb);
-                    });
-                    waitsFor(function() { return cb.wasCalled; }, 'test+android plugin add');
-                    runs(function() {
-                        cordova.plugin(_invocation, [testPlugin, androidPlugin], cbtwo);
-                    });
-                    waitsFor(function() { return cbtwo.wasCalled; }, 'test+android plugin rm');
-                    runs(function() {
-                        expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(false);
-                        expect(fs.existsSync(path.join(tempDir, 'plugins', 'android'))).toBe(false);
-                    });
+                waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
+                runs(function() {
+                    cordova.plugin(_invocation, 'test', removeCb);
+                });
+                waitsFor(function() { return removeCb.wasCalled; }, 'test plugin remove');
+                runs(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'www', 'test.js'))).toBe(false);
                 });
             });
-        };
-    };
-    describe('`rm`', removing_tests('rm'));
-    describe('`remove`', removing_tests('remove'));
+            it('should remove the full plugin from the plugins directory', function() {
+                var cb = jasmine.createSpy();
+                var pluginCb = jasmine.createSpy();
+                var removeCb = jasmine.createSpy();
+                runs(function() {
+                    cordova.platform('add', 'ios', cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'ios platform add');
+                runs(function() {
+                    cordova.plugin('add', testPlugin, pluginCb);
+                });
+                waitsFor(function() { return pluginCb.wasCalled; }, 'test plugin add');
+                runs(function() {
+                    cordova.plugin(_invocation, 'test', removeCb);
+                });
+                waitsFor(function() { return removeCb.wasCalled; }, 'test plugin remove');
+                runs(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(false);
+                });
+            });
+            it('should be able to handle removing multiple plugins', function() {
+                cordova.platform('add', 'android');
+                var cb = jasmine.createSpy();
+                var cbtwo = jasmine.createSpy();
+                runs(function() {
+                    cordova.plugin('add', [testPlugin, androidPlugin], cb);
+                });
+                waitsFor(function() { return cb.wasCalled; }, 'test+android plugin add');
+                runs(function() {
+                    cordova.plugin(_invocation, [testPlugin, androidPlugin], cbtwo);
+                });
+                waitsFor(function() { return cbtwo.wasCalled; }, 'test+android plugin rm');
+                runs(function() {
+                    expect(fs.existsSync(path.join(tempDir, 'plugins', 'test'))).toBe(false);
+                    expect(fs.existsSync(path.join(tempDir, 'plugins', 'android'))).toBe(false);
+                });
+            });
+        });
+    });
 
     describe('hooks', function() {
         var s;

@@ -99,10 +99,10 @@ describe('build command', function() {
                 cordova.platform('add', 'android');
             });
 
-            it('should shell out to debug command on Android', function() {
+            it('should shell out to build command on Android', function() {
                 var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
                 cordova.build();
-                expect(s.mostRecentCall.args[0].match(/\/cordova\/debug/)).not.toBeNull();
+                expect(s.mostRecentCall.args[0].match(/\/cordova\/build/)).not.toBeNull();
             });
             it('should call android_parser\'s update_project', function() {
                 spyOn(require('shelljs'), 'exec').andReturn({code:0});
@@ -112,7 +112,7 @@ describe('build command', function() {
             });
         });
         describe('iOS', function() {
-            it('should shell out to debug command on iOS', function() {
+            it('should shell out to build command on iOS', function() {
                 var cb = jasmine.createSpy();
                 var buildcb = jasmine.createSpy();
                 var s;
@@ -128,7 +128,7 @@ describe('build command', function() {
                 waitsFor(function() { return buildcb.wasCalled; }, 'ios build');
                 runs(function() {
                     expect(s).toHaveBeenCalled();
-                    expect(s.mostRecentCall.args[0].match(/\/cordova\/debug/)).not.toBeNull();
+                    expect(s.mostRecentCall.args[0].match(/\/cordova\/build/)).not.toBeNull();
                 });
             });
             it('should call ios_parser\'s update_project', function() {
@@ -146,14 +146,14 @@ describe('build command', function() {
             });
         });
         describe('BlackBerry', function() {
-            it('should shell out to ant command on blackberry-10', function() {
+            it('should shell out to ant command on blackberry', function() {
                 var buildcb = jasmine.createSpy();
                 var cb = jasmine.createSpy();
                 var s;
 
                 runs(function() {
                     var t = spyOn(require('prompt'), 'get').andReturn(true);
-                    cordova.platform('add', 'blackberry-10', cb);
+                    cordova.platform('add', 'blackberry', cb);
                     // Fake prompt invoking its callback
                     t.mostRecentCall.args[1](null, {});
                 });
@@ -176,7 +176,7 @@ describe('build command', function() {
                     }
                 }), 'utf-8');
                 runs(function() {
-                    cordova.platform('add', 'blackberry-10', cb);
+                    cordova.platform('add', 'blackberry', cb);
                 });
                 waitsFor(function() { return cb.wasCalled; }, 'bb add platform');
                 runs(function() {
@@ -243,7 +243,7 @@ describe('build command', function() {
             waitsFor(function() { return cb.wasCalled; }, 'platform add ios');
             runs(function() {
                 var g = spyOn(require('prompt'), 'get');
-                cordova.platform('add', 'blackberry-10', bbcb);
+                cordova.platform('add', 'blackberry', bbcb);
                 g.mostRecentCall.args[1](null, {}); // fake out prompt io
             });
             waitsFor(function() { return bbcb.wasCalled; }, 'platform add bb');

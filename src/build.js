@@ -18,7 +18,8 @@ function shell_out_to_debug(projectRoot, platform) {
     var cmd = path.join(projectRoot, 'platforms', platform);
     // TODO: wait for https://issues.apache.org/jira/browse/CB-1548 to be fixed before we axe this
     // TODO: this is bb10 only for now
-    if (platform.indexOf('blackberry') > -1) {
+    // TODO: PLATFORM LIBRARY INCONSISTENCY
+    if (platform == 'blackberry') {
         cmd = 'ant -f "' + path.join(cmd, 'build.xml') + '" qnx load-device';
     } else {
         cmd = '"' + cmd + '/cordova/build"';
@@ -74,14 +75,14 @@ module.exports = function build (platforms, callback) {
                 shell_out_to_debug(projectRoot, 'android');
                 end();
                 break;
-            case 'blackberry-10':
-                platformPath = path.join(projectRoot, 'platforms', 'blackberry-10');
+            case 'blackberry':
+                platformPath = path.join(projectRoot, 'platforms', 'blackberry');
                 parser = new blackberry_parser(platformPath);
                 
                 // Update the related platform project from the config
                 parser.update_project(cfg, function() {
                     // Shell it
-                    shell_out_to_debug(projectRoot, 'blackberry-10');
+                    shell_out_to_debug(projectRoot, 'blackberry');
                     end();
                 });
                 break;

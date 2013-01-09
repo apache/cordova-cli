@@ -14,8 +14,8 @@ var cordova_util = require('./util'),
 
 function shell_out_to_emulate(root, platform) {
     var cmd = path.join(root, 'platforms', platform, 'cordova', 'emulate');
-    // TODO: bad bad bad
-    if (platform.indexOf('blackberry') > -1) {
+    // TODO: PLATFORM LIBRARY INCONSISTENCY 
+    if (platform == 'blackberry') {
         cmd = 'ant -f ' + path.join(root, 'platforms', platform, 'build.xml') + ' qnx load-simulator';
     } else if (platform.indexOf('android') > -1) {
         cmd = path.join(root, 'platforms', platform, 'cordova', 'run');
@@ -69,20 +69,19 @@ module.exports = function emulate (platforms, callback) {
                 shell_out_to_emulate(projectRoot, 'android');
                 end();
                 break;
-            case 'blackberry-10':
-                platformPath = path.join(projectRoot, 'platforms', 'blackberry-10');
+            case 'blackberry':
+                platformPath = path.join(projectRoot, 'platforms', 'blackberry');
                 parser = new blackberry_parser(platformPath);
                 
                 // Update the related platform project from the config
                 parser.update_project(cfg, function() {
                     // Shell it
-                    shell_out_to_emulate(projectRoot, 'blackberry-10');
+                    shell_out_to_emulate(projectRoot, 'blackberry');
                     end();
                 });
                 break;
             case 'ios':
                 platformPath = path.join(projectRoot, 'platforms', 'ios');
-                js = path.join(__dirname, '..', 'lib', 'ios', 'CordovaLib', 'javascript', 'cordova.ios.js');
                 parser = new ios_parser(platformPath);
                 // Update the related platform project from the config
                 parser.update_project(cfg, function() {
