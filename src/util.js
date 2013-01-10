@@ -111,6 +111,7 @@ module.exports = {
     },
     getCordovaLib:function (callback) {
         if (!fs.existsSync(archive_path)) {
+            shell.mkdir('-p', libs_path);
             console.log('Downloading cordova-' + cordova_lib_tag + ', this may take a while...');
             request.get(root_url, function(err) {
                 if (err) throw ('Error during cordova download!');
