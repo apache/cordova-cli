@@ -33,7 +33,7 @@ module.exports.prototype = {
         var infoPlist = plist.parseFileSync(plistFile);
         infoPlist['CFBundleIdentifier'] = pkg;
         var info_contents = plist.build(infoPlist);
-        info_contents = info_contents.replace(/<string>\s*<\/string>/,'<string></string>');
+        info_contents = info_contents.replace(/<string>[\s\r\n]*<\/string>/g,'<string></string>');
         fs.writeFileSync(plistFile, info_contents, 'utf-8');
 
         // Update whitelist
