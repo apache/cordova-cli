@@ -21,7 +21,9 @@ module.exports.prototype = {
         // Fire script-based hooks
         var contents = fs.readdirSync(dir);
         contents.forEach(function(script) {
-            var status = shell.exec(path.join(dir, script));
+            var fullpath = path.join(dir, script);
+            if (fs.statSync(fullpath).isDirectory()) return; // skip directories if they're in there.
+            var status = shell.exec(fullpath);
             if (status.code != 0) throw 'Script "' + path.basename(script) + '"' + 'in the ' + hook + ' hook exited with non-zero status code. Aborting.';
         });
         return true;

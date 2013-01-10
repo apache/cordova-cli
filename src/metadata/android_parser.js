@@ -33,7 +33,7 @@ module.exports.prototype = {
         manifest.getroot().attrib.package = pkg;
         fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');
         var orig_pkgDir = path.join(this.path, 'src', path.join.apply(null, orig_pkg.split('.')));
-        var orig_java_class = fs.readdirSync(orig_pkgDir)[0];
+        var orig_java_class = fs.readdirSync(orig_pkgDir).filter(function(f) {return f.indexOf('.svn') == -1;})[0];
         var pkgDir = path.join(this.path, 'src', path.join.apply(null, pkg.split('.')));
         shell.mkdir('-p', pkgDir);
         var orig_javs = path.join(orig_pkgDir, orig_java_class);
@@ -61,9 +61,16 @@ module.exports.prototype = {
         var projectRoot = util.isCordova(process.cwd());
         var www = path.join(projectRoot, 'www');
         var platformWww = path.join(this.path, 'assets');
+        // copy over all app www assets
         shell.cp('-rf', www, platformWww);
+        platformWww = path.join(platformWww, 'www');
+
+        // write out android lib's cordova.js
         var jsPath = path.join(util.libDirectory, 'cordova-android', 'framework', 'assets', 'js', 'cordova.android.js');
-        fs.writeFileSync(path.join(platformWww, 'www', 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
+        fs.writeFileSync(path.join(platformWww, 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
+
+        // delete any .svn folders copied over
+        util.deleteSvnFolders(platformWww);
     },
     update_project:function(cfg) {
         this.update_from_config(cfg);

@@ -120,5 +120,17 @@ module.exports = {
         } else {
             module.exports.extractCordovaLib(callback);
         }
+    },
+    // Recursively deletes .svn folders from a target path
+    deleteSvnFolders:function(dir) {
+        var contents = fs.readdirSync(dir);
+        contents.forEach(function(entry) {
+            var fullpath = path.join(dir, entry);
+            if (fs.statSync(fullpath).isDirectory()) {
+                if (entry == '.svn') {
+                    shell.rm('-rf', fullpath);
+                } else module.exports.deleteSvnFolders(fullpath);
+            }
+        });
     }
 };

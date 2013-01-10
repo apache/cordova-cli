@@ -85,6 +85,8 @@ module.exports.prototype = {
         var contents = fs.readFileSync(index, 'utf-8');
         contents = contents.replace(/<script type="text\/javascript" src="cordova\.js"><\/script>/, '<script type="text/javascript" src="js/webworks.js"></script><script type="text/javascript" src="cordova.js"></script>');
         fs.writeFileSync(index, contents, 'utf-8');
+
+        util.deleteSvnFolders(platformWww);
     },
     write_project_properties:function() {
         // TODO: eventually support all blackberry sub-platforms
