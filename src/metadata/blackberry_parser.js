@@ -78,14 +78,6 @@ module.exports.prototype = {
         // Move the js to just cordova.js
         shell.mv('-f', path.join(platformWww, 'cordova-*.js'), path.join(platformWww, 'cordova.js'));
 
-        // Add the webworks.js script file
-        // TODO: assumption that index.html is only file that needs the hot webworks script injection
-        // TODO: assumption that index.html is entry point to app
-        var index = path.join(platformWww, 'index.html');
-        var contents = fs.readFileSync(index, 'utf-8');
-        contents = contents.replace(/<script type="text\/javascript" src="cordova\.js"><\/script>/, '<script type="text/javascript" src="js/webworks.js"></script><script type="text/javascript" src="cordova.js"></script>');
-        fs.writeFileSync(index, contents, 'utf-8');
-
         util.deleteSvnFolders(platformWww);
     },
     write_project_properties:function() {
