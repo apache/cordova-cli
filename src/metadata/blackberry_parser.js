@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -118,14 +117,6 @@ module.exports.prototype = {
         // Delete the old platform www, and move the final project over
         shell.rm('-rf', platformWww);
         shell.mv(finalWww, platformWww);
-
-        // Add the webworks.js script file
-        // TODO: assumption that index.html is only file that needs the hot webworks script injection
-        // TODO: assumption that index.html is entry point to app. instead read <content> of project's www
-        var index = path.join(platformWww, 'index.html');
-        var contents = fs.readFileSync(index, 'utf-8');
-        contents = contents.replace(/<script type="text\/javascript" src="cordova\.js"><\/script>/, '<script type="text/javascript" src="js/webworks.js"></script><script type="text/javascript" src="cordova.js"></script>');
-        fs.writeFileSync(index, contents, 'utf-8');
 
         util.deleteSvnFolders(platformWww);
     },
