@@ -105,4 +105,45 @@ describe('config.xml parser', function () {
             });
         });
     });
+
+    describe('preference elements', function() {
+        var cfg;
+
+        beforeEach(function() {
+            cfg = new config_parser(xml);
+        });
+
+        describe('getter', function() {
+            it('should get all preference elements', function() {
+                expect(cfg.preference.get()[0].name).toEqual('phonegap-version');
+                expect(cfg.preference.get()[0].value).toEqual('1.9.0');
+            });
+            it('should return an array of all preference name/value pairs', function() {
+                expect(cfg.preference.get() instanceof Array).toBe(true);
+            });
+        });
+        describe('setters', function() {
+            it('should allow removing a preference by name', function() {
+                cfg.preference.remove('phonegap-version');
+                expect(cfg.preference.get().length).toEqual(3);
+            });
+            it('should write to disk after removing a preference', function() {
+                cfg.preference.remove('phonegap-version');
+                expect(fs.readFileSync(xml, 'utf-8')).not.toMatch(/<preference\sname="phonegap-version"/);
+            });
+            it('should allow adding a new preference', function() {
+                cfg.preference.add({name:'UIWebViewBounce',value:'false'});
+                expect(cfg.preference.get().length).toEqual(5);
+                expect(cfg.preference.get()[4].value).toEqual('false');
+            });
+            it('should write to disk after adding a preference', function() {
+                cfg.preference.add({name:'UIWebViewBounce',value:'false'});
+                expect(fs.readFileSync(xml, 'utf-8')).toMatch(/<preference name="UIWebViewBounce" value="false"/);
+            });
+            it('should allow removing all preference elements when no parameter is specified', function() {
+                cfg.preference.remove();
+                expect(fs.readFileSync(xml, 'utf-8')).not.toMatch(/<preference.*\/>/);
+            });
+        });
+    });
 });

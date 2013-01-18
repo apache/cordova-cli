@@ -38,15 +38,11 @@ module.exports.prototype = {
 
         // Update whitelist
         var self = this;
-        this.config.doc.findall('access').forEach(function(a) {
-            self.config.doc.getroot().remove(0, a);
-        });
+        // Remove old access elements
+        this.config.access.remove();
         config.access.get().forEach(function(uri) {
-            var el = new et.Element('access');
-            el.attrib.origin = uri;
-            self.config.doc.getroot().append(el);
+            self.config.access.add(uri);
         });
-        this.config.update();
         
         // Update product name
         var proj = new xcode.project(this.pbxproj);
