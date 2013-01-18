@@ -50,6 +50,15 @@ module.exports.prototype = {
         config.access.get().forEach(function(uri) {
             android_cfg_xml.access.add(uri);
         });
+        
+        // update any preferences
+        android_cfg_xml.preference.remove();
+        config.preference.get().forEach(function(pref) {
+            android_cfg_xml.preference.add({
+                name:pref.name,
+                value:pref.value
+            });
+        });
     },
 
     // Returns the platform-specific www directory.

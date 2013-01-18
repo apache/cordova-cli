@@ -38,10 +38,17 @@ module.exports.prototype = {
 
         // Update whitelist
         var self = this;
-        // Remove old access elements
         this.config.access.remove();
         config.access.get().forEach(function(uri) {
             self.config.access.add(uri);
+        });
+        // Update preferences
+        this.config.preference.remove();
+        config.preference.get().forEach(function(pref) {
+            self.config.preference.add({
+                name:pref.name,
+                value:pref.value
+            });
         });
         
         // Update product name
