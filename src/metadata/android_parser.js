@@ -5,6 +5,11 @@ var fs            = require('fs'),
     shell         = require('shelljs'),
     config_parser = require('../config_parser');
 
+var default_prefs = {
+    "useBrowserHistory":"true",
+    "exit-on-suspend":"false"
+};
+
 module.exports = function android_parser(project) {
     if (!fs.existsSync(path.join(project, 'AndroidManifest.xml'))) {
         throw 'The provided path is not an Android project.';
@@ -51,9 +56,25 @@ module.exports.prototype = {
             android_cfg_xml.access.add(uri);
         });
         
-        // update any preferences
+        // Update preferences
         android_cfg_xml.preference.remove();
-        config.preference.get().forEach(function(pref) {
+        var prefs = config.preference.get();
+        // write out defaults, unless user has specifically overrode it
+        for (var p in default_prefs) if (default_prefs.hasOwnProperty(p)) {
+            var override = prefs.filter(function(pref) { return pref.name == p; });
+            var value = default_prefs[p];
+            if (override.length) {
+                // override exists
+                value = override[0].value;
+                // remove from prefs list so we dont write it out again below
+                prefs = prefs.filter(function(pref) { return pref.name != p });
+            }
+            android_cfg_xml.preference.add({
+                name:p,
+                value:value
+            });
+        }
+        prefs.forEach(function(pref) {
             android_cfg_xml.preference.add({
                 name:pref.name,
                 value:pref.value

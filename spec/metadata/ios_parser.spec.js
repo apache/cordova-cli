@@ -5,6 +5,7 @@ var ios_parser = require('../../src/metadata/ios_parser'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
+    et = require('elementtree'),
     cfg_path = path.join(__dirname, '..', 'fixtures', 'projects', 'test', 'www', 'config.xml'),
     ios_path = path.join(__dirname, '..', 'fixtures', 'projects', 'native', 'ios_fixture'),
     tempDir = path.join(__dirname, '..', '..', 'temp'),
@@ -93,6 +94,45 @@ describe('ios project parser', function() {
             runs(function() {
                 var config_contents = fs.readFileSync(ios_config_xml, 'utf-8');
                 expect(config_contents).toMatch(/<access origin="\*" \/>/);
+            });
+        });
+        describe('preferences', function() {
+            it('should not change default project preferences and copy over additional project preferences to platform-level config.xml', function() {
+                var cb = jasmine.createSpy();
+
+                runs(function() {
+                    config.preference.add({name:'henrik',value:'sedin'});
+                    project.update_from_config(config, cb);
+                });
+
+                waitsFor(function() { return cb.wasCalled; }, "update_from_config callback");
+
+                runs(function() {
+                    var native_config = new et.ElementTree(et.XML(fs.readFileSync(ios_config_xml, 'utf-8')));
+                    var ps = native_config.findall('preference');
+                    expect(ps.length).toEqual(13);
+                    expect(ps[0].attrib.name).toEqual('KeyboardDisplayRequiresUserAction');
+                    expect(ps[0].attrib.value).toEqual('true');
+                    expect(ps[12].attrib.name).toEqual('henrik');
+                    expect(ps[12].attrib.value).toEqual('sedin');
+                });
+            });
+            it('should override a default project preference if applicable', function() {
+                var cb = jasmine.createSpy();
+                runs(function() {
+                    config.preference.add({name:'UIWebViewBounce',value:'false'});
+                    project.update_from_config(config, cb);
+                });
+
+                waitsFor(function() { return cb.wasCalled; }, "update_from_config callback");
+
+                runs(function() {
+                    var native_config = new et.ElementTree(et.XML(fs.readFileSync(ios_config_xml, 'utf-8')));
+                    var ps = native_config.findall('preference');
+                    expect(ps.length).toEqual(12);
+                    expect(ps[2].attrib.name).toEqual('UIWebViewBounce');
+                    expect(ps[2].attrib.value).toEqual('false');
+                });
             });
         });
     });

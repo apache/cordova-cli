@@ -7,6 +7,21 @@ var fs   = require('fs'),
     et = require('elementtree'),
     config_parser = require('../config_parser');
 
+var default_prefs = {
+    "KeyboardDisplayRequiresUserAction":"true",
+    "SuppressesIncrementalRendering":"false",
+    "UIWebViewBounce":"true",
+    "TopActivityIndicator":"gray",
+    "EnableLocation":"false",
+    "EnableViewportScale":"false",
+    "AutoHideSplashScreen":"true",
+    "ShowSplashScreenSpinner":"true",
+    "MediaPlaybackRequiresUserAction":"false",
+    "AllowInlineMediaPlayback":"false",
+    "OpenAllWhitelistURLsInWebView":"false",
+    "BackupWebStorage":"cloud"
+};
+
 module.exports = function ios_parser(project) {
     try {
         var xcodeproj_dir = fs.readdirSync(project).filter(function(e) { return e.match(/\.xcodeproj$/i); })[0];
@@ -42,9 +57,26 @@ module.exports.prototype = {
         config.access.get().forEach(function(uri) {
             self.config.access.add(uri);
         });
+        
         // Update preferences
         this.config.preference.remove();
-        config.preference.get().forEach(function(pref) {
+        var prefs = config.preference.get();
+        // write out defaults, unless user has specifically overrode it
+        for (var p in default_prefs) if (default_prefs.hasOwnProperty(p)) {
+            var override = prefs.filter(function(pref) { return pref.name == p; });
+            var value = default_prefs[p];
+            if (override.length) {
+                // override exists
+                value = override[0].value;
+                // remove from prefs list so we dont write it out again below
+                prefs = prefs.filter(function(pref) { return pref.name != p });
+            }
+            this.config.preference.add({
+                name:p,
+                value:value
+            });
+        }
+        prefs.forEach(function(pref) {
             self.config.preference.add({
                 name:pref.name,
                 value:pref.value

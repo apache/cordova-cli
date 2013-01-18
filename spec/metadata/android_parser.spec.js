@@ -64,7 +64,7 @@ describe('android project parser', function() {
         });
         it('should update the application package name properly', function() {
             var javs = path.join(android_path, 'src', 'ca', 'filmaj', 'dewd', 'cordovaExample.java');
-            var orig_javs = path.join(android_path, 'src', 'io', 'cordova', 'hellocordova', 'cordovaExample.java');
+            var orig_javs = path.join(android_path, 'src', 'org', 'apache', 'cordova', 'cordovaExample', 'cordovaExample.java');
             var orig_contents = fs.readFileSync(orig_javs, 'utf-8');
             this.after(function() {
                 fs.writeFileSync(orig_javs, orig_contents, 'utf-8');
@@ -90,6 +90,30 @@ describe('android project parser', function() {
             expect(as.length).toEqual(2);
             expect(as[0].attrib.origin).toEqual('http://apache.org');
             expect(as[1].attrib.origin).toEqual('http://github.com');
+        });
+        describe('preferences', function() {
+            it('should not change default project preferences and copy over additional project preferences to platform-level config.xml', function() {
+                config.preference.add({name:'henrik',value:'sedin'});
+                project.update_from_config(config);
+
+                var native_config = new et.ElementTree(et.XML(fs.readFileSync(android_config, 'utf-8')));
+                var ps = native_config.findall('preference');
+                expect(ps.length).toEqual(3);
+                expect(ps[0].attrib.name).toEqual('useBrowserHistory');
+                expect(ps[0].attrib.value).toEqual('true');
+                expect(ps[2].attrib.name).toEqual('henrik');
+                expect(ps[2].attrib.value).toEqual('sedin');
+            });
+            it('should override a default project preference if applicable', function() {
+                config.preference.add({name:'useBrowserHistory',value:'false'});
+                project.update_from_config(config);
+
+                var native_config = new et.ElementTree(et.XML(fs.readFileSync(android_config, 'utf-8')));
+                var ps = native_config.findall('preference');
+                expect(ps.length).toEqual(2);
+                expect(ps[0].attrib.name).toEqual('useBrowserHistory');
+                expect(ps[0].attrib.value).toEqual('false');
+            });
         });
     });
 
