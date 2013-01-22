@@ -2,5 +2,4 @@ node_modules
 npm-debug.log
 temp
 .DS_Store
-lib
 spec/fixtures/projects/native

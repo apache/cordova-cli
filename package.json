@@ -29,7 +29,6 @@
     "express":"3.0",
     "shelljs":"0.0.8",
     "ncallbacks":"1.0.0",
-    "unzip":"0.1.0",
     "request":"2.11.4",
     "semver":"1.1.0",
     "prompt":"0.2.7"
@@ -43,7 +42,9 @@
     {"name": "Fil Maj", "email": "maj.fil@gmail.com"},
     {"name": "Mike Reinstein", "email":"reinstein.mike@gmail.com"},
     {"name": "Darry Pogue", "email":"darryl@dpogue.ca"},
-    {"name": "Michael Brooks", "email":"michael@michaelbrooks.ca"}
+    {"name": "Michael Brooks", "email":"michael@michaelbrooks.ca"},
+    {"name": "Braden Shepherdson", "email":"braden@chromium.org"},
+    {"name": "Gord Tanner", "email":"gtanner@gmail.com"}
   ],
   "license": "Apache version 2.0"
 }
