@@ -3,3 +3,6 @@ npm-debug.log
 temp
 .DS_Store
 spec/fixtures/projects/native
+lib/cordova-android/bin/templates/cordova/appinfo.jar
+lib/cordova-android/framework/bin
+lib/cordova-android/framework/project.properties
