@@ -34,6 +34,11 @@ module.exports = function blackberry_parser(project) {
     this.xml = new config_parser(this.config_path);
 };
 
+module.exports.check_requirements = function(callback) {
+    // TODO: below, we ask for users to fill out SDK paths, etc. into config.json. Android requires the sdk path be on the PATH. Which to choose? 
+    callback(false);
+};
+
 module.exports.prototype = {
     update_from_config:function(config) {
         if (config instanceof config_parser) {

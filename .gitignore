@@ -3,4 +3,4 @@ npm-debug.log
 temp
 .DS_Store
 spec/fixtures/projects/native
-lib
+lib/**

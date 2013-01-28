@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -17,14 +16,17 @@
     specific language governing permissions and limitations
     under the License.
 */
-var fs   = require('fs'),
-    path = require('path'),
-    xcode = require('xcode'),
-    util = require('../util'),
-    shell = require('shelljs'),
-    plist = require('plist'),
-    et = require('elementtree'),
+var fs            = require('fs'),
+    path          = require('path'),
+    xcode         = require('xcode'),
+    util          = require('../util'),
+    shell         = require('shelljs'),
+    plist         = require('plist'),
+    semver        = require('semver'),
+    et            = require('elementtree'),
     config_parser = require('../config_parser');
+
+var MIN_XCODE_VERSION = '4.5.x';
 
 var default_prefs = {
     "KeyboardDisplayRequiresUserAction":"true",
@@ -49,12 +51,27 @@ module.exports = function ios_parser(project) {
         this.originalName = this.xcodeproj.substring(this.xcodeproj.lastIndexOf('/'), this.xcodeproj.indexOf('.xcodeproj'));
         this.cordovaproj = path.join(project, this.originalName);
     } catch(e) {
-        throw 'The provided path is not a Cordova iOS project.';
+        throw new Error('The provided path is not a Cordova iOS project.');
     }
     this.path = project;
     this.pbxproj = path.join(this.xcodeproj, 'project.pbxproj');
     this.config = new config_parser(path.join(this.cordovaproj, 'config.xml'));
 };
+
+module.exports.check_requirements = function(callback) {
+    // Check xcode + version.
+    shell.exec('xcodebuild -version', {silent:true, async:true}, function(code, output) {
+        if (code != 0) {
+            callback('Xcode is not installed. Cannot add iOS platform.');
+        } else {
+            var xc_version = output.split('\n')[0].split(' ')[1];
+            if (semver.lt(xc_version, MIN_XCODE_VERSION)) {
+                callback('Xcode version installed is too old. Minimum: ' + MIN_XCODE_VERSION + ', yours: ' + xc_version);
+            } else callback(false);
+        }
+    });
+};
+
 module.exports.prototype = {
     update_from_config:function(config, callback) {
         if (config instanceof config_parser) {
