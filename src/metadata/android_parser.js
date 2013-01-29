@@ -131,6 +131,8 @@ module.exports.prototype = {
         var projectRoot = util.isCordova(process.cwd());
         var www = path.join(projectRoot, 'www');
         var platformWww = path.join(this.path, 'assets');
+        // remove stock platform assets
+        shell.rm('-rf', path.join(platformWww, 'www'));
         // copy over all app www assets
         shell.cp('-rf', www, platformWww);
         platformWww = path.join(platformWww, 'www');

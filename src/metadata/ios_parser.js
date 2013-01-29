@@ -139,14 +139,18 @@ module.exports.prototype = {
 
     update_www:function() {
         var projectRoot = util.isCordova(process.cwd());
-        // copy over app www assets
         var www = path.join(projectRoot, 'www');
-        shell.cp('-rf', www, this.path);
         var project_www = path.join(this.path, 'www');
+
+        // remove the stock www folder
+        shell.rm('-rf', project_www);
+
+        // copy over project www assets
+        shell.cp('-rf', www, this.path);
+
         // write out proper cordova.js
-        // TODO: this seems bad and brittle..
-        var js = fs.readdirSync(project_www).filter(function(e) { return e.match(/\.js$/i); })[0];
-        shell.mv('-f', path.join(project_www, js), path.join(project_www, 'cordova.js'));
+        shell.mv('-f', path.join(project_www, 'cordova-*.js'), path.join(project_www, 'cordova.js'));
+
         util.deleteSvnFolders(project_www);
     },
     update_project:function(cfg, callback) {
