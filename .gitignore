@@ -3,4 +3,5 @@ npm-debug.log
 temp
 .DS_Store
 spec/fixtures/projects/native
-lib/**
+spec/fixtures/projects/cordova
+lib

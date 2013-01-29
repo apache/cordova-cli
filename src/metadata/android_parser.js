@@ -128,7 +128,7 @@ module.exports.prototype = {
     },
 
     update_www:function() {
-        var projectRoot = util.isCordova(process.cwd());
+        var projectRoot = util.isCordova(this.path);
         var www = path.join(projectRoot, 'www');
         var platformWww = path.join(this.path, 'assets');
         // remove stock platform assets
