@@ -25,7 +25,6 @@ var ios_parser = require('../../src/metadata/ios_parser'),
     shell = require('shelljs'),
     fs = require('fs'),
     et = require('elementtree'),
-    tempDir = path.join(__dirname, '..', '..', 'temp'),
     projects_path = path.join(__dirname, '..', 'fixtures', 'projects')
     ios_path = path.join(projects_path, 'native', 'ios_fixture'),
     project_path = path.join(projects_path, 'cordova'),
@@ -159,6 +158,11 @@ describe('ios project parser', function() {
             it('should write out ios js to cordova.js', function() {
                 parser.update_www();
                 expect(fs.readFileSync(path.join(ios_project_path, 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(util.libDirectory, 'cordova-ios', 'CordovaLib', 'cordova.ios.js'), 'utf-8'));
+            });
+            it('should call out to util.deleteSvnFolders', function() {
+                var spy = spyOn(util, 'deleteSvnFolders');
+                parser.update_www();
+                expect(spy).toHaveBeenCalled();
             });
         });
 
