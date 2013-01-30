@@ -138,7 +138,7 @@ module.exports.prototype = {
     },
 
     update_www:function() {
-        var projectRoot = util.isCordova(process.cwd());
+        var projectRoot = util.isCordova(this.path);
         var www = path.join(projectRoot, 'www');
         var project_www = path.join(this.path, 'www');
 
@@ -149,7 +149,7 @@ module.exports.prototype = {
         shell.cp('-rf', www, this.path);
 
         // write out proper cordova.js
-        shell.mv('-f', path.join(project_www, 'cordova-*.js'), path.join(project_www, 'cordova.js'));
+        shell.cp('-f', path.join(util.libDirectory, 'cordova-ios', 'CordovaLib', 'cordova.ios.js'), path.join(project_www, 'cordova.js'));
 
         util.deleteSvnFolders(project_www);
     },

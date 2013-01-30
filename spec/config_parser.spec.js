@@ -26,12 +26,11 @@ var cordova = require('../cordova'),
     et = require('elementtree'),
     xml = path.join(tempDir, 'www', 'config.xml');
 
+
 describe('config.xml parser', function () {
     beforeEach(function() {
-        cordova.create(tempDir);
-    });
-    afterEach(function() {
         shell.rm('-rf', tempDir);
+        cordova.create(tempDir);
     });
 
     it('should create an instance based on an xml file', function() {
