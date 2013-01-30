@@ -195,6 +195,9 @@ describe('blackberry project parser', function() {
                     expect(spyEnv).toHaveBeenCalled();
                 });
                 it('should write out project properties', function(done) {
+                    this.after(function() {
+                        fs.writeFileSync(cordova_config_path, original_config_json, 'utf-8');
+                    });
                     var spyProps = spyOn(parser, 'write_project_properties');
                     var promptSpy = spyOn(require('prompt'), 'get');
                     parser.update_project(config, function() {
