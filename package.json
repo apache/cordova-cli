@@ -27,7 +27,7 @@
     "plist":"git://github.com/filmaj/node-plist.git",
     "xcode":"0.5.1",
     "express":"3.0",
-    "shelljs":"0.0.8",
+    "shelljs":"0.1.2",
     "ncallbacks":"1.0.0",
     "request":"2.11.4",
     "semver":"1.1.0",
