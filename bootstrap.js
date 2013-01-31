@@ -26,6 +26,7 @@ var util      = require('./src/util'),
     b_parser  = require('./src/metadata/blackberry_parser'),
     i_parser  = require('./src/metadata/ios_parser'),
     path      = require('path'),
+    fs        = require('fs'),
     shell     = require('shelljs'),
     platforms = require('./platforms');
 
@@ -66,6 +67,21 @@ platforms.forEach(function(platform) {
                     console.error('ERROR! Could not create a native ' + platform + ' project test fixture. See below for error output.');
                     console.error(output);
                 } else {
+                    // set permissions on executables
+                    switch (platform) {
+                        case 'android':
+                            break;
+                        case 'ios':
+                            var scripts_path = path.join(fix_path, 'cordova');
+                            var scripts = fs.readdirSync(scripts_path);
+                            scripts.forEach(function(script) {
+                                var script_path = path.join(scripts_path, script);
+                                shell.chmod('+x', script_path);
+                            });
+                            break;
+                        case 'blackberry':
+                            break;
+                    };
                     var platformDir = path.join(platformsDir, platform);
                     shell.mkdir('-p', platformDir);
                     shell.cp('-rf', path.join(fix_path, '*'), platformDir); 
