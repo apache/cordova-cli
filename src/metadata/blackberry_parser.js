@@ -27,7 +27,7 @@ var fs            = require('fs'),
 
 module.exports = function blackberry_parser(project) {
     if (!fs.existsSync(path.join(project, 'project.properties')) || !fs.existsSync(path.join(project, 'build.xml'))) {
-        throw 'The provided path is not a Cordova BlackBerry WebWorks project.';
+        throw new Error('The provided path "' + project + '" is not a Cordova BlackBerry WebWorks project.');
     }
     this.path = project;
     this.config_path = path.join(this.path, 'www', 'config.xml');

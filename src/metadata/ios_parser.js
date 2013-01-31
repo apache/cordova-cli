@@ -46,7 +46,7 @@ var default_prefs = {
 module.exports = function ios_parser(project) {
     try {
         var xcodeproj_dir = fs.readdirSync(project).filter(function(e) { return e.match(/\.xcodeproj$/i); })[0];
-        if (!xcodeproj_dir) throw 'The provided path is not a Cordova iOS project.';
+        if (!xcodeproj_dir) throw new Error('The provided path "' + project + '" is not a Cordova iOS project.');
         this.xcodeproj = path.join(project, xcodeproj_dir);
         this.originalName = this.xcodeproj.substring(this.xcodeproj.lastIndexOf('/'), this.xcodeproj.indexOf('.xcodeproj'));
         this.cordovaproj = path.join(project, this.originalName);

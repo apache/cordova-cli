@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -22,18 +21,9 @@ var config_parser     = require('./config_parser'),
     util              = require('util'),
     fs                = require('fs'),
     path              = require('path'),
-    android_parser    = require('./metadata/android_parser'),
-    blackberry_parser = require('./metadata/blackberry_parser'),
-    ios_parser        = require('./metadata/ios_parser'),
     hooker            = require('./hooker'),
     n                 = require('ncallbacks'),
     shell             = require('shelljs');
-
-var check_requirements = {
-    "ios":ios_parser.check_requirements,
-    "android":android_parser.check_requirements,
-    "blackberry":blackberry_parser.check_requirements
-};
 
 module.exports = function platform(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
@@ -75,7 +65,7 @@ module.exports = function platform(command, targets, callback) {
                 }
 
                 // Make sure we have minimum requirements to work with specified platform
-                check_requirements[target](function(err) {
+                require('./metadata/' + target + '_parser').check_requirements(function(err) {
                     if (err) {
                         throw new Error('Your system does not meet the requirements to create ' + target + ' projects: ' + err);
                     } else {
@@ -89,33 +79,34 @@ module.exports = function platform(command, targets, callback) {
                         // TODO: keep tabs on CB-2300
                         var command = util.format('"%s" "%s" "%s" "%s"', bin, output, (target=='blackberry'?name:pkg), name);
 
-                        var create = shell.exec(command, {silent:true});
-                        if (create.code > 0) {
-                            throw new Error('An error occured during creation of ' + target + ' sub-project. ' + create.output);
-                        }
+                        shell.exec(command, {silent:true,async:true}, function(code, create_output) {
+                            if (code > 0) {
+                                throw new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output);
+                            }
 
-                        switch(target) {
-                            case 'android':
-                                var android = new android_parser(output);
-                                android.update_project(cfg);
-                                hooks.fire('after_platform_add');
-                                end();
-                                break;
-                            case 'ios':
-                                var ios = new ios_parser(output);
-                                ios.update_project(cfg, function() {
+                            switch(target) {
+                                case 'android':
+                                    var android = new android_parser(output);
+                                    android.update_project(cfg);
                                     hooks.fire('after_platform_add');
                                     end();
-                                });
-                                break;
-                            case 'blackberry':
-                                var bb = new blackberry_parser(output);
-                                bb.update_project(cfg, function() {
-                                    hooks.fire('after_platform_add');
-                                    end();
-                                });
-                                break;
-                        }
+                                    break;
+                                case 'ios':
+                                    var ios = new ios_parser(output);
+                                    ios.update_project(cfg, function() {
+                                        hooks.fire('after_platform_add');
+                                        end();
+                                    });
+                                    break;
+                                case 'blackberry':
+                                    var bb = new blackberry_parser(output);
+                                    bb.update_project(cfg, function() {
+                                        hooks.fire('after_platform_add');
+                                        end();
+                                    });
+                                    break;
+                            }
+                        });
                     }
                 });
             });

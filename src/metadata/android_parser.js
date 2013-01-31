@@ -31,7 +31,7 @@ var default_prefs = {
 
 module.exports = function android_parser(project) {
     if (!fs.existsSync(path.join(project, 'AndroidManifest.xml'))) {
-        throw 'The provided path is not an Android project.';
+        throw new Error('The provided path "' + project + '" is not an Android project.');
     }
     this.path = project;
     this.strings = path.join(this.path, 'res', 'values', 'strings.xml');
