@@ -153,6 +153,7 @@ describe('blackberry project parser', function() {
         describe('update_project method', function() {
             var cordova_config_path = path.join(project_path, '.cordova', 'config.json');
             var original_config_json = fs.readFileSync(cordova_config_path, 'utf-8');
+
             describe('with stubbed out config for BlackBerry SDKs', function() {
                 beforeEach(function() {
                     fs.writeFileSync(cordova_config_path, JSON.stringify({
@@ -188,6 +189,9 @@ describe('blackberry project parser', function() {
                 });
             });
             describe('with empty BlackBerry SDKs in config', function() {
+                afterEach(function() {
+                    fs.writeFileSync(cordova_config_path, original_config_json, 'utf-8');
+                });
                 it('should invoke get_blackberry_environment', function() {
                     var spyEnv = spyOn(parser, 'get_blackberry_environment');
                     var promptSpy = spyOn(require('prompt'), 'get');
@@ -195,9 +199,6 @@ describe('blackberry project parser', function() {
                     expect(spyEnv).toHaveBeenCalled();
                 });
                 it('should write out project properties', function(done) {
-                    this.after(function() {
-                        fs.writeFileSync(cordova_config_path, original_config_json, 'utf-8');
-                    });
                     var spyProps = spyOn(parser, 'write_project_properties');
                     var promptSpy = spyOn(require('prompt'), 'get');
                     parser.update_project(config, function() {

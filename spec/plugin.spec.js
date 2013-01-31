@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -29,7 +28,7 @@ var cordova = require('../cordova'),
 
 var cwd = process.cwd();
 
-describe('plugin command', function() {
+xdescribe('plugin command', function() {
     beforeEach(function() {
         // Make a temp directory
         shell.rm('-rf', tempDir);

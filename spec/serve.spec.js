@@ -32,7 +32,7 @@ var cordova = require('../cordova'),
 
 var cwd = process.cwd();
 
-describe('serve command', function() {
+xdescribe('serve command', function() {
     beforeEach(function() {
         // Make a temp directory
         shell.rm('-rf', tempDir);

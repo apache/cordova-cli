@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -20,7 +19,7 @@
 var cordova_util  = require('./util'),
     path          = require('path'),
     config_parser = require('./config_parser'),
-    platform     = require('./platform'),
+    platform      = require('./platform'),
     fs            = require('fs'),
     shell         = require('shelljs'),
     ls            = fs.readdirSync,
