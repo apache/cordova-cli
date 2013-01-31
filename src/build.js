@@ -32,9 +32,8 @@ var cordova_util  = require('./util'),
     prompt        = require('prompt'),
     util          = require('util');
 
-function shell_out_to_debug(projectRoot, platform) {
+function shell_out_to_debug(projectRoot, platform, callback) {
     var cmd = path.join(projectRoot, 'platforms', platform);
-    // TODO: wait for https://issues.apache.org/jira/browse/CB-1548 to be fixed before we axe this
     // TODO: this is bb10 only for now
     // TODO: PLATFORM LIBRARY INCONSISTENCY
     if (platform == 'blackberry') {
@@ -42,15 +41,20 @@ function shell_out_to_debug(projectRoot, platform) {
     } else {
         cmd = '"' + cmd + '/cordova/build"';
     }
-    var response = shell.exec(cmd, {silent:true});
-    if (response.code > 0) throw 'An error occurred while building the ' + platform + ' project. ' + response.output;
+    shell.exec(cmd, {silent:true, async:true}, function(code, output) {
+        if (code > 0) {
+            throw new Error('An error occurred while building the ' + platform + ' project. ' + output);
+        } else {
+            callback();
+        }
+    });
 }
 
-module.exports = function build (platforms, callback) {
+module.exports = function build(platforms, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw 'Current working directory is not a Cordova-based project.';
+        throw new Error('Current working directory is not a Cordova-based project.');
     }
 
     var xml = path.join(projectRoot, 'www', 'config.xml');
@@ -65,16 +69,16 @@ module.exports = function build (platforms, callback) {
         platforms = ls(path.join(projectRoot, 'platforms'));
     }
 
-    if (platforms.length === 0) throw 'No platforms added to this project. Please use `cordova platform add <platform>`.';
+    if (platforms.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
 
     var hooks = new hooker(projectRoot);
     if (!(hooks.fire('before_build'))) {
-        throw 'before_build hooks exited with non-zero code. Aborting.';
+        throw new Error('before_build hooks exited with non-zero code. Aborting.');
     }
 
     var end = n(platforms.length, function() {
         if (!(hooks.fire('after_build'))) {
-            throw 'after_build hooks exited with non-zero code. Aborting.';
+            throw new Error('after_build hooks exited with non-zero code. Aborting.');
         }
         if (callback) callback();
     });
@@ -90,8 +94,7 @@ module.exports = function build (platforms, callback) {
 
                 // Update the related platform project from the config
                 parser.update_project(cfg);
-                shell_out_to_debug(projectRoot, 'android');
-                end();
+                shell_out_to_debug(projectRoot, 'android', end);
                 break;
             case 'blackberry':
                 platformPath = path.join(projectRoot, 'platforms', 'blackberry');
@@ -100,8 +103,7 @@ module.exports = function build (platforms, callback) {
                 // Update the related platform project from the config
                 parser.update_project(cfg, function() {
                     // Shell it
-                    shell_out_to_debug(projectRoot, 'blackberry');
-                    end();
+                    shell_out_to_debug(projectRoot, 'blackberry', end);
                 });
                 break;
             case 'ios':
@@ -110,8 +112,7 @@ module.exports = function build (platforms, callback) {
 
                 // Update the related platform project from the config
                 parser.update_project(cfg, function() {
-                    shell_out_to_debug(projectRoot, 'ios');
-                    end();
+                    shell_out_to_debug(projectRoot, 'ios', end);
                 });
                 break;
         }
