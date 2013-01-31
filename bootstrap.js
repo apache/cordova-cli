@@ -67,24 +67,20 @@ platforms.forEach(function(platform) {
                     console.error('ERROR! Could not create a native ' + platform + ' project test fixture. See below for error output.');
                     console.error(output);
                 } else {
-                    // set permissions on executables
-                    switch (platform) {
-                        case 'android':
-                            break;
-                        case 'ios':
-                            var scripts_path = path.join(fix_path, 'cordova');
-                            var scripts = fs.readdirSync(scripts_path);
-                            scripts.forEach(function(script) {
-                                var script_path = path.join(scripts_path, script);
-                                shell.chmod('+x', script_path);
-                            });
-                            break;
-                        case 'blackberry':
-                            break;
-                    };
+                    // copy over to full cordova project test fixture
                     var platformDir = path.join(platformsDir, platform);
                     shell.mkdir('-p', platformDir);
                     shell.cp('-rf', path.join(fix_path, '*'), platformDir); 
+                    // set permissions on executables
+                    var scripts_path = path.join(fix_path, 'cordova');
+                    var other_path = path.join(platformDir, 'cordova');
+                    var scripts = fs.readdirSync(scripts_path);
+                    scripts.forEach(function(script) {
+                        var script_path = path.join(scripts_path, script);
+                        var other_script_path = path.join(other_path, script);
+                        shell.chmod('+x', script_path);
+                        shell.chmod('+x', other_script_path);
+                    });
                     console.log('SUCCESS: ' + platform + ' ready to rock!');
                 }
             });
