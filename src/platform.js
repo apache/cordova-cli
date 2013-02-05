@@ -23,6 +23,9 @@ var config_parser     = require('./config_parser'),
     path              = require('path'),
     hooker            = require('./hooker'),
     n                 = require('ncallbacks'),
+    android_parser    = require('./metadata/android_parser'),
+    ios_parser        = require('./metadata/ios_parser'),
+    blackberry_parser = require('./metadata/blackberry_parser'),
     shell             = require('shelljs');
 
 module.exports = function platform(command, targets, callback) {

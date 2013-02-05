@@ -48,6 +48,8 @@ var cordovaDir = path.join(projectFixtures, 'cordova');
 shell.rm('-rf', cordovaDir);
 create(cordovaDir);
 var platformsDir = path.join(cordovaDir, 'platforms');
+// kill the stupid spec shit!
+shell.rm('-rf', path.join(cordovaDir, 'www', 'spec'));
 
 platforms.forEach(function(platform) {
     min_reqs[platform](function(err) {
@@ -67,8 +69,12 @@ platforms.forEach(function(platform) {
                     console.error('ERROR! Could not create a native ' + platform + ' project test fixture. See below for error output.');
                     console.error(output);
                 } else {
-                    // copy over to full cordova project test fixture
                     var platformDir = path.join(platformsDir, platform);
+                    // remove extra spec bullshit as it intereferes with jasmine-node
+                    var dub = path.join(fix_path, 'www');
+                    if (platform == 'android') dub = path.join(fix_path, 'assets', 'www');
+                    shell.rm('-rf', path.join(dub, 'spec'));
+                    // copy over to full cordova project test fixture
                     shell.mkdir('-p', platformDir);
                     shell.cp('-rf', path.join(fix_path, '*'), platformDir); 
                     // set permissions on executables

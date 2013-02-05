@@ -75,7 +75,7 @@ module.exports.check_requirements = function(callback) {
 module.exports.prototype = {
     update_from_config:function(config, callback) {
         if (config instanceof config_parser) {
-        } else throw 'update_from_config requires a config_parser object';
+        } else throw new Error('update_from_config requires a config_parser object');
         var name = config.name();
         var pkg = config.packageName();
 
@@ -123,7 +123,7 @@ module.exports.prototype = {
         var proj = new xcode.project(this.pbxproj);
         var parser = this;
         proj.parse(function(err,hash) {
-            if (err) throw 'An error occured during parsing of project.pbxproj. Start weeping.';
+            if (err) throw new Error('An error occured during parsing of project.pbxproj. Start weeping.');
             else {
                 proj.updateProductName(name);
                 fs.writeFileSync(parser.pbxproj, proj.writeSync(), 'utf-8');
