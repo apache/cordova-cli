@@ -4,4 +4,3 @@ temp
 .DS_Store
 spec/fixtures/projects/native
 spec/fixtures/projects/cordova
-lib
