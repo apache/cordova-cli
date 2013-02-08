@@ -1,9 +1,6 @@
 {
   "name": "cordova",
   "version": "2.4.6",
-  "config":{
-      "unsafe-perm":true
-  },
   "preferGlobal": "true",
   "description": "Cordova command line interface tool",
   "main": "cordova",
