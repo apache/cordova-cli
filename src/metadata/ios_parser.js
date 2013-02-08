@@ -62,7 +62,7 @@ module.exports.check_requirements = function(callback) {
     // Check xcode + version.
     shell.exec('xcodebuild -version', {silent:true, async:true}, function(code, output) {
         if (code != 0) {
-            callback('Xcode is not installed. Cannot add iOS platform. Output: ' + output);
+            callback('Xcode is (probably) not installed, specifically the command `xcodebuild` is unavailable or erroring out. Output of `xcodebuild -version` is: ' + output);
         } else {
             var xc_version = output.split('\n')[0].split(' ')[1];
             if (semver.lt(xc_version, MIN_XCODE_VERSION)) {
