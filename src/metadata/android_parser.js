@@ -42,7 +42,7 @@ module.exports = function android_parser(project) {
 module.exports.check_requirements = function(callback) {
     shell.exec('android list target', {silent:true, async:true}, function(code, output) {
         if (code != 0) {
-            callback('The command `android` failed. Make sure you have the latest Android SDK installed, and the `android` command (inside the tools/ folder) added to your path.');
+            callback('The command `android` failed. Make sure you have the latest Android SDK installed, and the `android` command (inside the tools/ folder) added to your path. Output: ' + output);
         } else {
             if (output.indexOf('android-17') == -1) {
                 callback('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.');
