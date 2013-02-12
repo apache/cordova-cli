@@ -153,6 +153,15 @@ module.exports.prototype = {
 
         util.deleteSvnFolders(project_www);
     },
+
+    // update the overrides folder into the www folder
+    update_overrides:function() {
+        var projectRoot = util.isCordova(this.path);
+        var project_www = path.join(this.path, 'www');
+        var overrides = path.join(projectRoot, 'merges','ios');
+        shell.cp('-rf', overrides+'/*',project_www);
+    },
+
     update_project:function(cfg, callback) {
         var self = this;
         this.update_from_config(cfg, function() {

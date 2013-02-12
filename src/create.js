@@ -59,6 +59,7 @@ module.exports = function create (dir, id, name) {
     // Create basic project structure.
     shell.mkdir('-p', dotCordova);
     shell.mkdir('-p', path.join(dir, 'platforms'));
+    shell.mkdir('-p', path.join(dir, 'merges'));
     shell.mkdir('-p', path.join(dir, 'plugins'));
     var hooks = path.join(dotCordova, 'hooks');
     shell.mkdir('-p', hooks);

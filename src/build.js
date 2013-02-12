@@ -94,6 +94,7 @@ module.exports = function build(platforms, callback) {
 
                 // Update the related platform project from the config
                 parser.update_project(cfg);
+                parser.update_overrides();
                 shell_out_to_debug(projectRoot, 'android', end);
                 break;
             case 'blackberry':
@@ -102,6 +103,7 @@ module.exports = function build(platforms, callback) {
                 
                 // Update the related platform project from the config
                 parser.update_project(cfg, function() {
+                    parser.update_overrides();
                     // Shell it
                     shell_out_to_debug(projectRoot, 'blackberry', end);
                 });
@@ -112,6 +114,7 @@ module.exports = function build(platforms, callback) {
 
                 // Update the related platform project from the config
                 parser.update_project(cfg, function() {
+                    parser.update_overrides();
                     shell_out_to_debug(projectRoot, 'ios', end);
                 });
                 break;
