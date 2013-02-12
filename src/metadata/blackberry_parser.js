@@ -120,6 +120,15 @@ module.exports.prototype = {
 
         util.deleteSvnFolders(platformWww);
     },
+
+    // update the overrides folder into the www folder
+    update_overrides:function() {
+        var projectRoot = util.isCordova(this.path);
+        var platformWww = path.join(this.path, 'www');
+        var overrides = path.join(projectRoot, 'merges','blackberry');
+        shell.cp('-rf', overrides+'/*',platformWww);
+    },
+
     write_project_properties:function() {
         // TODO: eventually support all blackberry sub-platforms
         var projectRoot = util.isCordova(this.path);

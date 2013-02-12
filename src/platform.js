@@ -38,6 +38,10 @@ module.exports = function platform(command, targets, callback) {
     var hooks = new hooker(projectRoot),
         end;
 
+    var createOverrides = function(target){
+        shell.mkdir('-p', path.join('merges',target));
+    };
+
     if (arguments.length === 0) command = 'ls';
     if (targets) {
         if (!(targets instanceof Array)) targets = [targets];
@@ -91,12 +95,14 @@ module.exports = function platform(command, targets, callback) {
                                 case 'android':
                                     var android = new android_parser(output);
                                     android.update_project(cfg);
+                                    createOverrides(target);
                                     hooks.fire('after_platform_add');
                                     end();
                                     break;
                                 case 'ios':
                                     var ios = new ios_parser(output);
                                     ios.update_project(cfg, function() {
+                                        createOverrides(target);
                                         hooks.fire('after_platform_add');
                                         end();
                                     });
@@ -104,6 +110,7 @@ module.exports = function platform(command, targets, callback) {
                                 case 'blackberry':
                                     var bb = new blackberry_parser(output);
                                     bb.update_project(cfg, function() {
+                                        createOverrides(target);
                                         hooks.fire('after_platform_add');
                                         end();
                                     });
@@ -119,6 +126,7 @@ module.exports = function platform(command, targets, callback) {
             targets.forEach(function(target) {
                 hooks.fire('before_platform_rm');
                 shell.rm('-rf', path.join(projectRoot, 'platforms', target));
+                shell.rm('-rf', path.join(projectRoot,'merges',target));
                 hooks.fire('after_platform_rm');
             });
             break;
