@@ -16,14 +16,17 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova_events = require('./src/events');
+var cordova_events = require('./src/events'),
+    prepare = require('./src/prepare'),
+    compile = require('./src/compile');
 
 module.exports = {
     help:     require('./src/help'),
     create:   require('./src/create'),
     platform: require('./src/platform'),
     platforms: require('./src/platform'),
-    build:    require('./src/build'),
+    prepare:    prepare,
+    compile:    compile,
     emulate:  require('./src/emulate'),
     plugin:   require('./src/plugin'),
     plugins:   require('./src/plugin'),
@@ -33,5 +36,9 @@ module.exports = {
     },
     emit:     function() {
         cordova_events.emit.apply(cordova_events, arguments);
+    },
+    build: function() {
+        prepare.apply(this, arguments);
+        compile.apply(this, arguments);
     }
 };

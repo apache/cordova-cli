@@ -32,6 +32,7 @@ var cordova_util  = require('./util'),
     prompt        = require('prompt'),
     util          = require('util');
 
+
 function shell_out_to_debug(projectRoot, platform, callback) {
     var cmd = path.join(projectRoot, 'platforms', platform);
     // TODO: this is bb10 only for now
@@ -50,7 +51,8 @@ function shell_out_to_debug(projectRoot, platform, callback) {
     });
 }
 
-module.exports = function build(platforms, callback) {
+
+module.exports = function compile(platforms, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -72,49 +74,21 @@ module.exports = function build(platforms, callback) {
     if (platforms.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
 
     var hooks = new hooker(projectRoot);
-    if (!(hooks.fire('before_build'))) {
-        throw new Error('before_build hooks exited with non-zero code. Aborting.');
+    if (!(hooks.fire('before_compile'))) {
+        throw new Error('before_compile hooks exited with non-zero code. Aborting.');
     }
 
     var end = n(platforms.length, function() {
-        if (!(hooks.fire('after_build'))) {
-            throw new Error('after_build hooks exited with non-zero code. Aborting.');
+        if (!(hooks.fire('after_compile'))) {
+            throw new Error('after_compile hooks exited with non-zero code. Aborting.');
         }
         if (callback) callback();
     });
 
-    // Iterate over each added platform 
+    // Iterate over each added platform
     platforms.forEach(function(platform) {
-        // Figure out paths based on platform
-        var parser, platformPath;
-        switch (platform) {
-            case 'android':
-                platformPath = path.join(projectRoot, 'platforms', 'android');
-                parser = new android_parser(platformPath);
-
-                // Update the related platform project from the config
-                parser.update_project(cfg);
-                shell_out_to_debug(projectRoot, 'android', end);
-                break;
-            case 'blackberry':
-                platformPath = path.join(projectRoot, 'platforms', 'blackberry');
-                parser = new blackberry_parser(platformPath);
-                
-                // Update the related platform project from the config
-                parser.update_project(cfg, function() {
-                    // Shell it
-                    shell_out_to_debug(projectRoot, 'blackberry', end);
-                });
-                break;
-            case 'ios':
-                platformPath = path.join(projectRoot, 'platforms', 'ios');
-                parser = new ios_parser(platformPath);
-
-                // Update the related platform project from the config
-                parser.update_project(cfg, function() {
-                    shell_out_to_debug(projectRoot, 'ios', end);
-                });
-                break;
-        }
+        shell_out_to_debug(projectRoot, platform);
     });
 };
+
+
