@@ -59,9 +59,11 @@ module.exports.prototype = {
         this.xml.update();
     },
     update_project:function(cfg, callback) {
-        this.update_from_config(cfg);
-        this.update_www();
         var self = this;
+
+        self.update_from_config(cfg);
+        self.update_www();
+        self.update_overrides();
 
         // Do we have BB config?
         var projectRoot = util.isCordova(this.path);
@@ -127,6 +129,7 @@ module.exports.prototype = {
         var platformWww = path.join(this.path, 'www');
         var overrides = path.join(projectRoot, 'merges','blackberry');
         shell.cp('-rf', overrides+'/*',platformWww);
+        util.deleteSvnFolders(platformWww);
     },
 
     write_project_properties:function() {

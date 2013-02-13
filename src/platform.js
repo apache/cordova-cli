@@ -94,23 +94,26 @@ module.exports = function platform(command, targets, callback) {
                             switch(target) {
                                 case 'android':
                                     var android = new android_parser(output);
-                                    android.update_project(cfg);
                                     createOverrides(target);
+
+                                    android.update_project(cfg);
                                     hooks.fire('after_platform_add');
                                     end();
                                     break;
                                 case 'ios':
                                     var ios = new ios_parser(output);
+                                    createOverrides(target);
+
                                     ios.update_project(cfg, function() {
-                                        createOverrides(target);
                                         hooks.fire('after_platform_add');
                                         end();
                                     });
                                     break;
                                 case 'blackberry':
                                     var bb = new blackberry_parser(output);
+                                    createOverrides(target);
+
                                     bb.update_project(cfg, function() {
-                                        createOverrides(target);
                                         hooks.fire('after_platform_add');
                                         end();
                                     });

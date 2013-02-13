@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -155,6 +154,7 @@ module.exports.prototype = {
     update_project:function(cfg, callback) {
         this.update_from_config(cfg);
         this.update_www();
+        this.update_overrides();
         if (callback) callback();
     }
 };
