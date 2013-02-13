@@ -160,12 +160,16 @@ module.exports.prototype = {
         var project_www = path.join(this.path, 'www');
         var overrides = path.join(projectRoot, 'merges','ios');
         shell.cp('-rf', overrides+'/*',project_www);
+
+        util.deleteSvnFolders(project_www);
+
     },
 
     update_project:function(cfg, callback) {
         var self = this;
         this.update_from_config(cfg, function() {
             self.update_www();
+            self.update_overrides();
             if (callback) callback();
         });
     }

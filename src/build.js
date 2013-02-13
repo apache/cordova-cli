@@ -92,9 +92,10 @@ module.exports = function build(platforms, callback) {
                 platformPath = path.join(projectRoot, 'platforms', 'android');
                 parser = new android_parser(platformPath);
 
+
                 // Update the related platform project from the config
+                // also merges in any platform changes
                 parser.update_project(cfg);
-                parser.update_overrides();
                 shell_out_to_debug(projectRoot, 'android', end);
                 break;
             case 'blackberry':
@@ -102,8 +103,8 @@ module.exports = function build(platforms, callback) {
                 parser = new blackberry_parser(platformPath);
                 
                 // Update the related platform project from the config
+                // also merges in any platform changes
                 parser.update_project(cfg, function() {
-                    parser.update_overrides();
                     // Shell it
                     shell_out_to_debug(projectRoot, 'blackberry', end);
                 });
@@ -113,8 +114,8 @@ module.exports = function build(platforms, callback) {
                 parser = new ios_parser(platformPath);
 
                 // Update the related platform project from the config
+                // also merges in any platform changes
                 parser.update_project(cfg, function() {
-                    parser.update_overrides();
                     shell_out_to_debug(projectRoot, 'ios', end);
                 });
                 break;

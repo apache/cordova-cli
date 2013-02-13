@@ -151,11 +151,15 @@ module.exports.prototype = {
         var project_www = path.join(this.path, 'assets','www');
         var overrides = path.join(projectRoot, 'merges','android');
         shell.cp('-rf', overrides+'/*',project_www);
+
+        // delete any .svn folders copied over
+        util.deleteSvnFolders(project_www);
     },
 
     update_project:function(cfg) {
         this.update_from_config(cfg);
         this.update_www();
+        this.update_overrides();
     }
 };
 
