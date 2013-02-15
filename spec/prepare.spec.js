@@ -55,19 +55,19 @@ describe('prepare command', function() {
         // move platform project fixtures over to fake cordova into thinking platforms were added
         // TODO: possibly add this to helper?
         shell.mv('-f', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir));
-        shell.mv('-f', path.join(cordova_project, 'platforms', 'ios'), path.join(tempDir));
         this.after(function() {
             process.chdir(cwd);
             shell.mv('-f', path.join(tempDir, 'blackberry'), path.join(cordova_project, 'platforms', 'blackberry'));
-            shell.mv('-f', path.join(tempDir, 'ios'), path.join(cordova_project, 'platforms', 'ios'));
         });
 
         process.chdir(cordova_project);
 
-        var parser_spy = spyOn(android_parser.prototype, 'update_project');
+        var a_parser_spy = spyOn(android_parser.prototype, 'update_project');
+        var i_parser_spy = spyOn(ios_parser.prototype, 'update_project');
         expect(function() {
             cordova.prepare();
-            expect(parser_spy).toHaveBeenCalled();
+            expect(a_parser_spy).toHaveBeenCalled();
+            expect(i_parser_spy).toHaveBeenCalled();
         }).not.toThrow();
     });
     it('should not run outside of a Cordova-based project', function() {

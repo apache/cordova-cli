@@ -73,7 +73,7 @@ module.exports = function prepare(platforms, callback) {
 
     // Iterate over each added platform
     platforms.forEach(function(platform) {
-        var platformPath = path.join(projectRoot, 'platforms', 'android');
+        var platformPath = path.join(projectRoot, 'platforms', platform);
         var parser = new parsers[platform](platformPath);
         parser.update_project(cfg, end);
     });
