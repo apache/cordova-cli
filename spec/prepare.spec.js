@@ -33,7 +33,7 @@ var cordova = require('../cordova'),
 
 var cwd = process.cwd();
 
-describe('build command', function() {
+describe('prepare command', function() {
     beforeEach(function() {
         shell.rm('-rf', tempDir);
         shell.mkdir('-p', tempDir);
@@ -47,7 +47,7 @@ describe('build command', function() {
         cordova.create(tempDir);
         process.chdir(tempDir);
         expect(function() {
-            cordova.build();
+            cordova.prepare();
         }).toThrow();
     });
     
@@ -64,14 +64,10 @@ describe('build command', function() {
 
         process.chdir(cordova_project);
 
-        var prepare_spy = spyOn(cordova, 'prepare');
-        var compile_spy = spyOn(cordova, 'compile');
+        var parser_spy = spyOn(android_parser.prototype, 'update_project');
         expect(function() {
-            cordova.build();
-            var prep_cb = prepare_spy.mostRecentCall.args[0];
-            prep_cb();
-            expect(prepare_spy).toHaveBeenCalled();
-            expect(compile_spy).toHaveBeenCalled();
+            cordova.prepare();
+            expect(parser_spy).toHaveBeenCalled();
         }).not.toThrow();
     });
     it('should not run outside of a Cordova-based project', function() {
@@ -83,16 +79,14 @@ describe('build command', function() {
         process.chdir(tempDir);
 
         expect(function() {
-            cordova.build();
+            cordova.prepare();
         }).toThrow();
     });
 
     describe('hooks', function() {
-        var s, p, c;
+        var s;
         beforeEach(function() {
             s = spyOn(hooker.prototype, 'fire').andReturn(true);
-            p = spyOn(cordova, 'prepare');
-            c = spyOn(cordova, 'compile');
         });
 
         describe('when platforms are added', function() {
@@ -108,14 +102,14 @@ describe('build command', function() {
             });
 
             it('should fire before hooks through the hooker module', function() {
-                cordova.build();
-                expect(s).toHaveBeenCalledWith('before_build');
+                cordova.prepare();
+                expect(s).toHaveBeenCalledWith('before_prepare');
             });
             it('should fire after hooks through the hooker module', function() {
-                cordova.build();
-                p.mostRecentCall.args[0](); // prep cb
-                c.mostRecentCall.args[0](); // compile cb
-                expect(s).toHaveBeenCalledWith('after_build');
+                var parser_spy = spyOn(android_parser.prototype, 'update_project');
+                cordova.prepare();
+                parser_spy.mostRecentCall.args[1](); // parser cb
+                expect(s).toHaveBeenCalledWith('after_prepare');
             });
         });
 
@@ -129,10 +123,10 @@ describe('build command', function() {
             });
             it('should not fire the hooker', function() {
                 expect(function() {
-                    cordova.build();
+                    cordova.prepare();
                 }).toThrow();
-                expect(s).not.toHaveBeenCalledWith('before_build');
-                expect(s).not.toHaveBeenCalledWith('after_build');
+                expect(s).not.toHaveBeenCalledWith('before_prepare');
+                expect(s).not.toHaveBeenCalledWith('after_prepare');
             });
         });
     });

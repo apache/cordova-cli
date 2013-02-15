@@ -25,6 +25,7 @@ var util      = require('./src/util'),
     a_parser  = require('./src/metadata/android_parser'),
     b_parser  = require('./src/metadata/blackberry_parser'),
     i_parser  = require('./src/metadata/ios_parser'),
+    n         = require('ncallbacks'),
     path      = require('path'),
     fs        = require('fs'),
     shell     = require('shelljs'),
@@ -50,6 +51,14 @@ create(cordovaDir);
 var platformsDir = path.join(cordovaDir, 'platforms');
 // kill the stupid spec shit!
 shell.rm('-rf', path.join(cordovaDir, 'www', 'spec'));
+
+var end = n(platforms.length, function() {
+    console.log("************************************************************************");
+    console.log("* Please NOTE: it is highly recommended to run the command:            *");
+    console.log("*     sudo chown -R <yourusername> /usr/local/lib/node_modules/cordova *");
+    console.log("* This will allow you to run this tool globally without root.          *");
+    console.log("************************************************************************");
+});
 
 platforms.forEach(function(platform) {
     min_reqs[platform](function(err) {
@@ -88,6 +97,7 @@ platforms.forEach(function(platform) {
                         shell.chmod('+x', other_script_path);
                     });
                     console.log('SUCCESS: ' + platform + ' ready to rock!');
+                    end();
                 }
             });
         }

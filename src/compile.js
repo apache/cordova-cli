@@ -46,7 +46,7 @@ function shell_out_to_debug(projectRoot, platform, callback) {
         if (code > 0) {
             throw new Error('An error occurred while building the ' + platform + ' project. ' + output);
         } else {
-            callback();
+            if (callback) callback();
         }
     });
 }
@@ -87,7 +87,7 @@ module.exports = function compile(platforms, callback) {
 
     // Iterate over each added platform
     platforms.forEach(function(platform) {
-        shell_out_to_debug(projectRoot, platform);
+        shell_out_to_debug(projectRoot, platform, end);
     });
 };
 

@@ -16,21 +16,27 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova_util  = require('./util'),
-    path          = require('path'),
-    config_parser = require('./config_parser'),
-    platform      = require('./platform'),
-    fs            = require('fs'),
-    shell         = require('shelljs'),
-    ls            = fs.readdirSync,
-    et            = require('elementtree'),
-    android_parser= require('./metadata/android_parser'),
-    blackberry_parser= require('./metadata/blackberry_parser'),
-    ios_parser    = require('./metadata/ios_parser'),
-    hooker        = require('./hooker'),
-    n             = require('ncallbacks'),
-    prompt        = require('prompt'),
-    util          = require('util');
+var cordova_util      = require('./util'),
+    path              = require('path'),
+    config_parser     = require('./config_parser'),
+    platform          = require('./platform'),
+    fs                = require('fs'),
+    shell             = require('shelljs'),
+    ls                = fs.readdirSync,
+    et                = require('elementtree'),
+    android_parser    = require('./metadata/android_parser'),
+    blackberry_parser = require('./metadata/blackberry_parser'),
+    ios_parser        = require('./metadata/ios_parser'),
+    hooker            = require('./hooker'),
+    n                 = require('ncallbacks'),
+    prompt            = require('prompt'),
+    util              = require('util');
+
+var parsers = {
+    "android":android_parser,
+    "ios":ios_parser,
+    "blackberry":blackberry_parser
+};
 
 module.exports = function prepare(platforms, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
@@ -67,30 +73,8 @@ module.exports = function prepare(platforms, callback) {
 
     // Iterate over each added platform
     platforms.forEach(function(platform) {
-        // Figure out paths based on platform
-        var parser, platformPath;
-        switch (platform) {
-            case 'android':
-                platformPath = path.join(projectRoot, 'platforms', 'android');
-                parser = new android_parser(platformPath);
-
-                // Update the related platform project from the config
-                parser.update_project(cfg);
-                break;
-            case 'blackberry':
-                platformPath = path.join(projectRoot, 'platforms', 'blackberry');
-                parser = new blackberry_parser(platformPath);
-
-                // Update the related platform project from the config
-                parser.update_project(cfg);
-                break;
-            case 'ios':
-                platformPath = path.join(projectRoot, 'platforms', 'ios');
-                parser = new ios_parser(platformPath);
-
-                // Update the related platform project from the config
-                parser.update_project(cfg);
-                break;
-        }
+        var platformPath = path.join(projectRoot, 'platforms', 'android');
+        var parser = new parsers[platform](platformPath);
+        parser.update_project(cfg, end);
     });
 };

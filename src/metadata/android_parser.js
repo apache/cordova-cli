@@ -63,7 +63,7 @@ module.exports.check_requirements = function(callback) {
 module.exports.prototype = {
     update_from_config:function(config) {
         if (config instanceof config_parser) {
-        } else throw 'update_from_config requires a config_parser object';
+        } else throw new Error('update_from_config requires a config_parser object');
 
         // Update app name by editing res/values/strings.xml
         var name = config.name();
@@ -144,9 +144,10 @@ module.exports.prototype = {
         // delete any .svn folders copied over
         util.deleteSvnFolders(platformWww);
     },
-    update_project:function(cfg) {
+    update_project:function(cfg, callback) {
         this.update_from_config(cfg);
         this.update_www();
+        if (callback) callback();
     }
 };
 

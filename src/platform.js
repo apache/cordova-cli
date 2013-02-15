@@ -32,7 +32,7 @@ module.exports = function platform(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw 'Current working directory is not a Cordova-based project.';
+        throw new Error('Current working directory is not a Cordova-based project.');
     }
 
     var hooks = new hooker(projectRoot),

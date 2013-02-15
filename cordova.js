@@ -17,28 +17,56 @@
     under the License.
 */
 var cordova_events = require('./src/events'),
-    prepare = require('./src/prepare'),
-    compile = require('./src/compile');
+    prepare        = require('./src/prepare'),
+    platform       = require('./src/platform'),
+    hooker         = require('./src/hooker'),
+    util           = require('./src/util'),
+    path           = require('path'),
+    fs             = require('fs'),
+    compile        = require('./src/compile');
 
 module.exports = {
-    help:     require('./src/help'),
-    create:   require('./src/create'),
-    platform: require('./src/platform'),
-    platforms: require('./src/platform'),
-    prepare:    prepare,
-    compile:    compile,
-    emulate:  require('./src/emulate'),
-    plugin:   require('./src/plugin'),
+    help:      require('./src/help'),
+    create:    require('./src/create'),
+    platform:  platform,
+    platforms: platform,
+    prepare:   prepare,
+    compile:   compile,
+    emulate:   require('./src/emulate'),
+    plugin:    require('./src/plugin'),
     plugins:   require('./src/plugin'),
-    serve:    require('./src/serve'),
-    on:       function() {
+    serve:     require('./src/serve'),
+    on:        function() {
         cordova_events.on.apply(cordova_events, arguments);
     },
-    emit:     function() {
+    emit:      function() {
         cordova_events.emit.apply(cordova_events, arguments);
     },
-    build: function() {
-        prepare.apply(this, arguments);
-        compile.apply(this, arguments);
+    build:     function() {
+        var projectRoot = util.isCordova(process.cwd());
+        if (!projectRoot) {
+            throw new Error('Current working directory is not a Cordova-based project.');
+        }
+        var platforms_dir = path.join(projectRoot, 'platforms');
+        var platforms = fs.readdirSync(platforms_dir);
+        if (platforms.length === 0) {
+            throw new Error('No platforms added! `cordova platform add <platform>` to add a platform.');
+        }
+
+        // fire build hooks
+        var hooks = new hooker(projectRoot);
+        hooks.fire('before_build');
+
+        var prep_args = Array.prototype.slice.call(arguments, 0);
+        var compile_args = Array.prototype.slice.call(arguments, 0);
+
+        var self = this;
+        compile_args = compile_args.concat(function() {
+            hooks.fire('after_build');
+        });
+        prep_args = prep_args.concat(function() {
+            module.exports.compile.apply(self, compile_args);
+        });
+        module.exports.prepare.apply(this, prep_args);
     }
 };

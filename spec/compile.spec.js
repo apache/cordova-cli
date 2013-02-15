@@ -32,8 +32,7 @@ var cordova = require('../cordova'),
     cordova_project = path.join(fixtures, 'projects', 'cordova');
 
 var cwd = process.cwd();
-
-describe('build command', function() {
+describe('compile command', function() {
     beforeEach(function() {
         shell.rm('-rf', tempDir);
         shell.mkdir('-p', tempDir);
@@ -47,7 +46,7 @@ describe('build command', function() {
         cordova.create(tempDir);
         process.chdir(tempDir);
         expect(function() {
-            cordova.build();
+            cordova.compile();
         }).toThrow();
     });
     
@@ -64,14 +63,11 @@ describe('build command', function() {
 
         process.chdir(cordova_project);
 
-        var prepare_spy = spyOn(cordova, 'prepare');
-        var compile_spy = spyOn(cordova, 'compile');
+        var sh_spy = spyOn(shell, 'exec');
+
         expect(function() {
-            cordova.build();
-            var prep_cb = prepare_spy.mostRecentCall.args[0];
-            prep_cb();
-            expect(prepare_spy).toHaveBeenCalled();
-            expect(compile_spy).toHaveBeenCalled();
+            cordova.compile();
+            expect(sh_spy).toHaveBeenCalled();
         }).not.toThrow();
     });
     it('should not run outside of a Cordova-based project', function() {
@@ -83,16 +79,14 @@ describe('build command', function() {
         process.chdir(tempDir);
 
         expect(function() {
-            cordova.build();
+            cordova.compile();
         }).toThrow();
     });
 
     describe('hooks', function() {
-        var s, p, c;
+        var s;
         beforeEach(function() {
             s = spyOn(hooker.prototype, 'fire').andReturn(true);
-            p = spyOn(cordova, 'prepare');
-            c = spyOn(cordova, 'compile');
         });
 
         describe('when platforms are added', function() {
@@ -108,14 +102,15 @@ describe('build command', function() {
             });
 
             it('should fire before hooks through the hooker module', function() {
-                cordova.build();
-                expect(s).toHaveBeenCalledWith('before_build');
+                spyOn(shell, 'exec');
+                cordova.compile();
+                expect(s).toHaveBeenCalledWith('before_compile');
             });
             it('should fire after hooks through the hooker module', function() {
-                cordova.build();
-                p.mostRecentCall.args[0](); // prep cb
-                c.mostRecentCall.args[0](); // compile cb
-                expect(s).toHaveBeenCalledWith('after_build');
+                var sh_spy = spyOn(shell, 'exec');
+                cordova.compile();
+                sh_spy.mostRecentCall.args[2](0); // shell cb
+                expect(s).toHaveBeenCalledWith('after_compile');
             });
         });
 
@@ -129,10 +124,43 @@ describe('build command', function() {
             });
             it('should not fire the hooker', function() {
                 expect(function() {
-                    cordova.build();
+                    cordova.compile();
                 }).toThrow();
-                expect(s).not.toHaveBeenCalledWith('before_build');
-                expect(s).not.toHaveBeenCalledWith('after_build');
+                expect(s).not.toHaveBeenCalledWith('before_compile');
+                expect(s).not.toHaveBeenCalledWith('after_compile');
+            });
+        });
+    });
+    describe('per platform', function() {
+        beforeEach(function() {
+            process.chdir(cordova_project);
+        });
+
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+       
+        describe('Android', function() {
+            it('should shell out to build command on Android', function() {
+                var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
+                cordova.compile('android');
+                expect(s.mostRecentCall.args[0].match(/\/cordova\/build/)).not.toBeNull();
+            });
+        });
+        describe('iOS', function() {
+            it('should shell out to build command on iOS', function() {
+                var s = spyOn(require('shelljs'), 'exec');
+                cordova.compile('ios');
+                expect(s).toHaveBeenCalled();
+                expect(s.mostRecentCall.args[0].match(/\/cordova\/build/)).not.toBeNull();
+            });
+        });
+        describe('BlackBerry', function() {
+            it('should shell out to ant command on blackberry', function() {
+                var s = spyOn(require('shelljs'), 'exec');
+                cordova.compile('blackberry');
+                expect(s).toHaveBeenCalled();
+                expect(s.mostRecentCall.args[0]).toMatch(/ant -f .*build\.xml" qnx load-device/);
             });
         });
     });

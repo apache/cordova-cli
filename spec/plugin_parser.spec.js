@@ -35,10 +35,8 @@ describe('plugin.xml parser', function () {
     });
     it('should be able to figure out which platforms the plugin supports', function() {
         var cfg = new plugin_parser(xml);
-        expect(cfg.platforms.length).toBe(3);
-        expect(cfg.platforms.indexOf('android') > -1).toBe(true);
+        expect(cfg.platforms.length).toBe(1);
         expect(cfg.platforms.indexOf('ios') > -1).toBe(true);
-        expect(cfg.platforms.indexOf('blackberry') > -1).toBe(true);
     });
 });
 
