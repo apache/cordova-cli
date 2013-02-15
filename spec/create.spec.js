@@ -20,6 +20,8 @@ describe('create command', function () {
         var hooks = path.join(tempDir, '.cordova', 'hooks');
         expect(fs.existsSync(hooks)).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'before_platform_add'))).toBe(true);
+        expect(fs.existsSync(path.join(hooks, 'before_prepare'))).toBe(true);
+        expect(fs.existsSync(path.join(hooks, 'before_compile'))).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'after_platform_add'))).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'before_platform_rm'))).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'after_platform_rm'))).toBe(true);
@@ -31,6 +33,8 @@ describe('create command', function () {
         expect(fs.existsSync(path.join(hooks, 'after_plugin_rm'))).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'before_plugin_ls'))).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'after_plugin_ls'))).toBe(true);
+        expect(fs.existsSync(path.join(hooks, 'after_prepare'))).toBe(true);
+        expect(fs.existsSync(path.join(hooks, 'after_compile'))).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'before_build'))).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'after_build'))).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'before_emulate'))).toBe(true);

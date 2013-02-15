@@ -65,6 +65,7 @@ module.exports = function create (dir, id, name) {
 
     // Add directories for hooks
     shell.mkdir(path.join(hooks, 'after_build'));
+    shell.mkdir(path.join(hooks, 'after_compile'));
     shell.mkdir(path.join(hooks, 'after_docs'));
     shell.mkdir(path.join(hooks, 'after_emulate'));
     shell.mkdir(path.join(hooks, 'after_platform_add'));
@@ -73,7 +74,9 @@ module.exports = function create (dir, id, name) {
     shell.mkdir(path.join(hooks, 'after_plugin_add'));
     shell.mkdir(path.join(hooks, 'after_plugin_ls'));
     shell.mkdir(path.join(hooks, 'after_plugin_rm'));
+    shell.mkdir(path.join(hooks, 'after_prepare'));
     shell.mkdir(path.join(hooks, 'before_build'));
+    shell.mkdir(path.join(hooks, 'before_compile'));
     shell.mkdir(path.join(hooks, 'before_docs'));
     shell.mkdir(path.join(hooks, 'before_emulate'));
     shell.mkdir(path.join(hooks, 'before_platform_add'));
@@ -82,6 +85,7 @@ module.exports = function create (dir, id, name) {
     shell.mkdir(path.join(hooks, 'before_plugin_add'));
     shell.mkdir(path.join(hooks, 'before_plugin_ls'));
     shell.mkdir(path.join(hooks, 'before_plugin_rm'));
+    shell.mkdir(path.join(hooks, 'before_prepare'));
 
     // Write out .cordova/config.json file with a simple json manifest
     fs.writeFileSync(path.join(dotCordova, 'config.json'), JSON.stringify({
