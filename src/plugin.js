@@ -24,6 +24,7 @@ var cordova_util  = require('./util'),
     shell         = require('shelljs'),
     config_parser = require('./config_parser'),
     hooker        = require('./hooker'),
+    core_platforms= require('../platforms'),
     platform      = require('./platform'),
     plugin_parser = require('./plugin_parser'),
     ls            = fs.readdirSync;
@@ -43,7 +44,7 @@ module.exports = function plugin(command, targets, callback) {
     // Grab config info for the project
     var xml = path.join(projectWww, 'config.xml');
     var cfg = new config_parser(xml);
-    var platforms = ls(path.join(projectRoot, 'platforms'));
+    var platforms = cordova_util.listPlatforms(projectRoot);
 
     // Massage plugin name(s) / path(s)
     var pluginPath, plugins, names = [];

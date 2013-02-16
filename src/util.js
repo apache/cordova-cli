@@ -19,6 +19,7 @@
 */
 var fs         = require('fs'),
     path       = require('path'),
+    core_platforms = require('../platforms'),
     shell      = require('shelljs');
 
 var lib_path = path.join(__dirname, '..', 'lib')
@@ -55,6 +56,11 @@ module.exports = {
                     shell.rm('-rf', fullpath);
                 } else module.exports.deleteSvnFolders(fullpath);
             }
+        });
+    },
+    listPlatforms:function(project_dir) {
+        return fs.readdirSync(path.join(project_dir, 'platforms')).filter(function(p) {
+            return core_platforms.indexOf(p) > -1;
         });
     }
 };

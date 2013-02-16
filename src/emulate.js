@@ -16,19 +16,25 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova_util = require('./util'),
-    path = require('path'),
-    shell = require('shelljs'),
-    config_parser = require('./config_parser'),
-    android_parser = require('./metadata/android_parser'),
-    ios_parser = require('./metadata/ios_parser'),
+var cordova_util      = require('./util'),
+    path              = require('path'),
+    shell             = require('shelljs'),
+    config_parser     = require('./config_parser'),
+    android_parser    = require('./metadata/android_parser'),
+    ios_parser        = require('./metadata/ios_parser'),
     blackberry_parser = require('./metadata/blackberry_parser'),
-    platform = require('./platform'),
-    fs = require('fs'),
-    ls = fs.readdirSync,
-    n = require('ncallbacks'),
-    hooker = require('../src/hooker'),
-    util = require('util');
+    platform          = require('./platform'),
+    fs                = require('fs'),
+    ls                = fs.readdirSync,
+    n                 = require('ncallbacks'),
+    hooker            = require('../src/hooker'),
+    util              = require('util');
+
+var parsers = {
+    "android":android_parser,
+    "ios":ios_parser,
+    "blackberry":blackberry_parser
+};
 
 function shell_out_to_emulate(root, platform, callback) {
     var cmd = path.join(root, 'platforms', platform, 'cordova', 'emulate');
@@ -51,18 +57,18 @@ module.exports = function emulate (platforms, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw 'Current working directory is not a Cordova-based project.';
+        throw new Error('Current working directory is not a Cordova-based project.');
     }
 
     var xml = path.join(projectRoot, 'www', 'config.xml');
     var cfg = new config_parser(xml);
 
     if (arguments.length === 0 || (platforms instanceof Array && platforms.length === 0)) {
-        platforms = ls(path.join(projectRoot, 'platforms'));
+        platforms = cordova_util.listPlatforms(projectRoot);
     } else if (typeof platforms == 'string') platforms = [platforms];
     else if (platforms instanceof Function && callback === undefined) {
         callback = platforms;
-        platforms = ls(path.join(projectRoot, 'platforms'));
+        platforms = cordova_util.listPlatforms(projectRoot);
     }
 
     if (platforms.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
@@ -81,35 +87,11 @@ module.exports = function emulate (platforms, callback) {
 
     // Iterate over each added platform and shell out to debug command
     platforms.forEach(function(platform) {
-        var parser, platformPath;
-        switch (platform) {
-            case 'android':
-                platformPath = path.join(projectRoot, 'platforms', 'android');
-                parser = new android_parser(platformPath);
-
-                // Update the related platform project from the config
-                parser.update_project(cfg);
-                shell_out_to_emulate(projectRoot, 'android', end);
-                break;
-            case 'blackberry':
-                platformPath = path.join(projectRoot, 'platforms', 'blackberry');
-                parser = new blackberry_parser(platformPath);
-                
-                // Update the related platform project from the config
-                parser.update_project(cfg, function() {
-                    // Shell it
-                    shell_out_to_emulate(projectRoot, 'blackberry', end);
-                });
-                break;
-            case 'ios':
-                platformPath = path.join(projectRoot, 'platforms', 'ios');
-                parser = new ios_parser(platformPath);
-                // Update the related platform project from the config
-                parser.update_project(cfg, function() {
-                    shell_out_to_emulate(projectRoot, 'ios', end);
-                });
-                break;
-        }
+        var platformPath = path.join(projectRoot, 'platforms', platform);
+        var parser = new parsers[platform](platformPath);
+        parser.update_project(cfg, function() {
+            shell_out_to_emulate(projectRoot, platform, end);
+        });
     });
 };
 

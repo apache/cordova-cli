@@ -22,7 +22,6 @@ var cordova_util      = require('./util'),
     platform          = require('./platform'),
     fs                = require('fs'),
     shell             = require('shelljs'),
-    ls                = fs.readdirSync,
     et                = require('elementtree'),
     android_parser    = require('./metadata/android_parser'),
     blackberry_parser = require('./metadata/blackberry_parser'),
@@ -50,11 +49,11 @@ module.exports = function prepare(platforms, callback) {
     var cfg = new config_parser(xml);
 
     if (arguments.length === 0 || (platforms instanceof Array && platforms.length === 0)) {
-        platforms = ls(path.join(projectRoot, 'platforms'));
+        platforms = cordova_util.listPlatforms(projectRoot);
     } else if (typeof platforms == 'string') platforms = [platforms];
     else if (platforms instanceof Function && callback === undefined) {
         callback = platforms;
-        platforms = ls(path.join(projectRoot, 'platforms'));
+        platforms = cordova_util.listPlatforms(projectRoot);
     }
 
     if (platforms.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');

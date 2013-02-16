@@ -157,11 +157,23 @@ describe('compile command', function() {
         });
         describe('BlackBerry', function() {
             it('should shell out to ant command on blackberry', function() {
-                var s = spyOn(require('shelljs'), 'exec');
+                var s = spyOn(shell, 'exec');
                 cordova.compile('blackberry');
                 expect(s).toHaveBeenCalled();
                 expect(s.mostRecentCall.args[0]).toMatch(/ant -f .*build\.xml" qnx load-device/);
             });
+        });
+        it('should not treat a .gitignore file as a platform', function() {
+            var gitignore = path.join(cordova_project, 'platforms', '.gitignore');
+            fs.writeFileSync(gitignore, 'somethinghere', 'utf-8');
+            this.after(function() {
+                shell.rm('-f', gitignore);
+            });
+            var s = spyOn(shell, 'exec');
+            cordova.compile();
+            expect(s.calls[0].args[0]).not.toMatch(/\.gitignore/);
+            expect(s.calls[1].args[0]).not.toMatch(/\.gitignore/);
+            expect(s.calls[1].args[0]).not.toMatch(/\.gitignore/);
         });
     });
 });

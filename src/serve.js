@@ -25,7 +25,6 @@ var cordova_util = require('./util'),
     ios_parser = require('./metadata/ios_parser'),
     blackberry_parser = require('./metadata/blackberry_parser'),
     fs = require('fs'),
-    ls = fs.readdirSync,
     util = require('util'),
     http = require("http"),
     url = require("url");
@@ -90,7 +89,7 @@ module.exports = function serve (platform, port) {
     var cfg = new config_parser(xml);
 
     // Retrieve the platforms.
-    var platforms = ls(path.join(projectRoot, 'platforms'));
+    var platforms = cordova_util.listPlatforms(projectRoot);
     if (!platform) {
         throw 'You need to specify a platform.';
     } else if (platforms.length == 0) {

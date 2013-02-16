@@ -63,9 +63,10 @@ describe('emulate command', function() {
         process.chdir(cordova_project);
 
         var s = spyOn(shell, 'exec');
-        spyOn(android_parser.prototype, 'update_project');
+        var a_spy = spyOn(android_parser.prototype, 'update_project');
         expect(function() {
             cordova.emulate();
+            a_spy.mostRecentCall.args[1](); // fake out android parser
             expect(s).toHaveBeenCalled();
         }).not.toThrow();
     });
@@ -163,6 +164,7 @@ describe('emulate command', function() {
             });
             it('should fire after hooks through the hooker module', function() {
                 cordova.emulate();
+                ap.mostRecentCall.args[1](); // fake parser call
                 sh.mostRecentCall.args[2](0); //fake shell call
                 expect(s).toHaveBeenCalledWith('after_emulate');
             });
