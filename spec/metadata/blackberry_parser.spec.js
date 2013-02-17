@@ -150,6 +150,47 @@ describe('blackberry project parser', function() {
             });
         });
 
+        describe('update_overrides method',function() {
+
+            it('should copy a new file from merges into www', function() {
+
+                var newFile = path.join(project_path, 'merges','blackberry', 'merge.js');
+
+                this.after(function() {
+                    shell.rm('-rf', path.join(project_path, 'merges','blackberry','merge.js'));
+                });
+
+                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
+                parser.update_overrides();
+                expect(fs.existsSync(path.join(blackberry_project_path, 'www', 'merge.js'))).toBe(true);
+            });
+
+            it('should copy a file from merges over a file in www', function() {
+
+                var newFile = path.join(project_path, 'merges','blackberry', 'merge.js');
+                var newFileWWW = path.join(project_path, 'www','merge.js');
+
+                this.after(function() {
+                    shell.rm('-rf', path.join(project_path, 'merges','blackberry','merge.js'));
+                    shell.rm('-rf',path.join(project_path,'www','merge.js'));
+                });
+
+                fs.writeFileSync(newFile, 'var foo=2;', 'utf-8');
+                fs.writeFileSync(newFileWWW, 'var foo=1;', 'utf-8');
+                parser.update_overrides();
+                expect(fs.existsSync(path.join(blackberry_project_path, 'www', 'merge.js'))).toBe(true);
+                expect(fs.readFileSync(path.join(blackberry_project_path, 'www', 'merge.js'),'utf-8')).toEqual('var foo=2;');
+            });
+
+
+            it('should call out to util.deleteSvnFolders', function() {
+                var spy = spyOn(util, 'deleteSvnFolders');
+                parser.update_overrides();
+                expect(spy).toHaveBeenCalled();
+            });
+        });
+
+
         describe('update_project method', function() {
             var cordova_config_path = path.join(project_path, '.cordova', 'config.json');
             var original_config_json = fs.readFileSync(cordova_config_path, 'utf-8');

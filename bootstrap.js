@@ -76,7 +76,9 @@ platforms.forEach(function(platform) {
                     shell.rm('-rf', path.join(dub, 'spec'));
                     // copy over to full cordova project test fixture
                     shell.mkdir('-p', platformDir);
-                    shell.cp('-rf', path.join(fix_path, '*'), platformDir); 
+                    shell.cp('-rf', path.join(fix_path, '*'), platformDir);
+                    shell.mkdir('-p',path.join(cordovaDir,'merges',platform));
+
                     // set permissions on executables
                     var scripts_path = path.join(fix_path, 'cordova');
                     var other_path = path.join(platformDir, 'cordova');
@@ -93,3 +95,4 @@ platforms.forEach(function(platform) {
         }
     });
 });
+

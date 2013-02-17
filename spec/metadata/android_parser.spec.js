@@ -177,6 +177,47 @@ describe('android project parser', function() {
             });
         });
 
+        describe('update_overrides method',function() {
+
+            it('should copy a new file from merges into www', function() {
+
+                var newFile = path.join(project_path, 'merges','android', 'merge.js');
+
+                this.after(function() {
+                    shell.rm('-rf', path.join(project_path, 'merges','android','merge.js'));
+                });
+
+                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
+                parser.update_overrides();
+                expect(fs.existsSync(path.join(android_project_path, 'assets', 'www', 'merge.js'))).toBe(true);
+            });
+
+            it('should copy a file from merges over a file in www', function() {
+
+                var newFile = path.join(project_path, 'merges','android', 'merge.js');
+                var newFileWWW = path.join(project_path, 'www','merge.js');
+
+                this.after(function() {
+                    shell.rm('-rf', path.join(project_path, 'merges','android','merge.js'));
+                    shell.rm('-rf',path.join(project_path,'www','merge.js'));
+                });
+
+                fs.writeFileSync(newFile, 'var foo=2;', 'utf-8');
+                fs.writeFileSync(newFileWWW, 'var foo=1;', 'utf-8');
+                parser.update_overrides();
+                expect(fs.existsSync(path.join(android_project_path, 'assets', 'www', 'merge.js'))).toBe(true);
+                console.log(fs.readFileSync(path.join(android_project_path, 'assets', 'www', 'merge.js')));
+                expect(fs.readFileSync(path.join(android_project_path, 'assets', 'www', 'merge.js'),'utf-8')).toEqual('var foo=2;');
+            });
+
+
+            it('should call out to util.deleteSvnFolders', function() {
+                var spy = spyOn(util, 'deleteSvnFolders');
+                parser.update_overrides();
+                expect(spy).toHaveBeenCalled();
+            });
+        });
+
         describe('update_project method', function() {
             it('should invoke update_www', function() {
                 var spyWww = spyOn(parser, 'update_www');

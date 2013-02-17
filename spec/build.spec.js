@@ -29,7 +29,12 @@ var cordova = require('../cordova'),
     fixtures = path.join(__dirname, 'fixtures'),
     hooks = path.join(fixtures, 'hooks'),
     tempDir = path.join(__dirname, '..', 'temp'),
-    cordova_project = path.join(fixtures, 'projects', 'cordova');
+    cordova_project = path.join(fixtures, 'projects', 'cordova'),
+    ios_project_path = path.join(cordova_project, 'platforms', 'ios'),
+    blackberry_project_path = path.join(cordova_project, 'platforms', 'blackberry'),
+    www_config = path.join(cordova_project, 'www', 'config.xml');
+
+
 
 var cwd = process.cwd();
 
@@ -99,9 +104,12 @@ describe('build command', function() {
             it('should call android_parser\'s update_project', function() {
                 spyOn(require('shelljs'), 'exec').andReturn({code:0});
                 var s = spyOn(android_parser.prototype, 'update_project');
+
                 cordova.build('android');
                 expect(s).toHaveBeenCalled();
+
             });
+
         });
         describe('iOS', function() {
             it('should shell out to build command on iOS', function() {
@@ -112,11 +120,13 @@ describe('build command', function() {
                 expect(s).toHaveBeenCalled();
                 expect(s.mostRecentCall.args[0].match(/\/cordova\/build/)).not.toBeNull();
             });
+
             it('should call ios_parser\'s update_project', function() {
                 var s = spyOn(ios_parser.prototype, 'update_project');
                 cordova.build('ios');
                 expect(s).toHaveBeenCalled();
             });
+
         });
         describe('BlackBerry', function() {
             it('should shell out to ant command on blackberry', function() {
@@ -127,11 +137,13 @@ describe('build command', function() {
                 expect(s).toHaveBeenCalled();
                 expect(s.mostRecentCall.args[0]).toMatch(/ant -f .*build\.xml" qnx load-device/);
             });
+
             it('should call blackberry_parser\'s update_project', function() {
                 var s = spyOn(blackberry_parser.prototype, 'update_project');
                 cordova.build('blackberry');
                 expect(s).toHaveBeenCalled();
             });
+
         });
     });
 
@@ -183,5 +195,60 @@ describe('build command', function() {
                 expect(s).not.toHaveBeenCalledWith('after_build');
             });
         });
+
     });
+
+    describe('merges', function() {
+        describe('per platform', function() {
+            beforeEach(function() {
+                process.chdir(cordova_project);
+            });
+
+            afterEach(function() {
+                process.chdir(cwd);
+            });
+
+            describe('Android', function() {
+                it('should call android_parser\'s update_overrides', function() {
+                    spyOn(require('shelljs'), 'exec').andReturn({code:0});
+                    var s = spyOn(android_parser.prototype, 'update_overrides');
+
+                    cordova.build('android');
+                    expect(s).toHaveBeenCalled();
+                });
+
+            });
+
+            describe('iOS', function() {
+                it('should call ios_parser\'s update_overrides', function(done) {
+                    var parser = new ios_parser(ios_project_path);
+                    var config = new config_parser(www_config);
+
+                    var s = spyOn(parser, 'update_overrides');
+                    parser.update_project(config, function() {
+                        expect(s).toHaveBeenCalled();
+                        done();
+                    });
+                });
+
+            });
+
+            describe('BlackBerry', function() {
+                it('should call blackberry_parser\'s update_overrides', function(done) {
+                    var parser = new blackberry_parser(blackberry_project_path);
+                    var config = new config_parser(www_config);
+
+                    var s = spyOn(parser, 'update_overrides');
+                    parser.update_project(config, function() {
+                        expect(s).toHaveBeenCalled();
+                        done();
+                    });
+                });
+
+            });
+
+
+        });
+    });
+
 });
