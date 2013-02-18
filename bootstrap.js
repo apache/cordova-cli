@@ -53,11 +53,16 @@ var platformsDir = path.join(cordovaDir, 'platforms');
 shell.rm('-rf', path.join(cordovaDir, 'www', 'spec'));
 
 var end = n(platforms.length, function() {
-    console.log("************************************************************************");
-    console.log("* Please NOTE: it is highly recommended to run the command:            *");
-    console.log("*     sudo chown -R <yourusername> /usr/local/lib/node_modules/cordova *");
-    console.log("* This will allow you to run this tool globally without root.          *");
-    console.log("************************************************************************");
+    // Check that we are installing globally into a root-only directory.
+    if (process.env.USER == 'root' && process.env.npm_config_prefix.indexOf('/usr/local') === 0) {
+        console.log("**************************************************************************");
+        console.log("* WARNING: YOU ARE INSTALLING GLOBALLY INTO A ROOT-ONLY DIRECTORY!!!1one *");
+        console.log("* Your node install is global, so global modules get installed there too.*");
+        console.log("* You should probably run the following command for this tool to run:    *");
+        console.log("    $ sudo chown -R " + process.env.SUDO_USER + " " + process.env.PWD);
+        console.log("* This will allow you to run this tool globally without using `sudo`.    *");
+        console.log("**************************************************************************");
+    }
 });
 
 platforms.forEach(function(platform) {
