@@ -29,6 +29,7 @@ var cordova_util      = require('./util'),
     hooker            = require('./hooker'),
     n                 = require('ncallbacks'),
     prompt            = require('prompt'),
+    plugin_loader = require('./plugin_loader'),
     util              = require('util');
 
 var parsers = {
@@ -75,5 +76,7 @@ module.exports = function prepare(platforms, callback) {
         var platformPath = path.join(projectRoot, 'platforms', platform);
         var parser = new parsers[platform](platformPath);
         parser.update_project(cfg, end);
+
+        plugin_loader(platform);
     });
 };
