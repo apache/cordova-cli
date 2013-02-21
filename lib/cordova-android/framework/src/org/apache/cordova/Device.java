@@ -24,7 +24,6 @@ import org.apache.cordova.api.CallbackContext;
 import org.apache.cordova.api.CordovaPlugin;
 import org.apache.cordova.api.LOG;
 import org.apache.cordova.api.CordovaInterface;
-import org.apache.cordova.api.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,7 +38,7 @@ import android.telephony.TelephonyManager;
 public class Device extends CordovaPlugin {
     public static final String TAG = "Device";
 
-    public static String cordovaVersion = "2.4.0";              // Cordova version
+    public static String cordovaVersion = "2.5.0rc1";              // Cordova version
     public static String platform = "Android";                  // Device OS
     public static String uuid;                                  // Device UUID
 

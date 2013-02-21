@@ -138,11 +138,6 @@ describe('blackberry project parser', function() {
                 var bb_cfg = fs.readFileSync(blackberry_config, 'utf-8');
                 expect(bb_cfg).not.toBe(www_cfg);
             });
-            it('should inject a reference to webworks.js in index.html', function() {
-                parser.update_www();
-                var index = fs.readFileSync(path.join(blackberry_project_path, 'www', 'index.html'), 'utf-8');
-                expect(index).toMatch(/<script type="text\/javascript" src="js\/webworks.js">/i);
-            });
             it('should call out to util.deleteSvnFolders', function() {
                 var spy = spyOn(util, 'deleteSvnFolders');
                 parser.update_www();

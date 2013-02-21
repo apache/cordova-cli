@@ -7,7 +7,7 @@ Directory Structure
 -------------------
 
     framework/ ... BlackBerry WebWorks JavaScript Extension (Cordova native code)
-    javascript/ .. Cordova JavaScript (Non-concatenated, non-minified)
+    javascript/ .. Cordova JavaScript (concatenated, non-minified)
     bin/ ......... Scripts for project creation
 
 Introduction
@@ -47,7 +47,7 @@ The Cordova developer tooling is split between general tooling and project level
 
 ### General Commands
 
-    ./bin/create [path appname] ............ creates a sample app with the specified application name, to the specified path
+    ./bin/create [path appname packagename] ............ creates a sample app with the specified application name, to the specified path
 
 Please note that once you `create` a Cordova BlackBerry project, you
 will need to edit the `project.properties` file that resides inside your
@@ -67,11 +67,11 @@ Create the example project and build it to the first device:
 
     ./bin/create
     cd example
-    ./cordova/debug
+    ./cordova/run blackberry
 
 #### Creating a new Cordova BlackBerry Project
 
-    ./bin/create ~/Desktop/myapp MyApp
+    ./bin/create ~/Desktop/myapp MyAppName MyAppPackageName
 
 ### Project Commands
 

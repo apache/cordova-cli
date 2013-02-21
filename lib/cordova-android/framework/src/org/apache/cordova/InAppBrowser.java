@@ -23,6 +23,7 @@ import java.util.StringTokenizer;
 
 import org.apache.cordova.api.CallbackContext;
 import org.apache.cordova.api.CordovaPlugin;
+import org.apache.cordova.api.LOG;
 import org.apache.cordova.api.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +49,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -67,13 +69,14 @@ public class InAppBrowser extends CordovaPlugin {
     private static final String EXIT_EVENT = "exit";
     private static final String LOAD_START_EVENT = "loadstart";
     private static final String LOAD_STOP_EVENT = "loadstop";
+    private long MAX_QUOTA = 100 * 1024 * 1024;
 
     private Dialog dialog;
     private WebView inAppWebView;
     private EditText edittext;
     private boolean showLocationBar = true;
     private CallbackContext callbackContext;
-
+    
     /**
      * Executes the request and returns PluginResult.
      *
@@ -107,6 +110,17 @@ public class InAppBrowser extends CordovaPlugin {
                     if (url.startsWith("file://") || url.startsWith("javascript:") 
                             || Config.isUrlWhiteListed(url)) {
                         this.webView.loadUrl(url);
+                    }
+                    //Load the dialer
+                    else if (url.startsWith(WebView.SCHEME_TEL))
+                    {
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_DIAL);
+                            intent.setData(Uri.parse(url));
+                            this.cordova.getActivity().startActivity(intent);
+                        } catch (android.content.ActivityNotFoundException e) {
+                            LOG.e(LOG_TAG, "Error dialing " + url + ": " + e.toString());
+                        }
                     }
                     // load in InAppBrowser
                     else {
@@ -401,7 +415,7 @@ public class InAppBrowser extends CordovaPlugin {
                 // WebView
                 inAppWebView = new WebView(cordova.getActivity());
                 inAppWebView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-                inAppWebView.setWebChromeClient(new WebChromeClient());
+                inAppWebView.setWebChromeClient(new InAppChromeClient());
                 WebViewClient client = new InAppBrowserClient(thatWebView, edittext);
                 inAppWebView.setWebViewClient(client);
                 WebSettings settings = inAppWebView.getSettings();
@@ -468,6 +482,40 @@ public class InAppBrowser extends CordovaPlugin {
         this.callbackContext.sendPluginResult(result);
     }
 
+    public class InAppChromeClient extends WebChromeClient {
+
+        /**
+         * Handle database quota exceeded notification.
+         *
+         * @param url
+         * @param databaseIdentifier
+         * @param currentQuota
+         * @param estimatedSize
+         * @param totalUsedQuota
+         * @param quotaUpdater
+         */
+        @Override
+        public void onExceededDatabaseQuota(String url, String databaseIdentifier, long currentQuota, long estimatedSize,
+                long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater)
+        {
+            LOG.d(LOG_TAG, "onExceededDatabaseQuota estimatedSize: %d  currentQuota: %d  totalUsedQuota: %d", estimatedSize, currentQuota, totalUsedQuota);
+
+            if (estimatedSize < MAX_QUOTA)
+            {
+                //increase for 1Mb
+                long newQuota = estimatedSize;
+                LOG.d(LOG_TAG, "calling quotaUpdater.updateQuota newQuota: %d", newQuota);
+                quotaUpdater.updateQuota(newQuota);
+            }
+            else
+            {
+                // Set the quota to whatever it is and force an error
+                // TODO: get docs on how to handle this properly
+                quotaUpdater.updateQuota(currentQuota);
+            }
+        }
+    }
+    
     /**
      * The webview client receives notifications about appView
      */
