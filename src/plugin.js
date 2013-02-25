@@ -101,8 +101,6 @@ module.exports = function plugin(command, targets, callback) {
 
                 hooks.fire('before_plugin_add');
 
-                var pluginWww = path.join(target, 'www');
-                var wwwContents = ls(pluginWww);
                 var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
 
                 // Iterate over all matchin app-plugin platforms in the project and install the
@@ -112,12 +110,11 @@ module.exports = function plugin(command, targets, callback) {
                     var plugin_cli = shell.exec(cmd, {silent:true});
                     if (plugin_cli.code > 0) throw new Error('An error occured during plugin installation for ' + platform + '. ' + plugin_cli.output);
                 });
-                
-                // Add the plugin web assets to the www folder as well
-                // TODO: assumption that web assets go under www folder
-                // inside plugin dir; instead should read plugin.xml
-                wwwContents.forEach(function(asset) {
-                    asset = path.resolve(path.join(pluginWww, asset));
+
+                // Add the plugin web assets to the www folder as well.
+                var assets = pluginXml.doc.findall('plugin/asset');
+                assets.forEach(function(asset) {
+                    asset = path.resolve(path.join(target, asset.attrib.src));
                     var info = fs.lstatSync(asset);
                     var name = asset.substr(asset.lastIndexOf('/')+1);
                     var wwwPath = path.join(projectWww, name);
@@ -148,8 +145,6 @@ module.exports = function plugin(command, targets, callback) {
                 if (plugins.indexOf(targetName) > -1) {
                     var targetPath = path.join(pluginPath, targetName);
                     hooks.fire('before_plugin_rm');
-                    var pluginWww = path.join(targetPath, 'www');
-                    var wwwContents = ls(pluginWww);
                     var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
 
                     // Check if there is at least one match between plugin
@@ -167,18 +162,25 @@ module.exports = function plugin(command, targets, callback) {
                         var plugin_cli = shell.exec(cmd, {silent:true});
                         if (plugin_cli.code > 0) throw new Error('An error occured during plugin uninstallation for ' + platform + '. ' + plugin_cli.output);
                     });
-                    
-                    // Remove the plugin web assets to the www folder as well
-                    // TODO: assumption that web assets go under www folder
-                    // inside plugin dir; instead should read plugin.xml
-                    wwwContents.forEach(function(asset) {
-                        asset = path.resolve(path.join(projectWww, asset));
+
+                    // Remove the plugin web assets from the www folder as well.
+                    var assets = pluginXml.doc.findall('plugin/asset');
+                    assets.forEach(function(asset) {
+                        asset = path.resolve(path.join(projectWww, asset.attrib.src));
                         var info = fs.lstatSync(asset);
                         if (info.isDirectory()) {
                             shell.rm('-rf', asset);
                         } else {
                             fs.unlinkSync(asset);
                         }
+                    });
+
+                    // Remove the plugin web assets to the www folder as well
+                    // TODO: assumption that web assets go under www folder
+                    // inside plugin dir; instead should read plugin.xml
+                    wwwContents.forEach(function(asset) {
+                        asset = path.resolve(path.join(projectWww, asset));
+                        var info = fs.lstatSync(asset);
                     });
 
                     // Finally remove the plugin dir from plugins/
