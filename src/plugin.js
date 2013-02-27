@@ -111,20 +111,6 @@ module.exports = function plugin(command, targets, callback) {
                     if (plugin_cli.code > 0) throw new Error('An error occured during plugin installation for ' + platform + '. ' + plugin_cli.output);
                 });
 
-                // Add the plugin web assets to the www folder as well.
-                var assets = pluginXml.doc.findall('plugin/asset');
-                assets.forEach(function(asset) {
-                    asset = path.resolve(path.join(target, asset.attrib.src));
-                    var info = fs.lstatSync(asset);
-                    var name = asset.substr(asset.lastIndexOf('/')+1);
-                    var wwwPath = path.join(projectWww, name);
-                    if (info.isDirectory()) {
-                        shell.cp('-r', asset, projectWww);
-                    } else {
-                        fs.writeFileSync(wwwPath, fs.readFileSync(asset));
-                    }
-                });
-
                 // Finally copy the plugin into the project
                 var targetPath = path.join(pluginPath, targetName);
                 shell.mkdir('-p', targetPath);
@@ -161,26 +147,6 @@ module.exports = function plugin(command, targets, callback) {
                         var cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --remove', cli, platform, path.join(projectRoot, 'platforms', platform), targetPath);
                         var plugin_cli = shell.exec(cmd, {silent:true});
                         if (plugin_cli.code > 0) throw new Error('An error occured during plugin uninstallation for ' + platform + '. ' + plugin_cli.output);
-                    });
-
-                    // Remove the plugin web assets from the www folder as well.
-                    var assets = pluginXml.doc.findall('plugin/asset');
-                    assets.forEach(function(asset) {
-                        asset = path.resolve(path.join(projectWww, asset.attrib.src));
-                        var info = fs.lstatSync(asset);
-                        if (info.isDirectory()) {
-                            shell.rm('-rf', asset);
-                        } else {
-                            fs.unlinkSync(asset);
-                        }
-                    });
-
-                    // Remove the plugin web assets to the www folder as well
-                    // TODO: assumption that web assets go under www folder
-                    // inside plugin dir; instead should read plugin.xml
-                    wwwContents.forEach(function(asset) {
-                        asset = path.resolve(path.join(projectWww, asset));
-                        var info = fs.lstatSync(asset);
                     });
 
                     // Finally remove the plugin dir from plugins/
