@@ -6,3 +6,8 @@ spec/fixtures/projects/native
 spec/fixtures/projects/cordova
 lib/cordova-android/framework/bin
 lib/cordova-android/framework/gen
+.idea/*
+spec/fixtures/*
+.gitcore
+*.jar
+lib/*
