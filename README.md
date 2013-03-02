@@ -52,6 +52,7 @@ directory structure:
 
     myApp/
     |-.cordova/
+    |- merges/
     |- platforms/
     |- plugins/
     `- www/
@@ -60,6 +61,9 @@ directory structure:
 This directory identifies a tree as a cordova project. Simple configuration information is stored in here (such as BlackBerry environment variables).
 
 Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find the project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a cordova project directory (same as git).
+
+## merges/
+Platform specific web artifacts, such as .html, .css and .js files which is deployed on build to the appropriate native directory.  Files placed in merges will override matching files in www for a specific platform.
 
 ## platforms/
 Platforms added to your application will have the native
@@ -111,6 +115,9 @@ The directory structure of KewlApp now looks like this:
 
     KewlApp/
     |- .cordova/
+    |- mergess/
+       |- android/
+       `- ios/
     |- platforms/
        |- android/
        |  `- …
