@@ -28,6 +28,12 @@ var config_parser     = require('./config_parser'),
     blackberry_parser = require('./metadata/blackberry_parser'),
     shell             = require('shelljs');
 
+var parsers = {
+    "android":android_parser,
+    "ios":ios_parser,
+    "blackberry":blackberry_parser
+};
+
 module.exports = function platform(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
@@ -38,8 +44,8 @@ module.exports = function platform(command, targets, callback) {
     var hooks = new hooker(projectRoot),
         end;
 
-    var createOverrides = function(target){
-        shell.mkdir('-p', path.join('merges',target));
+    var createOverrides = function(target) {
+        shell.mkdir('-p', path.join(projectRoot, 'merges', target));
     };
 
     if (arguments.length === 0) command = 'ls';
@@ -91,34 +97,12 @@ module.exports = function platform(command, targets, callback) {
                                 throw new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output);
                             }
 
-                            switch(target) {
-                                case 'android':
-                                    var android = new android_parser(output);
-                                    createOverrides(target);
-
-                                    android.update_project(cfg);
-                                    hooks.fire('after_platform_add');
-                                    end();
-                                    break;
-                                case 'ios':
-                                    var ios = new ios_parser(output);
-                                    createOverrides(target);
-
-                                    ios.update_project(cfg, function() {
-                                        hooks.fire('after_platform_add');
-                                        end();
-                                    });
-                                    break;
-                                case 'blackberry':
-                                    var bb = new blackberry_parser(output);
-                                    createOverrides(target);
-
-                                    bb.update_project(cfg, function() {
-                                        hooks.fire('after_platform_add');
-                                        end();
-                                    });
-                                    break;
-                            }
+                            var parser = new parsers[target](output);
+                            parser.update_project(cfg, function() {
+                                createOverrides(target);
+                                hooks.fire('after_platform_add');
+                                end();
+                            });
                         });
                     }
                 });
@@ -129,11 +113,11 @@ module.exports = function platform(command, targets, callback) {
             targets.forEach(function(target) {
                 hooks.fire('before_platform_rm');
                 shell.rm('-rf', path.join(projectRoot, 'platforms', target));
-                shell.rm('-rf', path.join(projectRoot,'merges',target));
+                shell.rm('-rf', path.join(projectRoot, 'merges', target));
                 hooks.fire('after_platform_rm');
             });
             break;
         default:
-            throw ('Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.');
+            throw new Error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.');
     }
 };

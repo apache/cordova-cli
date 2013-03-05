@@ -64,6 +64,7 @@ module.exports.prototype = {
         self.update_from_config(cfg);
         self.update_www();
         self.update_overrides();
+        util.deleteSvnFolders(this.www_dir());
 
         // Do we have BB config?
         var projectRoot = util.isCordova(this.path);
@@ -91,7 +92,7 @@ module.exports.prototype = {
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
         var www = path.join(projectRoot, 'www');
-        var platformWww = path.join(this.path, 'www');
+        var platformWww = this.www_dir();
 
         var finalWww = path.join(this.path, 'finalwww');
         shell.mkdir('-p', finalWww);
@@ -120,16 +121,16 @@ module.exports.prototype = {
         shell.rm('-rf', platformWww);
         shell.mv(finalWww, platformWww);
 
-        util.deleteSvnFolders(platformWww);
     },
 
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var platformWww = path.join(this.path, 'www');
-        var overrides = path.join(projectRoot, 'merges','blackberry');
-        shell.cp('-rf', overrides+'/*',platformWww);
-        util.deleteSvnFolders(platformWww);
+        var merges_path = path.join(projectRoot, 'merges', 'blackberry');
+        if (fs.existsSync(merges_path)) {
+            var overrides = path.join(merges_path, '*');
+            shell.cp('-rf', overrides, this.www_dir());
+        }
     },
 
     write_project_properties:function() {

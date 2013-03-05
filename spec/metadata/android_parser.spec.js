@@ -170,51 +170,32 @@ describe('android project parser', function() {
                 parser.update_www();
                 expect(fs.readFileSync(path.join(android_project_path, 'assets', 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(util.libDirectory, 'cordova-android', 'framework', 'assets', 'js', 'cordova.android.js'), 'utf-8'));
             });
-            it('should call out to util.deleteSvnFolders', function() {
-                var spy = spyOn(util, 'deleteSvnFolders');
-                parser.update_www();
-                expect(spy).toHaveBeenCalled();
-            });
         });
 
         describe('update_overrides method',function() {
-
-            it('should copy a new file from merges into www', function() {
-
-                var newFile = path.join(project_path, 'merges','android', 'merge.js');
-
-                this.after(function() {
-                    shell.rm('-rf', path.join(project_path, 'merges','android','merge.js'));
-                });
-
+            var mergesPath = path.join(project_path, 'merges', 'android');
+            var newFile = path.join(mergesPath, 'merge.js');
+            beforeEach(function() {
+                shell.mkdir('-p', mergesPath);
                 fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
+            });
+            afterEach(function() {
+                shell.rm('-rf', mergesPath);
+            });
+            it('should copy a new file from merges into www', function() {
                 parser.update_overrides();
                 expect(fs.existsSync(path.join(android_project_path, 'assets', 'www', 'merge.js'))).toBe(true);
             });
 
             it('should copy a file from merges over a file in www', function() {
-
-                var newFile = path.join(project_path, 'merges','android', 'merge.js');
                 var newFileWWW = path.join(project_path, 'www','merge.js');
-
-                this.after(function() {
-                    shell.rm('-rf', path.join(project_path, 'merges','android','merge.js'));
-                    shell.rm('-rf',path.join(project_path,'www','merge.js'));
-                });
-
-                fs.writeFileSync(newFile, 'var foo=2;', 'utf-8');
                 fs.writeFileSync(newFileWWW, 'var foo=1;', 'utf-8');
+                this.after(function() {
+                    shell.rm('-rf', newFileWWW);
+                });
                 parser.update_overrides();
                 expect(fs.existsSync(path.join(android_project_path, 'assets', 'www', 'merge.js'))).toBe(true);
-                console.log(fs.readFileSync(path.join(android_project_path, 'assets', 'www', 'merge.js')));
-                expect(fs.readFileSync(path.join(android_project_path, 'assets', 'www', 'merge.js'),'utf-8')).toEqual('var foo=2;');
-            });
-
-
-            it('should call out to util.deleteSvnFolders', function() {
-                var spy = spyOn(util, 'deleteSvnFolders');
-                parser.update_overrides();
-                expect(spy).toHaveBeenCalled();
+                expect(fs.readFileSync(path.join(android_project_path, 'assets', 'www', 'merge.js'),'utf-8')).toEqual('alert("sup");');
             });
         });
 
@@ -228,6 +209,11 @@ describe('android project parser', function() {
                 var spyConfig = spyOn(parser, 'update_from_config');
                 parser.update_project(config);
                 expect(spyConfig).toHaveBeenCalled();
+            });
+            it('should call out to util.deleteSvnFolders', function() {
+                var spy = spyOn(util, 'deleteSvnFolders');
+                parser.update_project(config);
+                expect(spy).toHaveBeenCalled();
             });
         });
     });

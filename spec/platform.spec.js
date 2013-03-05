@@ -267,10 +267,11 @@ describe('platform command', function() {
                 cr = spyOn(android_parser, 'check_requirements');
             });
             it('should fire before and after hooks through the hooker module', function() {
-                spyOn(android_parser.prototype, 'update_project');
+                var ap = spyOn(android_parser.prototype, 'update_project');
                 cordova.platform('add', 'android');
                 fake_reqs_check();
                 fake_create(path.join(tempDir, 'platforms', 'android'));
+                ap.mostRecentCall.args[1](); // fake out update_project
                 expect(s).toHaveBeenCalledWith('before_platform_add');
                 expect(s).toHaveBeenCalledWith('after_platform_add');
             });

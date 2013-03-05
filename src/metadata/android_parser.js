@@ -131,30 +131,33 @@ module.exports.prototype = {
         var www = path.join(projectRoot, 'www');
         var platformWww = path.join(this.path, 'assets');
         // remove stock platform assets
-        shell.rm('-rf', path.join(platformWww, 'www'));
+        shell.rm('-rf', this.www_dir());
         // copy over all app www assets
         shell.cp('-rf', www, platformWww);
-        platformWww = path.join(platformWww, 'www');
 
         // write out android lib's cordova.js
         var jsPath = path.join(util.libDirectory, 'cordova-android', 'framework', 'assets', 'js', 'cordova.android.js');
-        fs.writeFileSync(path.join(platformWww, 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
+        fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
 
-        // delete any .svn folders copied over
-        util.deleteSvnFolders(platformWww);
     },
 
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var overrides = path.join(projectRoot, 'merges','android','*');
-        shell.cp('-rf', overrides, this.www_dir());
+        var merges_path = path.join(projectRoot, 'merges', 'android');
+        if (fs.existsSync(merges_path)) {
+            var overrides = path.join(merges_path, '*');
+            shell.cp('-rf', overrides, this.www_dir());
+        }
     },
 
     update_project:function(cfg, callback) {
+        var platformWww = path.join(this.path, 'assets');
         this.update_from_config(cfg);
         this.update_www();
         this.update_overrides();
+        // delete any .svn folders copied over
+        util.deleteSvnFolders(platformWww);
         if (callback) callback();
     }
 };

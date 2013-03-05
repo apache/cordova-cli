@@ -138,53 +138,35 @@ describe('blackberry project parser', function() {
                 var bb_cfg = fs.readFileSync(blackberry_config, 'utf-8');
                 expect(bb_cfg).not.toBe(www_cfg);
             });
-            it('should call out to util.deleteSvnFolders', function() {
-                var spy = spyOn(util, 'deleteSvnFolders');
-                parser.update_www();
-                expect(spy).toHaveBeenCalled();
-            });
         });
 
         describe('update_overrides method',function() {
+            var mergesPath = path.join(project_path, 'merges', 'blackberry');
+            var newFile = path.join(mergesPath, 'merge.js');
+            beforeEach(function() {
+                shell.mkdir('-p', mergesPath);
+                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
+            });
+            afterEach(function() {
+                shell.rm('-rf', mergesPath);
+            });
 
             it('should copy a new file from merges into www', function() {
-
-                var newFile = path.join(project_path, 'merges','blackberry', 'merge.js');
-
-                this.after(function() {
-                    shell.rm('-rf', path.join(project_path, 'merges','blackberry','merge.js'));
-                });
-
-                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
                 parser.update_overrides();
                 expect(fs.existsSync(path.join(blackberry_project_path, 'www', 'merge.js'))).toBe(true);
             });
 
             it('should copy a file from merges over a file in www', function() {
-
-                var newFile = path.join(project_path, 'merges','blackberry', 'merge.js');
                 var newFileWWW = path.join(project_path, 'www','merge.js');
-
-                this.after(function() {
-                    shell.rm('-rf', path.join(project_path, 'merges','blackberry','merge.js'));
-                    shell.rm('-rf',path.join(project_path,'www','merge.js'));
-                });
-
-                fs.writeFileSync(newFile, 'var foo=2;', 'utf-8');
                 fs.writeFileSync(newFileWWW, 'var foo=1;', 'utf-8');
+                this.after(function() {
+                    shell.rm('-rf', newFileWWW);
+                });
                 parser.update_overrides();
                 expect(fs.existsSync(path.join(blackberry_project_path, 'www', 'merge.js'))).toBe(true);
-                expect(fs.readFileSync(path.join(blackberry_project_path, 'www', 'merge.js'),'utf-8')).toEqual('var foo=2;');
-            });
-
-
-            it('should call out to util.deleteSvnFolders', function() {
-                var spy = spyOn(util, 'deleteSvnFolders');
-                parser.update_overrides();
-                expect(spy).toHaveBeenCalled();
+                expect(fs.readFileSync(path.join(blackberry_project_path, 'www', 'merge.js'),'utf-8')).toEqual('alert("sup");');
             });
         });
-
 
         describe('update_project method', function() {
             var cordova_config_path = path.join(project_path, '.cordova', 'config.json');
@@ -217,10 +199,18 @@ describe('blackberry project parser', function() {
                     parser.update_project(config);
                     expect(spyEnv).not.toHaveBeenCalled();
                 });
-                it('should write out project properties', function() {
+                it('should write out project properties', function(done) {
                     var spyProps = spyOn(parser, 'write_project_properties');
                     parser.update_project(config, function() { 
                         expect(spyProps).toHaveBeenCalled();
+                        done();
+                    });
+                });
+                it('should call out to util.deleteSvnFolders', function(done) {
+                    var spy = spyOn(util, 'deleteSvnFolders');
+                    parser.update_project(config, function() {
+                        expect(spy).toHaveBeenCalled();
+                        done();
                     });
                 });
             });

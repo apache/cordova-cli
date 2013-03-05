@@ -140,7 +140,7 @@ module.exports.prototype = {
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
         var www = path.join(projectRoot, 'www');
-        var project_www = path.join(this.path, 'www');
+        var project_www = this.www_dir();
 
         // remove the stock www folder
         shell.rm('-rf', project_www);
@@ -151,18 +151,16 @@ module.exports.prototype = {
         // write out proper cordova.js
         shell.cp('-f', path.join(util.libDirectory, 'cordova-ios', 'CordovaLib', 'cordova.ios.js'), path.join(project_www, 'cordova.js'));
 
-        util.deleteSvnFolders(project_www);
     },
 
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var project_www = path.join(this.path, 'www');
-        var overrides = path.join(projectRoot, 'merges','ios');
-        shell.cp('-rf', overrides+'/*',project_www);
-
-        util.deleteSvnFolders(project_www);
-
+        var merges_path = path.join(projectRoot, 'merges', 'ios');
+        if (fs.existsSync(merges_path)) {
+            var overrides = path.join(merges_path, '*');
+            shell.cp('-rf', overrides, this.www_dir());
+        }
     },
 
     update_project:function(cfg, callback) {
@@ -170,6 +168,7 @@ module.exports.prototype = {
         this.update_from_config(cfg, function() {
             self.update_www();
             self.update_overrides();
+            util.deleteSvnFolders(self.www_dir());
             if (callback) callback();
         });
     }
