@@ -20,7 +20,9 @@ cordova-cli has been tested on Mas OS X and Linux.
 npm install -g cordova
 ```
 
-**NOTE**: on Unix-based machines, you may want to change the owner of the cordova directory that npm installs to. This will allow you to run cordova as local user without requiring root permissions. Assuming your node_modules directory is in `/usr/local/lib/`, you can do this by running: `sudo chown -R <username> /usr/local/lib/node_modules/cordova`
+**NOTE**: on Unix-based machines, you may want to change the owner of the cordova directory that npm installs to. This will allow you to run cordova as local user without requiring root permissions. Assuming your node_modules directory is in `/usr/local/lib/`, you can do this by running: 
+
+    sudo chown -R <username> /usr/local/lib/node_modules/cordova
 
 # Getting Started
 
@@ -47,15 +49,20 @@ cordova-cli has a single global `create` command that creates new cordova projec
 
 
 # Project Directory Structure
-A Cordova application built with cordova-cli will have the following
-directory structure:
+A Cordova application built with cordova-cli will have the following directory structure:
 
     myApp/
-    |-.cordova/
-    |- merges/
-    |- platforms/
-    |- plugins/
-    `- www/
+    |--.cordova/
+    |-- merges/
+    | |-- android/
+    | |-- blackberry/
+    | `-- ios/
+    |-- platforms/
+    | |-- android/
+    | |-- blackberry/
+    | `-- ios/
+    |-- plugins/
+    `-- www/
 
 ## .cordova/
 This directory identifies a tree as a cordova project. Simple configuration information is stored in here (such as BlackBerry environment variables).
@@ -63,11 +70,20 @@ This directory identifies a tree as a cordova project. Simple configuration info
 Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find the project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a cordova project directory (same as git).
 
 ## merges/
-Platform specific web artifacts, such as .html, .css and .js files which is deployed on build to the appropriate native directory.  Files placed in merges will override matching files in www for a specific platform.
+Platform-specific web assets (HTML, CSS and JavaScript files) are contained within appropriate subfolders in this directory. These are deployed during a `prepare` to the appropriate native directory.  Files placed under `merges/` will override matching files in the `www/` folder for the relevant platform. A quick example, assuming a project structure of:
+
+    merges/
+    |-- ios/
+    | `-- app.js
+    |-- android/
+    | `-- android.js
+    www/
+      `-- app.js
+
+After building the Android and iOS projects, the Android application will contain both `app.js` and `android.js`. However, the iOS application will only contain an `app.js`, and it will override the "common" `app.js` located inside the `www/` folder above.
 
 ## platforms/
-Platforms added to your application will have the native
- application project structures laid out within this directory.
+Platforms added to your application will have the native application project structures laid out within this directory.
 
 ## plugins/
 Any added plugins will be extracted or copied into this directory.

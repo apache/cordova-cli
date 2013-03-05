@@ -45,7 +45,8 @@
     {"name": "Michael Brooks", "email":"michael@michaelbrooks.ca"},
     {"name": "Braden Shepherdson", "email":"braden@chromium.org"},
     {"name": "Gord Tanner", "email":"gtanner@gmail.com"},
-    {"name": "Tim Kim", "email": "timk@adobe.com"}
+    {"name": "Tim Kim", "email": "timk@adobe.com"},
+    {"name": "Michael Wolf", "email": "Michael.Wolf@Cynergy.com"}
   ],
   "license": "Apache version 2.0"
 }
