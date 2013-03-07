@@ -36,6 +36,7 @@ module.exports = {
     plugin:    require('./src/plugin'),
     plugins:   require('./src/plugin'),
     serve:     require('./src/serve'),
+    ripple:    require('./src/ripple'),
     on:        function() {
         cordova_events.on.apply(cordova_events, arguments);
     },

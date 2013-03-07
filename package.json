@@ -31,7 +31,8 @@
     "ncallbacks":"1.0.0",
     "request":"2.11.4",
     "semver":"1.1.0",
-    "prompt":"0.2.7"
+    "prompt":"0.2.7",
+    "open": "0.0.*"
   },
   "devDependencies": {
     "jasmine-node":"1.1.x"
