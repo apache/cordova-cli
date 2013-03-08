@@ -119,7 +119,7 @@ If you are using cordova-cli as a module within a larger node application, you c
 # Examples
 
 ## Creating a new cordova project
-This example shows how to create a project from scratch named KewlApp with iOS and Android platform support, and includes a plugin named Kewlio. The project will live in ~/MyProjects/KewlApp
+This example shows how to create a project from scratch named KewlApp with iOS and Android platform support, and includes a plugin named Kewlio. The project will live in ~/KewlApp
 
     cordova create ~/KewlApp KewlApp
     cd ~/KewlApp
