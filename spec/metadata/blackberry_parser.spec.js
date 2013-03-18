@@ -34,6 +34,10 @@ var www_config = path.join(project_path, 'www', 'config.xml');
 var original_www_config = fs.readFileSync(www_config, 'utf-8');
 
 describe('blackberry project parser', function() {
+    beforeEach(function() {
+        spyOn(process.stdout, 'write'); // silence console output
+    });
+
     it('should throw an exception with a path that is not a native blackberry project', function() {
         expect(function() {
             var project = new blackberry_parser(process.cwd());

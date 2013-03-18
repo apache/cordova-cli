@@ -37,12 +37,12 @@ var parsers = {
 };
 
 function shell_out_to_emulate(root, platform, callback) {
-    var cmd = path.join(root, 'platforms', platform, 'cordova', 'emulate');
+    var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'emulate') + '"';
     // TODO: PLATFORM LIBRARY INCONSISTENCY 
     if (platform == 'blackberry') {
         cmd = 'ant -f "' + path.join(root, 'platforms', platform, 'build.xml') + '" qnx load-simulator';
     } else if (platform.indexOf('android') > -1) {
-        cmd = path.join(root, 'platforms', platform, 'cordova', 'run');
+        cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '"';
     }
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         if (code > 0) {
