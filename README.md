@@ -42,7 +42,7 @@ cordova-cli has a single global `create` command that creates new cordova projec
 - `plugin add <path-to-plugin> [<path-to-plugin> ...]` add one (or more) plugins to the project
 - `plugin [rm | remove] <plugin-name> [<plugin-name> ...]` remove one (or more) added plugins
 - `prepare [platform...]` copies files into the specified platforms, or all platforms. it is then ready for building by Eclipse/Xcode/etc.
-- `compile [platform...]` compiles and deploys the app to a connected and compatible device. With no parameters, builds for all platforms, otherwise builds for the specified platforms.
+- `compile [platform...]` compiles the app into a binary for each added platform. With no parameters, builds for all platforms, otherwise builds for the specified platforms.
 - `build [<platform> [<platform> [...]]]` an alias for `cordova prepare` followed by `cordova compile`
 - `emulate [<platform> [<platform> [...]]]` launch emulators and deploy app to them. With no parameters emulates for all platforms added to the project, otherwise emulates for the specified platforms
 - `serve <platform> [port]` launch a local web server for that platform's www directory on the given port (default 8000).
