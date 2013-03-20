@@ -82,7 +82,7 @@ module.exports = function serve (platform, port) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw 'Current working directory is not a Cordova-based project.';
+        throw new Error('Current working directory is not a Cordova-based project.');
     }
 
     var xml = path.join(projectRoot, 'www', 'config.xml');
@@ -91,11 +91,11 @@ module.exports = function serve (platform, port) {
     // Retrieve the platforms.
     var platforms = cordova_util.listPlatforms(projectRoot);
     if (!platform) {
-        throw 'You need to specify a platform.';
+        throw new Error('You need to specify a platform.');
     } else if (platforms.length == 0) {
-        throw 'No platforms to serve.';
+        throw new Error('No platforms to serve.');
     } else if (platforms.filter(function(x) { return x == platform }).length == 0) {
-        throw platform + ' is not an installed platform.';
+        throw new Error(platform + ' is not an installed platform.');
     }
 
     // If we got to this point, the given platform is valid.

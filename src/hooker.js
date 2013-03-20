@@ -25,7 +25,7 @@ var shell = require('shelljs'),
 
 module.exports = function hooker(root) {
     var r = util.isCordova(root);
-    if (!r) throw "Not a Cordova project, can't use hooks.";
+    if (!r) throw new Error('Not a Cordova project, can\'t use hooks.');
     else this.root = r;
 }
 
@@ -43,7 +43,7 @@ module.exports.prototype = {
             var fullpath = path.join(dir, script);
             if (fs.statSync(fullpath).isDirectory()) return; // skip directories if they're in there.
             var status = shell.exec(fullpath);
-            if (status.code != 0) throw 'Script "' + path.basename(script) + '"' + 'in the ' + hook + ' hook exited with non-zero status code. Aborting.';
+            if (status.code !== 0) throw new Error('Script "' + path.basename(script) + '"' + 'in the ' + hook + ' hook exited with non-zero status code. Aborting.');
         });
         return true;
     }

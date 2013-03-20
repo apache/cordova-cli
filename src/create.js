@@ -53,7 +53,7 @@ module.exports = function create (dir, id, name) {
 
     // Check for existing cordova project
     if (fs.existsSync(dotCordova)) {
-        throw 'Cordova project already exists at ' + dir + ', aborting.';
+        throw new Error('Cordova project already exists at ' + dir + ', aborting.');
     }
 
     // Create basic project structure.
