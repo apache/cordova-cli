@@ -2,6 +2,8 @@
 
 > The command line tool to build, deploy and manage [Cordova](http://cordova.io)-based applications.
 
+[Apache Cordova](http://cordova.io) allows for building native mobile applications using HTML, CSS and JavaScript. Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/guide_getting-started_index.md.html#Getting%20Started%20Guides) for more details on how to work with Cordova sub-projects.
+
 # Requirements
 
 * [nodejs](http://nodejs.org/)
@@ -16,9 +18,7 @@ cordova-cli has been tested on Mas OS X and Linux.
 
 # Install
 
-```
-npm install -g cordova
-```
+    npm install -g cordova
 
 **NOTE**: on Unix-based machines, you may want to change the owner of the cordova directory that npm installs to. This will allow you to run cordova as local user without requiring root permissions. Assuming your node_modules directory is in `/usr/local/lib/`, you can do this by running: 
 
