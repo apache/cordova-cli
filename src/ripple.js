@@ -18,16 +18,36 @@
     under the License.
 */
 var serve = require('./serve'),
-    ripple = require('ripple'),
+    ripple = require('ripple-emulator'),
     open = require('open');
 
 module.exports = function (platform, port) {
     port = port || 8000;
-    var server = serve(platform, port);
 
-    ripple.emulate.start({
-        remote: 'http://localhost:' + port
+    serve.config(platform, port, function (cfg) {
+        ripple.emulate.start({
+            path: cfg.paths,
+            port: port
+        });
+
+        var device;
+
+        switch (platform) {
+        case "blackberry":
+            device = "Z10";
+            break;
+        case "ios":
+            device = "IPhone5";
+            break;
+        case "android":
+            device = "NexusS";
+            break;
+        default:
+            device = "XVGA";
+            break;
+        }
+
+        var uri = "http://localhost:" + port + "?enableripple=cordova-2.0.0-" + device;
+        open(uri);
     });
-
-    open('http://localhost:4400?enableripple=cordova-2.0.0');
 };

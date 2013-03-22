@@ -110,9 +110,3 @@ platforms.forEach(function(platform) {
         }
     });
 });
-
-// HACK: Install and configure ripple
-// Ripple will soon be in npm, this is a workaround until that happens
-shell.exec("git clone https://github.com/blackberry/Ripple-UI/ node_modules/ripple", {silent:false});
-shell.cd("node_modules/ripple");
-shell.exec("./configure && jake", {silent: false});
