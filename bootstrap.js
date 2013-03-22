@@ -110,4 +110,3 @@ platforms.forEach(function(platform) {
         }
     });
 });
-
