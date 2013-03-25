@@ -79,10 +79,21 @@ function launch_server(www, platform_www, port) {
 }
 
 module.exports = function serve (platform, port) {
+    var returnValue = {};
+
+    module.exports.config(platform, port, function (config) {
+        returnValue.server = launch_server(config.paths[0], config.paths[1], port);
+    });
+
+    // Hack for testing despite its async nature.
+    return returnValue;
+};
+
+module.exports.config = function (platform, port, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw 'Current working directory is not a Cordova-based project.';
+        throw new Error('Current working directory is not a Cordova-based project.');
     }
 
     var xml = path.join(projectRoot, 'www', 'config.xml');
@@ -91,55 +102,41 @@ module.exports = function serve (platform, port) {
     // Retrieve the platforms.
     var platforms = cordova_util.listPlatforms(projectRoot);
     if (!platform) {
-        throw 'You need to specify a platform.';
+        throw new Error('You need to specify a platform.');
     } else if (platforms.length == 0) {
-        throw 'No platforms to serve.';
+        throw new Error('No platforms to serve.');
     } else if (platforms.filter(function(x) { return x == platform }).length == 0) {
-        throw platform + ' is not an installed platform.';
+        throw new Error(platform + ' is not an installed platform.');
     }
 
     // If we got to this point, the given platform is valid.
 
-    // Default port is 8000 if not given. This is also the default of the Python module.
-    port = port || 8000;
+    var result = {
+        paths: [],
+        // Default port is 8000 if not given. This is also the default of the Python module.
+        port: port || 8000
+    };
 
     // Top-level www directory.
-    var www = projectRoot + path.sep + 'www';
+    result.paths.push(projectRoot + path.sep + 'www');
 
-    var parser, platformPath;
+    var parser;
 
-    // Hack for testing despite its async nature.
-    var returnValue = {};
     switch (platform) {
         case 'android':
-            platformPath = path.join(projectRoot, 'platforms', 'android');
-            parser = new android_parser(platformPath);
-
-            // Update the related platform project from the config
-            parser.update_project(cfg);
-            var platform_www = parser.www_dir();
-            returnValue.server = launch_server(www, platform_www, port);
+            parser = new android_parser(path.join(projectRoot, 'platforms', platform));
             break;
         case 'blackberry-10':
-            platformPath = path.join(projectRoot, 'platforms', 'blackberry-10');
-            parser = new blackberry_parser(platformPath);
-
-            // Update the related platform project from the config
-            parser.update_project(cfg, function() {
-                // Shell it
-                returnValue.server = launch_server(www, parser.www_dir(), port);
-            });
+            parser = new blackberry_parser(path.join(projectRoot, 'platforms', platform));
             break;
         case 'ios':
-            platformPath = path.join(projectRoot, 'platforms', 'ios');
-            js = path.join(__dirname, '..', 'lib', 'ios', 'CordovaLib', 'javascript', 'cordova.ios.js');
-            parser = new ios_parser(platformPath);
-            // Update the related platform project from the config
-            parser.update_project(cfg, function() {
-                returnValue.server = launch_server(www, parser.www_dir(), port);
-            });
+            parser = new ios_parser(path.join(projectRoot, 'platforms', platform));
             break;
     }
-    return returnValue;
-};
 
+    // Update the related platform project from the config
+    parser.update_project(cfg, function() {
+        result.paths.push(parser.www_dir());
+        callback(result);
+    });
+}

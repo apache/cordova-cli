@@ -2,6 +2,8 @@
 
 > The command line tool to build, deploy and manage [Cordova](http://cordova.io)-based applications.
 
+[Apache Cordova](http://cordova.io) allows for building native mobile applications using HTML, CSS and JavaScript. Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/guide_getting-started_index.md.html#Getting%20Started%20Guides) for more details on how to work with Cordova sub-projects.
+
 # Requirements
 
 * [nodejs](http://nodejs.org/)
@@ -16,9 +18,7 @@ cordova-cli has been tested on Mas OS X and Linux.
 
 # Install
 
-```
-npm install -g cordova
-```
+    npm install -g cordova
 
 **NOTE**: on Unix-based machines, you may want to change the owner of the cordova directory that npm installs to. This will allow you to run cordova as local user without requiring root permissions. Assuming your node_modules directory is in `/usr/local/lib/`, you can do this by running: 
 
@@ -42,7 +42,7 @@ cordova-cli has a single global `create` command that creates new cordova projec
 - `plugin add <path-to-plugin> [<path-to-plugin> ...]` add one (or more) plugins to the project
 - `plugin [rm | remove] <plugin-name> [<plugin-name> ...]` remove one (or more) added plugins
 - `prepare [platform...]` copies files into the specified platforms, or all platforms. it is then ready for building by Eclipse/Xcode/etc.
-- `compile [platform...]` compiles and deploys the app to a connected and compatible device. With no parameters, builds for all platforms, otherwise builds for the specified platforms.
+- `compile [platform...]` compiles the app into a binary for each added platform. With no parameters, builds for all platforms, otherwise builds for the specified platforms.
 - `build [<platform> [<platform> [...]]]` an alias for `cordova prepare` followed by `cordova compile`
 - `emulate [<platform> [<platform> [...]]]` launch emulators and deploy app to them. With no parameters emulates for all platforms added to the project, otherwise emulates for the specified platforms
 - `serve <platform> [port]` launch a local web server for that platform's www directory on the given port (default 8000).
@@ -119,7 +119,7 @@ If you are using cordova-cli as a module within a larger node application, you c
 # Examples
 
 ## Creating a new cordova project
-This example shows how to create a project from scratch named KewlApp with iOS and Android platform support, and includes a plugin named Kewlio. The project will live in ~/MyProjects/KewlApp
+This example shows how to create a project from scratch named KewlApp with iOS and Android platform support, and includes a plugin named Kewlio. The project will live in ~/KewlApp
 
     cordova create ~/KewlApp KewlApp
     cd ~/KewlApp

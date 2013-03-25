@@ -4,7 +4,7 @@ Synopsis
 
 Global Commands
 
-    create [path]...................... creates a cordova project in the specified directory
+    create [path] [id] [name] ......... creates a cordova project in the specified directory optional name and id (package name, reverse-domain style)
     -v ................................ prints out this utility's version
 
 Project-Level Commands
@@ -19,6 +19,8 @@ Project-Level Commands
     serve <platform> [port] ........... runs a local web server for the www/ directory of the given platform
                                         the default port is 8000
                                         note that you must edit the native code to point at the server!
+    ripple <platform> [port] .......... uses the serve command as a base and then wraps the server
+                                        with ripple to test your app in your desktop browser.
     help .............................. shows this!
 
 Example usage

@@ -54,7 +54,7 @@ shell.rm('-rf', path.join(cordovaDir, 'www', 'spec'));
 
 var end = n(platforms.length, function() {
     // Check that we are installing globally into a root-only directory.
-    if (process.env.USER == 'root' && process.env.npm_config_prefix.indexOf('/usr/local') === 0) {
+    if (process.env.USER == 'root') {
         console.log("**************************************************************************");
         console.log("* WARNING: YOU ARE INSTALLING GLOBALLY INTO A ROOT-ONLY DIRECTORY!!!1one *");
         console.log("* Your node install is global, so global modules get installed there too.*");
@@ -110,4 +110,3 @@ platforms.forEach(function(platform) {
         }
     });
 });
-

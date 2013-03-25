@@ -154,7 +154,7 @@ module.exports = function plugin(command, targets, callback) {
 
                     hooks.fire('after_plugin_rm');
                 } else {
-                    throw 'Plugin "' + targetName + '" not added to project.';
+                    throw new Error('Plugin "' + targetName + '" not added to project.');
                 }
             });
             if (callback) callback();

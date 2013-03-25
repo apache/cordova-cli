@@ -41,7 +41,7 @@ module.exports.check_requirements = function(callback) {
 module.exports.prototype = {
     update_from_config:function(config) {
         if (config instanceof config_parser) {
-        } else throw 'update_from_config requires a config_parser object';
+        } else throw new Error('update_from_config requires a config_parser object');
 
         this.xml.name(config.name());
         this.xml.packageName(config.packageName());
@@ -182,7 +182,7 @@ module.exports.prototype = {
             description:'Enter the password for your BB10 simulator'
         }
         ], function(err, results) {
-            if (err) throw 'Error during BlackBerry environment config retrieval';
+            if (err) throw new Error('Error during BlackBerry environment config retrieval');
             // Write out .cordova/config.json file
             if (dot.blackberry === undefined) dot.blackberry = {};
             if (dot.blackberry.qnx === undefined) dot.blackberry.qnx = {};
