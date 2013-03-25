@@ -15,18 +15,17 @@
        KIND, either express or implied.  See the License for the
        specific language governing permissions and limitations
        under the License.
-*/
+ */
 package org.apache.cordova;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.channels.FileChannel;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.cordova.api.CallbackContext;
-import org.apache.cordova.api.CordovaInterface;
 import org.apache.cordova.api.CordovaPlugin;
 import org.apache.cordova.api.PluginResult;
 import org.apache.cordova.file.EncodingException;
@@ -38,23 +37,25 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-//import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.webkit.MimeTypeMap;
-
-//import android.app.Activity;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.channels.FileChannel;
 
 /**
  * This class provides SD card file and directory services to JavaScript.
  * Only files on the SD card can be accessed.
  */
 public class FileUtils extends CordovaPlugin {
-    @SuppressWarnings("unused")
     private static final String LOG_TAG = "FileUtils";
-    private static final String _DATA = "_data";    // The column name where the file path is stored
 
     public static int NOT_FOUND_ERR = 1;
     public static int SECURITY_ERR = 2;
@@ -74,9 +75,6 @@ public class FileUtils extends CordovaPlugin {
     public static int PERSISTENT = 1;
     public static int RESOURCE = 2;
     public static int APPLICATION = 3;
-
-    FileReader f_in;
-    FileWriter f_out;
 
     /**
      * Constructor.
@@ -111,30 +109,29 @@ public class FileUtils extends CordovaPlugin {
                 callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, b));
             }
             else if (action.equals("readAsText")) {
-                int start = 0;
-                int end = Integer.MAX_VALUE;
-                if (args.length() >= 3) {
-                    start = args.getInt(2);
-                }
-                if (args.length() >= 4) {
-                    end = args.getInt(3);
-                }
+                String encoding = args.getString(1);
+                int start = args.getInt(2);
+                int end = args.getInt(3);
 
-                String s = this.readAsText(args.getString(0), args.getString(1), start, end);
-                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, s));
+                this.readFileAs(args.getString(0), start, end, callbackContext, encoding, PluginResult.MESSAGE_TYPE_STRING);
             }
             else if (action.equals("readAsDataURL")) {
-                int start = 0;
-                int end = Integer.MAX_VALUE;
-                if (args.length() >= 2) {
-                    start = args.getInt(1);
-                }
-                if (args.length() >= 3) {
-                    end = args.getInt(2);
-                }
+                int start = args.getInt(1);
+                int end = args.getInt(2);
 
-                String s = this.readAsDataURL(args.getString(0), start, end);
-                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, s));
+                this.readFileAs(args.getString(0), start, end, callbackContext, null, -1);
+            }
+            else if (action.equals("readAsArrayBuffer")) {
+                int start = args.getInt(1);
+                int end = args.getInt(2);
+
+                this.readFileAs(args.getString(0), start, end, callbackContext, null, PluginResult.MESSAGE_TYPE_ARRAYBUFFER);
+            }
+            else if (action.equals("readAsBinaryString")) {
+                int start = args.getInt(1);
+                int end = args.getInt(2);
+
+                this.readFileAs(args.getString(0), start, end, callbackContext, null, PluginResult.MESSAGE_TYPE_BINARYSTRING);
             }
             else if (action.equals("write")) {
                 long fileSize = this.write(args.getString(0), args.getString(1), args.getInt(2));
@@ -237,11 +234,11 @@ public class FileUtils extends CordovaPlugin {
      * @param filePath the path to check
      */
     private void notifyDelete(String filePath) {
-        String newFilePath = getRealPathFromURI(Uri.parse(filePath), cordova);
+        String newFilePath = FileHelper.getRealPath(filePath, cordova);
         try {
             this.cordova.getActivity().getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                MediaStore.Images.Media.DATA + " = ?",
-                new String[] { newFilePath });
+                    MediaStore.Images.Media.DATA + " = ?",
+                    new String[] { newFilePath });
         } catch (UnsupportedOperationException t) {
             // Was seeing this on the File mobile-spec tests on 4.0.3 x86 emulator.
             // The ContentResolver applies only when the file was registered in the
@@ -344,8 +341,8 @@ public class FileUtils extends CordovaPlugin {
      * @throws FileExistsException
      */
     private JSONObject transferTo(String fileName, String newParent, String newName, boolean move) throws JSONException, NoModificationAllowedException, IOException, InvalidModificationException, EncodingException, FileExistsException {
-        String newFileName = getRealPathFromURI(Uri.parse(fileName), cordova);
-        newParent = getRealPathFromURI(Uri.parse(newParent), cordova);
+        String newFileName = FileHelper.getRealPath(fileName, cordova);
+        newParent = FileHelper.getRealPath(newParent, cordova);
 
         // Check for invalid file name
         if (newName != null && newName.contains(":")) {
@@ -384,14 +381,14 @@ public class FileUtils extends CordovaPlugin {
             }
         } else {
             if (move) {
-            	JSONObject newFileEntry = moveFile(source, destination);
+                JSONObject newFileEntry = moveFile(source, destination);
 
-            	// If we've moved a file given its content URI, we need to clean up.
-            	if (fileName.startsWith("content://")) {
-            		notifyDelete(fileName);
-            	}
+                // If we've moved a file given its content URI, we need to clean up.
+                if (fileName.startsWith("content://")) {
+                    notifyDelete(fileName);
+                }
 
-            	return newFileEntry;
+                return newFileEntry;
             } else {
                 return copyFile(source, destination);
             }
@@ -748,7 +745,7 @@ public class FileUtils extends CordovaPlugin {
         if (fileName.startsWith("/")) {
             fp = new File(fileName);
         } else {
-            dirPath = getRealPathFromURI(Uri.parse(dirPath), cordova);
+            dirPath = FileHelper.getRealPath(dirPath, cordova);
             fp = new File(dirPath + File.separator + fileName);
         }
         return fp;
@@ -763,7 +760,7 @@ public class FileUtils extends CordovaPlugin {
      * @throws JSONException
      */
     private JSONObject getParent(String filePath) throws JSONException {
-        filePath = getRealPathFromURI(Uri.parse(filePath), cordova);
+        filePath = FileHelper.getRealPath(filePath, cordova);
 
         if (atRootDirectory(filePath)) {
             return getEntry(filePath);
@@ -779,7 +776,7 @@ public class FileUtils extends CordovaPlugin {
      * @return true if we are at the root, false otherwise.
      */
     private boolean atRootDirectory(String filePath) {
-        filePath = getRealPathFromURI(Uri.parse(filePath), cordova);
+        filePath = FileHelper.getRealPath(filePath, cordova);
 
         if (filePath.equals(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + cordova.getActivity().getPackageName() + "/cache") ||
                 filePath.equals(Environment.getExternalStorageDirectory().getAbsolutePath()) ||
@@ -790,26 +787,13 @@ public class FileUtils extends CordovaPlugin {
     }
 
     /**
-     * This method removes the "file://" from the passed in filePath
-     *
-     * @param filePath to be checked.
-     * @return
-     */
-    public static String stripFileProtocol(String filePath) {
-        if (filePath.startsWith("file://")) {
-            filePath = filePath.substring(7);
-        }
-        return filePath;
-    }
-
-    /**
      * Create a File object from the passed in path
      *
      * @param filePath
      * @return
      */
     private File createFileObject(String filePath) {
-    	filePath = getRealPathFromURI(Uri.parse(filePath), cordova);
+        filePath = FileHelper.getRealPath(filePath, cordova);
 
         File file = new File(filePath);
         return file;
@@ -849,7 +833,7 @@ public class FileUtils extends CordovaPlugin {
 
         JSONObject metadata = new JSONObject();
         metadata.put("size", file.length());
-        metadata.put("type", getMimeType(filePath));
+        metadata.put("type", FileHelper.getMimeType(filePath, cordova));
         metadata.put("name", file.getName());
         metadata.put("fullPath", filePath);
         metadata.put("lastModifiedDate", file.lastModified());
@@ -900,21 +884,21 @@ public class FileUtils extends CordovaPlugin {
     }
 
     /**
-     * Returns a JSON Object representing a directory on the device's file system
+     * Returns a JSON object representing the given File.
      *
-     * @param path to the directory
-     * @return
+     * @param file the File to convert
+     * @return a JSON representation of the given File
      * @throws JSONException
      */
-    public JSONObject getEntry(File file) throws JSONException {
+    public static JSONObject getEntry(File file) throws JSONException {
         JSONObject entry = new JSONObject();
 
         entry.put("isFile", file.isFile());
         entry.put("isDirectory", file.isDirectory());
         entry.put("name", file.getName());
         entry.put("fullPath", "file://" + file.getAbsolutePath());
-        // I can't add the next thing it as it would be an infinite loop
-        //entry.put("filesystem", null);
+        // The file system can't be specified, as it would lead to an infinite loop.
+        // entry.put("filesystem", null);
 
         return entry;
     }
@@ -930,123 +914,83 @@ public class FileUtils extends CordovaPlugin {
         return getEntry(new File(path));
     }
 
-    /**
-     * Identifies if action to be executed returns a value and should be run synchronously.
-     *
-     * @param action	The action to execute
-     * @return			T=returns value
-     */
-    public boolean isSynch(String action) {
-        if (action.equals("testSaveLocationExists")) {
-            return true;
-        }
-        else if (action.equals("getFreeDiskSpace")) {
-            return true;
-        }
-        else if (action.equals("testFileExists")) {
-            return true;
-        }
-        else if (action.equals("testDirectoryExists")) {
-            return true;
-        }
-        return false;
-    }
 
     //--------------------------------------------------------------------------
     // LOCAL METHODS
     //--------------------------------------------------------------------------
 
     /**
-     * Read content of text file.
+     * Read the contents of a file.
+     * This is done in a background thread; the result is sent to the callback.
      *
-     * @param filename			The name of the file.
-     * @param encoding			The encoding to return contents as.  Typical value is UTF-8.
-     * 							(see http://www.iana.org/assignments/character-sets)
-     * @param start                     Start position in the file.
-     * @param end                       End position to stop at (exclusive).
-     * @return					Contents of file.
-     * @throws FileNotFoundException, IOException
+     * @param filename          The name of the file.
+     * @param start             Start position in the file.
+     * @param end               End position to stop at (exclusive).
+     * @param callbackContext   The context through which to send the result.
+     * @param encoding          The encoding to return contents as.  Typical value is UTF-8. (see http://www.iana.org/assignments/character-sets)
+     * @param resultType        The desired type of data to send to the callback.
+     * @return                  Contents of file.
      */
-    public String readAsText(String filename, String encoding, int start, int end) throws FileNotFoundException, IOException {
-        int diff = end - start;
-        byte[] bytes = new byte[1000];
-        BufferedInputStream bis = new BufferedInputStream(getPathFromUri(filename), 1024);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        int numRead = 0;
+    public void readFileAs(final String filename, final int start, final int end, final CallbackContext callbackContext, final String encoding, final int resultType) {
+        this.cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+                    byte[] bytes = readAsBinaryHelper(filename, start, end);
+                    
+                    PluginResult result;
+                    switch (resultType) {
+                        case PluginResult.MESSAGE_TYPE_STRING:
+                            result = new PluginResult(PluginResult.Status.OK, new String(bytes, encoding));
+                            break;
+                        case PluginResult.MESSAGE_TYPE_ARRAYBUFFER:
+                            result = new PluginResult(PluginResult.Status.OK, bytes);
+                            break;
+                        case PluginResult.MESSAGE_TYPE_BINARYSTRING:
+                            result = new PluginResult(PluginResult.Status.OK, bytes, true);
+                            break;
+                        default: // Base64.
+                            String contentType = FileHelper.getMimeType(filename, cordova);
+                            byte[] base64 = Base64.encodeBase64(bytes);
+                            String s = "data:" + contentType + ";base64," + new String(base64, "US-ASCII");
+                            result = new PluginResult(PluginResult.Status.OK, s);
+                    }
 
-        if (start > 0) {
-            bis.skip(start);
-        }
-
-        while ( diff > 0 && (numRead = bis.read(bytes, 0, Math.min(1000, diff))) >= 0) {
-            diff -= numRead;
-            bos.write(bytes, 0, numRead);
-        }
-
-        return new String(bos.toByteArray(), encoding);
-    }
-
-    /**
-     * Read content of text file and return as base64 encoded data url.
-     *
-     * @param filename			The name of the file.
-     * @return					Contents of file = data:<media type>;base64,<data>
-     * @throws FileNotFoundException, IOException
-     */
-    public String readAsDataURL(String filename, int start, int end) throws FileNotFoundException, IOException {
-        int diff = end - start;
-        byte[] bytes = new byte[1000];
-        BufferedInputStream bis = new BufferedInputStream(getPathFromUri(filename), 1024);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        int numRead = 0;
-
-        if (start > 0) {
-            bis.skip(start);
-        }
-
-        while (diff > 0 && (numRead = bis.read(bytes, 0, Math.min(1000, diff))) >= 0) {
-            diff -= numRead;
-            bos.write(bytes, 0, numRead);
-        }
-
-        // Determine content type from file name
-        String contentType = null;
-        if (filename.startsWith("content:")) {
-            Uri fileUri = Uri.parse(filename);
-            contentType = this.cordova.getActivity().getContentResolver().getType(fileUri);
-        }
-        else {
-            contentType = getMimeType(filename);
-        }
-
-        byte[] base64 = Base64.encodeBase64(bos.toByteArray());
-        String data = "data:" + contentType + ";base64," + new String(base64);
-        return data;
-    }
-
-    /**
-     * Looks up the mime type of a given file name.
-     *
-     * @param filename
-     * @return a mime type
-     */
-    public static String getMimeType(String filename) {
-        if (filename != null) {
-            // Stupid bug in getFileExtensionFromUrl when the file name has a space
-            // So we need to replace the space with a url encoded %20
-
-            // CB-2185: Stupid bug not putting JPG extension in the mime-type map
-            String url = filename.replace(" ", "%20").toLowerCase();
-            MimeTypeMap map = MimeTypeMap.getSingleton();
-            String extension = MimeTypeMap.getFileExtensionFromUrl(url);
-            if (extension.toLowerCase().equals("3ga")) {
-                return "audio/3gpp";
-            } else {
-                return map.getMimeTypeFromExtension(extension);
+                    callbackContext.sendPluginResult(result);
+                } catch (FileNotFoundException e) {
+                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.IO_EXCEPTION, NOT_FOUND_ERR));
+                } catch (IOException e) {
+                    Log.d(LOG_TAG, e.getLocalizedMessage());
+                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.IO_EXCEPTION, NOT_READABLE_ERR));
+                }
             }
-        } else {
-            return "";
+        });
+    }
+
+    /**
+     * Read the contents of a file as binary.
+     * This is done synchronously; the result is returned.
+     *
+     * @param filename          The name of the file.
+     * @param start             Start position in the file.
+     * @param end               End position to stop at (exclusive).
+     * @return                  Contents of the file as a byte[].
+     * @throws IOException
+     */
+    private byte[] readAsBinaryHelper(String filename, int start, int end) throws IOException {
+        int numBytesToRead = end - start;
+        byte[] bytes = new byte[numBytesToRead];
+        InputStream inputStream = FileHelper.getInputStreamFromUriString(filename, cordova);
+        int numBytesRead = 0;
+
+        if (start > 0) {
+            inputStream.skip(start);
         }
+
+        while (numBytesToRead > 0 && (numBytesRead = inputStream.read(bytes, numBytesRead, numBytesToRead)) >= 0) {
+            numBytesToRead -= numBytesRead;
+        }
+
+        return bytes;
     }
 
     /**
@@ -1060,11 +1004,11 @@ public class FileUtils extends CordovaPlugin {
      */
     /**/
     public long write(String filename, String data, int offset) throws FileNotFoundException, IOException, NoModificationAllowedException {
-    	if (filename.startsWith("content://")) {
-    		throw new NoModificationAllowedException("Couldn't write to file given its content URI");
-    	}
+        if (filename.startsWith("content://")) {
+            throw new NoModificationAllowedException("Couldn't write to file given its content URI");
+        }
 
-        filename = getRealPathFromURI(Uri.parse(filename), cordova);
+        filename = FileHelper.getRealPath(filename, cordova);
 
         boolean append = false;
         if (offset > 0) {
@@ -1093,11 +1037,11 @@ public class FileUtils extends CordovaPlugin {
      * @throws NoModificationAllowedException
      */
     private long truncateFile(String filename, long size) throws FileNotFoundException, IOException, NoModificationAllowedException {
-    	if (filename.startsWith("content://")) {
-    		throw new NoModificationAllowedException("Couldn't truncate file given its content URI");
-    	}
+        if (filename.startsWith("content://")) {
+            throw new NoModificationAllowedException("Couldn't truncate file given its content URI");
+        }
 
-        filename = getRealPathFromURI(Uri.parse(filename), cordova);
+        filename = FileHelper.getRealPath(filename, cordova);
 
         RandomAccessFile raf = new RandomAccessFile(filename, "rw");
         try {
@@ -1110,50 +1054,6 @@ public class FileUtils extends CordovaPlugin {
             return raf.length();
         } finally {
             raf.close();
-        }
-    }
-
-    /**
-     * Get an input stream based on file path or content:// uri
-     *
-     * @param path
-     * @return an input stream
-     * @throws FileNotFoundException
-     */
-    private InputStream getPathFromUri(String path) throws FileNotFoundException {
-        if (path.startsWith("content")) {
-            Uri uri = Uri.parse(path);
-            return cordova.getActivity().getContentResolver().openInputStream(uri);
-        }
-        else {
-            path = getRealPathFromURI(Uri.parse(path), cordova);
-            return new FileInputStream(path);
-        }
-    }
-
-    /**
-     * Queries the media store to find out what the file path is for the Uri we supply
-     *
-     * @param contentUri the Uri of the audio/image/video
-     * @param cordova the current application context
-     * @return the full path to the file
-     */
-    @SuppressWarnings("deprecation")
-    protected static String getRealPathFromURI(Uri contentUri, CordovaInterface cordova) {
-        final String scheme = contentUri.getScheme();
-
-        if (scheme == null) {
-        	return contentUri.toString();
-    	} else if (scheme.compareTo("content") == 0) {
-            String[] proj = { _DATA };
-            Cursor cursor = cordova.getActivity().managedQuery(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(_DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } else if (scheme.compareTo("file") == 0) {
-            return contentUri.getPath();
-        } else {
-            return contentUri.toString();
         }
     }
 }

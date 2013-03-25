@@ -18,6 +18,7 @@
 */
 package org.apache.cordova;
 
+import java.io.ByteArrayInputStream;
 import java.util.Hashtable;
 
 import org.apache.cordova.api.CordovaInterface;
@@ -38,6 +39,7 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.HttpAuthHandler;
 import android.webkit.SslErrorHandler;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -66,7 +68,7 @@ public class CordovaWebViewClient extends WebViewClient {
 
     /**
      * Constructor.
-     * 
+     *
      * @param cordova
      * @param view
      */
@@ -77,7 +79,7 @@ public class CordovaWebViewClient extends WebViewClient {
 
     /**
      * Constructor.
-     * 
+     *
      * @param view
      */
     public void setWebView(CordovaWebView view) {
@@ -101,8 +103,8 @@ public class CordovaWebViewClient extends WebViewClient {
 		String callbackId = url.substring(idx3 + 1, idx4);
 		String jsonArgs   = url.substring(idx4 + 1);
         appView.pluginManager.exec(service, action, callbackId, jsonArgs);
-	}    
-	
+	}
+
     /**
      * Give the host application a chance to take over the control when a new url
      * is about to be loaded in the current WebView.
@@ -192,12 +194,8 @@ public class CordovaWebViewClient extends WebViewClient {
 
             // If our app or file:, then load into a new Cordova webview container by starting a new instance of our activity.
             // Our app continues to run.  When BACK is pressed, our app is redisplayed.
-            if (url.startsWith("file://") || url.startsWith("data:") || url.indexOf(this.appView.baseUrl) == 0 || Config.isUrlWhiteListed(url)) {
-                //This will fix iFrames
-                if (appView.useBrowserHistory || url.startsWith("data:"))
-                    return false;
-                else
-                    this.appView.loadUrl(url);
+            if (url.startsWith("file://") || url.startsWith("data:")  || Config.isUrlWhiteListed(url)) {
+                return false;
             }
 
             // If not our application, let default viewer handle
@@ -212,6 +210,34 @@ public class CordovaWebViewClient extends WebViewClient {
             }
         }
         return true;
+    }
+
+    /**
+     * Check for intercepting any requests for resources.
+     * This includes images and scripts and so on, not just top-level pages.
+     * @param view          The WebView.
+     * @param url           The URL to be loaded.
+     * @return              Either null to proceed as normal, or a WebResourceResponse.
+     */
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+      //If something isn't whitelisted, just send a blank response
+        if(!Config.isUrlWhiteListed(url) && (url.startsWith("http://") || url.startsWith("https://")))
+        {
+            return getWhitelistResponse();
+        }
+    	if (this.appView.pluginManager != null) {
+            return this.appView.pluginManager.shouldInterceptRequest(url);
+        }
+        return null;
+    }
+    
+    private WebResourceResponse getWhitelistResponse()
+    {
+        WebResourceResponse emptyResponse;
+        String empty = "";
+        ByteArrayInputStream data = new ByteArrayInputStream(empty.getBytes());
+        return new WebResourceResponse("text/plain", "UTF-8", data);
     }
 
     /**
@@ -230,7 +256,7 @@ public class CordovaWebViewClient extends WebViewClient {
         AuthenticationToken token = this.getAuthenticationToken(host, realm);
         if (token != null) {
             handler.proceed(token.getUserName(), token.getPassword());
-        } 
+        }
         else {
             // Handle 401 like we'd normally do!
             super.onReceivedHttpAuthRequest(view, handler, host, realm);
@@ -238,22 +264,16 @@ public class CordovaWebViewClient extends WebViewClient {
     }
 
     /**
-     * Notify the host application that a page has started loading. 
-     * This method is called once for each main frame load so a page with iframes or framesets will call onPageStarted 
-     * one time for the main frame. This also means that onPageStarted will not be called when the contents of an 
-     * embedded frame changes, i.e. clicking a link whose target is an iframe. 
-     * 
+     * Notify the host application that a page has started loading.
+     * This method is called once for each main frame load so a page with iframes or framesets will call onPageStarted
+     * one time for the main frame. This also means that onPageStarted will not be called when the contents of an
+     * embedded frame changes, i.e. clicking a link whose target is an iframe.
+     *
      * @param view          The webview initiating the callback.
      * @param url           The url of the page.
      */
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        // Clear history so history.back() doesn't do anything.
-        // So we can reinit() native side CallbackServer & PluginManager.
-        if (!this.appView.useBrowserHistory) {
-            view.clearHistory();
-            this.doClearHistory = true;
-        }
 
         // Flush stale messages.
         this.appView.jsMessageQueue.reset();
@@ -270,7 +290,7 @@ public class CordovaWebViewClient extends WebViewClient {
     /**
      * Notify the host application that a page has finished loading.
      * This method is called only for main frame. When onPageFinished() is called, the rendering picture may not be updated yet.
-     * 
+     *
      *
      * @param view          The webview initiating the callback.
      * @param url           The url of the page.
@@ -359,11 +379,11 @@ public class CordovaWebViewClient extends WebViewClient {
     }
 
     /**
-     * Notify the host application that an SSL error occurred while loading a resource. 
-     * The host application must call either handler.cancel() or handler.proceed(). 
-     * Note that the decision may be retained for use in response to future SSL errors. 
+     * Notify the host application that an SSL error occurred while loading a resource.
+     * The host application must call either handler.cancel() or handler.proceed().
+     * Note that the decision may be retained for use in response to future SSL errors.
      * The default behavior is to cancel the load.
-     * 
+     *
      * @param view          The WebView that is initiating the callback.
      * @param handler       An SslErrorHandler object that will handle the user's response.
      * @param error         The SSL error object.
@@ -392,27 +412,10 @@ public class CordovaWebViewClient extends WebViewClient {
         }
     }
 
-    /**
-     * Notify the host application to update its visited links database.
-     * 
-     * @param view          The WebView that is initiating the callback.
-     * @param url           The url being visited.
-     * @param isReload      True if this url is being reloaded.
-     */
-    @Override
-    public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
-        /*
-         * If you do a document.location.href the url does not get pushed on the stack
-         * so we do a check here to see if the url should be pushed.
-         */
-        if (!this.appView.peekAtUrlStack().equals(url)) {
-            this.appView.pushUrl(url);
-        }
-    }
 
     /**
      * Sets the authentication token.
-     * 
+     *
      * @param authenticationToken
      * @param host
      * @param realm
@@ -429,10 +432,10 @@ public class CordovaWebViewClient extends WebViewClient {
 
     /**
      * Removes the authentication token.
-     * 
+     *
      * @param host
      * @param realm
-     * 
+     *
      * @return the authentication token or null if did not exist
      */
     public AuthenticationToken removeAuthenticationToken(String host, String realm) {
@@ -441,16 +444,16 @@ public class CordovaWebViewClient extends WebViewClient {
 
     /**
      * Gets the authentication token.
-     * 
+     *
      * In order it tries:
      * 1- host + realm
      * 2- host
      * 3- realm
      * 4- no host, no realm
-     * 
+     *
      * @param host
      * @param realm
-     * 
+     *
      * @return the authentication token
      */
     public AuthenticationToken getAuthenticationToken(String host, String realm) {

@@ -28,6 +28,7 @@ import org.apache.cordova.api.LOG;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -332,6 +333,7 @@ public class DroidGap extends Activity implements CordovaInterface {
      * @param webViewClient
      * @param webChromeClient
      */
+    @SuppressLint("NewApi")
     public void init(CordovaWebView webView, CordovaWebViewClient webViewClient, CordovaChromeClient webChromeClient) {
         LOG.d(TAG, "DroidGap.init()");
 
@@ -348,6 +350,12 @@ public class DroidGap extends Activity implements CordovaInterface {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 1.0F));
+
+        if (this.getBooleanProperty("disallowOverscroll", false)) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
+                this.appView.setOverScrollMode(CordovaWebView.OVER_SCROLL_NEVER);
+            }
+        }
 
         // Add web view but make it invisible while loading URL
         this.appView.setVisibility(View.INVISIBLE);
@@ -1054,7 +1062,8 @@ public class DroidGap extends Activity implements CordovaInterface {
     {
         //Get whatever has focus!
         View childView = appView.getFocusedChild();
-        if ((appView.isCustomViewShowing() || childView != null ) && keyCode == KeyEvent.KEYCODE_BACK) {
+        if ((appView.isCustomViewShowing() || childView != null ) &&
+                (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
             return appView.onKeyUp(keyCode, event);
         } else {
             return super.onKeyUp(keyCode, event);
@@ -1074,7 +1083,7 @@ public class DroidGap extends Activity implements CordovaInterface {
         //Get whatever has focus!
         View childView = appView.getFocusedChild();
         //Determine if the focus is on the current view or not
-        if (childView != null && keyCode == KeyEvent.KEYCODE_BACK) {
+        if (childView != null && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
                     return appView.onKeyDown(keyCode, event);
         }
         else
