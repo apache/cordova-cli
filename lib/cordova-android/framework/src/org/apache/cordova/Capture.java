@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import android.os.Build;
 import org.apache.cordova.api.CallbackContext;
 import org.apache.cordova.api.CordovaPlugin;
 import org.apache.cordova.api.LOG;
@@ -128,7 +129,7 @@ public class Capture extends CordovaPlugin {
         // If the mimeType isn't set the rest will fail
         // so let's see if we can determine it.
         if (mimeType == null || mimeType.equals("") || "null".equals(mimeType)) {
-            mimeType = FileUtils.getMimeType(filePath);
+            mimeType = FileHelper.getMimeType(filePath, cordova);
         }
         Log.d(LOG_TAG, "Mime type = " + mimeType);
 
@@ -155,7 +156,7 @@ public class Capture extends CordovaPlugin {
     private JSONObject getImageData(String filePath, JSONObject obj) throws JSONException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(FileUtils.stripFileProtocol(filePath), options);
+        BitmapFactory.decodeFile(FileHelper.stripFileProtocol(filePath), options);
         obj.put("height", options.outHeight);
         obj.put("width", options.outWidth);
         return obj;
@@ -216,9 +217,10 @@ public class Capture extends CordovaPlugin {
      */
     private void captureVideo(double duration) {
         Intent intent = new Intent(android.provider.MediaStore.ACTION_VIDEO_CAPTURE);
-        // Introduced in API 8
-        //intent.putExtra(android.provider.MediaStore.EXTRA_DURATION_LIMIT, duration);
 
+        if(Build.VERSION.SDK_INT > 8){
+            intent.putExtra("android.intent.extra.durationLimit", duration);
+        }
         this.cordova.startActivityForResult((CordovaPlugin) this, intent, CAPTURE_VIDEO);
     }
 
@@ -346,7 +348,7 @@ public class Capture extends CordovaPlugin {
      * @throws IOException
      */
     private JSONObject createMediaFile(Uri data) {
-        File fp = new File(FileUtils.getRealPathFromURI(data, this.cordova));
+        File fp = new File(FileHelper.getRealPath(data, this.cordova));
         JSONObject obj = new JSONObject();
 
         try {
@@ -363,7 +365,7 @@ public class Capture extends CordovaPlugin {
                     obj.put("type", VIDEO_3GPP);
                 }
             } else {
-                obj.put("type", FileUtils.getMimeType(fp.getAbsolutePath()));
+                obj.put("type", FileHelper.getMimeType(fp.getAbsolutePath(), cordova));
             }
 
             obj.put("lastModifiedDate", fp.lastModified());

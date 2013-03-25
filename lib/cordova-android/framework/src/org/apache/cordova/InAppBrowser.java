@@ -35,7 +35,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
@@ -48,6 +50,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebChromeClient;
+import android.webkit.GeolocationPermissions.Callback;
 import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
@@ -69,6 +72,8 @@ public class InAppBrowser extends CordovaPlugin {
     private static final String EXIT_EVENT = "exit";
     private static final String LOAD_START_EVENT = "loadstart";
     private static final String LOAD_STOP_EVENT = "loadstop";
+    private static final String LOAD_ERROR_EVENT = "loaderror";
+    private static final String CLOSE_BUTTON_CAPTION = "closebuttoncaption";
     private long MAX_QUOTA = 100 * 1024 * 1024;
 
     private Dialog dialog;
@@ -76,6 +81,7 @@ public class InAppBrowser extends CordovaPlugin {
     private EditText edittext;
     private boolean showLocationBar = true;
     private CallbackContext callbackContext;
+    private String buttonLabel = "Done";
     
     /**
      * Executes the request and returns PluginResult.
@@ -174,8 +180,12 @@ public class InAppBrowser extends CordovaPlugin {
                 option = new StringTokenizer(features.nextToken(), "=");
                 if (option.hasMoreElements()) {
                     String key = option.nextToken();
-                    Boolean value = option.nextToken().equals("no") ? Boolean.FALSE : Boolean.TRUE;
-                    map.put(key, value);
+                    if (key.equalsIgnoreCase(CLOSE_BUTTON_CAPTION)) {
+                        this.buttonLabel = option.nextToken();
+                    } else {
+                        Boolean value = option.nextToken().equals("no") ? Boolean.FALSE : Boolean.TRUE;
+                        map.put(key, value);
+                    }
                 }
             }
             return map;
@@ -221,6 +231,7 @@ public class InAppBrowser extends CordovaPlugin {
      */
     private void closeDialog() {
         try {
+            this.inAppWebView.loadUrl("about:blank");
             JSONObject obj = new JSONObject();
             obj.put("type", EXIT_EVENT);
 
@@ -289,7 +300,10 @@ public class InAppBrowser extends CordovaPlugin {
         // Determine if we should hide the location bar.
         showLocationBar = true;
         if (features != null) {
-            showLocationBar = features.get(LOCATION).booleanValue();
+            Boolean show = features.get(LOCATION);
+            if (show != null) {
+                showLocationBar = show.booleanValue();
+            }
         }
         
         final CordovaWebView thatWebView = this.webView;
@@ -405,7 +419,7 @@ public class InAppBrowser extends CordovaPlugin {
                 close.setLayoutParams(closeLayoutParams);
                 forward.setContentDescription("Close Button");
                 close.setId(5);
-                close.setText("Done");
+                close.setText(buttonLabel);
                 close.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         closeDialog();
@@ -428,10 +442,18 @@ public class InAppBrowser extends CordovaPlugin {
                  */
                 // @TODO: replace with settings.setPluginState(android.webkit.WebSettings.PluginState.ON)
                 settings.setPluginsEnabled(true);
-                settings.setDatabaseEnabled(true);
-                String databasePath = cordova.getActivity().getApplicationContext().getDir("inAppBrowserDB", Context.MODE_PRIVATE).getPath();
-                settings.setDatabasePath(databasePath);
+                
+                //Toggle whether this is enabled or not!
+                Bundle appSettings = cordova.getActivity().getIntent().getExtras();
+                boolean enableDatabase = appSettings.getBoolean("InAppBrowserStorageEnabled", true);
+                if(enableDatabase)
+                {
+                    String databasePath = cordova.getActivity().getApplicationContext().getDir("inAppBrowserDB", Context.MODE_PRIVATE).getPath();
+                    settings.setDatabasePath(databasePath);
+                    settings.setDatabaseEnabled(true);
+                }
                 settings.setDomStorageEnabled(true);
+               
                 inAppWebView.loadUrl(url);
                 inAppWebView.setId(6);
                 inAppWebView.getSettings().setLoadWithOverviewMode(true);
@@ -472,16 +494,24 @@ public class InAppBrowser extends CordovaPlugin {
     }
 
     /**
-     * Create a new plugin result and send it back to JavaScript
+     * Create a new plugin success result and send it back to JavaScript
      *
      * @param obj a JSONObject contain event payload information
      */
     private void sendUpdate(JSONObject obj, boolean keepCallback) {
-        PluginResult result = new PluginResult(PluginResult.Status.OK, obj);
+        sendUpdate(obj, keepCallback, PluginResult.Status.OK);
+    }
+
+    /**
+     * Create a new plugin result and send it back to JavaScript
+     *
+     * @param obj a JSONObject contain event payload information
+     * @param status the status code to return to the JavaScript environment
+     */    private void sendUpdate(JSONObject obj, boolean keepCallback, PluginResult.Status status) {
+        PluginResult result = new PluginResult(status, obj);
         result.setKeepCallback(keepCallback);
         this.callbackContext.sendPluginResult(result);
     }
-
     public class InAppChromeClient extends WebChromeClient {
 
         /**
@@ -514,6 +544,18 @@ public class InAppBrowser extends CordovaPlugin {
                 quotaUpdater.updateQuota(currentQuota);
             }
         }
+
+        /**
+         * Instructs the client to show a prompt to ask the user to set the Geolocation permission state for the specified origin.
+         *
+         * @param origin
+         * @param callback
+         */
+        @Override
+        public void onGeolocationPermissionsShowPrompt(String origin, Callback callback) {
+            super.onGeolocationPermissionsShowPrompt(origin, callback);
+            callback.invoke(origin, true, false);
+        }
     }
     
     /**
@@ -543,10 +585,62 @@ public class InAppBrowser extends CordovaPlugin {
         @Override
         public void onPageStarted(WebView view, String url,  Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
-            String newloc;
+            String newloc = "";
             if (url.startsWith("http:") || url.startsWith("https:") || url.startsWith("file:")) {
                 newloc = url;
-            } else {
+            } 
+            // If dialing phone (tel:5551212)
+            else if (url.startsWith(WebView.SCHEME_TEL)) {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse(url));
+                    cordova.getActivity().startActivity(intent);
+                } catch (android.content.ActivityNotFoundException e) {
+                    LOG.e(LOG_TAG, "Error dialing " + url + ": " + e.toString());
+                }
+            }
+
+            else if (url.startsWith("geo:") || url.startsWith(WebView.SCHEME_MAILTO) || url.startsWith("market:")) {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(url));
+                    cordova.getActivity().startActivity(intent);
+                } catch (android.content.ActivityNotFoundException e) {
+                    LOG.e(LOG_TAG, "Error with " + url + ": " + e.toString());
+                }
+            }
+            // If sms:5551212?body=This is the message
+            else if (url.startsWith("sms:")) {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+
+                    // Get address
+                    String address = null;
+                    int parmIndex = url.indexOf('?');
+                    if (parmIndex == -1) {
+                        address = url.substring(4);
+                    }
+                    else {
+                        address = url.substring(4, parmIndex);
+
+                        // If body, then set sms body
+                        Uri uri = Uri.parse(url);
+                        String query = uri.getQuery();
+                        if (query != null) {
+                            if (query.startsWith("body=")) {
+                                intent.putExtra("sms_body", query.substring(5));
+                            }
+                        }
+                    }
+                    intent.setData(Uri.parse("sms:" + address));
+                    intent.putExtra("address", address);
+                    intent.setType("vnd.android-dir/mms-sms");
+                    cordova.getActivity().startActivity(intent);
+                } catch (android.content.ActivityNotFoundException e) {
+                    LOG.e(LOG_TAG, "Error sending sms " + url + ":" + e.toString());
+                }
+            }
+            else {
                 newloc = "http://" + url;
             }
 
@@ -577,6 +671,23 @@ public class InAppBrowser extends CordovaPlugin {
             } catch (JSONException ex) {
                 Log.d(LOG_TAG, "Should never happen");
             }
+        }
+        
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            super.onReceivedError(view, errorCode, description, failingUrl);
+            
+            try {
+                JSONObject obj = new JSONObject();
+                obj.put("type", LOAD_ERROR_EVENT);
+                obj.put("url", failingUrl);
+                obj.put("code", errorCode);
+                obj.put("message", description);
+    
+                sendUpdate(obj, true, PluginResult.Status.ERROR);
+            } catch (JSONException ex) {
+                Log.d(LOG_TAG, "Should never happen");
+            }
+        	
         }
     }
 }
