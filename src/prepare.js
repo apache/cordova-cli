@@ -29,7 +29,6 @@ var cordova_util      = require('./util'),
     hooker            = require('./hooker'),
     n                 = require('ncallbacks'),
     prompt            = require('prompt'),
-    plugin_loader = require('./plugin_loader'),
     util              = require('util');
 
 var parsers = {
@@ -70,12 +69,19 @@ module.exports = function prepare(platforms, callback) {
         if (callback) callback();
     });
 
+    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
+
     // Iterate over each added platform
     platforms.forEach(function(platform) {
         var platformPath = path.join(projectRoot, 'platforms', platform);
         var parser = new parsers[platform](platformPath);
         parser.update_project(cfg, function() {
-            plugin_loader(platform);
+            // Call plugman --prepare for each platform.
+            var cmd = util.format('%s --prepare --platform "%s" --project "%s" --www "%s" --plugins_dir "%s"', cli, platform, platformPath, parser.www_dir(), path.join(projectRoot, 'plugins'));
+            console.log(cmd);
+            var plugman_call = shell.exec(cmd, {silent:true});
+            if (plugman_call.code > 0) throw new Error('An error occurred during plugman --prepare for ' + platform + ': ' + plugman_call.output);
+
             end();
         });
     });
