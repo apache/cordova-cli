@@ -70,51 +70,15 @@ module.exports = function plugin(command, targets, callback) {
             } else return 'No plugins added. Use `cordova plugin add <plugin>`.';
             break;
         case 'add':
-            if (platforms.length === 0) {
-                throw new Error('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
-            }
             targets.forEach(function(target, index) {
-                var pluginContents = ls(target);
-                var targetName = names[index];
-                // Check if we already have the plugin.
-                // TODO edge case: if a new platform is added, then you want
-                // to re-add the plugin to the new platform.
-                if (plugins.indexOf(targetName) > -1) {
-                    throw new Error('Plugin "' + targetName + '" already added to project.');
-                }
-                // Check if the plugin has a plugin.xml in the root of the
-                // specified dir.
-                if (pluginContents.indexOf('plugin.xml') == -1) {
-                    throw new Error('Plugin "' + targetName + '" does not have a plugin.xml in the root. Plugin must support the Cordova Plugin Specification: https://github.com/alunny/cordova-plugin-spec');
-                }
-
-                // Check if there is at least one match between plugin
-                // supported platforms and app platforms
-                var pluginXml = new plugin_parser(path.join(target, 'plugin.xml'));
-                var intersection = pluginXml.platforms.filter(function(e) {
-                    if (platforms.indexOf(e) == -1) return false;
-                    else return true;
-                });
-                if (intersection.length === 0) {
-                    throw new Error('Plugin "' + targetName + '" does not support any of your application\'s platforms. Plugin platforms: ' + pluginXml.platforms.join(', ') + '; your application\'s platforms: ' + platforms.join(', '));
-                }
-
                 hooks.fire('before_plugin_add');
-
                 var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
-
-                // Iterate over all matchin app-plugin platforms in the project and install the
-                // plugin.
-                intersection.forEach(function(platform) {
-                    var cmd = util.format('%s --platform %s --project "%s" --plugin "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
+                // Iterate over all platforms in the project and install the plugin.
+                platforms.forEach(function(platform) {
+                    var cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --plugins_dir "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target, path.join(projectRoot, 'plugins'));
                     var plugin_cli = shell.exec(cmd, {silent:true});
-                    if (plugin_cli.code > 0) throw new Error('An error occured during plugin installation for ' + platform + '. ' + plugin_cli.output);
+                    if (plugin_cli.code > 0) throw new Error('An error occured during plugin installation for ' + platform + ': ' + plugin_cli.output);
                 });
-
-                // Finally copy the plugin into the project
-                var targetPath = path.join(pluginPath, targetName);
-                shell.mkdir('-p', targetPath);
-                shell.cp('-r', path.join(target, '*'), targetPath);
 
                 hooks.fire('after_plugin_add');
             });
