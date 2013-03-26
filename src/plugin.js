@@ -50,11 +50,14 @@ module.exports = function plugin(command, targets, callback) {
     var pluginPath, plugins, names = [];
     pluginPath = path.join(projectRoot, 'plugins');
     plugins = ls(pluginPath);
-    if (targets) { 
+    if (targets) {
         if (!(targets instanceof Array)) targets = [targets];
         targets.forEach(function(target) {
-            var targetName = target.substr(target.lastIndexOf('/') + 1);
-            if (targetName[targetName.length-1] == '/') targetName = targetName.substr(0, targetName.length-1);
+            if (target[target.length - 1] == path.sep) {
+                target = target.substring(0, target.length - 1);
+            }
+
+            var targetName = target.substr(target.lastIndexOf(path.sep) + 1);
             names.push(targetName);
         });
     }
@@ -75,7 +78,9 @@ module.exports = function plugin(command, targets, callback) {
                 var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
                 var pluginsDir = path.join(projectRoot, 'plugins');
 
-                var lastSlash = target.lastIndexOf('/', target.length - 2);
+                if (target[target.length - 1] == path.sep) {
+                    target = target.substring(0, target.length - 1);
+                }
 
                 // Fetch the plugin first.
                 var cmd = util.format('%s --fetch --plugin "%s" --plugins_dir "%s"', cli, target, pluginsDir);
