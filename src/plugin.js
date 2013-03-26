@@ -73,9 +73,20 @@ module.exports = function plugin(command, targets, callback) {
             targets.forEach(function(target, index) {
                 hooks.fire('before_plugin_add');
                 var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
+                var pluginsDir = path.join(projectRoot, 'plugins');
+
+                var lastSlash = target.lastIndexOf('/', target.length - 2);
+
+                // Fetch the plugin first.
+                var cmd = util.format('%s --fetch --plugin "%s" --plugins_dir "%s"', cli, target, pluginsDir);
+                console.log(cmd);
+                var plugin_fetch = shell.exec(cmd, {silent: true});
+                if (plugin_fetch.code > 0) throw new Error('An error occured during plugin fetching:\n' + plugin_fetch.output);
+
                 // Iterate over all platforms in the project and install the plugin.
                 platforms.forEach(function(platform) {
-                    var cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --plugins_dir "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target, path.join(projectRoot, 'plugins'));
+                    cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --plugins_dir "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), names[index], pluginsDir);
+                    console.log(cmd);
                     var plugin_cli = shell.exec(cmd, {silent:true});
                     if (plugin_cli.code > 0) throw new Error('An error occured during plugin installation for ' + platform + ': ' + plugin_cli.output);
                 });
@@ -107,14 +118,19 @@ module.exports = function plugin(command, targets, callback) {
 
                     // Iterate over all matchin app-plugin platforms in the project and uninstall the
                     // plugin.
+                    var cmd;
                     intersection.forEach(function(platform) {
-                        var cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --remove', cli, platform, path.join(projectRoot, 'platforms', platform), targetPath);
+                        cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --plugins_dir "%s" --uninstall', cli, platform, path.join(projectRoot, 'platforms', platform), targetName, path.join(projectRoot, 'plugins'));
+                        console.log(cmd);
                         var plugin_cli = shell.exec(cmd, {silent:true});
                         if (plugin_cli.code > 0) throw new Error('An error occured during plugin uninstallation for ' + platform + '. ' + plugin_cli.output);
                     });
 
                     // Finally remove the plugin dir from plugins/
-                    shell.rm('-rf', targetPath);
+                    cmd = util.format('%s --plugin "%s" --plugins_dir "%s" --remove', cli, targetName, path.join(projectRoot, 'plugins'));
+                    console.log(cmd);
+                    var plugin_remove = shell.exec(cmd, {silent: true});
+                    if (plugin_remove.code > 0) throw new Error('An error occurred during plugin removal:\n' + plugin_remove.output);
 
                     hooks.fire('after_plugin_rm');
                 } else {
