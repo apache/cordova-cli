@@ -121,8 +121,10 @@ module.exports = function plugin(command, targets, callback) {
                         else return true;
                     });
 
-                    // Iterate over all matchin app-plugin platforms in the project and uninstall the
-                    // plugin.
+                    // Iterate over all the common platforms between the plugin
+                    // and the app, and uninstall.
+                    // If this is a web-only plugin with no platform tags, this step
+                    // is not needed and we just --remove the plugin below.
                     var cmd;
                     intersection.forEach(function(platform) {
                         cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --plugins_dir "%s" --uninstall', cli, platform, path.join(projectRoot, 'platforms', platform), targetName, path.join(projectRoot, 'plugins'));
