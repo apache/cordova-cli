@@ -35,14 +35,15 @@ module.exports.prototype = {
         if (!(fs.existsSync(dir))) return true; // hooks directory got axed post-create; ignore.
 
         // Fire JS hook/event
-        events.emit(hook);
+        events.emit(hook, this.root);
 
         // Fire script-based hooks
         var contents = fs.readdirSync(dir);
+        var self = this;
         contents.forEach(function(script) {
             var fullpath = path.join(dir, script);
             if (fs.statSync(fullpath).isDirectory()) return; // skip directories if they're in there.
-            var status = shell.exec(fullpath);
+            var status = shell.exec(fullpath + ' "' + self.root + '"');
             if (status.code !== 0) throw new Error('Script "' + path.basename(script) + '"' + 'in the ' + hook + ' hook exited with non-zero status code. Aborting.');
         });
         return true;
