@@ -87,38 +87,9 @@ module.exports.prototype = {
         info_contents = info_contents.replace(/<string>[\s\r\n]*<\/string>/g,'<string></string>');
         fs.writeFileSync(plistFile, info_contents, 'utf-8');
 
-        // Update whitelist
-        var self = this;
-        this.config.access.remove();
-        config.access.get().forEach(function(uri) {
-            self.config.access.add(uri);
-        });
-        
-        // Update preferences
-        this.config.preference.remove();
-        var prefs = config.preference.get();
-        // write out defaults, unless user has specifically overrode it
-        for (var p in default_prefs) if (default_prefs.hasOwnProperty(p)) {
-            var override = prefs.filter(function(pref) { return pref.name == p; });
-            var value = default_prefs[p];
-            if (override.length) {
-                // override exists
-                value = override[0].value;
-                // remove from prefs list so we dont write it out again below
-                prefs = prefs.filter(function(pref) { return pref.name != p });
-            }
-            this.config.preference.add({
-                name:p,
-                value:value
-            });
-        }
-        prefs.forEach(function(pref) {
-            self.config.preference.add({
-                name:pref.name,
-                value:pref.value
-            });
-        });
-        
+        var root = util.isCordova(this.path);
+        shell.cp( '-f', path.join( root, 'www', 'config.xml'),path.join(this.cordovaproj, 'config.xml') );
+
         // Update product name
         var proj = new xcode.project(this.pbxproj);
         var parser = this;

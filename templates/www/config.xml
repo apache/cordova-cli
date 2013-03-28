@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <widget xmlns     = "http://www.w3.org/ns/widgets"
-        xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "io.cordova.hello-cordova"
         version   = "2.0.0">
     <name>Hello Cordova</name>
@@ -13,37 +12,116 @@
         Apache Cordova Team
     </author>
 
-    <icon src="res/icon/cordova_512.png"        width="512" height="512" />
-    <icon src="res/icon/cordova_android_96.png" width="96"  height="96"  gap:platform="android" />
-    <icon src="res/icon/cordova_bb_80.png"      width="80"  height="80"  gap:platform="blackberry" />
-    <icon src="res/icon/cordova_ios_144.png"    width="144" height="144" gap:platform="ios" />
+    <access origin=".*"/>
+    <access origin="http://127.0.0.1*"/> <!-- allow local pages -->`
 
-    <gap:splash src="res/screen/android_hdpi_landscape.png"      width="800"  height="480"  gap:platform="android" />
-    <gap:splash src="res/screen/android_hdpi_portrait.png"       width="480"  height="800"  gap:platform="android" />
-    <gap:splash src="res/screen/android_ldpi_landscape.png"      width="320"  height="200"  gap:platform="android" />
-    <gap:splash src="res/screen/android_ldpi_portrait.png"       width="200"  height="320"  gap:platform="android" />
-    <gap:splash src="res/screen/android_mdpi_landscape.png"      width="480"  height="320"  gap:platform="android" />
-    <gap:splash src="res/screen/android_mdpi_portrait.png"       width="320"  height="480"  gap:platform="android" />
-    <gap:splash src="res/screen/android_xhdpi_landscape.png"     width="1280" height="720"  gap:platform="android" />
-    <gap:splash src="res/screen/android_xhdpi_portrait.png"      width="720"  height="1280" gap:platform="android" />
-    <gap:splash src="res/screen/blackberry_transparent_300.png"  width="300"  height="300"  gap:platform="blackberry" />
-    <gap:splash src="res/screen/blackberry_transparent_400.png"  width="200"  height="200"  gap:platform="blackberry" />
-    <gap:splash src="res/screen/ipad_landscape.png"              width="1024" height="748"  gap:platform="ios" />
-    <gap:splash src="res/screen/ipad_portrait.png"               width="768"  height="1004" gap:platform="ios" />
-    <gap:splash src="res/screen/ipad_retina_landscape.png"       width="2048" height="1496" gap:platform="ios" />
-    <gap:splash src="res/screen/ipad_retina_portrait.png"        width="1536" height="2008" gap:platform="ios" />
-    <gap:splash src="res/screen/iphone_landscape.png"            width="480"  height="320"  gap:platform="ios" />
-    <gap:splash src="res/screen/iphone_portrait.png"             width="320"  height="480"  gap:platform="ios" />
-    <gap:splash src="res/screen/iphone_retina_landscape.png"     width="960"  height="640"  gap:platform="ios" />
-    <gap:splash src="res/screen/iphone_retina_portrait.png"      width="640"  height="960"  gap:platform="ios" />
-    <gap:splash src="res/screen/windows_phone_portrait.jpg"      width="480"  height="800"  gap:platform="winphone" />
+    <!-- <content src="http://mysite.com/myapp.html" /> for external pages -->
+    <content src="index.html" />
 
-    <feature name="http://api.phonegap.com/1.0/device" />
+    <log level="DEBUG"/>
 
-    <preference name="phonegap-version" value="1.9.0" />
-    <preference name="orientation"      value="default" />
-    <preference name="target-device"    value="universal" />
-    <preference name="fullscreen"       value="false" />
+    <!-- Preferences for Android -->
+    <preference name="useBrowserHistory" value="true" />
+    <preference name="exit-on-suspend" value="false" />
 
-    <access origin="*" />
+    <!-- Preferences for iOS -->
+    <preference name="AllowInlineMediaPlayback" value="false" />
+    <preference name="AutoHideSplashScreen" value="true" />
+    <preference name="BackupWebStorage" value="cloud" />
+    <preference name="DisallowOverscroll" value="false" />
+    <preference name="EnableLocation" value="false" /><!-- DEPRECATED -->
+    <preference name="EnableViewportScale" value="false" />
+    <preference name="FadeSplashScreen" value="true" />
+    <preference name="FadeSplashScreenDuration" value=".25" />
+    <preference name="HideKeyboardFormAccessoryBar" value="false" />
+    <preference name="KeyboardDisplayRequiresUserAction" value="true" />
+    <preference name="KeyboardShrinksView" value="false" />
+    <preference name="MediaPlaybackRequiresUserAction" value="false" />
+    <preference name="ShowSplashScreenSpinner" value="true" />
+    <preference name="SuppressesIncrementalRendering" value="false" />
+    <preference name="TopActivityIndicator" value="gray" />
+
+
+
+    <feature name="App">
+      <param name="android-package" value="org.apache.cordova.App"/>
+    </feature>
+    <feature name="Geolocation">
+      <param name="ios-package" value="CDVLocation"/>
+      <param name="android-package" value="org.apache.cordova.GeoBroker"/>
+    </feature>
+    <feature name="Device">
+      <param name="ios-package" value="CDVDevice"/>
+      <param name="android-package" value="org.apache.cordova.Device"/>
+    </feature>
+    <feature name="Accelerometer">
+      <param name="ios-package" value="CDVAccelerometer"/>
+      <param name="android-package" value="org.apache.cordova.AccelListener"/>
+    </feature>
+    <feature name="Compass">
+      <param name="ios-package" value="CDVLocation"/>
+      <param name="android-package" value="org.apache.cordova.CompassListener"/>
+    </feature>
+    <feature name="Media">
+      <param name="ios-package" value="CDVSound"/>
+      <param name="android-package" value="org.apache.cordova.AudioHandler"/>
+    </feature>
+    <feature name="Camera">
+      <param name="ios-package" value="CDVCamera"/>
+      <param name="android-package" value="org.apache.cordova.CameraLauncher"/>
+    </feature>
+    <feature name="Contacts">
+      <param name="ios-package" value="CDVContacts"/>
+      <param name="android-package" value="org.apache.cordova.ContactManager"/>
+    </feature>
+    <feature name="File">
+      <param name="ios-package"  value="CDVFile"/>
+      <param name="android-package" value="org.apache.cordova.FileUtils"/>
+    </feature>
+    <feature name="NetworkStatus">
+      <param name="ios-package" value="CDVConnection"/>
+      <param name="android-package" value="org.apache.cordova.NetworkManager"/>
+    </feature>
+    <feature name="Notification">
+      <param name="ios-package" value="CDVNotification"/>
+      <param name="android-package" value="org.apache.cordova.Notification"/>
+    </feature>
+    <feature name="Storage">
+      <param name="android-package" value="org.apache.cordova.Storage"/>
+    </feature>
+    <feature name="FileTransfer">
+      <param name="ios-package" value="CDVFileTransfer"/>
+      <param name="android-package" value="org.apache.cordova.FileTransfer"/>
+    </feature>
+    <feature name="Capture">
+      <param name="ios-package" value="CDVCapture"/>
+      <param name="android-package" value="org.apache.cordova.Capture"/>
+    </feature>
+    <feature name="Battery">
+      <param name="ios-package" value="CDVBattery"/>
+      <param name="android-package" value="org.apache.cordova.BatteryListener"/>
+    </feature>
+    <feature name="SplashScreen">
+      <param name="ios-package" value="CDVSplashScreen"/>
+      <param name="android-package" value="org.apache.cordova.SplashScreen"/>
+    </feature>
+    <feature name="Echo">
+      <param name="ios-package" value="CDVEcho"/>
+      <param name="android-package" value="org.apache.cordova.Echo"/>
+    </feature>
+    <feature name="Globalization">
+      <param name="ios-package" value="CDVGlobalization"/>
+      <param name="android-package" value="org.apache.cordova.Globalization"/>
+    </feature>
+    <feature name="InAppBrowser">
+      <param name="ios-package" value="CDVInAppBrowser"/>
+      <param name="android-package" value="org.apache.cordova.InAppBrowser"/>
+    </feature>
+    <feature name="Logger">
+      <param name="ios-package" value="CDVLogger"/>
+    </feature>
+    <feature name="Debug Console">
+      <param name="ios-package" value="CDVDebugConsole"/>
+    </feature>
+         
 </widget>
