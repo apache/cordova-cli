@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -90,8 +89,48 @@ describe('hooker', function() {
                     returnValue = h.fire('before_build');
                 }).not.toThrow();
                 expect(returnValue).toBe(true);
-                expect(s.calls[0].args[0]).toMatch(/0.sh$/);
-                expect(s.calls[1].args[0]).toMatch(/1.sh$/);
+                expect(s.calls[0].args[0]).toMatch(/0.sh/);
+                expect(s.calls[1].args[0]).toMatch(/1.sh/);
+            });
+            it('should pass the project root folder as parameter into the project-level hooks', function() {
+                var hook = path.join(tempDir, '.cordova', 'hooks', 'before_build');
+                shell.cp(path.join(hooks, 'test', '0.sh'), path.join(hook, '.'));
+                fs.readdirSync(hook).forEach(function(script) {
+                    fs.chmodSync(path.join(hook, script), '754');
+                });
+                var returnValue;
+                var s = spyOn(shell, 'exec').andReturn({code:0});
+                expect(function() {
+                    returnValue = h.fire('before_build');
+                }).not.toThrow();
+                expect(returnValue).toBe(true);
+                var paramRegex = new RegExp('0.sh "'+tempDir+'"$');
+                expect(s.calls[0].args[0]).toMatch(paramRegex);
+            });
+            describe('module-level hooks', function() {
+                var handler = jasmine.createSpy();
+                var test_event = 'before_build';
+                afterEach(function() {
+                    cordova.off(test_event, handler);
+                    handler.reset();
+                });
+
+                it('should fire handlers using cordova.on', function() {
+                    cordova.on(test_event, handler);
+                    h.fire(test_event);
+                    expect(handler).toHaveBeenCalled();
+                });
+                it('should pass the project root folder as parameter into the module-level handlers', function() {
+                    cordova.on(test_event, handler);
+                    h.fire('before_build');
+                    expect(handler).toHaveBeenCalledWith(tempDir);
+                });
+                it('should be able to stop listening to events using cordova.off', function() {
+                    cordova.on(test_event, handler);
+                    cordova.off(test_event, handler);
+                    h.fire('before_build');
+                    expect(handler).not.toHaveBeenCalled();
+                });
             });
         });
     });

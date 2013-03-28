@@ -25,6 +25,14 @@ var cordova_events = require('./src/events'),
     fs             = require('fs'),
     compile        = require('./src/compile');
 
+var off = function() {
+    cordova_events.removeListener.apply(cordova_events, arguments);
+};
+
+var emit = function() {
+    cordova_events.emit.apply(cordova_events, arguments);
+};
+
 module.exports = {
     help:      require('./src/help'),
     create:    require('./src/create'),
@@ -40,9 +48,10 @@ module.exports = {
     on:        function() {
         cordova_events.on.apply(cordova_events, arguments);
     },
-    emit:      function() {
-        cordova_events.emit.apply(cordova_events, arguments);
-    },
+    off:       off,
+    removeListener:off,
+    emit:      emit,
+    trigger:   emit,
     build:     function() {
         var projectRoot = util.isCordova(process.cwd());
         if (!projectRoot) {
