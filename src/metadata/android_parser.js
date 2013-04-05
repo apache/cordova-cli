@@ -87,38 +87,9 @@ module.exports.prototype = {
         fs.writeFileSync(new_javs, javs_contents, 'utf-8');
 
         // Update whitelist by changing res/xml/config.xml
-        var android_cfg_xml = new config_parser(this.android_config);
-        // clean out all existing access elements first
-        android_cfg_xml.access.remove();
-        // add only the ones specified in the www/config.xml file
-        config.access.get().forEach(function(uri) {
-            android_cfg_xml.access.add(uri);
-        });
-        
-        // Update preferences
-        android_cfg_xml.preference.remove();
-        var prefs = config.preference.get();
-        // write out defaults, unless user has specifically overrode it
-        for (var p in default_prefs) if (default_prefs.hasOwnProperty(p)) {
-            var override = prefs.filter(function(pref) { return pref.name == p; });
-            var value = default_prefs[p];
-            if (override.length) {
-                // override exists
-                value = override[0].value;
-                // remove from prefs list so we dont write it out again below
-                prefs = prefs.filter(function(pref) { return pref.name != p });
-            }
-            android_cfg_xml.preference.add({
-                name:p,
-                value:value
-            });
-        }
-        prefs.forEach(function(pref) {
-            android_cfg_xml.preference.add({
-                name:pref.name,
-                value:pref.value
-            });
-        });
+        var root = util.isCordova(this.path);
+        shell.cp( '-f', path.join( root, 'www', 'config.xml'),
+this.android_config );
     },
 
     // Returns the platform-specific www directory.
