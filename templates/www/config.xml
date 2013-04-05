@@ -12,8 +12,7 @@
         Apache Cordova Team
     </author>
 
-    <access origin=".*"/>
-    <access origin="http://127.0.0.1*"/> <!-- allow local pages -->`
+    <access origin="*"/>
 
     <!-- <content src="http://mysite.com/myapp.html" /> for external pages -->
     <content src="index.html" />
