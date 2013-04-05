@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -45,9 +44,7 @@ module.exports = function create (dir, id, name) {
     id = id || DEFAULT_ID;
     name = name || DEFAULT_NAME;
 
-    if (!(dir && (dir[0] == '~' || dir[0] == '/'))) {
-        dir = dir ? path.join(process.cwd(), dir) : process.cwd();
-    }
+    dir = path.resolve(dir); //get the absolute path
 
     var dotCordova = path.join(dir, '.cordova');
 
