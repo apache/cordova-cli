@@ -101,6 +101,18 @@ module.exports = function platform(command, targets, callback) {
                             parser.update_project(cfg, function() {
                                 createOverrides(target);
                                 hooks.fire('after_platform_add');
+
+                                // Install all currently installed plugins into this new platform.
+                                var pluginsDir = path.join(projectRoot, 'plugins');
+                                var plugins = fs.readdirSync(pluginsDir);
+                                plugins && plugins.forEach(function(plugin) {
+                                    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
+                                    var cmd = util.format('"%s" --platform "%s" --project "%s" --plugin "%s" --plugins_dir "%s"', cli, target, output, path.basename(plugin), pluginsDir);
+                                    var result = shell.exec(cmd, { silent: true });
+                                    if (result.code > 0) {
+                                        throw new Error('An error occurred while installing the ' + path.basename(plugin) + ' plugin: ' + result.output);
+                                    }
+                                });
                                 end();
                             });
                         });
