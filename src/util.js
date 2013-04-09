@@ -62,5 +62,14 @@ module.exports = {
         return fs.readdirSync(path.join(project_dir, 'platforms')).filter(function(p) {
             return core_platforms.indexOf(p) > -1;
         });
+    },
+    projectWww: function(projectDir) {
+        return path.join(projectDir, 'app', 'www');
+    },
+    appDir: function(projectDir) {
+        return path.join(projectDir, 'app');
+    },
+    projectConfig: function(projectDir) {
+        return path.join(projectDir, 'app', 'config.xml');
     }
 };

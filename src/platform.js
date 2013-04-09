@@ -45,7 +45,7 @@ module.exports = function platform(command, targets, callback) {
         end;
 
     var createOverrides = function(target) {
-        shell.mkdir('-p', path.join(projectRoot, 'merges', target));
+        shell.mkdir('-p', path.join(cordova_util.appDir(projectRoot), 'merges', target));
     };
 
     if (arguments.length === 0) command = 'ls';
@@ -56,7 +56,7 @@ module.exports = function platform(command, targets, callback) {
         });
     }
 
-    var xml = path.join(projectRoot, 'www', 'config.xml');
+    var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new config_parser(xml);
 
     switch(command) {
@@ -125,7 +125,7 @@ module.exports = function platform(command, targets, callback) {
             targets.forEach(function(target) {
                 hooks.fire('before_platform_rm');
                 shell.rm('-rf', path.join(projectRoot, 'platforms', target));
-                shell.rm('-rf', path.join(projectRoot, 'merges', target));
+                shell.rm('-rf', path.join(cordova_util.appDir(projectRoot), 'merges', target));
                 hooks.fire('after_platform_rm');
             });
             break;

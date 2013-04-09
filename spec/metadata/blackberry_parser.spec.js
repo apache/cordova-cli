@@ -30,7 +30,7 @@ var blackberry_parser = require('../../src/metadata/blackberry_parser'),
     project_path = path.join(projects_path, 'cordova'),
     blackberry_project_path = path.join(project_path, 'platforms', 'blackberry');
 
-var www_config = path.join(project_path, 'www', 'config.xml');
+var www_config = util.projectConfig(project_path);
 var original_www_config = fs.readFileSync(www_config, 'utf-8');
 
 describe('blackberry project parser', function() {
@@ -128,7 +128,7 @@ describe('blackberry project parser', function() {
 
         describe('update_www method', function() {
             it('should update all www assets', function() {
-                var newFile = path.join(project_path, 'www', 'somescript.js');
+                var newFile = path.join(util.projectWww(project_path), 'somescript.js');
                 this.after(function() {
                     shell.rm('-f', newFile);
                 });
@@ -137,7 +137,7 @@ describe('blackberry project parser', function() {
                 expect(fs.existsSync(path.join(blackberry_project_path, 'www', 'somescript.js'))).toBe(true);
             });
             it('should not overwrite the blackberry-specific config.xml', function() {
-                var www_cfg = fs.readFileSync(path.join(project_path, 'www', 'config.xml'), 'utf-8');
+                var www_cfg = fs.readFileSync(util.projectConfig(project_path), 'utf-8');
                 parser.update_www();
                 var bb_cfg = fs.readFileSync(blackberry_config, 'utf-8');
                 expect(bb_cfg).not.toBe(www_cfg);
@@ -145,7 +145,7 @@ describe('blackberry project parser', function() {
         });
 
         describe('update_overrides method',function() {
-            var mergesPath = path.join(project_path, 'merges', 'blackberry');
+            var mergesPath = path.join(util.appDir(project_path), 'merges', 'blackberry');
             var newFile = path.join(mergesPath, 'merge.js');
             beforeEach(function() {
                 shell.mkdir('-p', mergesPath);
@@ -161,7 +161,7 @@ describe('blackberry project parser', function() {
             });
 
             it('should copy a file from merges over a file in www', function() {
-                var newFileWWW = path.join(project_path, 'www','merge.js');
+                var newFileWWW = path.join(util.projectWww(project_path), 'merge.js');
                 fs.writeFileSync(newFileWWW, 'var foo=1;', 'utf-8');
                 this.after(function() {
                     shell.rm('-rf', newFileWWW);

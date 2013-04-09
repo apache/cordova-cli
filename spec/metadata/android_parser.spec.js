@@ -30,7 +30,7 @@ var android_parser = require('../../src/metadata/android_parser'),
     project_path = path.join(projects_path, 'cordova'),
     android_project_path = path.join(project_path, 'platforms', 'android');
 
-var www_config = path.join(project_path, 'www', 'config.xml');
+var www_config = util.projectConfig(project_path);
 var original_www_config = fs.readFileSync(www_config, 'utf-8');
 
 describe('android project parser', function() {
@@ -158,7 +158,7 @@ describe('android project parser', function() {
         });
         describe('update_www method', function() {
             it('should update all www assets', function() {
-                var newFile = path.join(project_path, 'www', 'somescript.js');
+                var newFile = path.join(util.projectWww(project_path), 'somescript.js');
                 this.after(function() {
                     shell.rm('-f', newFile);
                 });
@@ -173,7 +173,7 @@ describe('android project parser', function() {
         });
 
         describe('update_overrides method',function() {
-            var mergesPath = path.join(project_path, 'merges', 'android');
+            var mergesPath = path.join(util.appDir(project_path), 'merges', 'android');
             var newFile = path.join(mergesPath, 'merge.js');
             beforeEach(function() {
                 shell.mkdir('-p', mergesPath);
@@ -188,7 +188,7 @@ describe('android project parser', function() {
             });
 
             it('should copy a file from merges over a file in www', function() {
-                var newFileWWW = path.join(project_path, 'www','merge.js');
+                var newFileWWW = path.join(util.projectWww(project_path), 'merge.js');
                 fs.writeFileSync(newFileWWW, 'var foo=1;', 'utf-8');
                 this.after(function() {
                     shell.rm('-rf', newFileWWW);

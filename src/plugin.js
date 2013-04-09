@@ -39,10 +39,8 @@ module.exports = function plugin(command, targets, callback) {
 
     var hooks = new hooker(projectRoot);
 
-    var projectWww = path.join(projectRoot, 'www');
-
     // Grab config info for the project
-    var xml = path.join(projectWww, 'config.xml');
+    var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new config_parser(xml);
     var platforms = cordova_util.listPlatforms(projectRoot);
 

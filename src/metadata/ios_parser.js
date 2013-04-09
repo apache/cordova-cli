@@ -139,7 +139,7 @@ module.exports.prototype = {
 
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
-        var www = path.join(projectRoot, 'www');
+        var www = util.projectWww(projectRoot);
         var project_www = this.www_dir();
 
         // remove the stock www folder
@@ -156,7 +156,7 @@ module.exports.prototype = {
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var merges_path = path.join(projectRoot, 'merges', 'ios');
+        var merges_path = path.join(util.appDir(projectRoot), 'merges', 'ios');
         if (fs.existsSync(merges_path)) {
             var overrides = path.join(merges_path, '*');
             shell.cp('-rf', overrides, this.www_dir());

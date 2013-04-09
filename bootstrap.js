@@ -50,7 +50,7 @@ shell.rm('-rf', cordovaDir);
 create(cordovaDir);
 var platformsDir = path.join(cordovaDir, 'platforms');
 // kill the stupid spec shit!
-shell.rm('-rf', path.join(cordovaDir, 'www', 'spec'));
+shell.rm('-rf', path.join(cordovaDir, 'app', 'www', 'spec'));
 
 var end = n(platforms.length, function() {
     // Check that we are installing globally into a root-only directory.
@@ -91,7 +91,7 @@ platforms.forEach(function(platform) {
                     // copy over to full cordova project test fixture
                     shell.mkdir('-p', platformDir);
                     shell.cp('-rf', path.join(fix_path, '*'), platformDir);
-                    shell.mkdir('-p',path.join(cordovaDir,'merges',platform));
+                    shell.mkdir('-p',path.join(util.appDir(cordovaDir),'merges',platform));
 
                     // set permissions on executables
                     var scripts_path = path.join(fix_path, 'cordova');

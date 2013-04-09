@@ -96,7 +96,7 @@ module.exports.config = function (platform, port, callback) {
         throw new Error('Current working directory is not a Cordova-based project.');
     }
 
-    var xml = path.join(projectRoot, 'www', 'config.xml');
+    var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new config_parser(xml);
 
     // Retrieve the platforms.

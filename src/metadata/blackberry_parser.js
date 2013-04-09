@@ -91,7 +91,7 @@ module.exports.prototype = {
 
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
-        var www = path.join(projectRoot, 'www');
+        var www = util.projectWww(projectRoot);
         var platformWww = this.www_dir();
 
         var finalWww = path.join(this.path, 'finalwww');
@@ -110,12 +110,8 @@ module.exports.prototype = {
         shell.cp('-rf', path.join(platformWww, 'ext*'), finalWww);
         shell.cp('-rf', path.join(platformWww, 'res'), finalWww);
 
-        // Copy everything over from platform-agnostic www, except config.xml
-        var cfg_www = path.join(www, 'config.xml');
-        var temp_cfg = path.join(projectRoot, 'config.xml');
-        shell.mv(cfg_www, temp_cfg);
+        // Copy everything over from platform-agnostic www.
         shell.cp('-rf', path.join(www, '*'), finalWww);
-        shell.mv(temp_cfg, cfg_www);
 
         // Delete the old platform www, and move the final project over
         shell.rm('-rf', platformWww);
@@ -126,7 +122,7 @@ module.exports.prototype = {
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var merges_path = path.join(projectRoot, 'merges', 'blackberry');
+        var merges_path = path.join(util.appDir(projectRoot), 'merges', 'blackberry');
         if (fs.existsSync(merges_path)) {
             var overrides = path.join(merges_path, '*');
             shell.cp('-rf', overrides, this.www_dir());

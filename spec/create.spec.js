@@ -2,6 +2,7 @@ var cordova = require('../cordova'),
     path    = require('path'),
     shell   = require('shelljs'),
     fs      = require('fs'),
+    util    = require('../src/util'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 describe('create command', function () {
@@ -54,14 +55,14 @@ describe('create command', function () {
 
         expect(fs.lstatSync(path.join(tempDir, '.cordova', 'config.json')).isFile()).toBe(true);
 
-        expect(fs.readFileSync(path.join(tempDir, 'www', 'config.xml')).toString('utf8')).toMatch(/<name>balls<\/name>/);
+        expect(fs.readFileSync(util.projectConfig(tempDir)).toString('utf8')).toMatch(/<name>balls<\/name>/);
     });
     it('should create a cordova project in the specified dir with specified name and id if provided', function() {
         cordova.create(tempDir, "birdy.nam.nam", "numnum");
 
         expect(fs.lstatSync(path.join(tempDir, '.cordova', 'config.json')).isFile()).toBe(true);
 
-        var config = fs.readFileSync(path.join(tempDir, 'www', 'config.xml')).toString('utf8');
+        var config = fs.readFileSync(util.projectConfig(tempDir)).toString('utf8');
         expect(config).toMatch(/<name>numnum<\/name>/);
         expect(config).toMatch(/id="birdy\.nam\.nam"/);
     });

@@ -60,7 +60,7 @@ module.exports = function emulate (platforms, callback) {
         throw new Error('Current working directory is not a Cordova-based project.');
     }
 
-    var xml = path.join(projectRoot, 'www', 'config.xml');
+    var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new config_parser(xml);
 
     if (arguments.length === 0 || (platforms instanceof Array && platforms.length === 0)) {
