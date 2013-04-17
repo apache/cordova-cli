@@ -278,3 +278,62 @@ describe('platform command', function() {
         });
     });
 });
+
+describe('platform.supports(name, callback)', function() {
+    var androidParser = require('../src/metadata/android_parser');
+
+    beforeEach(function() {
+        spyOn(androidParser, 'check_requirements');
+    });
+
+    it('should require a platform name', function() {
+        expect(function() {
+            cordova.platform.supports(undefined, function(e){});
+        }).toThrow();
+    });
+
+    it('should require a callback function', function() {
+        expect(function() {
+            cordova.platform.supports('android', undefined);
+        }).toThrow();
+    });
+
+    describe('when platform is unknown', function() {
+        it('should trigger callback with false', function(done) {
+            cordova.platform.supports('windows-3.1', function(e) {
+                expect(e).toEqual(jasmine.any(Error));
+                done();
+            });
+        });
+    });
+
+    describe('when platform is supported', function() {
+        beforeEach(function() {
+            androidParser.check_requirements.andCallFake(function(callback) {
+                callback(null);
+            });
+        });
+
+        it('should trigger callback without error', function(done) {
+            cordova.platform.supports('android', function(e) {
+                expect(e).toBeNull();
+                done();
+            });
+        });
+    });
+
+    describe('when platform is unsupported', function() {
+        beforeEach(function() {
+            androidParser.check_requirements.andCallFake(function(callback) {
+                callback(new Error('could not find the android sdk'));
+            });
+        });
+
+        it('should trigger callback with error', function(done) {
+            cordova.platform.supports('android', function(e) {
+                expect(e).toEqual(jasmine.any(Error));
+                done();
+            });
+        });
+    });
+});

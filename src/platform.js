@@ -78,9 +78,9 @@ module.exports = function platform(command, targets, callback) {
                 }
 
                 // Make sure we have minimum requirements to work with specified platform
-                require('./metadata/' + target + '_parser').check_requirements(function(err) {
+                module.exports.supports(target, function(err) {
                     if (err) {
-                        throw new Error('Your system does not meet the requirements to create ' + target + ' projects: ' + err);
+                        throw new Error('Your system does not meet the requirements to create ' + target + ' projects: ' + err.message);
                     } else {
                         // Create a platform app using the ./bin/create scripts that exist in each repo.
                         // TODO: eventually refactor to allow multiple versions to be created.
@@ -120,4 +120,37 @@ module.exports = function platform(command, targets, callback) {
         default:
             throw new Error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.');
     }
+};
+
+/**
+ * Check Platform Support.
+ *
+ * Options:
+ *
+ *   - {String} `name` of the platform to test.
+ *   - {Function} `callback` is triggered with the answer.
+ *     - {Error} `e` null when a platform is supported otherwise describes error.
+ */
+
+module.exports.supports = function(name, callback) {
+    // required parameters
+    if (!name) throw new Error('requires a platform name parameter');
+    if (!callback) throw new Error('requires a callback parameter');
+
+    // look up platform meta-data parser
+    var platformParser = parsers[name];
+    if (!platformParser) {
+        callback(new Error(util.format('"%s" platform does not exist', name)));
+        return;
+    }
+
+    // check for platform support
+    platformParser.check_requirements(function(e) {
+        // typecast String to Error
+        e = (e instanceof String) ? new Error(e) : e;
+        // typecast false Boolean to null
+        e = (e) ? e : null;
+
+        callback(e);
+    });
 };
