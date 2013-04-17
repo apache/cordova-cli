@@ -86,11 +86,12 @@ module.exports = function platform(command, targets, callback) {
                         // TODO: eventually refactor to allow multiple versions to be created.
                         // Run platform's create script
                         var bin = path.join(cordova_util.libDirectory, 'cordova-' + target, 'bin', 'create');
+                        var args = (target=='ios') ? '--arc' : '';
                         var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
                         var name = cfg.name().replace(/\W/g,'_');
                         // TODO: PLATFORM LIBRARY INCONSISTENCY: order/number of arguments to create
                         // TODO: keep tabs on CB-2300
-                        var command = util.format('"%s" "%s" "%s" "%s"', bin, output, (target=='blackberry'?name:pkg), name);
+                        var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, (target=='blackberry'?name:pkg), name);
 
                         shell.exec(command, {silent:true,async:true}, function(code, create_output) {
                             if (code > 0) {
