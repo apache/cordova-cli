@@ -94,6 +94,9 @@ module.exports.prototype = {
         config.access.get().forEach(function(uri) {
             android_cfg_xml.access.add(uri);
         });
+
+        // Update content
+        android_cfg_xml.content(config.content());
         
         // Update preferences
         android_cfg_xml.preference.remove();
