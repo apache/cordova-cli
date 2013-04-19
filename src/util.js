@@ -63,13 +63,18 @@ module.exports = {
             return core_platforms.indexOf(p) > -1;
         });
     },
-    projectWww: function(projectDir) {
-        return path.join(projectDir, 'app', 'www');
-    },
-    appDir: function(projectDir) {
-        return path.join(projectDir, 'app');
-    },
-    projectConfig: function(projectDir) {
-        return path.join(projectDir, 'app', 'config.xml');
+    // list the directories in the path, ignoring any files
+    findPlugins:function(pluginPath) {
+        var plugins = [],
+            stats;
+
+        if (fs.existsSync(pluginPath)) {
+            plugins = fs.readdirSync(pluginPath).filter(function (fileName) {
+               stats = fs.statSync(path.join(pluginPath, fileName));
+               return stats.isDirectory();
+            });
+        }
+
+        return plugins;
     }
 };

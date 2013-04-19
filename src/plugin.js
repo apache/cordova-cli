@@ -24,15 +24,10 @@ var cordova_util  = require('./util'),
     shell         = require('shelljs'),
     config_parser = require('./config_parser'),
     hooker        = require('./hooker'),
+    core_platforms= require('../platforms'),
+    platform      = require('./platform'),
     plugin_parser = require('./plugin_parser'),
-    ls            = fs.readdirSync,
-    plugman       = require('plugman');
-
-var parsers = {
-    "android": require('./metadata/android_parser'),
-    "ios": require('./metadata/ios_parser'),
-    "blackberry": require('./metadata/blackberry_parser')
-};
+    ls            = fs.readdirSync;
 
 module.exports = function plugin(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
@@ -44,23 +39,22 @@ module.exports = function plugin(command, targets, callback) {
 
     var hooks = new hooker(projectRoot);
 
+    var projectWww = path.join(projectRoot, 'www');
+
     // Grab config info for the project
-    var xml = cordova_util.projectConfig(projectRoot);
+    var xml = path.join(projectWww, 'config.xml');
     var cfg = new config_parser(xml);
     var platforms = cordova_util.listPlatforms(projectRoot);
 
     // Massage plugin name(s) / path(s)
     var pluginPath, plugins, names = [];
     pluginPath = path.join(projectRoot, 'plugins');
-    plugins = ls(pluginPath);
-    if (targets) {
+    plugins = cordova_util.findPlugins(pluginPath);
+    if (targets) { 
         if (!(targets instanceof Array)) targets = [targets];
         targets.forEach(function(target) {
-            if (target[target.length - 1] == path.sep) {
-                target = target.substring(0, target.length - 1);
-            }
-
-            var targetName = target.substr(target.lastIndexOf(path.sep) + 1);
+            var targetName = target.substr(target.lastIndexOf('/') + 1);
+            if (targetName[targetName.length-1] == '/') targetName = targetName.substr(0, targetName.length-1);
             names.push(targetName);
         });
     }
@@ -76,24 +70,51 @@ module.exports = function plugin(command, targets, callback) {
             } else return 'No plugins added. Use `cordova plugin add <plugin>`.';
             break;
         case 'add':
+            if (platforms.length === 0) {
+                throw new Error('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
+            }
             targets.forEach(function(target, index) {
-                hooks.fire('before_plugin_add');
-                var pluginsDir = path.join(projectRoot, 'plugins');
-
-                if (target[target.length - 1] == path.sep) {
-                    target = target.substring(0, target.length - 1);
+                var pluginContents = ls(target);
+                var targetName = names[index];
+                // Check if we already have the plugin.
+                // TODO edge case: if a new platform is added, then you want
+                // to re-add the plugin to the new platform.
+                if (plugins.indexOf(targetName) > -1) {
+                    throw new Error('Plugin "' + targetName + '" already added to project.');
+                }
+                // Check if the plugin has a plugin.xml in the root of the
+                // specified dir.
+                if (pluginContents.indexOf('plugin.xml') == -1) {
+                    throw new Error('Plugin "' + targetName + '" does not have a plugin.xml in the root. Plugin must support the Cordova Plugin Specification: https://github.com/alunny/cordova-plugin-spec');
                 }
 
-                // Fetch the plugin first.
-                plugman.fetch(target, pluginsDir, false);
-                
-                // Iterate over all platforms in the project and install the plugin.
-                platforms.forEach(function(platform) {
-                    var platformRoot = path.join(projectRoot, 'platforms', platform);
-                    var parser = new parsers[platform](platformRoot);
-                    plugman.install(platform, platformRoot,
-                                    names[index], pluginsDir, {}, parser.staging_dir());
+                // Check if there is at least one match between plugin
+                // supported platforms and app platforms
+                var pluginXml = new plugin_parser(path.join(target, 'plugin.xml'));
+                var intersection = pluginXml.platforms.filter(function(e) {
+                    if (platforms.indexOf(e) == -1) return false;
+                    else return true;
                 });
+                if (intersection.length === 0) {
+                    throw new Error('Plugin "' + targetName + '" does not support any of your application\'s platforms. Plugin platforms: ' + pluginXml.platforms.join(', ') + '; your application\'s platforms: ' + platforms.join(', '));
+                }
+
+                hooks.fire('before_plugin_add');
+
+                var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
+
+                // Iterate over all matchin app-plugin platforms in the project and install the
+                // plugin.
+                intersection.forEach(function(platform) {
+                    var cmd = util.format('%s --platform %s --project "%s" --plugin "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
+                    var plugin_cli = shell.exec(cmd, {silent:true});
+                    if (plugin_cli.code > 0) throw new Error('An error occured during plugin installation for ' + platform + '. ' + plugin_cli.output);
+                });
+
+                // Finally copy the plugin into the project
+                var targetPath = path.join(pluginPath, targetName);
+                shell.mkdir('-p', targetPath);
+                shell.cp('-r', path.join(target, '*'), targetPath);
 
                 hooks.fire('after_plugin_add');
             });
@@ -110,6 +131,8 @@ module.exports = function plugin(command, targets, callback) {
                 if (plugins.indexOf(targetName) > -1) {
                     var targetPath = path.join(pluginPath, targetName);
                     hooks.fire('before_plugin_rm');
+                    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
+
                     // Check if there is at least one match between plugin
                     // supported platforms and app platforms
                     var pluginXml = new plugin_parser(path.join(targetPath, 'plugin.xml'));
@@ -118,18 +141,16 @@ module.exports = function plugin(command, targets, callback) {
                         else return true;
                     });
 
-                    // Iterate over all the common platforms between the plugin
-                    // and the app, and uninstall.
-                    // If this is a web-only plugin with no platform tags, this step
-                    // is not needed and we just --remove the plugin below.
+                    // Iterate over all matchin app-plugin platforms in the project and uninstall the
+                    // plugin.
                     intersection.forEach(function(platform) {
-                        var platformRoot = path.join(projectRoot, 'platforms', platform);
-                        var parser = new parsers[platform](platformRoot);
-                        plugman.uninstall(platform, platformRoot, targetName, path.join(projectRoot, 'plugins'), {}, parser.staging_dir());
+                        var cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --remove', cli, platform, path.join(projectRoot, 'platforms', platform), targetPath);
+                        var plugin_cli = shell.exec(cmd, {silent:true});
+                        if (plugin_cli.code > 0) throw new Error('An error occured during plugin uninstallation for ' + platform + '. ' + plugin_cli.output);
                     });
 
                     // Finally remove the plugin dir from plugins/
-                    plugman.remove(targetName, path.join(projectRoot, 'plugins'));
+                    shell.rm('-rf', targetPath);
 
                     hooks.fire('after_plugin_rm');
                 } else {
