@@ -20,7 +20,6 @@
 var path            = require('path'),
     fs              = require('fs'),
     shell           = require('shelljs'),
-    ls              = fs.readdirSync,
     cordova_util    = require('./util'),
     util            = require('util'),
     android_parser  = require('./metadata/android_parser'),
@@ -46,8 +45,7 @@ module.exports = function plugin_loader(platform) {
 
     var projectRoot = cordova_util.isCordova(process.cwd());
     var plugins_dir = path.join(projectRoot, 'plugins');
-    var plugins = ls(plugins_dir);
-
+    var plugins = cordova_util.findPlugins(plugins_dir);
 
     // Placed at the top of cordova.js to delay onDeviceReady until all the plugins
     // are actually loaded. This is a temporary hack that can be removed once this

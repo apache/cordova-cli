@@ -62,5 +62,19 @@ module.exports = {
         return fs.readdirSync(path.join(project_dir, 'platforms')).filter(function(p) {
             return core_platforms.indexOf(p) > -1;
         });
+    },
+    // list the directories in the path, ignoring any files
+    findPlugins:function(pluginPath) {
+        var plugins = [],
+            stats;
+
+        if (fs.existsSync(pluginPath)) {
+            plugins = fs.readdirSync(pluginPath).filter(function (fileName) {
+               stats = fs.statSync(path.join(pluginPath, fileName));
+               return stats.isDirectory();
+            });
+        }
+
+        return plugins;
     }
 };

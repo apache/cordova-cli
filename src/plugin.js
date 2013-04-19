@@ -49,7 +49,7 @@ module.exports = function plugin(command, targets, callback) {
     // Massage plugin name(s) / path(s)
     var pluginPath, plugins, names = [];
     pluginPath = path.join(projectRoot, 'plugins');
-    plugins = ls(pluginPath);
+    plugins = cordova_util.findPlugins(pluginPath);
     if (targets) { 
         if (!(targets instanceof Array)) targets = [targets];
         targets.forEach(function(target) {

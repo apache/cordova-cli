@@ -61,6 +61,32 @@ describe('plugin command', function() {
         }).toThrow();
     });
 
+    describe('edge cases', function() {
+       beforeEach(function() {
+           cordova.create(tempDir);
+           process.chdir(tempDir);
+       });
+
+       afterEach(function() {
+           process.chdir(cwd);
+       });
+
+       it('should not fail when the plugins directory is missing', function() {
+           fs.rmdirSync('plugins');
+
+           expect(function() {
+               cordova.plugin();
+           }).not.toThrow();
+       });
+
+       it('should ignore files, like .gitignore, in the plugins directory', function() {
+           var someFile = path.join(tempDir, 'plugins', '.gitignore');
+           fs.writeFileSync(someFile, 'not a plugin');
+
+           expect(cordova.plugin('list')).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
+       });
+    });
+
     describe('`ls`', function() {
         beforeEach(function() {
             cordova.create(tempDir);
