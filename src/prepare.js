@@ -69,7 +69,7 @@ module.exports = function prepare(platforms, callback) {
         if (callback) callback();
     });
 
-    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
+    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'main.js');
 
     // Iterate over each added platform
     platforms.forEach(function(platform) {

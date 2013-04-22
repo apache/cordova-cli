@@ -73,7 +73,7 @@ module.exports = function plugin(command, targets, callback) {
         case 'add':
             targets.forEach(function(target, index) {
                 hooks.fire('before_plugin_add');
-                var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
+                var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'main.js');
                 var pluginsDir = path.join(projectRoot, 'plugins');
 
                 if (target[target.length - 1] == path.sep) {

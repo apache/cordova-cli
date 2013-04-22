@@ -107,7 +107,7 @@ module.exports = function platform(command, targets, callback) {
                                 var pluginsDir = path.join(projectRoot, 'plugins');
                                 var plugins = fs.readdirSync(pluginsDir);
                                 plugins && plugins.forEach(function(plugin) {
-                                    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
+                                    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'main.js');
                                     var cmd = util.format('"%s" --platform "%s" --project "%s" --plugin "%s" --plugins_dir "%s"', cli, target, output, path.basename(plugin), pluginsDir);
                                     var result = shell.exec(cmd, { silent: true });
                                     if (result.code > 0) {
