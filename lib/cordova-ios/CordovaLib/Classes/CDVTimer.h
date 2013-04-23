@@ -17,21 +17,11 @@
  under the License.
  */
 
-#import "CDVDebugConsole.h"
+#import <Foundation/Foundation.h>
 
-@implementation CDVDebugConsole
+@interface CDVTimer : NSObject
 
-- (void)log:(CDVInvokedUrlCommand*)command
-{
-    NSString* message = [command.arguments objectAtIndex:0];
-    NSDictionary* options = [command.arguments objectAtIndex:1];
-    NSString* log_level = @"INFO";
-
-    if ([options objectForKey:@"logLevel"]) {
-        log_level = [options objectForKey:@"logLevel"];
-    }
-
-    NSLog(@"[%@] %@", log_level, message);
-}
++ (void)start:(NSString*)name;
++ (void)stop:(NSString*)name;
 
 @end
