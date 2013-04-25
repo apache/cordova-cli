@@ -11,3 +11,6 @@ lib/cordova-android/framework/local.properties
 spec/fixtures/*
 .gitcore
 *.jar
+
+# avoid npm pack issues
+.gitignore
