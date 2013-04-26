@@ -94,33 +94,25 @@ module.exports.prototype = {
         var www = path.join(projectRoot, 'www');
         var platformWww = this.www_dir();
 
-        var finalWww = path.join(this.path, 'finalwww');
-        shell.mkdir('-p', finalWww);
+        // remove the stock www folder
+        shell.rm('-rf', this.www_dir());
 
-        // replace stock bb app contents with app contents. 
-        // to keep:
-        //        - config.xml
-        //        - cordova.js
-        //        - ext*
-        //        - plugins.xml
-        //        - res
-        shell.cp('-f', path.join(platformWww, 'config.xml'), finalWww);
-        shell.cp('-f', path.join(platformWww, 'cordova-*.js'), finalWww);
-        shell.cp('-f', path.join(platformWww, 'plugins.xml'), finalWww);
-        shell.cp('-rf', path.join(platformWww, 'ext*'), finalWww);
-        shell.cp('-rf', path.join(platformWww, 'res'), finalWww);
+        // copy over project www assets
+        shell.cp('-rf', www, this.path);
 
-        // Copy everything over from platform-agnostic www, except config.xml
-        var cfg_www = path.join(www, 'config.xml');
-        var temp_cfg = path.join(projectRoot, 'config.xml');
-        shell.mv(cfg_www, temp_cfg);
-        shell.cp('-rf', path.join(www, '*'), finalWww);
-        shell.mv(temp_cfg, cfg_www);
+        // add cordova.js
+        shell.cp('-f', path.join(util.libDirectory, 'cordova-blackberry', 'javascript', 'cordova.blackberry.js'), path.join(this.www_dir(), 'cordova.js'));
 
-        // Delete the old platform www, and move the final project over
-        shell.rm('-rf', platformWww);
-        shell.mv(finalWww, platformWww);
+        // add webworks ext directories
+        shell.cp('-rf', path.join(util.libDirectory, 'cordova-blackberry', 'framework', 'ext*'), this.www_dir());
 
+        // add config.xml
+        // @TODO should use project www/config.xml but it must use BBWP elements
+        shell.cp('-f', path.join(util.libDirectory, 'cordova-blackberry', 'bin', 'templates', 'project', 'www', 'config.xml'), this.www_dir());
+
+        // add res/
+        // @TODO remove this when config.xml is generalized
+        shell.cp('-rf', path.join(util.libDirectory, 'cordova-blackberry', 'bin', 'templates', 'project', 'www', 'res'), this.www_dir());
     },
 
     // update the overrides folder into the www folder
