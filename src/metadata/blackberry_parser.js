@@ -64,7 +64,6 @@ module.exports.prototype = {
         self.update_from_config(cfg);
         self.update_www();
         self.update_overrides();
-        self.update_staging();
         util.deleteSvnFolders(this.www_dir());
 
         // Do we have BB config?
@@ -90,60 +89,39 @@ module.exports.prototype = {
         return path.join(this.path, 'www');
     },
 
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
-    },
-
-    config_xml:function(){
-        return this.config_path;
-    },
-
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
-        var www = util.projectWww(projectRoot);
+        var www = path.join(projectRoot, 'www');
         var platformWww = this.www_dir();
 
-        var finalWww = path.join(this.path, 'finalwww');
-        shell.mkdir('-p', finalWww);
+        // remove the stock www folder
+        shell.rm('-rf', this.www_dir());
 
-        // replace stock bb app contents with app contents. 
-        // to keep:
-        //        - config.xml
-        //        - cordova.js
-        //        - ext*
-        //        - plugins.xml
-        //        - res
-        shell.cp('-f', path.join(platformWww, 'config.xml'), finalWww);
-        shell.cp('-f', path.join(platformWww, 'cordova-*.js'), finalWww);
-        shell.cp('-f', path.join(platformWww, 'plugins.xml'), finalWww);
-        shell.cp('-rf', path.join(platformWww, 'ext*'), finalWww);
-        shell.cp('-rf', path.join(platformWww, 'res'), finalWww);
+        // copy over project www assets
+        shell.cp('-rf', www, this.path);
 
-        // Copy everything over from platform-agnostic www.
-        shell.cp('-rf', path.join(www, '*'), finalWww);
+        // add cordova.js
+        shell.cp('-f', path.join(util.libDirectory, 'cordova-blackberry', 'javascript', 'cordova.blackberry.js'), path.join(this.www_dir(), 'cordova.js'));
 
-        // Delete the old platform www, and move the final project over
-        shell.rm('-rf', platformWww);
-        shell.mv(finalWww, platformWww);
+        // add webworks ext directories
+        shell.cp('-rf', path.join(util.libDirectory, 'cordova-blackberry', 'framework', 'ext*'), this.www_dir());
 
+        // add config.xml
+        // @TODO should use project www/config.xml but it must use BBWP elements
+        shell.cp('-f', path.join(util.libDirectory, 'cordova-blackberry', 'bin', 'templates', 'project', 'www', 'config.xml'), this.www_dir());
+
+        // add res/
+        // @TODO remove this when config.xml is generalized
+        shell.cp('-rf', path.join(util.libDirectory, 'cordova-blackberry', 'bin', 'templates', 'project', 'www', 'res'), this.www_dir());
     },
 
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var merges_path = path.join(util.appDir(projectRoot), 'merges', 'blackberry');
+        var merges_path = path.join(projectRoot, 'merges', 'blackberry');
         if (fs.existsSync(merges_path)) {
             var overrides = path.join(merges_path, '*');
             shell.cp('-rf', overrides, this.www_dir());
-        }
-    },
-
-    // update the overrides folder into the www folder
-    update_staging:function() {
-        var projectRoot = util.isCordova(this.path);
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
         }
     },
 
