@@ -1,2 +1,1 @@
-@ECHO OFF
-%~dp0\cordova.bat run %*
+%~dp0\cordova.bat run
