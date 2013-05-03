@@ -27,7 +27,8 @@ var cordova_util  = require('./util'),
     core_platforms= require('../platforms'),
     platform      = require('./platform'),
     plugin_parser = require('./plugin_parser'),
-    ls            = fs.readdirSync;
+    ls            = fs.readdirSync,
+    plugman       = require('plugman');
 
 module.exports = function plugin(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
@@ -73,7 +74,6 @@ module.exports = function plugin(command, targets, callback) {
         case 'add':
             targets.forEach(function(target, index) {
                 hooks.fire('before_plugin_add');
-                var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'main.js');
                 var pluginsDir = path.join(projectRoot, 'plugins');
 
                 if (target[target.length - 1] == path.sep) {
@@ -81,17 +81,13 @@ module.exports = function plugin(command, targets, callback) {
                 }
 
                 // Fetch the plugin first.
-                var cmd = util.format('%s --fetch --plugin "%s" --plugins_dir "%s"', cli, target, pluginsDir);
-                console.log(cmd);
-                var plugin_fetch = shell.exec(cmd, {silent: true});
-                if (plugin_fetch.code > 0) throw new Error('An error occured during plugin fetching:\n' + plugin_fetch.output);
-
+                plugman.fetch(target, pluginsDir, false);
+                
                 // Iterate over all platforms in the project and install the plugin.
+                // TODO add cli_variables if it's important (last argument) ?
                 platforms.forEach(function(platform) {
-                    cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --plugins_dir "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), names[index], pluginsDir);
-                    console.log(cmd);
-                    var plugin_cli = shell.exec(cmd, {silent:true});
-                    if (plugin_cli.code > 0) throw new Error('An error occured during plugin installation for ' + platform + ': ' + plugin_cli.output);
+                    plugman.install(platform, path.join(projectRoot, 'platforms', platform), 
+                                    names[index], pluginsDir, {});
                 });
 
                 hooks.fire('after_plugin_add');
@@ -109,8 +105,6 @@ module.exports = function plugin(command, targets, callback) {
                 if (plugins.indexOf(targetName) > -1) {
                     var targetPath = path.join(pluginPath, targetName);
                     hooks.fire('before_plugin_rm');
-                    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'plugman.js');
-
                     // Check if there is at least one match between plugin
                     // supported platforms and app platforms
                     var pluginXml = new plugin_parser(path.join(targetPath, 'plugin.xml'));
@@ -123,19 +117,12 @@ module.exports = function plugin(command, targets, callback) {
                     // and the app, and uninstall.
                     // If this is a web-only plugin with no platform tags, this step
                     // is not needed and we just --remove the plugin below.
-                    var cmd;
                     intersection.forEach(function(platform) {
-                        cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --plugins_dir "%s" --uninstall', cli, platform, path.join(projectRoot, 'platforms', platform), targetName, path.join(projectRoot, 'plugins'));
-                        console.log(cmd);
-                        var plugin_cli = shell.exec(cmd, {silent:true});
-                        if (plugin_cli.code > 0) throw new Error('An error occured during plugin uninstallation for ' + platform + '. ' + plugin_cli.output);
+                        plugman.uninstall(platform, path.join(projectRoot, 'platforms', platform), targetName, path.join(projectRoot, 'plugins'));
                     });
 
                     // Finally remove the plugin dir from plugins/
-                    cmd = util.format('%s --plugin "%s" --plugins_dir "%s" --remove', cli, targetName, path.join(projectRoot, 'plugins'));
-                    console.log(cmd);
-                    var plugin_remove = shell.exec(cmd, {silent: true});
-                    if (plugin_remove.code > 0) throw new Error('An error occurred during plugin removal:\n' + plugin_remove.output);
+                    plugman.remove(targetName, path.join(projectRoot, 'plugins'));
 
                     hooks.fire('after_plugin_rm');
                 } else {
