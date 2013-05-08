@@ -30,11 +30,11 @@ var cordova_util = require('./util'),
     url = require("url");
 
 
-function launch_server(www, platform_www, port) {
+function launch_server(www, platform_www, config_xml_path, port) {
     port = port || 8000;
 
     // Searches these directories in order looking for the requested file.
-    var searchPath = [www, platform_www];
+    var searchPath = [platform_www];
 
     var server = http.createServer(function(request, response) {
         var uri = url.parse(request.url).pathname;
@@ -48,6 +48,9 @@ function launch_server(www, platform_www, port) {
             }
 
             var filename = path.join(searchPath[pathIndex], uri);
+            if(uri === "/config.xml"){
+                filename = config_xml_path;
+            }
 
             fs.exists(filename, function(exists) {
                 if(!exists) {
@@ -82,7 +85,7 @@ module.exports = function serve (platform, port) {
     var returnValue = {};
 
     module.exports.config(platform, port, function (config) {
-        returnValue.server = launch_server(config.paths[0], config.paths[1], port);
+        returnValue.server = launch_server(config.paths[0], config.paths[1], config.config_xml_path, port);
     });
 
     // Hack for testing despite its async nature.
@@ -113,6 +116,8 @@ module.exports.config = function (platform, port, callback) {
 
     var result = {
         paths: [],
+        // Config file path
+        config_xml_path : "",
         // Default port is 8000 if not given. This is also the default of the Python module.
         port: port || 8000
     };
@@ -137,6 +142,7 @@ module.exports.config = function (platform, port, callback) {
     // Update the related platform project from the config
     parser.update_project(cfg, function() {
         result.paths.push(parser.www_dir());
+        result.config_xml_path = parser.config_xml();
         callback(result);
     });
 }

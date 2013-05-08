@@ -130,6 +130,10 @@ module.exports.prototype = {
         return path.join(this.path, '.staging', 'www');
     },
 
+    config_xml:function(){
+        return this.android_config;
+    },
+
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
         var www = util.projectWww(projectRoot);
