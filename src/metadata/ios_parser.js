@@ -55,7 +55,8 @@ module.exports = function ios_parser(project) {
     }
     this.path = project;
     this.pbxproj = path.join(this.xcodeproj, 'project.pbxproj');
-    this.config = new config_parser(path.join(this.cordovaproj, 'config.xml'));
+    this.config_path = path.join(this.cordovaproj, 'config.xml');
+    this.config = new config_parser(this.config_path);
 };
 
 module.exports.check_requirements = function(callback) {
@@ -139,6 +140,10 @@ module.exports.prototype = {
 
     staging_dir: function() {
         return path.join(this.path, '.staging', 'www');
+    },
+
+    config_xml:function(){
+        return this.config_path;
     },
 
     update_www:function() {
