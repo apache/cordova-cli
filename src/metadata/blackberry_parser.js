@@ -64,6 +64,7 @@ module.exports.prototype = {
         self.update_from_config(cfg);
         self.update_www();
         self.update_overrides();
+        self.update_staging();
         util.deleteSvnFolders(this.www_dir());
 
         // Do we have BB config?
@@ -87,6 +88,10 @@ module.exports.prototype = {
     // Returns the platform-specific www directory.
     www_dir:function() {
         return path.join(this.path, 'www');
+    },
+
+    staging_dir: function() {
+        return path.join(this.path, '.staging', 'www');
     },
 
     update_www:function() {
@@ -126,6 +131,15 @@ module.exports.prototype = {
         if (fs.existsSync(merges_path)) {
             var overrides = path.join(merges_path, '*');
             shell.cp('-rf', overrides, this.www_dir());
+        }
+    },
+
+    // update the overrides folder into the www folder
+    update_staging:function() {
+        var projectRoot = util.isCordova(this.path);
+        if (fs.existsSync(this.staging_dir())) {
+            var staging = path.join(this.staging_dir(), '*');
+            shell.cp('-rf', staging, this.www_dir());
         }
     },
 

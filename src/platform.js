@@ -26,6 +26,7 @@ var config_parser     = require('./config_parser'),
     android_parser    = require('./metadata/android_parser'),
     ios_parser        = require('./metadata/ios_parser'),
     blackberry_parser = require('./metadata/blackberry_parser'),
+    plugman           = require('plugman'),
     shell             = require('shelljs');
 
 var parsers = {
@@ -107,12 +108,11 @@ module.exports = function platform(command, targets, callback) {
                                 var pluginsDir = path.join(projectRoot, 'plugins');
                                 var plugins = fs.readdirSync(pluginsDir);
                                 plugins && plugins.forEach(function(plugin) {
-                                    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'main.js');
-                                    var cmd = util.format('"%s" --platform "%s" --project "%s" --plugin "%s" --plugins_dir "%s"', cli, target, output, path.basename(plugin), pluginsDir);
-                                    var result = shell.exec(cmd, { silent: true });
-                                    if (result.code > 0) {
-                                        throw new Error('An error occurred while installing the ' + path.basename(plugin) + ' plugin: ' + result.output);
+                                    if (!fs.statSync(path.join(projectRoot, 'plugins', plugin)).isDirectory()) {
+                                        return;
                                     }
+
+                                    plugman.install(target, output, path.basename(plugin), pluginsDir, {}, parser.staging_dir());
                                 });
                                 end();
                             });

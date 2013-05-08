@@ -24,11 +24,15 @@ var cordova_util  = require('./util'),
     shell         = require('shelljs'),
     config_parser = require('./config_parser'),
     hooker        = require('./hooker'),
-    core_platforms= require('../platforms'),
-    platform      = require('./platform'),
     plugin_parser = require('./plugin_parser'),
     ls            = fs.readdirSync,
     plugman       = require('plugman');
+
+var parsers = {
+    "android": require('./metadata/android_parser'),
+    "ios": require('./metadata/ios_parser'),
+    "blackberry": require('./metadata/blackberry_parser')
+};
 
 module.exports = function plugin(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
@@ -84,10 +88,11 @@ module.exports = function plugin(command, targets, callback) {
                 plugman.fetch(target, pluginsDir, false);
                 
                 // Iterate over all platforms in the project and install the plugin.
-                // TODO add cli_variables if it's important (last argument) ?
                 platforms.forEach(function(platform) {
-                    plugman.install(platform, path.join(projectRoot, 'platforms', platform), 
-                                    names[index], pluginsDir, {});
+                    var platformRoot = path.join(projectRoot, 'platforms', platform);
+                    var parser = new parsers[platform](platformRoot);
+                    plugman.install(platform, platformRoot,
+                                    names[index], pluginsDir, {}, parser.staging_dir());
                 });
 
                 hooks.fire('after_plugin_add');
@@ -118,7 +123,9 @@ module.exports = function plugin(command, targets, callback) {
                     // If this is a web-only plugin with no platform tags, this step
                     // is not needed and we just --remove the plugin below.
                     intersection.forEach(function(platform) {
-                        plugman.uninstall(platform, path.join(projectRoot, 'platforms', platform), targetName, path.join(projectRoot, 'plugins'));
+                        var platformRoot = path.join(projectRoot, 'platforms', platform);
+                        var parser = new parsers[platform](platformRoot);
+                        plugman.uninstall(platform, platformRoot, targetName, path.join(projectRoot, 'plugins'), {}, parser.staging_dir());
                     });
 
                     // Finally remove the plugin dir from plugins/

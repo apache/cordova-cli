@@ -75,13 +75,6 @@ module.exports = function prepare(platforms, callback) {
     platforms.forEach(function(platform) {
         var platformPath = path.join(projectRoot, 'platforms', platform);
         var parser = new parsers[platform](platformPath);
-        parser.update_project(cfg, function() {
-            // Call plugman --prepare for each platform.
-            var cmd = util.format('%s --prepare --platform "%s" --project "%s" --www "%s" --plugins_dir "%s"', cli, platform, platformPath, parser.www_dir(), path.join(projectRoot, 'plugins'));
-            var plugman_call = shell.exec(cmd, {silent:true});
-            if (plugman_call.code > 0) throw new Error('An error occurred during plugman --prepare for ' + platform + ': ' + plugman_call.output);
-
-            end();
-        });
+        parser.update_project(cfg, end);
     });
 };
