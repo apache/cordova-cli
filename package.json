@@ -8,7 +8,7 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "./node_modules/jasmine-node/bin/jasmine-node --color spec",
+    "test": "jasmine-node --color spec/cordova-cli",
     "install": "node bootstrap.js"
   },
   "repository": {

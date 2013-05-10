@@ -26,9 +26,12 @@ var fs            = require('fs'),
 
 module.exports = function wp8_parser(project) {
     try {
-        var csproj_path   = fs.readdirSync(project).filter(function(e) { return e.match(/\.csproj$/i); })[0];
+        // TODO : Check that it's not a wp7 project?
+        var csproj_file   = fs.readdirSync(project).filter(function(e) { return e.match(/\.csproj$/i); })[0];
+        if (!csproj_file) throw new Error('The provided path "' + project + '" is not a Windows Phone 8 project.');
         this.wp8_proj_dir = project;
-        this.csproj_path  = path.join(this.wp8_proj_dir, csproj_path);
+        this.csproj_path  = path.join(this.wp8_proj_dir, csproj_file);
+        this.sln_path     = path.join(this.wp8_proj_dir, csproj_file.replace(/\.csproj/, '.sln'));
     } catch(e) {
         throw new Error('The provided path "' + project + '" is not a Windows Phone 8 project.' + e);
     }
@@ -54,16 +57,28 @@ module.exports.prototype = {
         // Update app name by editing app title in Properties\WMAppManifest.xml
         var name = config.name();
         var man = fs.readFileSync(this.manifest_path, 'utf-8');
-        //Strip three bytes that windows adds (http://www.multiasking.com/2012/11/851/#comment-3076)
+        //Strip three bytes that windows adds (http://www.multiasking.com/2012/11/851/)
         var cleanedMan = man.replace('\ufeff', '');
         var manifest = new et.ElementTree(et.XML(cleanedMan));
         var prev_name = manifest.find('.//App[@Title]')['attrib']['Title'];
         if(prev_name != name)
         {
-            console.log("Updating app name from " + prev_name + " to " + name);
+            //console.log("Updating app name from " + prev_name + " to " + name);
             manifest.find('.//App').attrib.Title = name;
             manifest.find('.//Title').text = name;
-            fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8'); 
+            fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
+
+            //update name of sln and csproj.
+            name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a ligitamate name
+            prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); 
+            var sln_path = path.join(this.wp8_proj_dir, prev_name + '.sln');
+            var sln_file = fs.readFileSync(sln_path, 'utf-8');
+            var name_regex = new RegExp(prev_name, "g");
+            fs.writeFileSync(sln_path, sln_file.replace(name_regex, name), 'utf-8');
+            shell.mv('-f', this.csproj_path, path.join(this.wp8_proj_dir, name + '.csproj'));
+            this.csproj_path = path.join(this.wp8_proj_dir, name + '.csproj');
+            shell.mv('-f', sln_path, path.join(this.wp8_proj_dir, name + '.sln'));
+            this.sln_path    = path.join(this.wp8_proj_dir, name + '.sln');
         }
 
         // Update package name by changing:
@@ -75,12 +90,12 @@ module.exports.prototype = {
          */
          var pkg = config.packageName();
          var raw = fs.readFileSync(this.csproj_path, 'utf-8');
-         var cleanedPage = raw.replace('\ufeff', '');
+         var cleanedPage = raw.replace(/^\uFEFF/i, '');
          var csproj = new et.ElementTree(et.XML(cleanedPage));
          prev_name = csproj.find('.//RootNamespace').text;
          if(prev_name != pkg)
          {
-            console.log("Updating package name from " + prev_name + " to " + pkg);
+            //console.log("Updating package name from " + prev_name + " to " + pkg);
             //CordovaAppProj.csproj
             csproj.find('.//RootNamespace').text = pkg;
             csproj.find('.//AssemblyName').text = pkg;
@@ -89,25 +104,24 @@ module.exports.prototype = {
             fs.writeFileSync(this.csproj_path, csproj.write({indent: 4}), 'utf-8');
             //MainPage.xaml
             raw = fs.readFileSync(path.join(this.wp8_proj_dir, 'MainPage.xaml'), 'utf-8');
-            cleanedPage = raw.replace('\ufeff', '');
+            // Remove potential UTF Byte Order Mark
+            cleanedPage = raw.replace(/^\uFEFF/i, '');
             var mainPageXAML = new et.ElementTree(et.XML(cleanedPage));
             mainPageXAML._root.attrib['x:Class'] = pkg + '.MainPage';
             fs.writeFileSync(path.join(this.wp8_proj_dir, 'MainPage.xaml'), mainPageXAML.write({indent: 4}), 'utf-8');
             //MainPage.xaml.cs
             var mainPageCS = fs.readFileSync(path.join(this.wp8_proj_dir, 'MainPage.xaml.cs'), 'utf-8');
-            var namespaceRegEx = new RegExp("namespace\s" + prev_name);
-            mainPageCS.replace(namespaceRegEx, 'namespace ' + pkg);
-            fs.writeFileSync(path.join(this.wp8_proj_dir, 'MainPage.xaml'), mainPageCS, 'utf-8');
+            var namespaceRegEx = new RegExp('namespace ' + prev_name);
+            fs.writeFileSync(path.join(this.wp8_proj_dir, 'MainPage.xaml.cs'), mainPageCS.replace(namespaceRegEx, 'namespace ' + pkg), 'utf-8');
             //App.xaml
             raw = fs.readFileSync(path.join(this.wp8_proj_dir, 'App.xaml'), 'utf-8');
-            cleanedPage = raw.replace('\ufeff', '');
+            cleanedPage = raw.replace(/^\uFEFF/i, '');
             var appXAML = new et.ElementTree(et.XML(cleanedPage));
             appXAML._root.attrib['x:Class'] = pkg + '.App';
             fs.writeFileSync(path.join(this.wp8_proj_dir, 'App.xaml'), appXAML.write({indent: 4}), 'utf-8');
             //App.xaml.cs
             var appCS = fs.readFileSync(path.join(this.wp8_proj_dir, 'App.xaml.cs'), 'utf-8');
-            appCS.replace(namespaceRegEx, 'namespace ' + pkg);
-            fs.writeFileSync(path.join(this.wp8_proj_dir, 'App.xaml.cs'), appCS, 'utf-8');
+            fs.writeFileSync(path.join(this.wp8_proj_dir, 'App.xaml.cs'), appCS.replace(namespaceRegEx, 'namespace ' + pkg), 'utf-8');
          }
     },
     // Returns the platform-specific www directory.
@@ -116,26 +130,27 @@ module.exports.prototype = {
     },
     // copyies the app www folder into the wp8 project's www folder
     update_www:function() {
-        var project_www = util.projectWww();
+        var project_www = path.join(this.wp8_proj_dir, '..', '..', util.projectWww());
         // remove stock platform assets
         shell.rm('-rf', this.www_dir());
         // copy over all app www assets
         shell.cp('-rf', project_www, this.wp8_proj_dir);
 
         // copy over wp8 lib's cordova.js
-        var VERSION = fs.readFileSync(path.join(this.wp8_proj_dir, 'VERSION'), 'utf-8').replace(/\r\n/,'').replace(/\n/,'');
+        var raw_version = fs.readFileSync(path.join(util.libDirectory, 'cordova-wp8', 'VERSION'), 'utf-8')
+        var VERSION = raw_version.replace(/\r\n/,'').replace(/\n/,'');
         var cordovajs_path = path.join(util.libDirectory, 'cordova-wp8', 'templates', 'standalone', 'www', 'cordova-' + VERSION + '.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
     },
     // calls the nessesary functions to update the wp8 project 
     update_project:function(cfg, callback) {
-        console.log("Updating wp8 project...");
+        //console.log("Updating wp8 project...");
 
         this.update_from_config(cfg);
         this.update_www();
         util.deleteSvnFolders(this.www_dir());
 
-        console.log("Done updating.");
+        //console.log("Done updating.");
 
         if (callback) callback();
     }

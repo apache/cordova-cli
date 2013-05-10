@@ -17,15 +17,15 @@
     specific language governing permissions and limitations
     under the License.
 */
-var android_parser = require('../../src/metadata/android_parser'),
-    config_parser = require('../../src/config_parser'),
-    util = require('../../src/util'),
+var android_parser = require('../../../src/metadata/android_parser'),
+    config_parser = require('../../../src/config_parser'),
+    util = require('../../../src/util'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
     et = require('elementtree'),
-    cordova = require('../../cordova'),
-    projects_path = path.join(__dirname, '..', 'fixtures', 'projects'),
+    cordova = require('../../../cordova'),
+    projects_path = path.join(__dirname, '..', '..', 'fixtures', 'projects'),
     android_path = path.join(projects_path, 'native', 'android_fixture'),
     project_path = path.join(projects_path, 'cordova'),
     android_project_path = path.join(project_path, 'platforms', 'android');

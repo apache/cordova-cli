@@ -1,4 +1,4 @@
-/**
+ /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
     distributed with this work for additional information
@@ -16,14 +16,16 @@
     specific language governing permissions and limitations
     under the License.
 */
-var hooker = require('../src/hooker'),
+var hooker = require('../../src/hooker'),
     shell  = require('shelljs'),
     path   = require('path'),
     fs     = require('fs'),
-    tempDir= path.join(__dirname, '..', 'temp'),
-    hooks  = path.join(__dirname, 'fixtures', 'hooks'),
-    cordova= require('../cordova');
+    os     = require('os'),
+    tempDir= path.join(__dirname, '..', '..', 'temp'),
+    hooks  = path.join(__dirname, '..', 'fixtures', 'hooks'),
+    cordova= require('../../cordova');
 
+var platform = os.platform();
 var cwd = process.cwd();
 
 describe('hooker', function() {
@@ -67,8 +69,14 @@ describe('hooker', function() {
                 }).not.toThrow();
             });
             it('should throw if any script exits with non-zero code', function() {
-                var script = path.join(tempDir, '.cordova', 'hooks', 'before_build', 'fail.sh');
-                shell.cp(path.join(hooks, 'fail', 'fail.sh'), script);
+                var script;
+                if (platform.match(/(win32|win64)/)) {
+                    script = path.join(tempDir, '.cordova', 'hooks', 'before_build', 'fail.bat');
+                    shell.cp(path.join(hooks, 'fail', 'fail.bat'), script);
+                } else {
+                    script = path.join(tempDir, '.cordova', 'hooks', 'before_build', 'fail.sh');
+                    shell.cp(path.join(hooks, 'fail', 'fail.sh'), script);
+                }
                 fs.chmodSync(script, '754');
                 expect(function() {
                     h.fire('before_build');
@@ -79,7 +87,13 @@ describe('hooker', function() {
         describe('success', function() {
             it('should execute all scripts in order and return true', function() {
                 var hook = path.join(tempDir, '.cordova', 'hooks', 'before_build');
-                shell.cp(path.join(hooks, 'test', '*'), path.join(hook, '.'));
+                if (platform.match(/(win32|win64)/)) {
+                    shell.cp(path.join(hooks, 'test', '0.bat'), hook);
+                    shell.cp(path.join(hooks, 'test', '1.bat'), hook);
+                } else {
+                    shell.cp(path.join(hooks, 'test', '0.sh'), hook);
+                    shell.cp(path.join(hooks, 'test', '1.sh'), hook);
+                }
                 fs.readdirSync(hook).forEach(function(script) {
                     fs.chmodSync(path.join(hook, script), '754');
                 });
@@ -89,12 +103,21 @@ describe('hooker', function() {
                     returnValue = h.fire('before_build');
                 }).not.toThrow();
                 expect(returnValue).toBe(true);
-                expect(s.calls[0].args[0]).toMatch(/0.sh/);
-                expect(s.calls[1].args[0]).toMatch(/1.sh/);
+                if (platform.match(/(win32|win64)/)) {
+                    expect(s.calls[0].args[0]).toMatch(/0.bat/);
+                    expect(s.calls[1].args[0]).toMatch(/1.bat/);
+                } else {
+                    expect(s.calls[0].args[0]).toMatch(/0.sh/);
+                    expect(s.calls[1].args[0]).toMatch(/1.sh/);
+                }
             });
             it('should pass the project root folder as parameter into the project-level hooks', function() {
                 var hook = path.join(tempDir, '.cordova', 'hooks', 'before_build');
-                shell.cp(path.join(hooks, 'test', '0.sh'), path.join(hook, '.'));
+                if (platform.match(/(win32|win64)/)) {
+                    shell.cp(path.join(hooks, 'test', '0.bat'), hook);
+                } else {
+                    shell.cp(path.join(hooks, 'test', '0.sh'), hook);
+                }
                 fs.readdirSync(hook).forEach(function(script) {
                     fs.chmodSync(path.join(hook, script), '754');
                 });
@@ -104,8 +127,13 @@ describe('hooker', function() {
                     returnValue = h.fire('before_build');
                 }).not.toThrow();
                 expect(returnValue).toBe(true);
-                var paramRegex = new RegExp('0.sh "'+tempDir+'"$');
-                expect(s.calls[0].args[0]).toMatch(paramRegex);
+                var param_str;
+                if (platform.match(/(win32|win64)/)) {
+                    param_str = '0.bat "'+tempDir+'"';
+                } else { 
+                    param_str = '0.sh "'+tempDir+'"'; 
+                }
+                expect(s.calls[0].args[0].indexOf(param_str)).not.toEqual(-1);
             });
             describe('module-level hooks', function() {
                 var handler = jasmine.createSpy();

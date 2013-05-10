@@ -17,10 +17,10 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../cordova'),
+var cordova = require('../../cordova'),
     path = require('path'),
     fs = require('fs'),
-    plugin_parser = require('../src/plugin_parser'),
+    plugin_parser = require('../../src/plugin_parser'),
     et = require('elementtree'),
     xml = path.join(__dirname, 'fixtures', 'plugins', 'test', 'plugin.xml');
 
@@ -36,7 +36,7 @@ describe('plugin.xml parser', function () {
     it('should be able to figure out which platforms the plugin supports', function() {
         var cfg = new plugin_parser(xml);
         expect(cfg.platforms.length).toBe(1);
-        expect(cfg.platforms.indexOf('ios') > -1).toBe(true);
+        expect(cfg.platforms.indexOf('android') > -1).toBe(true);
     });
 });
 

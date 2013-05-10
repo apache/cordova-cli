@@ -17,18 +17,20 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../cordova'),
+var cordova = require('../../cordova'),
     path = require('path'),
     shell = require('shelljs'),
     request = require('request'),
     fs = require('fs'),
-    util = require('../src/util'),
-    hooker = require('../src/hooker'),
-    tempDir = path.join(__dirname, '..', 'temp'),
+    util = require('../../src/util'),
+    hooker = require('../../src/hooker'),
+    tempDir = path.join(__dirname, '..', '..', 'temp'),
     http = require('http'),
-    android_parser = require('../src/metadata/android_parser'),
-    ios_parser = require('../src/metadata/ios_parser'),
-    blackberry_parser = require('../src/metadata/blackberry_parser');
+    android_parser = require('../../src/metadata/android_parser'),
+    ios_parser = require('../../src/metadata/ios_parser'),
+    blackberry_parser = require('../../src/metadata/blackberry_parser'),
+    wp7_parser        = require('../../src/metadata/wp7_parser'),
+    wp8_parser        = require('../../src/metadata/wp8_parser');
 
 var cwd = process.cwd();
 

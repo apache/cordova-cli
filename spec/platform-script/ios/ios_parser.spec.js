@@ -17,16 +17,17 @@
  under the License.
  */
 
-var ios_parser = require('../../src/metadata/ios_parser'),
-    config_parser = require('../../src/config_parser'),
-    cordova = require('../../cordova'),
-    util = require('../../src/util'),
+var ios_parser = require('../../../src/metadata/ios_parser'),
+    config_parser = require('../../../src/config_parser'),
+    cordova = require('../../../cordova'),
+    util = require('../../../src/util'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
+    os = require('os'),
     et = require('elementtree'),
-    projects_path = path.join(__dirname, '..', 'fixtures', 'projects')
-ios_path = path.join(projects_path, 'native', 'ios_fixture'),
+    projects_path = path.join(__dirname, '..', '..', 'fixtures', 'projects')
+    ios_path = path.join(projects_path, 'native', 'ios_fixture'),
     project_path = path.join(projects_path, 'cordova'),
     ios_project_path = path.join(project_path, 'platforms', 'ios');
 

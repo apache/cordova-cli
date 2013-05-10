@@ -1,9 +1,9 @@
-var cordova = require('../cordova'),
+var cordova = require('../../cordova'),
     path    = require('path'),
     shell   = require('shelljs'),
     fs      = require('fs'),
-    util    = require('../src/util'),
-    tempDir = path.join(__dirname, '..', 'temp');
+    util    = require('../../src/util'),
+    tempDir = path.join(__dirname, '..', '..', 'temp');
 
 describe('create command', function () {
     beforeEach(function() {

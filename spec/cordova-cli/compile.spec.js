@@ -16,22 +16,19 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../cordova'),
-    et = require('elementtree'),
+var cordova = require('../../cordova'),
     shell = require('shelljs'),
     path = require('path'),
     fs = require('fs'),
-    config_parser = require('../src/config_parser'),
-    android_parser = require('../src/metadata/android_parser'),
-    ios_parser = require('../src/metadata/ios_parser'),
-    blackberry_parser = require('../src/metadata/blackberry_parser'),
-    hooker = require('../src/hooker'),
-    fixtures = path.join(__dirname, 'fixtures'),
+    events = require('../../src/events'),
+    hooker = require('../../src/hooker'),
+    fixtures = path.join(__dirname, '..', 'fixtures'),
     hooks = path.join(fixtures, 'hooks'),
-    tempDir = path.join(__dirname, '..', 'temp'),
+    tempDir = path.join(__dirname, '..', '..', 'temp'),
     cordova_project = path.join(fixtures, 'projects', 'cordova');
 
 var cwd = process.cwd();
+
 describe('compile command', function() {
     beforeEach(function() {
         shell.rm('-rf', tempDir);
@@ -53,12 +50,12 @@ describe('compile command', function() {
     it('should run inside a Cordova-based project with at least one added platform', function() {
         // move platform project fixtures over to fake cordova into thinking platforms were added
         // TODO: possibly add this to helper?
-        shell.mv('-f', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir));
-        shell.mv('-f', path.join(cordova_project, 'platforms', 'ios'), path.join(tempDir));
+        // Just make a folder instead of moving the whole platform? 
+        shell.mkdir('-p', tempDir);
+        shell.mv('-f', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir));
         this.after(function() {
             process.chdir(cwd);
-            shell.mv('-f', path.join(tempDir, 'blackberry'), path.join(cordova_project, 'platforms', 'blackberry'));
-            shell.mv('-f', path.join(tempDir, 'ios'), path.join(cordova_project, 'platforms', 'ios'));
+            shell.mv('-f', path.join(tempDir, 'android'), path.join(cordova_project, 'platforms', 'android'));
         });
 
         process.chdir(cordova_project);
@@ -78,9 +75,28 @@ describe('compile command', function() {
         shell.mkdir('-p', tempDir);
         process.chdir(tempDir);
 
+        // we don't actually want it building the project (if it does somehow exist)
+        var sh_spy = spyOn(shell, 'exec');
+
         expect(function() {
             cordova.compile();
         }).toThrow();
+    });
+    /* Is this a repeat of the util.spec.js test? */
+    it('should not treat a .gitignore file as a platform', function() {
+        var gitignore = path.join(cordova_project, 'platforms', '.gitignore');
+        fs.writeFileSync(gitignore, 'somethinghere', 'utf-8');
+        this.after(function() {
+            shell.rm('-f', gitignore);
+            process.chdir(cwd);
+        });
+
+        var s = spyOn(shell, 'exec');
+        process.chdir(cordova_project);
+        cordova.compile();
+        for (call in s.calls) {
+            expect(s.calls[call].args[0]).not.toMatch(/\.gitignore/);
+        }
     });
 
     describe('hooks', function() {
@@ -91,13 +107,11 @@ describe('compile command', function() {
 
         describe('when platforms are added', function() {
             beforeEach(function() {
-                shell.mv('-f', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir));
-                shell.mv('-f', path.join(cordova_project, 'platforms', 'ios'), path.join(tempDir));
+                shell.mv('-f', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir));
                 process.chdir(cordova_project);
             });
             afterEach(function() {
-                shell.mv('-f', path.join(tempDir, 'blackberry'), path.join(cordova_project, 'platforms', 'blackberry'));
-                shell.mv('-f', path.join(tempDir, 'ios'), path.join(cordova_project, 'platforms', 'ios'));
+                shell.mv('-f', path.join(tempDir, 'android'), path.join(cordova_project, 'platforms', 'android'));
                 process.chdir(cwd);
             });
 
@@ -106,11 +120,14 @@ describe('compile command', function() {
                 cordova.compile();
                 expect(s).toHaveBeenCalledWith('before_compile');
             });
-            it('should fire after hooks through the hooker module', function() {
-                var sh_spy = spyOn(shell, 'exec');
-                cordova.compile();
-                sh_spy.mostRecentCall.args[2](0); // shell cb
-                expect(s).toHaveBeenCalledWith('after_compile');
+            it('should fire after hooks through the hooker module', function(done) {
+                spyOn(shell, 'exec').andCallFake(function(cmd, options, callback) {
+                    callback(0, 'fucking eh');
+                });
+                cordova.compile('android', function() {
+                     expect(hooker.prototype.fire).toHaveBeenCalledWith('after_compile');
+                     done();
+                });
             });
         });
 
@@ -129,51 +146,6 @@ describe('compile command', function() {
                 expect(s).not.toHaveBeenCalledWith('before_compile');
                 expect(s).not.toHaveBeenCalledWith('after_compile');
             });
-        });
-    });
-    describe('per platform', function() {
-        beforeEach(function() {
-            process.chdir(cordova_project);
-        });
-
-        afterEach(function() {
-            process.chdir(cwd);
-        });
-       
-        describe('Android', function() {
-            it('should shell out to build command on Android', function() {
-                var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
-                cordova.compile('android');
-                expect(s.mostRecentCall.args[0].match(/\/cordova\/build/)).not.toBeNull();
-            });
-        });
-        describe('iOS', function() {
-            it('should shell out to build command on iOS', function() {
-                var s = spyOn(require('shelljs'), 'exec');
-                cordova.compile('ios');
-                expect(s).toHaveBeenCalled();
-                expect(s.mostRecentCall.args[0].match(/\/cordova\/build/)).not.toBeNull();
-            });
-        });
-        describe('BlackBerry', function() {
-            it('should shell out to ant command on blackberry', function() {
-                var s = spyOn(shell, 'exec');
-                cordova.compile('blackberry');
-                expect(s).toHaveBeenCalled();
-                expect(s.mostRecentCall.args[0]).toMatch(/ant -f .*build\.xml" qnx load-device/);
-            });
-        });
-        it('should not treat a .gitignore file as a platform', function() {
-            var gitignore = path.join(cordova_project, 'platforms', '.gitignore');
-            fs.writeFileSync(gitignore, 'somethinghere', 'utf-8');
-            this.after(function() {
-                shell.rm('-f', gitignore);
-            });
-            var s = spyOn(shell, 'exec');
-            cordova.compile();
-            expect(s.calls[0].args[0]).not.toMatch(/\.gitignore/);
-            expect(s.calls[1].args[0]).not.toMatch(/\.gitignore/);
-            expect(s.calls[1].args[0]).not.toMatch(/\.gitignore/);
         });
     });
 });

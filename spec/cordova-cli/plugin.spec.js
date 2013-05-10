@@ -16,13 +16,13 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../cordova'),
+var cordova = require('../../cordova'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
-    hooker = require('../src/hooker'),
-    tempDir = path.join(__dirname, '..', 'temp'),
-    fixturesDir = path.join(__dirname, 'fixtures'),
+    hooker = require('../../src/hooker'),
+    tempDir = path.join(__dirname, '..', '..', 'temp'),
+    fixturesDir = path.join(__dirname, '..', 'fixtures'),
     testPlugin = path.join(fixturesDir, 'plugins', 'test'),
     cordova_project = path.join(fixturesDir, 'projects', 'cordova'),
     androidPlugin = path.join(fixturesDir, 'plugins', 'android');

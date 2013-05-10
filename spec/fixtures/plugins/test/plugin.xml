@@ -7,7 +7,7 @@
     <name>Test Plugin</name>
 
     <asset src="www/test.js" target="test.js" />
-    <platform name="ios">
+    <platform name="android">
         <plugins-plist key="TestPlugin" string="Test" />
     </platform>
 </plugin>

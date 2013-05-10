@@ -16,27 +16,25 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../cordova'),
+var cordova = require('../../cordova'),
     et = require('elementtree'),
     shell = require('shelljs'),
     path = require('path'),
     fs = require('fs'),
-    config_parser = require('../src/config_parser'),
-    android_parser = require('../src/metadata/android_parser'),
-    ios_parser = require('../src/metadata/ios_parser'),
-    blackberry_parser = require('../src/metadata/blackberry_parser'),
-    hooker = require('../src/hooker'),
-    fixtures = path.join(__dirname, 'fixtures'),
+    config_parser = require('../../src/config_parser'),
+    android_parser = require('../../src/metadata/android_parser'),
+    hooker = require('../../src/hooker'),
+    fixtures = path.join(__dirname, '..', 'fixtures'),
     hooks = path.join(fixtures, 'hooks'),
-    tempDir = path.join(__dirname, '..', 'temp'),
+    tempDir = path.join(__dirname, '..', '..', 'temp'),
     cordova_project = path.join(fixtures, 'projects', 'cordova');
 
 var cwd = process.cwd();
 
-describe('prepare command', function() {
+describe('emulate command', function() {
     beforeEach(function() {
         shell.rm('-rf', tempDir);
-        shell.mkdir('-p', tempDir);
+        cordova.create(tempDir);
     });
 
     it('should not run inside a Cordova-based project with no added platforms', function() {
@@ -44,30 +42,25 @@ describe('prepare command', function() {
             process.chdir(cwd);
         });
 
-        cordova.create(tempDir);
         process.chdir(tempDir);
         expect(function() {
-            cordova.prepare();
+            cordova.emulate();
         }).toThrow();
     });
     
     it('should run inside a Cordova-based project with at least one added platform', function() {
-        // move platform project fixtures over to fake cordova into thinking platforms were added
-        // TODO: possibly add this to helper?
-        shell.mv('-f', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir));
         this.after(function() {
             process.chdir(cwd);
-            shell.mv('-f', path.join(tempDir, 'blackberry'), path.join(cordova_project, 'platforms', 'blackberry'));
         });
 
-        process.chdir(cordova_project);
-
-        var a_parser_spy = spyOn(android_parser.prototype, 'update_project');
-        var i_parser_spy = spyOn(ios_parser.prototype, 'update_project');
+        var s = spyOn(shell, 'exec');
+        var a_spy = spyOn(android_parser.prototype, 'update_project');
         expect(function() {
-            cordova.prepare();
-            expect(a_parser_spy).toHaveBeenCalled();
-            expect(i_parser_spy).toHaveBeenCalled();
+            shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
+            process.chdir(tempDir);
+            cordova.emulate();
+            a_spy.mostRecentCall.args[1](); // fake out android parser
+            expect(s).toHaveBeenCalled();
         }).not.toThrow();
     });
     it('should not run outside of a Cordova-based project', function() {
@@ -79,7 +72,7 @@ describe('prepare command', function() {
         process.chdir(tempDir);
 
         expect(function() {
-            cordova.prepare();
+            cordova.emulate();
         }).toThrow();
     });
 
@@ -91,42 +84,43 @@ describe('prepare command', function() {
 
         describe('when platforms are added', function() {
             beforeEach(function() {
-                shell.mv('-f', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir));
-                shell.mv('-f', path.join(cordova_project, 'platforms', 'ios'), path.join(tempDir));
-                process.chdir(cordova_project);
+                shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
+                process.chdir(tempDir);
             });
             afterEach(function() {
-                shell.mv('-f', path.join(tempDir, 'blackberry'), path.join(cordova_project, 'platforms', 'blackberry'));
-                shell.mv('-f', path.join(tempDir, 'ios'), path.join(cordova_project, 'platforms', 'ios'));
                 process.chdir(cwd);
             });
 
             it('should fire before hooks through the hooker module', function() {
-                cordova.prepare();
-                expect(s).toHaveBeenCalledWith('before_prepare');
+
+                spyOn(shell, 'exec');
+                cordova.emulate();
+                expect(hooker.prototype.fire).toHaveBeenCalledWith('before_emulate');
             });
             it('should fire after hooks through the hooker module', function() {
-                var parser_spy = spyOn(android_parser.prototype, 'update_project');
-                cordova.prepare();
-                parser_spy.mostRecentCall.args[1](); // parser cb
-                expect(s).toHaveBeenCalledWith('after_prepare');
+                spyOn(shell, 'exec').andCallFake(function(cmd, options, callback) {
+                    callback(0, 'fucking eh');
+                });
+                cordova.emulate('android', function() {
+                     expect(hooker.prototype.fire).toHaveBeenCalledWith('after_emulate');
+                });
             });
         });
 
         describe('with no platforms added', function() {
             beforeEach(function() {
-                cordova.create(tempDir);
                 process.chdir(tempDir);
             });
             afterEach(function() {
                 process.chdir(cwd);
             });
             it('should not fire the hooker', function() {
+                spyOn(shell, 'exec');
                 expect(function() {
-                    cordova.prepare();
+                    cordova.emulate();
                 }).toThrow();
-                expect(s).not.toHaveBeenCalledWith('before_prepare');
-                expect(s).not.toHaveBeenCalledWith('after_prepare');
+                expect(s).not.toHaveBeenCalledWith('before_emulate');
+                expect(s).not.toHaveBeenCalledWith('after_emulate');
             });
         });
     });
