@@ -40,6 +40,22 @@ config_parser.prototype = {
             this.update();
         } else return this.doc.find('name').text;
     },
+    content: function(src) {
+        var content = this.doc.find('content');
+        if (src) {
+            content = content || new et.Element('content');
+            content.attrib.src = src;
+            this.update();
+        } else {
+            if (content === undefined) {
+                content = new et.Element('content');
+                content.attrib.src = 'index.html';
+                this.doc.getroot().append(content);
+                this.update();
+            }
+            return content.attrib.src;
+        }
+    },
     update:function() {
         fs.writeFileSync(this.path, this.doc.write({indent: 4}), 'utf-8');
     }
