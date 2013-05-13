@@ -90,7 +90,7 @@ module.exports.prototype = {
         var android_cfg_xml = new config_parser(this.android_config);
         // clean out all existing access elements first
         android_cfg_xml.access.remove();
-        // add only the ones specified in the app/config.xml file
+        // add only the ones specified in the www/config.xml file
         config.access.get().forEach(function(uri) {
             android_cfg_xml.access.add(uri);
         });
@@ -126,17 +126,9 @@ module.exports.prototype = {
         return path.join(this.path, 'assets', 'www');
     },
 
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
-    },
-
-    config_xml:function(){
-        return this.android_config;
-    },
-
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
-        var www = util.projectWww(projectRoot);
+        var www = path.join(projectRoot, 'www');
         var platformWww = path.join(this.path, 'assets');
         // remove stock platform assets
         shell.rm('-rf', this.www_dir());
@@ -152,19 +144,10 @@ module.exports.prototype = {
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var merges_path = path.join(util.appDir(projectRoot), 'merges', 'android');
+        var merges_path = path.join(projectRoot, 'merges', 'android');
         if (fs.existsSync(merges_path)) {
             var overrides = path.join(merges_path, '*');
             shell.cp('-rf', overrides, this.www_dir());
-        }
-    },
-
-    // update the overrides folder into the www folder
-    update_staging:function() {
-        var projectRoot = util.isCordova(this.path);
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
         }
     },
 
@@ -173,7 +156,6 @@ module.exports.prototype = {
         this.update_from_config(cfg);
         this.update_www();
         this.update_overrides();
-        this.update_staging();
         // delete any .svn folders copied over
         util.deleteSvnFolders(platformWww);
         if (callback) callback();

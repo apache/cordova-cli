@@ -24,8 +24,7 @@ var cordova = require('../cordova'),
     config_parser = require('../src/config_parser'),
     tempDir = path.join(__dirname, '..', 'temp'),
     et = require('elementtree'),
-    util = require('../src/util'),
-    xml = util.projectConfig(tempDir);
+    xml = path.join(tempDir, 'www', 'config.xml');
 
 
 describe('config.xml parser', function () {

@@ -53,47 +53,45 @@ A Cordova application built with cordova-cli will have the following directory s
 
     myApp/
     |--.cordova/
-    |-- app/
-    | |-- merges/
-    | | |-- android/
-    | | |-- blackberry/
-    | | `-- ios/
-    | |-- www/
-    | `-- config.xml
+    |-- merges/
+    | |-- android/
+    | |-- blackberry/
+    | `-- ios/
     |-- platforms/
     | |-- android/
     | |-- blackberry/
     | `-- ios/
-    `-- plugins/
+    |-- plugins/
+    `-- www/
 
 ## .cordova/
 This directory identifies a tree as a cordova project. Simple configuration information is stored in here (such as BlackBerry environment variables).
 
 Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find the project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a cordova project directory (same as git).
 
-## app/
+## merges/
+Platform-specific web assets (HTML, CSS and JavaScript files) are contained within appropriate subfolders in this directory. These are deployed during a `prepare` to the appropriate native directory.  Files placed under `merges/` will override matching files in the `www/` folder for the relevant platform. A quick example, assuming a project structure of:
 
-Contains your app-specific content: its `www/` files, any `merges/`, and the `config.xml`. If you want to keep your app in source control, this directory should be the top of the repository.
-
-
-### app/merges/
-Platform-specific web assets (HTML, CSS and JavaScript files) are contained within appropriate subfolders in this directory. These are deployed during a `prepare` to the appropriate native directory.  Files placed under `app/merges/` will override matching files in the `app/www/` folder for the relevant platform. A quick example, assuming a project structure of:
-
-    app/
-    |-- merges/
-    | |-- ios/
-    | | `-- app.js
-    | `-- android/
-    |   `-- android.js
-    `--www/
+    merges/
+    |-- ios/
+    | `-- app.js
+    |-- android/
+    | `-- android.js
+    www/
       `-- app.js
 
-After building the Android and iOS projects, the Android application will contain both `app.js` and `android.js`. However, the iOS application will only contain an `app.js`, and it will be the one from `app/merges/ios/app.js`, overriding the "common" `app.js` located inside `app/www/`.
+After building the Android and iOS projects, the Android application will contain both `app.js` and `android.js`. However, the iOS application will only contain an `app.js`, and it will override the "common" `app.js` located inside the `www/` folder above.
 
-### app/www/
-Contains the project's web artifacts, such as .html, .css and .js files. These are your main application assets. They will be copied on a `cordova prepare` to each platform's www directory.
+## platforms/
+Platforms added to your application will have the native application project structures laid out within this directory.
 
-### Your Blanket: app/config.xml
+## plugins/
+Any added plugins will be extracted or copied into this directory.
+
+## www/
+Contains the project's web artifacts, such as .html, .css and .js files. These are your main application assets. The config.xml file within this directory is very important; read on to the next section!
+
+### Your Blanket: www/config.xml 
 
 This file is what you should be editing to modify your application's metadata. Any time you run any cordova-cli commands, the tool will look at the contents of `config.xml` and use all relevant info from this file to define native application information. cordova-cli supports changing your application's data via the following elements inside the `config.xml` file:
 
@@ -101,12 +99,6 @@ This file is what you should be editing to modify your application's metadata. A
 - The package name (AKA bundle identifier or application id) can be modified via the `id` attribute from the top-level `<widget>` element.
 - The whitelist can be modified using the `<access>` elements. Make sure the `origin` attribute of your `<access>` element points to a valid URL (you can use `*` as wildcard). For more information on the whitelisting syntax, see the [docs.phonegap.com](http://docs.phonegap.com/en/2.2.0/guide_whitelist_index.md.html#Domain%20Whitelist%20Guide). You can use either attribute `uri` ([BlackBerry-proprietary](https://developer.blackberry.com/html5/documentation/access_element_834677_11.html)) or `origin` ([standards-compliant](http://www.w3.org/TR/widgets-access/#attributes)) to denote the domain.
 - Platform-specific preferences can be customized via `<preference>` tags. See [docs.phonegap.com](http://docs.phonegap.com/en/2.3.0/guide_project-settings_index.md.html#Project%20Settings) for a list of preferences you can use.
-
-## platforms/
-Platforms added to your application will have the native application project structures laid out within this directory.
-
-## plugins/
-Any added plugins will be extracted or copied into this directory.
 
 # Hooks
 
@@ -142,20 +134,19 @@ This example shows how to create a project from scratch named KewlApp with iOS a
 The directory structure of KewlApp now looks like this:
 
     KewlApp/
-    |-- .cordova/
-    |-- app/
-    | |-- merges/
-    | | |-- android/
-    | | `-- ios/
-    | `- www/
-    |    `-- index.html
-    |-- platforms/
-    | |-- android/
-    | | `-- …
-    | `-- ios/
-    |   `-- …
-    `-- plugins/
-      `-- Kewlio/
+    |- .cordova/
+    |- mergess/
+       |- android/
+       `- ios/
+    |- platforms/
+       |- android/
+       |  `- …
+       `- ios/
+          `- …
+    |- plugins/
+       `- Kewlio/
+    `- www/
+       `- index.html
 
 # Contributing
 

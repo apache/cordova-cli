@@ -113,6 +113,24 @@ describe('plugin command', function() {
             process.chdir(cwd);
         });
         describe('failure', function() {
+            it('should throw if your app has no platforms added', function() {
+                expect(function() {
+                    cordova.plugin('add', testPlugin);
+                }).toThrow('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
+            });
+            it('should throw if plugin does not support any app platforms', function() {
+                process.chdir(cordova_project);
+                shell.mv('-f', path.join(cordova_project, 'platforms', 'android'), tempDir);
+                shell.mv('-f', path.join(cordova_project, 'platforms', 'blackberry'), tempDir);
+                this.after(function() {
+                    process.chdir(cwd);
+                    shell.mv('-f', path.join(tempDir, 'android'), path.join(cordova_project, 'platforms'));
+                    shell.mv('-f', path.join(tempDir, 'blackberry'), path.join(cordova_project, 'platforms'));
+                });
+                expect(function() {
+                    cordova.plugin('add', androidPlugin);
+                }).toThrow('Plugin "android" does not support any of your application\'s platforms. Plugin platforms: android; your application\'s platforms: ios');
+            });
             it('should throw if plugin is already added to project', function() {
                 process.chdir(cordova_project);
                 var cb = jasmine.createSpy();
@@ -128,7 +146,7 @@ describe('plugin command', function() {
                 runs(function(){
                     expect(function() {
                         cordova.plugin('add', testPlugin);
-                    }).toThrow();
+                    }).toThrow('Plugin "test" already added to project.');
                 });
             });
             it('should throw if plugin does not have a plugin.xml', function() {
@@ -138,7 +156,7 @@ describe('plugin command', function() {
                 });
                 expect(function() {
                     cordova.plugin('add', fixturesDir);
-                }).toThrow();
+                }).toThrow('Plugin "fixtures" does not have a plugin.xml in the root. Plugin must support the Cordova Plugin Specification: https://github.com/alunny/cordova-plugin-spec');
             });
         });
     });

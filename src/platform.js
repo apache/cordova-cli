@@ -26,7 +26,6 @@ var config_parser     = require('./config_parser'),
     android_parser    = require('./metadata/android_parser'),
     ios_parser        = require('./metadata/ios_parser'),
     blackberry_parser = require('./metadata/blackberry_parser'),
-    plugman           = require('plugman'),
     shell             = require('shelljs');
 
 var parsers = {
@@ -46,7 +45,7 @@ module.exports = function platform(command, targets, callback) {
         end;
 
     var createOverrides = function(target) {
-        shell.mkdir('-p', path.join(cordova_util.appDir(projectRoot), 'merges', target));
+        shell.mkdir('-p', path.join(projectRoot, 'merges', target));
     };
 
     if (arguments.length === 0) command = 'ls';
@@ -57,7 +56,7 @@ module.exports = function platform(command, targets, callback) {
         });
     }
 
-    var xml = cordova_util.projectConfig(projectRoot);
+    var xml = path.join(projectRoot, 'www', 'config.xml');
     var cfg = new config_parser(xml);
 
     switch(command) {
@@ -87,12 +86,11 @@ module.exports = function platform(command, targets, callback) {
                         // TODO: eventually refactor to allow multiple versions to be created.
                         // Run platform's create script
                         var bin = path.join(cordova_util.libDirectory, 'cordova-' + target, 'bin', 'create');
-                        var args = (target=='ios') ? '--arc' : '';
                         var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
                         var name = cfg.name().replace(/\W/g,'_');
                         // TODO: PLATFORM LIBRARY INCONSISTENCY: order/number of arguments to create
                         // TODO: keep tabs on CB-2300
-                        var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, (target=='blackberry'?name:pkg), name);
+                        var command = util.format('"%s" "%s" "%s" "%s"', bin, output, (target=='blackberry'?name:pkg), name);
 
                         shell.exec(command, {silent:true,async:true}, function(code, create_output) {
                             if (code > 0) {
@@ -103,17 +101,6 @@ module.exports = function platform(command, targets, callback) {
                             parser.update_project(cfg, function() {
                                 createOverrides(target);
                                 hooks.fire('after_platform_add');
-
-                                // Install all currently installed plugins into this new platform.
-                                var pluginsDir = path.join(projectRoot, 'plugins');
-                                var plugins = fs.readdirSync(pluginsDir);
-                                plugins && plugins.forEach(function(plugin) {
-                                    if (!fs.statSync(path.join(projectRoot, 'plugins', plugin)).isDirectory()) {
-                                        return;
-                                    }
-
-                                    plugman.install(target, output, path.basename(plugin), pluginsDir, {}, parser.staging_dir());
-                                });
                                 end();
                             });
                         });
@@ -126,7 +113,7 @@ module.exports = function platform(command, targets, callback) {
             targets.forEach(function(target) {
                 hooks.fire('before_platform_rm');
                 shell.rm('-rf', path.join(projectRoot, 'platforms', target));
-                shell.rm('-rf', path.join(cordova_util.appDir(projectRoot), 'merges', target));
+                shell.rm('-rf', path.join(projectRoot, 'merges', target));
                 hooks.fire('after_platform_rm');
             });
             break;

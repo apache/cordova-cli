@@ -136,7 +136,7 @@ describe('platform command', function() {
                 shell.mkdir('-p', a_path);
                 fs.writeFileSync(path.join(a_path, 'poo.xcodeproj'), 'hi', 'utf-8');
                 shell.mkdir('-p', path.join(a_path, 'poo'));
-                shell.cp(util.projectConfig(cordova_project), path.join(a_path, 'poo', 'config.xml'));
+                shell.cp(path.join(cordova_project, 'www', 'config.xml'), path.join(a_path, 'poo', 'config.xml'));
                 sh.mostRecentCall.args[2](0, '');
             };
             beforeEach(function() {
@@ -166,7 +166,7 @@ describe('platform command', function() {
                 shell.mkdir('-p', path.join(a_path, 'www'));
                 fs.writeFileSync(path.join(a_path, 'project.properties'), 'hi', 'utf-8');
                 fs.writeFileSync(path.join(a_path, 'build.xml'), 'hi', 'utf-8');
-                shell.cp(util.projectConfig(cordova_project), path.join(a_path, 'www', 'config.xml'));
+                shell.cp(path.join(cordova_project, 'www', 'config.xml'), path.join(a_path, 'www', 'config.xml'));
                 sh.mostRecentCall.args[2](0, '');
             };
             beforeEach(function() {

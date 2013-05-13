@@ -29,6 +29,7 @@ var cordova_util      = require('./util'),
     hooker            = require('./hooker'),
     n                 = require('ncallbacks'),
     prompt            = require('prompt'),
+    plugin_loader = require('./plugin_loader'),
     util              = require('util');
 
 var parsers = {
@@ -44,7 +45,7 @@ module.exports = function prepare(platforms, callback) {
         throw new Error('Current working directory is not a Cordova-based project.');
     }
 
-    var xml = cordova_util.projectConfig(projectRoot);
+    var xml = path.join(projectRoot, 'www', 'config.xml');
     var cfg = new config_parser(xml);
 
     if (arguments.length === 0 || (platforms instanceof Array && platforms.length === 0)) {
@@ -69,12 +70,13 @@ module.exports = function prepare(platforms, callback) {
         if (callback) callback();
     });
 
-    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'main.js');
-
     // Iterate over each added platform
     platforms.forEach(function(platform) {
         var platformPath = path.join(projectRoot, 'platforms', platform);
         var parser = new parsers[platform](platformPath);
-        parser.update_project(cfg, end);
+        parser.update_project(cfg, function() {
+            plugin_loader(platform);
+            end();
+        });
     });
 };
