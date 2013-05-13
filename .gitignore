@@ -7,6 +7,9 @@ spec/fixtures/projects/cordova
 lib/cordova-android/framework/bin
 lib/cordova-android/framework/gen
 lib/cordova-android/framework/local.properties
+lib/cordova-android/framework/project.properties
+lib/cordova-wp7/example
+lib/cordova-wp8/example
 .idea/*
 spec/fixtures/*
 .gitcore

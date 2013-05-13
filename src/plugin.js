@@ -144,7 +144,7 @@ module.exports = function plugin(command, targets, callback) {
                     // Iterate over all matchin app-plugin platforms in the project and uninstall the
                     // plugin.
                     intersection.forEach(function(platform) {
-                        var cmd = util.format('%s --platform %s --project "%s" --plugin "%s" --remove', cli, platform, path.join(projectRoot, 'platforms', platform), targetPath);
+                        var cmd = util.format('node %s --platform %s --project "%s" --plugin "%s" --remove', cli, platform, path.join(projectRoot, 'platforms', platform), targetPath);
                         var plugin_cli = shell.exec(cmd, {silent:true});
                         if (plugin_cli.code > 0) throw new Error('An error occured during plugin uninstallation for ' + platform + '. ' + plugin_cli.output);
                     });

@@ -1,3 +1,4 @@
+<<<<<<< HEAD:lib/cordova-android/bin/templates/cordova/cordova.bat
 :: Licensed to the Apache Software Foundation (ASF) under one
 :: or more contributor license agreements.  See the NOTICE file
 :: distributed with this work for additional information
@@ -30,3 +31,7 @@ ECHO Android SDK: http://developer.android.com
 ECHO Apache ant: http://ant.apache.org
 EXIT /B 1
 :END
+=======
+@echo off
+cscript "%~dp0\buildjs.js" %* //nologo
+>>>>>>> [CB-2078] Wp7 + wp8 support and future branch update:lib/cordova-wp7/tooling/scripts/buildjs.bat

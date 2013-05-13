@@ -76,5 +76,14 @@ module.exports = {
         }
 
         return plugins;
+    },
+    projectWww: function(projectDir) {
+        return (projectDir? path.join(projectDir, 'app', 'www') : path.join('app', 'www'));
+    },
+    appDir: function(projectDir) {
+        return (projectDir? path.join(projectDir, 'app') : path.join('app'));
+    },
+    projectConfig: function(projectDir) {
+        return (projectDir? path.join(projectDir, 'app', 'config.xml') : path.join('app', 'config.xml'));
     }
 };

@@ -1,3 +1,4 @@
+<<<<<<< HEAD:lib/cordova-android/bin/templates/cordova/clean.bat
 :: Licensed to the Apache Software Foundation (ASF) under one
 :: or more contributor license agreements.  See the NOTICE file
 :: distributed with this work for additional information
@@ -16,3 +17,7 @@
 :: under the License.
 
 %~dp0\cordova.bat clean
+=======
+@echo off
+cscript "%~dp0\new.js" %* //nologo
+>>>>>>> [CB-2078] Wp7 + wp8 support and future branch update:lib/cordova-wp7/tooling/scripts/new.bat
