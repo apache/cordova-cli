@@ -29,6 +29,7 @@ var cordova_util      = require('./util'),
     hooker            = require('./hooker'),
     n                 = require('ncallbacks'),
     prompt            = require('prompt'),
+    plugman           = require('plugman'),
     util              = require('util');
 
 var parsers = {
@@ -69,12 +70,16 @@ module.exports = function prepare(platforms, callback) {
         if (callback) callback();
     });
 
-    var cli = path.join(__dirname, '..', 'node_modules', 'plugman', 'main.js');
-
     // Iterate over each added platform
     platforms.forEach(function(platform) {
         var platformPath = path.join(projectRoot, 'platforms', platform);
         var parser = new parsers[platform](platformPath);
-        parser.update_project(cfg, end);
+
+        parser.update_project(cfg, function() {
+            // Call plugman --prepare for this platform.
+            plugman.prepare(platformPath, platform, path.join(projectRoot, 'plugins'));
+
+            end();
+        });
     });
 };
