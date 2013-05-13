@@ -50,19 +50,12 @@ module.exports = function plugin(command, targets, callback) {
     var platforms = cordova_util.listPlatforms(projectRoot);
 
     // Massage plugin name(s) / path(s)
-    var pluginPath, plugins, names = [];
+    var pluginPath, plugins;
     pluginPath = path.join(projectRoot, 'plugins');
     plugins = ls(pluginPath);
-    if (targets) {
-        if (!(targets instanceof Array)) targets = [targets];
-        targets.forEach(function(target) {
-            if (target[target.length - 1] == path.sep) {
-                target = target.substring(0, target.length - 1);
-            }
 
-            var targetName = target.substr(target.lastIndexOf(path.sep) + 1);
-            names.push(targetName);
-        });
+    if (targets && !(targets instanceof Array)) {
+        targets = [targets];
     }
 
     switch(command) {
@@ -85,17 +78,22 @@ module.exports = function plugin(command, targets, callback) {
                 }
 
                 // Fetch the plugin first.
-                plugman.fetch(target, pluginsDir, false);
-                
-                // Iterate over all platforms in the project and install the plugin.
-                platforms.forEach(function(platform) {
-                    var platformRoot = path.join(projectRoot, 'platforms', platform);
-                    var parser = new parsers[platform](platformRoot);
-                    plugman.install(platform, platformRoot,
-                                    names[index], pluginsDir, {}, parser.staging_dir());
-                });
+                plugman.fetch(target, pluginsDir, false /* no link */, undefined /* subdir */, function(err, dir) {
 
-                hooks.fire('after_plugin_add');
+                    if (err) {
+                        throw new Error('Error fetching plugin: ' + err);
+                    }
+
+                    // Iterate over all platforms in the project and install the plugin.
+                    platforms.forEach(function(platform) {
+                        var platformRoot = path.join(projectRoot, 'platforms', platform);
+                        var parser = new parsers[platform](platformRoot);
+                        plugman.install(platform, platformRoot,
+                                        path.basename(dir), pluginsDir, {}, parser.staging_dir());
+                    });
+
+                    hooks.fire('after_plugin_add');
+                });
             });
             if (callback) callback();
             break;
@@ -105,10 +103,9 @@ module.exports = function plugin(command, targets, callback) {
                 throw new Error('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
             }
             targets.forEach(function(target, index) {
-                var targetName = names[index];
                 // Check if we have the plugin.
-                if (plugins.indexOf(targetName) > -1) {
-                    var targetPath = path.join(pluginPath, targetName);
+                if (plugins.indexOf(target) > -1) {
+                    var targetPath = path.join(pluginPath, target);
                     hooks.fire('before_plugin_rm');
                     // Check if there is at least one match between plugin
                     // supported platforms and app platforms
@@ -125,15 +122,15 @@ module.exports = function plugin(command, targets, callback) {
                     intersection.forEach(function(platform) {
                         var platformRoot = path.join(projectRoot, 'platforms', platform);
                         var parser = new parsers[platform](platformRoot);
-                        plugman.uninstall(platform, platformRoot, targetName, path.join(projectRoot, 'plugins'), {}, parser.staging_dir());
+                        plugman.uninstall(platform, platformRoot, target, path.join(projectRoot, 'plugins'), {}, parser.staging_dir());
                     });
 
                     // Finally remove the plugin dir from plugins/
-                    plugman.remove(targetName, path.join(projectRoot, 'plugins'));
+                    plugman.remove(target, path.join(projectRoot, 'plugins'));
 
                     hooks.fire('after_plugin_rm');
                 } else {
-                    throw new Error('Plugin "' + targetName + '" not added to project.');
+                    throw new Error('Plugin "' + target + '" not added to project.');
                 }
             });
             if (callback) callback();
