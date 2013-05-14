@@ -22,7 +22,7 @@ var cordova = require('../cordova'),
     fs = require('fs'),
     plugin_parser = require('../src/plugin_parser'),
     et = require('elementtree'),
-    xml = path.join(__dirname, 'fixtures', 'plugins', 'test', 'plugin.xml');
+    xml = path.join(__dirname, '..', 'fixtures', 'plugins', 'test', 'plugin.xml');
 
 describe('plugin.xml parser', function () {
     it('should read a proper plugin.xml file', function() {
