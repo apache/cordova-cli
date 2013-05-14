@@ -26,12 +26,16 @@ var config_parser     = require('./config_parser'),
     android_parser    = require('./metadata/android_parser'),
     ios_parser        = require('./metadata/ios_parser'),
     blackberry_parser = require('./metadata/blackberry_parser'),
+    wp7_parser      = require('./metadata/wp7_parser'),
+    wp8_parser      = require('./metadata/wp8_parser'),
     shell             = require('shelljs');
 
 var parsers = {
     "android":android_parser,
     "ios":ios_parser,
-    "blackberry":blackberry_parser
+    "blackberry":blackberry_parser,
+    "wp7":wp7_parser,
+    "wp8":wp8_parser
 };
 
 module.exports = function platform(command, targets, callback) {

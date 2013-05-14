@@ -19,14 +19,11 @@
 var cordova_util      = require('./util'),
     path              = require('path'),
     config_parser     = require('./config_parser'),
-    platform          = require('./platform'),
     fs                = require('fs'),
     shell             = require('shelljs'),
     et                = require('elementtree'),
     hooker            = require('./hooker'),
-    n                 = require('ncallbacks'),
-    prompt            = require('prompt'),
-    util              = require('util');
+    n                 = require('ncallbacks');
 
 
 function shell_out_to_debug(projectRoot, platform, callback) {

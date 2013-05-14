@@ -16,19 +16,16 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../cordova'),
+var cordova = require('../../cordova'),
     et = require('elementtree'),
     shell = require('shelljs'),
     path = require('path'),
     fs = require('fs'),
-    config_parser = require('../src/config_parser'),
-    android_parser = require('../src/metadata/android_parser'),
-    ios_parser = require('../src/metadata/ios_parser'),
-    blackberry_parser = require('../src/metadata/blackberry_parser'),
-    hooker = require('../src/hooker'),
-    fixtures = path.join(__dirname, 'fixtures'),
+    config_parser = require('../../src/config_parser'),
+    hooker = require('../../src/hooker'),
+    fixtures = path.join(__dirname, '..', 'fixtures'),
     hooks = path.join(fixtures, 'hooks'),
-    tempDir = path.join(__dirname, '..', 'temp'),
+    tempDir = path.join(__dirname, '..', '..', 'temp'),
     cordova_project = path.join(fixtures, 'projects', 'cordova');
 
 var cwd = process.cwd();
@@ -36,7 +33,7 @@ var cwd = process.cwd();
 describe('prepare command', function() {
     beforeEach(function() {
         shell.rm('-rf', tempDir);
-        shell.mkdir('-p', tempDir);
+        cordova.create(tempDir);
     });
 
     it('should not run inside a Cordova-based project with no added platforms', function() {
@@ -44,7 +41,6 @@ describe('prepare command', function() {
             process.chdir(cwd);
         });
 
-        cordova.create(tempDir);
         process.chdir(tempDir);
         expect(function() {
             cordova.prepare();
@@ -54,20 +50,17 @@ describe('prepare command', function() {
     it('should run inside a Cordova-based project with at least one added platform', function() {
         // move platform project fixtures over to fake cordova into thinking platforms were added
         // TODO: possibly add this to helper?
-        shell.mv('-f', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir));
         this.after(function() {
             process.chdir(cwd);
-            shell.mv('-f', path.join(tempDir, 'blackberry'), path.join(cordova_project, 'platforms', 'blackberry'));
         });
 
-        process.chdir(cordova_project);
-
-        var a_parser_spy = spyOn(android_parser.prototype, 'update_project');
-        var i_parser_spy = spyOn(ios_parser.prototype, 'update_project');
+        spyOn(shell, 'exec');
         expect(function() {
+            shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
+            process.chdir(tempDir);
+            var a_parser_spy = spyOn(android_parser.prototype, 'update_project');
             cordova.prepare();
             expect(a_parser_spy).toHaveBeenCalled();
-            expect(i_parser_spy).toHaveBeenCalled();
         }).not.toThrow();
     });
     it('should not run outside of a Cordova-based project', function() {
@@ -91,13 +84,11 @@ describe('prepare command', function() {
 
         describe('when platforms are added', function() {
             beforeEach(function() {
-                shell.mv('-f', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir));
-                shell.mv('-f', path.join(cordova_project, 'platforms', 'ios'), path.join(tempDir));
-                process.chdir(cordova_project);
+                shell.cp('-rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
+                process.chdir(tempDir);
             });
             afterEach(function() {
-                shell.mv('-f', path.join(tempDir, 'blackberry'), path.join(cordova_project, 'platforms', 'blackberry'));
-                shell.mv('-f', path.join(tempDir, 'ios'), path.join(cordova_project, 'platforms', 'ios'));
+                shell.rm('-rf', path.join(tempDir, 'platforms', 'android'));
                 process.chdir(cwd);
             });
 
@@ -106,15 +97,16 @@ describe('prepare command', function() {
                 expect(s).toHaveBeenCalledWith('before_prepare');
             });
             it('should fire after hooks through the hooker module', function() {
-                var parser_spy = spyOn(android_parser.prototype, 'update_project');
-                cordova.prepare();
-                parser_spy.mostRecentCall.args[1](); // parser cb
-                expect(s).toHaveBeenCalledWith('after_prepare');
+                spyOn(shell, 'exec');
+                cordova.prepare('android', function() {
+                     expect(hooker.prototype.fire).toHaveBeenCalledWith('after_prepare');
+                });
             });
         });
 
         describe('with no platforms added', function() {
             beforeEach(function() {
+                shell.rm('-rf', tempDir);
                 cordova.create(tempDir);
                 process.chdir(tempDir);
             });

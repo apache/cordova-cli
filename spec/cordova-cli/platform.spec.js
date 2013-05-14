@@ -16,22 +16,21 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../cordova'),
+var cordova = require('../../cordova'),
     path = require('path'),
     shell = require('shelljs'),
     request = require('request'),
     fs = require('fs'),
     et = require('elementtree'),
-    config_parser = require('../src/config_parser'),
+    config_parser = require('../../src/config_parser'),
     helper = require('./helper'),
-    util = require('../src/util'),
-    hooker = require('../src/hooker'),
-    platforms = require('../platforms'),
-    tempDir = path.join(__dirname, '..', 'temp');
-    android_parser = require('../src/metadata/android_parser'),
-    ios_parser = require('../src/metadata/ios_parser'),
-    cordova_project = path.join(__dirname, 'fixtures', 'projects', 'cordova'),
-    blackberry_parser = require('../src/metadata/blackberry_parser');
+    util = require('../../src/util'),
+    hooker = require('../../src/hooker'),
+    platforms = require('../../platforms'),
+    tempDir = path.join(__dirname, '..', '..', 'temp');
+    android_parser = require('../../src/metadata/android_parser'),
+    blackberry_parser = require('../../src/metadata/blackberry_parser'),
+    cordova_project = path.join(__dirname, '..', 'fixtures', 'projects', 'cordova');
 
 var cwd = process.cwd();
 
@@ -84,7 +83,11 @@ describe('platform command', function() {
         });
 
         it('should list out added platforms in a project', function() {
-            expect(cordova.platform('list').length).toEqual(3);
+            process.chdir(tempDir);
+            cordova.create(tempDir);
+            shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
+            shell.cp('-Rf', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir, 'platforms'));
+            expect(cordova.platform('list').length).toEqual(2);
         });
     });
 
@@ -97,109 +100,23 @@ describe('platform command', function() {
         afterEach(function() {
             process.chdir(cwd);
         });
-
-        describe('android', function() {
-            var sh, cr;
-            var fake_reqs_check = function() {
-                cr.mostRecentCall.args[0](false);
-            };
-            var fake_create = function(a_path) {
-                shell.mkdir('-p', a_path);
-                fs.writeFileSync(path.join(a_path, 'AndroidManifest.xml'), 'hi', 'utf-8');
-                sh.mostRecentCall.args[2](0, '');
-            };
-            beforeEach(function() {
-                sh = spyOn(shell, 'exec');
-                cr = spyOn(android_parser, 'check_requirements');
-            });
-
-            it('should shell out to android ./bin/create', function() {
-                cordova.platform('add', 'android');
-                fake_reqs_check();
-                var shell_cmd = sh.mostRecentCall.args[0];
-                expect(shell_cmd).toMatch(/android\/bin\/create/);
-            });
-            it('should call android_parser\'s update_project', function() {
-                var s = spyOn(android_parser.prototype, 'update_project');
-                cordova.platform('add', 'android');
-                fake_reqs_check();
-                fake_create(path.join(tempDir, 'platforms', 'android'));
-                expect(s).toHaveBeenCalled();
-            });
-        });
-        describe('ios', function() {
-            var sh, cr;
-            var fake_reqs_check = function() {
-                cr.mostRecentCall.args[0](false);
-            };
-            var fake_create = function(a_path) {
-                shell.mkdir('-p', a_path);
-                fs.writeFileSync(path.join(a_path, 'poo.xcodeproj'), 'hi', 'utf-8');
-                shell.mkdir('-p', path.join(a_path, 'poo'));
-                shell.cp(path.join(cordova_project, 'www', 'config.xml'), path.join(a_path, 'poo', 'config.xml'));
-                sh.mostRecentCall.args[2](0, '');
-            };
-            beforeEach(function() {
-                sh = spyOn(shell, 'exec');
-                cr = spyOn(ios_parser, 'check_requirements');
-            });
-            it('should shell out to ios ./bin/create', function() {
-                cordova.platform('add', 'ios');
-                fake_reqs_check();
-                var shell_cmd = sh.mostRecentCall.args[0];
-                expect(shell_cmd).toMatch(/ios\/bin\/create/);
-            });
-            it('should call ios_parser\'s update_project', function() {
-                var s = spyOn(ios_parser.prototype, 'update_project');
-                cordova.platform('add', 'ios');
-                fake_reqs_check();
-                fake_create(path.join(tempDir, 'platforms', 'ios'));
-                expect(s).toHaveBeenCalled();
-            });
-        });
-        describe('blackberry', function() {
-            var sh, cr;
-            var fake_reqs_check = function() {
-                cr.mostRecentCall.args[0](false);
-            };
-            var fake_create = function(a_path) {
-                shell.mkdir('-p', path.join(a_path, 'www'));
-                fs.writeFileSync(path.join(a_path, 'project.properties'), 'hi', 'utf-8');
-                fs.writeFileSync(path.join(a_path, 'build.xml'), 'hi', 'utf-8');
-                shell.cp(path.join(cordova_project, 'www', 'config.xml'), path.join(a_path, 'www', 'config.xml'));
-                sh.mostRecentCall.args[2](0, '');
-            };
-            beforeEach(function() {
-                sh = spyOn(shell, 'exec');
-                cr = spyOn(blackberry_parser, 'check_requirements');
-            });
-            it('should shell out to blackberry bin/create', function() {
-                cordova.platform('add', 'blackberry');
-                fake_reqs_check();
-                var shell_cmd = sh.mostRecentCall.args[0];
-                expect(shell_cmd).toMatch(/blackberry\/bin\/create/);
-            });
-            it('should call blackberry_parser\'s update_project', function() {
-                var s = spyOn(blackberry_parser.prototype, 'update_project');
-                cordova.platform('add', 'blackberry');
-                fake_reqs_check();
-                fake_create(path.join(tempDir, 'platforms', 'blackberry'));
-                expect(s).toHaveBeenCalled();
-            });
-        });
+        
         it('should handle multiple platforms', function() {
             var arc = spyOn(android_parser, 'check_requirements');
-            var irc = spyOn(ios_parser, 'check_requirements');
+            var brc = spyOn(blackberry_parser, 'check_requirements');
             var sh = spyOn(shell, 'exec');
-            cordova.platform('add', ['android', 'ios']);
+            cordova.platform('add', ['android', 'blackberry']);
             arc.mostRecentCall.args[0](false);
-            irc.mostRecentCall.args[0](false);
-            expect(sh.argsForCall[0][0]).toMatch(/android\/bin\/create/);
-            expect(sh.argsForCall[1][0]).toMatch(/ios\/bin\/create/);
+            brc.mostRecentCall.args[0](false);
+            var android_create = path.join('android', 'bin', 'create');
+            var bb_create      = path.join('blackberry', 'bin', 'create');
+            expect(sh.argsForCall[0][0]).toContain(android_create);
+            expect(sh.argsForCall[1][0]).toContain(bb_create);
         });
     });
 
-    describe('`remove`',function() { 
+    describe('`remove`',function() {
+        var num_platforms = fs.readdirSync(path.join(cordova_project, 'platforms')).length; 
         beforeEach(function() {
             process.chdir(cordova_project);
             shell.cp('-rf', path.join(cordova_project, 'platforms' ,'*'), tempDir);
@@ -212,11 +129,11 @@ describe('platform command', function() {
 
         it('should remove a supported and added platform', function() {
             cordova.platform('remove', 'android');
-            expect(cordova.platform('ls').length).toEqual(2);
+            expect(cordova.platform('ls').length).toEqual(num_platforms - 1);
         });
         it('should be able to remove multiple platforms', function() {
-            cordova.platform('remove', ['android','ios']);
-            expect(cordova.platform('ls').length).toEqual(1);
+            cordova.platform('remove', ['android','blackberry']);
+            expect(cordova.platform('ls').length).toEqual(num_platforms - 2);
         });
     });
 
@@ -280,7 +197,7 @@ describe('platform command', function() {
 });
 
 describe('platform.supports(name, callback)', function() {
-    var androidParser = require('../src/metadata/android_parser');
+    var androidParser = require('../../src/metadata/android_parser');
 
     beforeEach(function() {
         spyOn(androidParser, 'check_requirements');
