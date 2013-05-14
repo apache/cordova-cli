@@ -25,6 +25,8 @@ var path            = require('path'),
     android_parser  = require('./metadata/android_parser'),
     blackberry_parser= require('./metadata/blackberry_parser'),
     ios_parser      = require('./metadata/ios_parser'),
+    wp7_parser      = require('./metadata/wp7_parser'),
+    wp8_parser      = require('./metadata/wp8_parser'),
     exec            = require('child_process').exec,
     et              = require('elementtree');
 
@@ -88,6 +90,13 @@ module.exports = function plugin_loader(platform) {
         case 'blackberry':
             parser = new blackberry_parser(path.join(projectRoot, 'platforms', 'blackberry'));
             break;
+        case 'wp7':
+            parser = new wp7_parser(path.join(projectRoot, 'platforms', 'wp7'));
+            break;
+        case 'wp8':
+            parser = new wp8_parser(path.join(projectRoot, 'platforms', 'wp8'));
+            break;
+
     }
 
     plugins && plugins.forEach(function(plugin) {

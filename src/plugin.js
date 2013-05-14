@@ -108,6 +108,7 @@ module.exports = function plugin(command, targets, callback) {
                 intersection.forEach(function(platform) {
                     var cmd = util.format('%s --platform %s --project "%s" --plugin "%s"', cli, platform, path.join(projectRoot, 'platforms', platform), target);
                     var plugin_cli = shell.exec(cmd, {silent:true});
+                    if(!plugin_cli) throw new Error('Plugman command failed to execute for ' + platform + '.');
                     if (plugin_cli.code > 0) throw new Error('An error occured during plugin installation for ' + platform + '. ' + plugin_cli.output);
                 });
 

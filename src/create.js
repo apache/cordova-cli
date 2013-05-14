@@ -45,7 +45,7 @@ module.exports = function create (dir, id, name) {
     id = id || DEFAULT_ID;
     name = name || DEFAULT_NAME;
 
-    if (!(dir && (dir[0] == '~' || dir[0] == '/'))) {
+    if (!(dir && (dir[0] == '~' || dir[0] == '/' || dir[0] + dir[1] == 'C:'))) {
         dir = dir ? path.join(process.cwd(), dir) : process.cwd();
     }
 

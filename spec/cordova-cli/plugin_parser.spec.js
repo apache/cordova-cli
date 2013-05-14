@@ -17,10 +17,10 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../cordova'),
+var cordova = require('../../cordova'),
     path = require('path'),
     fs = require('fs'),
-    plugin_parser = require('../src/plugin_parser'),
+    plugin_parser = require('../../src/plugin_parser'),
     et = require('elementtree'),
     xml = path.join(__dirname, '..', 'fixtures', 'plugins', 'test', 'plugin.xml');
 

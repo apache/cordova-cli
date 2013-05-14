@@ -76,5 +76,11 @@ module.exports = {
         }
 
         return plugins;
+    },
+    projectWww: function(projectDir) {
+        return path.join(projectDir, 'www');
+    },
+    projectConfig: function(projectDir) {
+        return path.join(projectDir, 'www', 'config.xml');
     }
 };

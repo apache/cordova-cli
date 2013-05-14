@@ -25,6 +25,8 @@ var util      = require('./src/util'),
     a_parser  = require('./src/metadata/android_parser'),
     b_parser  = require('./src/metadata/blackberry_parser'),
     i_parser  = require('./src/metadata/ios_parser'),
+    wp7_parser= require('./src/metadata/wp7_parser'),
+    wp8_parser= require('./src/metadata/wp8_parser'),
     n         = require('ncallbacks'),
     path      = require('path'),
     fs        = require('fs'),
@@ -35,7 +37,9 @@ var util      = require('./src/util'),
 var min_reqs = {
     "android":a_parser.check_requirements,
     "ios":i_parser.check_requirements,
-    "blackberry":b_parser.check_requirements
+    "blackberry":b_parser.check_requirements,
+    "wp7":wp7_parser.check_requirements,
+    "wp8":wp7_parser.check_requirements
 }
 
 // Create native projects using bin/create
@@ -68,16 +72,15 @@ var end = n(platforms.length, function() {
 platforms.forEach(function(platform) {
     min_reqs[platform](function(err) {
         if (err) {
-            console.error('WARNING: Your system does not meet requirements to create ' + platform + 'projects. See error output below.');
+            console.error('WARNING: Your system does not meet requirements to create ' + platform + ' projects. See error output below.');
             console.error(err);
             console.error('SKIPPING ' + platform + ' bootstrap.');
         } else {
             console.log('SUCCESS: Minimum requirements for ' + platform + ' met.');
             var fix_path = path.join(tempDir, platform + '_fixture');
-            var create = path.join(util.libDirectory, 'cordova-' + platform, 'bin', 'create'); 
+            var create = path.join(util.libDirectory, 'cordova-' + platform, 'bin', 'create');
             console.log('BOOTSTRAPPING ' + platform + '...');
             var cmd = create + ' "' + fix_path + '" org.apache.cordova.cordovaExample cordovaExample';
-            if (platform == 'blackberry') cmd = create + ' "' + fix_path + '" cordovaExample';
             shell.exec(cmd, {silent:true, async:true}, function(code, output) {
                 if (code > 0) {
                     console.error('ERROR! Could not create a native ' + platform + ' project test fixture. See below for error output.');

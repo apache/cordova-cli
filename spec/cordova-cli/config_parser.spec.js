@@ -17,14 +17,15 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../cordova'),
+var cordova = require('../../cordova'),
     path = require('path'),
     fs = require('fs'),
     shell = require('shelljs'),
-    config_parser = require('../src/config_parser'),
-    tempDir = path.join(__dirname, '..', 'temp'),
+    config_parser = require('../../src/config_parser'),
+    tempDir = path.join(__dirname, '..', '..', 'temp'),
     et = require('elementtree'),
-    xml = path.join(tempDir, 'www', 'config.xml');
+    util = require('../../src/util'),
+    xml = util.projectConfig(tempDir);
 
 
 describe('config.xml parser', function () {
