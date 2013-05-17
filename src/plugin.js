@@ -78,8 +78,7 @@ module.exports = function plugin(command, targets, callback) {
                 }
 
                 // Fetch the plugin first.
-                plugman.fetch(target, pluginsDir, false /* no link */, undefined /* subdir */, function(err, dir) {
-
+                plugman.fetch(target, pluginsDir, false /* no link */, undefined /* subdir */, undefined /* git_ref */, function(err, dir) {
                     if (err) {
                         throw new Error('Error fetching plugin: ' + err);
                     }
