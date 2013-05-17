@@ -46,9 +46,8 @@ module.exports = function create (dir, id, name) {
     id = id || DEFAULT_ID;
     name = name || DEFAULT_NAME;
 
-    if (!(dir && (dir[0] == '~' || dir[0] == '/'))) {
-        dir = dir ? path.join(process.cwd(), dir) : process.cwd();
-    }
+    // Make absolute.
+    dir = path.resolve(dir);
 
     var dotCordova = path.join(dir, '.cordova');
 
