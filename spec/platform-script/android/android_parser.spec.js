@@ -98,6 +98,23 @@ describe('android project parser', function() {
             expect(fs.existsSync(javs)).toBe(true);
             expect(fs.readFileSync(javs, 'utf-8')).toMatch(/package ca.filmaj.dewd/i);
         });
+        it('should handle unsupported "-" in the application package name', function() {
+            var javs = path.join(android_path, 'src', 'ca', 'filmaj', 'the_dewd', 'cordovaExample.java');
+            var orig_javs = path.join(android_path, 'src', 'org', 'apache', 'cordova', 'cordovaExample', 'cordovaExample.java');
+            var orig_contents = fs.readFileSync(orig_javs, 'utf-8');
+            this.after(function() {
+                fs.writeFileSync(orig_javs, orig_contents, 'utf-8');
+                shell.rm('-rf', path.join(android_path, 'src', 'ca'));
+            });
+            config.packageName('ca.filmaj.the-dewd');
+            project.update_from_config(config);
+
+            var manifest = new et.ElementTree(et.XML(fs.readFileSync(android_manifest, 'utf-8')));
+            expect(manifest.getroot().attrib.package).toEqual('ca.filmaj.the_dewd');
+
+            expect(fs.existsSync(javs)).toBe(true);
+            expect(fs.readFileSync(javs, 'utf-8')).toMatch(/package ca.filmaj.the_dewd/i);
+        });
         it('should update the whitelist properly', function() {
             config.access.remove('*');
             config.access.add('http://apache.org');
