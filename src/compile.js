@@ -82,5 +82,3 @@ module.exports = function compile(platforms, callback) {
         shell_out_to_debug(projectRoot, platform, end);
     });
 };
-
-
