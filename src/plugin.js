@@ -88,7 +88,7 @@ module.exports = function plugin(command, targets, callback) {
                         var platformRoot = path.join(projectRoot, 'platforms', platform);
                         var parser = new parsers[platform](platformRoot);
                         plugman.install(platform, platformRoot,
-                                        path.basename(dir), pluginsDir, {}, parser.staging_dir());
+                                        path.basename(dir), pluginsDir, undefined, {}, parser.staging_dir());
                     });
 
                     hooks.fire('after_plugin_add');
