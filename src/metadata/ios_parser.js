@@ -55,7 +55,8 @@ module.exports = function ios_parser(project) {
     }
     this.path = project;
     this.pbxproj = path.join(this.xcodeproj, 'project.pbxproj');
-    this.config = new config_parser(path.join(this.cordovaproj, 'config.xml'));
+    this.config_path = path.join(this.cordovaproj, 'config.xml');
+    this.config = new config_parser(this.config_path);
 };
 
 module.exports.check_requirements = function(callback) {
@@ -137,9 +138,17 @@ module.exports.prototype = {
         return path.join(this.path, 'www');
     },
 
+    staging_dir: function() {
+        return path.join(this.path, '.staging', 'www');
+    },
+
+    config_xml:function(){
+        return this.config_path;
+    },
+
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
-        var www = path.join(projectRoot, 'www');
+        var www = util.projectWww(projectRoot);
         var project_www = this.www_dir();
 
         // remove the stock www folder
@@ -149,17 +158,26 @@ module.exports.prototype = {
         shell.cp('-rf', www, this.path);
 
         // write out proper cordova.js
-        shell.cp('-f', path.join(util.libDirectory, 'cordova-ios', 'CordovaLib', 'cordova.ios.js'), path.join(project_www, 'cordova.js'));
+        shell.cp('-f', path.join(util.libDirectory, 'cordova-ios', 'CordovaLib', 'cordova.js'), path.join(project_www, 'cordova.js'));
 
     },
 
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var merges_path = path.join(projectRoot, 'merges', 'ios');
+        var merges_path = path.join(util.appDir(projectRoot), 'merges', 'ios');
         if (fs.existsSync(merges_path)) {
             var overrides = path.join(merges_path, '*');
             shell.cp('-rf', overrides, this.www_dir());
+        }
+    },
+
+    // update the overrides folder into the www folder
+    update_staging:function() {
+        var projectRoot = util.isCordova(this.path);
+        if (fs.existsSync(this.staging_dir())) {
+            var staging = path.join(this.staging_dir(), '*');
+            shell.cp('-rf', staging, this.www_dir());
         }
     },
 
@@ -168,6 +186,7 @@ module.exports.prototype = {
         this.update_from_config(cfg, function() {
             self.update_www();
             self.update_overrides();
+            self.update_staging();
             util.deleteSvnFolders(self.www_dir());
             if (callback) callback();
         });

@@ -21,7 +21,8 @@ var path          = require('path'),
     fs            = require('fs'),
     shell         = require('shelljs'),
     help          = require('./help'),
-    config_parser = require('./config_parser');
+    config_parser = require('./config_parser'),
+    util          = require('./util');
 
 var DEFAULT_NAME = "HelloCordova",
     DEFAULT_ID   = "io.cordova.hellocordova";
@@ -45,9 +46,8 @@ module.exports = function create (dir, id, name) {
     id = id || DEFAULT_ID;
     name = name || DEFAULT_NAME;
 
-    if (!(dir && (dir[0] == '~' || dir[0] == '/' || dir[0] + dir[1] == 'C:'))) {
-        dir = dir ? path.join(process.cwd(), dir) : process.cwd();
-    }
+    // Make absolute.
+    dir = path.resolve(dir);
 
     var dotCordova = path.join(dir, '.cordova');
 
@@ -59,8 +59,9 @@ module.exports = function create (dir, id, name) {
     // Create basic project structure.
     shell.mkdir('-p', dotCordova);
     shell.mkdir('-p', path.join(dir, 'platforms'));
-    shell.mkdir('-p', path.join(dir, 'merges'));
     shell.mkdir('-p', path.join(dir, 'plugins'));
+    shell.mkdir('-p', path.join(dir, 'app'));
+    shell.mkdir('-p', path.join(dir, 'app', 'merges'));
     var hooks = path.join(dotCordova, 'hooks');
     shell.mkdir('-p', hooks);
 
@@ -95,10 +96,10 @@ module.exports = function create (dir, id, name) {
     }));
 
     // Copy in base template
-    shell.cp('-r', path.join(__dirname, '..', 'templates', 'www'), dir);
+    shell.cp('-r', path.join(__dirname, '..', 'templates', 'app'), dir);
 
     // Write out id and name to config.xml
-    var configPath = path.join(dir, 'www', 'config.xml');
+    var configPath = util.projectConfig(dir);
     var config = new config_parser(configPath);
     config.packageName(id);
     config.name(name);

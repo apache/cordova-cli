@@ -121,7 +121,7 @@ xdescribe('serve command', function() {
 
         it('should serve from top-level www if the file exists there', function() {
             var payload = 'This is test file.';
-            fs.writeFileSync(path.join(tempDir, 'www', 'test.html'), payload);
+            fs.writeFileSync(path.join(util.projectWww(tempDir), 'test.html'), payload);
             test_serve('android', '/test.html', payload)();
         });
 
