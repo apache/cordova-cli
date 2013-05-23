@@ -77,6 +77,9 @@ module.exports = {
 
         return plugins;
     },
+    appDir: function(projectDir) {
+        return projectDir;
+    },
     projectWww: function(projectDir) {
         return path.join(projectDir, 'www');
     },

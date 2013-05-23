@@ -21,14 +21,18 @@ var cordova_util = require('./util'),
     path = require('path'),
     shell = require('shelljs'),
     config_parser = require('./config_parser'),
-    android_parser = require('./metadata/android_parser'),
-    ios_parser = require('./metadata/ios_parser'),
-    blackberry_parser = require('./metadata/blackberry_parser'),
     fs = require('fs'),
     util = require('util'),
     http = require("http"),
     url = require("url");
 
+var parsers = {
+    'android': require('./metadata/android_parser'),
+    'ios': require('./metadata/ios_parser'),
+    'blackberry': require('./metadata/blackberry_parser'),
+    'wp7': require('./metadata/wp7_parser'),
+    'wp8': require('./metadata/wp8_parser')
+};
 
 function launch_server(www, platform_www, config_xml_path, port) {
     port = port || 8000;
@@ -123,21 +127,9 @@ module.exports.config = function (platform, port, callback) {
     };
 
     // Top-level www directory.
-    result.paths.push(projectRoot + path.sep + 'www');
+    result.paths.push(cordova_util.projectWww(projectRoot));
 
-    var parser;
-
-    switch (platform) {
-        case 'android':
-            parser = new android_parser(path.join(projectRoot, 'platforms', platform));
-            break;
-        case 'blackberry-10':
-            parser = new blackberry_parser(path.join(projectRoot, 'platforms', platform));
-            break;
-        case 'ios':
-            parser = new ios_parser(path.join(projectRoot, 'platforms', platform));
-            break;
-    }
+    var parser = parsers[platform](path.join(projectRoot, 'platforms', platform));
 
     // Update the related platform project from the config
     parser.update_project(cfg, function() {
