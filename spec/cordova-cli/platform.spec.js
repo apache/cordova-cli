@@ -29,6 +29,7 @@ var cordova = require('../../cordova'),
     platforms = require('../../platforms'),
     tempDir = path.join(__dirname, '..', '..', 'temp');
     android_parser = require('../../src/metadata/android_parser'),
+    ios_parser = require('../../src/metadata/ios_parser'),
     blackberry_parser = require('../../src/metadata/blackberry_parser'),
     cordova_project = path.join(__dirname, '..', 'fixtures', 'projects', 'cordova');
 
