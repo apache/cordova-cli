@@ -142,12 +142,27 @@ module.exports.prototype = {
         var cordovajs_path = path.join(util.libDirectory, 'cordova-wp8', 'templates', 'standalone', 'www', 'cordova-' + VERSION + '.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
     },
+
+    staging_dir: function() {
+        return path.join(this.path, '.staging', 'www');
+    },
+
+    update_staging: function() {
+        var projectRoot = util.isCordova(this.path);
+        if (fs.existsSync(this.staging_dir())) {
+            var staging = path.join(this.staging_dir(), '*');
+            shell.cp('-rf', staging, this.www_dir());
+        }
+    },
+
     // calls the nessesary functions to update the wp8 project 
     update_project:function(cfg, callback) {
         //console.log("Updating wp8 project...");
 
         this.update_from_config(cfg);
         this.update_www();
+        // TODO: Add overrides support? Why is this missing?
+        this.update_staging();
         util.deleteSvnFolders(this.www_dir());
 
         //console.log("Done updating.");
