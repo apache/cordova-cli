@@ -113,24 +113,6 @@ describe('plugin command', function() {
             process.chdir(cwd);
         });
         describe('failure', function() {
-            it('should throw if plugin is already added to project', function() {
-                process.chdir(cordova_project);
-                var cb = jasmine.createSpy();
-                this.after(function() {
-                    process.chdir(cordova_project);
-                    cordova.plugin('rm', "test");
-                    process.chdir(cwd);
-                });
-                runs(function() {
-                    cordova.plugin('add', testPlugin, cb);
-                });
-                waitsFor(function() { return cb.wasCalled; }, 'frst add plugin');
-                runs(function(){
-                    expect(function() {
-                        cordova.plugin('add', testPlugin);
-                    }).toThrow();
-                });
-            });
             it('should throw if plugin does not have a plugin.xml', function() {
                 process.chdir(cordova_project);
                 this.after(function() {

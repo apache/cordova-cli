@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
        Licensed to the Apache Software Foundation (ASF) under one
        or more contributor license agreements.  See the NOTICE file
        distributed with this work for additional information
@@ -24,63 +24,28 @@
 
 <widget xmlns="http://www.w3.org/ns/widgets"
         xmlns:rim="http://www.blackberry.com/ns/widgets"
-	version="1.0.0.0" id="__PACKAGE__">
+	version="1.0.0" id="default.app.id">
 
-  <name>__NAME__</name>
+  <name>Webworks Application</name>
 
   <author>Your Name Here</author>
 
   <description>
        A sample Apache Cordova application that responds to the deviceready event.
   </description>
-    
+
   <license href="http://opensource.org/licenses/alphabetical">
   </license>
 
-  <!-- Cordova API -->
-  <feature id="blackberry.system" required="true" version="1.0.0.0" />
-  <feature id="org.apache.cordova" required="true" version="1.0.0" />
-  <feature id="blackberry.find" required="true" version="1.0.0.0" />
-  <feature id="blackberry.identity" required="true" version="1.0.0.0" />
-  <feature id="blackberry.identity.phone" required="true" version="1.0.0.0" />
-  <feature id="blackberry.pim.Address" required="true" version="1.0.0.0" />
-  <feature id="blackberry.pim.Contact" required="true" version="1.0.0.0" />
-  <feature id="blackberry.io.file" required="true" version="1.0.0.0" />
-  <feature id="blackberry.utils" required="true" version="1.0.0.0" />
-  <feature id="blackberry.io.dir" required="true" version="1.0.0.0" />
-  <feature id="blackberry.app" required="true" version="1.0.0.0" />
-  <feature id="blackberry.app.event" required="true" version="1.0.0.0" />
-  <feature id="blackberry.system.event" required="true" version="1.0.0.0"/>
-  <feature id="blackberry.widgetcache" required="true" version="1.0.0.0"/>
-  <feature id="blackberry.media.camera" />
-  <feature id="blackberry.ui.dialog" />
-  <feature id="blackberry.connection" />
-  <feature id="blackberry.bbm.platform" />
-  <feature id="blackberry.invoke.card" />
-  <feature id="blackberry.pim.contacts" />
-  <feature id="blackberry.ui.contextmenu" />
-  <feature id="blackberry.io.filetransfer" />
-  <feature id="blackberry.io" />
-  <feature id="blackberry.invoke" />
-  <feature id="blackberry.invoked" />
-  <feature id="blackberry.push" />
-  <feature id="blackberry.media.microphone" required="true" version="1.0.0.0"/>
-  
-  <!-- Cordova API -->
+  <!-- Expose access to all URIs, including the file and http protocols -->
   <access subdomains="true" uri="file:///store/home" />
   <access subdomains="true" uri="file:///SDCard" />
-
-  <!-- Expose access to all URIs, including the file and http protocols -->
   <access subdomains="true" uri="*" />
 
-  <icon rim:hover="false" src="res/icon/blackberry/icon-80.png" />
-  <icon rim:hover="true" src="res/icon/blackberry/icon-80.png" />
-
-  <rim:loadingScreen backgroundColor="#CFCFCF"
-                     foregroundImage="res/screen/blackberry/screen-225.png"
-		     onFirstLaunch="true">
-    <rim:transitionEffect type="fadeOut" />
-  </rim:loadingScreen>
+  <icon src="res/icon/blackberry/icon-80.png" />
+  <rim:splash src="res/screen/blackberry/splash-1280x768.png" />
+  <rim:splash src="res/screen/blackberry/splash-720x720.png" />
+  <rim:splash src="res/screen/blackberry/splash-768x1280.png" />
 
   <content src="index.html" />
 
@@ -89,8 +54,8 @@
     <rim:permit>read_device_identifying_information</rim:permit>
     <rim:permit>access_shared</rim:permit>
     <rim:permit>read_geolocation</rim:permit>
-    <rim:permit>record_audio</rim:permit> 
-    <rim:permit>access_pimdomain_contacts</rim:permit> 
+    <rim:permit>record_audio</rim:permit>
+    <rim:permit>access_pimdomain_contacts</rim:permit>
   </rim:permissions>
 
 </widget>

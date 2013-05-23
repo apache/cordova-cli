@@ -158,7 +158,7 @@ describe('ios project parser', function () {
             });
             it('should write out ios js to cordova.js', function () {
                 parser.update_www();
-                expect(fs.readFileSync(path.join(ios_project_path, 'www', 'cordova.js'), 'utf-8')).toBe(fs.readFileSync(path.join(util.libDirectory, 'cordova-ios', 'CordovaLib', 'cordova.ios.js'), 'utf-8'));
+                expect(fs.readFileSync(path.join(ios_project_path, 'www', 'cordova.js'), 'utf-8')).toBe(fs.readFileSync(path.join(util.libDirectory, 'cordova-ios', 'CordovaLib', 'cordova.js'), 'utf-8'));
             });
         });
 

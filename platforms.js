@@ -17,4 +17,4 @@
     under the License.
 */
 
-module.exports = ['ios', 'android', 'blackberry', 'wp7', 'wp8'];
+module.exports = ['ios', 'android', /*'blackberry',*/ 'wp7', 'wp8'];

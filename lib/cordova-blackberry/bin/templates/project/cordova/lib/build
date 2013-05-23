@@ -1,0 +1,174 @@
+#!/usr/bin/env node
+
+/*
+ *  Copyright 2012 Research In Motion Limited.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var path = require("path"),
+    command = require("commander"),
+    jWorkflow = require("jWorkflow"),
+    localize = require("./localize"),
+    logger = require("./logger"),
+    projectProperties = require("../../project.json"),
+    debugTokenHelper = require("./debugtoken-helper"),
+    bbwpArgv = [
+        process.argv[0],
+        path.resolve(path.join(__dirname, process.argv[1])),
+        path.resolve(path.join(__dirname, "..", "..", "www")),
+        "-o",
+        path.resolve(path.join(__dirname, "..", "..", "build"))
+    ],
+    built = false,
+    debugtoken = false;
+
+function getTarget() {
+    return typeof command.args[0] === "string" ? command.args[0] : undefined;
+}
+
+function copyArgIfExists(arg) {
+    if (command[arg]) {
+        bbwpArgv.push("--" + arg);
+        bbwpArgv.push(command[arg]);
+    }
+}
+
+function createDebugtoken(previous, baton) {
+    var keystorepass = command["keystorepass"] ? command["keystorepass"] : projectProperties.keystorepass;
+    baton.take();
+    logger.info(localize.translate("PROGRESS_WILL_CREATE_DEBUG_TOKEN"));
+    debugTokenHelper.createToken(projectProperties, getTarget(), keystorepass, function (code) {
+        if (code === 0) {
+            debugtoken = true;
+        }
+
+        baton.pass();
+    });
+}
+
+function deployDebugToken(previous, baton) {
+    baton.take();
+
+    // If in debug build and debug token was created, deploy the debug token and wait until the deployment is finished
+    if (debugtoken) {
+        logger.info(localize.translate("PROGRESS_WILL_DEPLOY_DEBUG_TOKEN"));
+        debugTokenHelper.deployToken(projectProperties, getTarget(), function () {
+            baton.pass();
+        });
+    } else {
+        baton.pass();
+    }
+}
+
+function doDebugBuild() {
+    built = true;
+
+    //build in debug mode by default
+    bbwpArgv.push("-d");
+
+    // In debug build, it needs to create debug token first
+    jWorkflow.order(createDebugtoken)
+             .andThen(deployDebugToken)
+             .andThen(build)
+             .start();
+}
+
+function doReleaseBuild() {
+    built = true;
+
+    //Note: Packager refers to signing password as "password" not "keystorepass"
+    if (command["keystorepass"]) {
+        bbwpArgv.push("--password");
+        bbwpArgv.push(command["keystorepass"]);
+    } else if (projectProperties.keystorepass) {
+        bbwpArgv.push("--password");
+        bbwpArgv.push( projectProperties.keystorepass);
+    } else {
+        throw "No signing password provided. Please use --keystorepass via command-line or enter a value for keystorepass in project.json";
+    }
+
+    copyArgIfExists("buildId");
+
+    build();
+}
+
+function build() {
+    copyArgIfExists("params");
+    copyArgIfExists("loglevel");
+
+    //Overrite process.argv, before calling packager
+    process.argv = bbwpArgv;
+
+    //Delete cached commander object. It will conflict with the packagers commander
+    delete require.cache[require.resolve("commander")];
+    delete require.cache[require.resolve("commander/lib/commander")];
+
+    //Package app. If successfull call run
+    require("./packager").start(run);
+}
+
+function run() {
+    var target = getTarget();
+
+    //Overrite process.argv, before calling run
+    process.argv = [
+        process.argv[0],
+        process.argv[1],
+    ];
+
+    if (target) {
+        process.argv.push(target);
+    }
+
+    //deploy app
+    require("./run");
+}
+
+command
+    .usage('command [<target>] [-k | --keystorepass] [-b | --buildId <number>] [-p | --params <json>] [-ll | --loglevel <level>]')
+    .option('-k, --keystorepass <password>', 'Signing key password')
+    .option('-b, --buildId <num>', 'Specifies the build number for signing (typically incremented from previous signing).')
+    .option('-p, --params <params JSON file>', 'Specifies additional parameters to pass to downstream tools.')
+    .option('-ll, --loglevel <loglevel>', 'set the logging level (error, warn, verbose)');
+
+command
+    .command('release')
+    .usage('[<target>] [-k | --keystorepass] [-b | --buildId <number>] [-p | --params <json>] [-ll | --loglevel <level>]')
+    .description('    Build in release mode. This will sign the resulting bar.')
+    .option('-k, --keystorepass <password>', 'Signing key password')
+    .option('-b, --buildId <num>', 'Specifies the build number for signing (typically incremented from previous signing).')
+    .option('-p, --params <params JSON file>', 'Specifies additional parameters to pass to downstream tools.')
+    .option('-ll, --loglevel <loglevel>', 'set the logging level (error, warn, verbose)')
+    .action(doReleaseBuild);
+
+command
+    .command('debug')
+    .usage('[<target>] [-p | --params <json>] [-ll | --loglevel <level>]')
+    .description('    Build in debug mode.')
+    .option('-p, --params <params JSON file>', 'Specifies additional parameters to pass to downstream tools.')
+    .option('-ll, --loglevel <loglevel>', 'set the logging level (error, warn, verbose)')
+    .action(doDebugBuild);
+
+try {
+    command.parse(process.argv);
+
+    //if we get here and haven't built yet then no mode was provided [debug, release], default to debug mode
+    if (!built) {
+        doDebugBuild();
+    }
+} catch (e) {
+    console.log(e);
+    process.exit();
+}
+

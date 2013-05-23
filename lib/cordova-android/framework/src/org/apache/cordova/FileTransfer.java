@@ -64,6 +64,8 @@ import android.os.Build;
 import android.util.Log;
 import android.webkit.CookieManager;
 
+import com.squareup.okhttp.OkHttpClient;
+
 public class FileTransfer extends CordovaPlugin {
 
     private static final String LOG_TAG = "FileTransfer";
@@ -78,6 +80,8 @@ public class FileTransfer extends CordovaPlugin {
 
     private static HashMap<String, RequestContext> activeRequests = new HashMap<String, RequestContext>();
     private static final int MAX_BUFFER_SIZE = 16 * 1024;
+
+    private static OkHttpClient httpClient = new OkHttpClient();
 
     private static final class RequestContext {
         String source;
@@ -174,39 +178,6 @@ public class FileTransfer extends CordovaPlugin {
         }
     }
 
-    /**
-     * Works around a bug on Android 2.3.
-     * http://code.google.com/p/android/issues/detail?id=14562
-     */
-    private static final class DoneHandlerInputStream extends TrackingHTTPInputStream {
-        private boolean done;
-        
-        public DoneHandlerInputStream(InputStream stream) {
-            super(stream);
-        }
-        
-        @Override
-        public int read() throws IOException {
-            int result = done ? -1 : super.read();
-            done = (result == -1);
-            return result;
-        }
-
-        @Override
-        public int read(byte[] buffer) throws IOException {
-            int result = done ? -1 : super.read(buffer);
-            done = (result == -1);
-            return result;
-        }
-
-        @Override
-        public int read(byte[] bytes, int offset, int count) throws IOException {
-            int result = done ? -1 : super.read(bytes, offset, count);
-            done = (result == -1);
-            return result;
-        }
-    }
-    
     @Override
     public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if (action.equals("upload") || action.equals("download")) {
@@ -327,13 +298,13 @@ public class FileTransfer extends CordovaPlugin {
                     if (useHttps) {
                         // Using standard HTTPS connection. Will not allow self signed certificate
                         if (!trustEveryone) {
-                            conn = (HttpsURLConnection) url.openConnection();
+                            conn = (HttpsURLConnection) httpClient.open(url);
                         }
                         // Use our HTTPS connection that blindly trusts everyone.
                         // This should only be used in debug environments
                         else {
                             // Setup the HTTPS connection class to trust everyone
-                            HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
+                            HttpsURLConnection https = (HttpsURLConnection) httpClient.open(url);
                             oldSocketFactory  = trustAllHosts(https);
                             // Save the current hostnameVerifier
                             oldHostnameVerifier = https.getHostnameVerifier();
@@ -344,7 +315,7 @@ public class FileTransfer extends CordovaPlugin {
                     }
                     // Return a standard HTTP connection
                     else {
-                        conn = (HttpURLConnection) url.openConnection();
+                        conn = httpClient.open(url);
                     }
 
                     // Allow Inputs
@@ -561,9 +532,6 @@ public class FileTransfer extends CordovaPlugin {
     }
 
     private static TrackingInputStream getInputStream(URLConnection conn) throws IOException {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-            return new DoneHandlerInputStream(conn.getInputStream());
-        }
         String encoding = conn.getContentEncoding();
         if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
         	return new TrackingGZIPInputStream(new ExposedGZIPInputStream(conn.getInputStream()));
@@ -681,7 +649,7 @@ public class FileTransfer extends CordovaPlugin {
      */
     private static String getArgument(JSONArray args, int position, String defaultString) {
         String arg = defaultString;
-        if (args.length() >= position) {
+        if (args.length() > position) {
             arg = args.optString(position);
             if (arg == null || "null".equals(arg)) {
                 arg = defaultString;
@@ -749,13 +717,13 @@ public class FileTransfer extends CordovaPlugin {
                     if (useHttps) {
                         // Using standard HTTPS connection. Will not allow self signed certificate
                         if (!trustEveryone) {
-                            connection = (HttpsURLConnection) url.openConnection();
+                            connection = (HttpsURLConnection) httpClient.open(url);
                         }
                         // Use our HTTPS connection that blindly trusts everyone.
                         // This should only be used in debug environments
                         else {
                             // Setup the HTTPS connection class to trust everyone
-                            HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
+                            HttpsURLConnection https = (HttpsURLConnection) httpClient.open(url);
                             oldSocketFactory = trustAllHosts(https);
                             // Save the current hostnameVerifier
                             oldHostnameVerifier = https.getHostnameVerifier();
@@ -766,7 +734,8 @@ public class FileTransfer extends CordovaPlugin {
                     }
                     // Return a standard HTTP connection
                     else {
-                          connection = url.openConnection();
+                          connection = httpClient.open(url);
+
                     }
     
                     if (connection instanceof HttpURLConnection) {

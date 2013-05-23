@@ -1,0 +1,204 @@
+#!/usr/bin/env node
+
+/*
+ *  Copyright 2012 Research In Motion Limited.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var childProcess = require("child_process"),
+    fs = require("fs"),
+    path = require("path"),
+    util = require("util"),
+    wrench = require("wrench"),
+    conf = require("./conf"),
+    localize = require("./localize"),
+    pkgrUtils = require("./packager-utils"),
+    properties = require('../../project.json'),
+    program = require('commander'),
+    xml2js = require('xml2js'),
+    target,
+    ip,
+    password,
+    workingdir,
+    barPath;
+
+function generateOptions(uninstall) {
+    var options = [];
+
+    workingdir = path.normalize(__dirname + "/.."),
+    barPath = path.normalize(__dirname + "/../../build/" + properties.targets[target].type + "/" + properties.barName + ".bar");
+
+    options.push("-device");
+    options.push(ip);
+
+    if (password) {
+        options.push("-password");
+        options.push(password);
+    }
+
+    options.push("-package");
+    options.push(barPath);
+
+    if (uninstall) {
+        options.push("-uninstallApp");
+        return options;
+    } else {
+
+        options.push("-installApp");
+
+        if (program.launch) {
+            options.push("-launchApp");
+        }
+
+        return options;
+    }
+}
+
+function execNativeDeploy(optionsArray, callback) {
+    var script = "/bin/blackberry-deploy",
+        nativeDeploy;
+        options = optionsArray.join(" ");
+
+    if (pkgrUtils.isWindows()) {
+        script += ".bat";
+    }
+
+    if (fs.existsSync(conf.DEPENDENCIES_TOOLS)) {
+        nativeDeploy = childProcess.exec(path.normalize(conf.DEPENDENCIES_TOOLS + script +" "+ options), {
+            "cwd": workingdir,
+            "env": process.env
+        });
+
+        nativeDeploy.stdout.on("data", pkgrUtils.handleProcessOutput);
+
+        nativeDeploy.stderr.on("data", pkgrUtils.handleProcessOutput);
+
+        nativeDeploy.on("exit", function (code) {
+            if (callback && typeof callback === "function") {
+                callback(code);
+            }
+        });
+    } else {
+        throw localize.translate("EXCEPTION_MISSING_TOOLS");
+    }
+}
+
+function checkTarget() {
+    if (!target) {
+        console.log("No target exists, to add that target please run target add <name> <ip> [-t | --type <device | simulator>] [-p <password>] [--pin <devicepin>]\n");
+        return false;
+    }
+    if (!properties.targets[target]) {
+        console.log("The target \""+target+"\" does not exist, to add that target please run target add "+target+" <ip> [-t | --type <device | simulator>] [-p <password>] [--pin <devicepin>]\n");
+        return false;
+    }
+    if (properties.targets[target].ip) {
+       ip = properties.targets[target].ip; 
+    } else {
+        console.log("IP is not defined in target \""+target+"\"\n");
+        return false;
+    }
+    if (properties.targets[target].password) {
+       password = properties.targets[target].password;
+    } 
+    return true;
+
+}
+
+function deployAll(keys) {
+    target = keys[0];
+
+    if (target) {
+        if (checkTarget()) {
+            var options = generateOptions();
+            if (program.uninstall) {
+                uninstall(
+                    function() {
+                        keys.shift();
+                        deployAll(keys);
+                });
+            } else {
+                execNativeDeploy(options,
+                    function() {
+                        deployAll(keys);
+                });
+            }
+        }
+    }
+}
+
+function uninstall(callback) {
+    var script = "/bin/blackberry-deploy",
+        nativeDeploy;
+
+    if (pkgrUtils.isWindows()) {
+        script += ".bat";
+    }
+
+    if (fs.existsSync(conf.DEPENDENCIES_TOOLS)) {
+        nativeDeploy = childProcess.exec(path.normalize(conf.DEPENDENCIES_TOOLS + script +" -listInstalledApps -device " +ip+ " -password " +password), {
+            "cwd": workingdir,
+            "env": process.env
+        }, function (error, stdout, stderr) {
+            var parser = new xml2js.Parser();
+            fs.readFile(path.join(__dirname + "/../../www/", "config.xml"), function(err, data) {
+                parser.parseString(data, function (err, result) {
+                    if (stdout.indexOf(result['@'].id) != -1) {
+                        var options = generateOptions(true);
+                        execNativeDeploy(options,
+                            function(){
+                                options = generateOptions(false);
+                                execNativeDeploy(options, callback);
+                        });
+                    } else {
+                        options = generateOptions(false);
+                        execNativeDeploy(options, callback);
+                    }
+                });
+            });
+        });
+    }
+}
+
+function exec(callback) {
+    program
+        .usage('command [<target>] [--no-launch] [--no-uninstall]')
+        .option('--no-uninstall', 'does not uninstall app from device')
+        .option('--no-launch', 'do not launch the app on device')
+
+    program
+        .command('all')
+        .usage('all [--no-launch] [--no-uninstall]')
+        .description('    Deploy the app on all targets')
+        .option('--no-uninstall', 'does not uninstall app from device')
+        .option('--no-launch', 'do not launch the app on device')
+    
+    program.parse(process.argv);
+    target = program.args[0] ? program.args[0] : properties.defaultTarget
+
+    if (target === "all") {
+        deployAll(Object.keys(properties.targets));
+    } else {
+        if (checkTarget()) {
+            if (program.uninstall) {
+                uninstall(callback);
+            } else {
+                options = generateOptions(false);
+                execNativeDeploy(options, callback)
+            }
+        }
+    }
+}
+
+exec(null);

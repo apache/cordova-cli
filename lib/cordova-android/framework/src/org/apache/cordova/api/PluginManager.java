@@ -54,6 +54,7 @@ public class PluginManager {
     // Map URL schemes like foo: to plugins that want to handle those schemes
     // This would allow how all URLs are handled to be offloaded to a plugin
     protected HashMap<String, String> urlMap = new HashMap<String, String>();
+    private int MAX_REPITIONS = 1000;
 
     /**
      * Constructor.
@@ -109,7 +110,6 @@ public class PluginManager {
         int eventType = -1;
         String service = "", pluginClass = "", paramType = "";
         boolean onload = false;
-        PluginEntry entry = null;
         boolean insideFeature = false;
         while (eventType != XmlResourceParser.END_DOCUMENT) {
             if (eventType == XmlResourceParser.START_TAG) {
@@ -118,45 +118,37 @@ public class PluginManager {
                 if (strNode.equals("plugin")) {
                     service = xml.getAttributeValue(null, "name");
                     pluginClass = xml.getAttributeValue(null, "value");
-                    // System.out.println("Plugin: "+name+" => "+value);
+                    Log.d(TAG, "<plugin> tags are deprecated, please use <features> instead. <plugin> will no longer work as of Cordova 3.0");
                     onload = "true".equals(xml.getAttributeValue(null, "onload"));
-                    entry = new PluginEntry(service, pluginClass, onload);
-                    this.addService(entry);
                 }
                 //What is this?
                 else if (strNode.equals("url-filter")) {
                     this.urlMap.put(xml.getAttributeValue(null, "value"), service);
                 }
                 else if (strNode.equals("feature")) {
-                    insideFeature = true;
-                    //Check for supported feature sets (Accelerometer, Geolocation, etc)
+                    //Check for supported feature sets  aka. plugins (Accelerometer, Geolocation, etc)
                     //Set the bit for reading params
-                    String uri = xml.getAttributeValue(null,"name");
+                    insideFeature = true;
+                    service = xml.getAttributeValue(null, "name");
                 }
-                else if(strNode.equals("param")) {
-                    if(insideFeature)
-                    {
-                        paramType = xml.getAttributeValue(null, "name");
-                        if(paramType.equals("service"))
-                            service = xml.getAttributeValue(null, "value");
-                        else if(paramType.equals("package"))
-                            pluginClass = xml.getAttributeValue(null, "value");
-                        if(service.length() > 0  && pluginClass.length() > 0)
-                        {
-                            onload = "true".equals(xml.getAttributeValue(null, "onload"));
-                            entry = new PluginEntry(service, pluginClass, onload);
-                            this.addService(entry);
-                            service = "";
-                            pluginClass = "";
-                        }
-                    }
+                else if (insideFeature && strNode.equals("param")) {
+                    paramType = xml.getAttributeValue(null, "name");
+                    if (paramType.equals("service")) // check if it is using the older service param
+                        service = xml.getAttributeValue(null, "value");
+                    else if (paramType.equals("package") || paramType.equals("android-package"))
+                        pluginClass = xml.getAttributeValue(null,"value");
+                    else if (paramType.equals("onload"))
+                        onload = "true".equals(xml.getAttributeValue(null, "value"));
                 }
             }
             else if (eventType == XmlResourceParser.END_TAG)
             {
                 String strNode = xml.getName();
-                if(strNode.equals("feature"))
+                if (strNode.equals("feature") || strNode.equals("plugin"))
                 {
+                    PluginEntry entry = new PluginEntry(service, pluginClass, onload);
+                    this.addService(entry);
+
                     //Empty the strings to prevent plugin loading bugs
                     service = "";
                     pluginClass = "";
@@ -408,5 +400,33 @@ public class PluginManager {
         LOG.e(TAG, "ERROR: plugin.xml is missing.  Add res/xml/plugins.xml to your project.");
         LOG.e(TAG, "https://git-wip-us.apache.org/repos/asf?p=incubator-cordova-android.git;a=blob;f=framework/res/xml/plugins.xml");
         LOG.e(TAG, "=====================================================================================");
+    }
+
+    /**
+     * Called when the any resource is going to be loaded - either from the webview, files or any other resource
+     *
+     *
+     * @param dataResource          The resource request to be loaded.
+     * @param dataResourceContext   The context of the dataResource request
+     * @return                      Return the resource request that will be loaded. The returned request may be modified or unchanged.
+     */
+    public DataResource handleDataResourceRequestWithPlugins(DataResource dataResource, DataResourceContext dataResourceContext){
+        int repetitions = 0;
+        boolean requestModified = true;
+        while(requestModified && repetitions < MAX_REPITIONS) {
+            requestModified = false;
+            repetitions ++;
+            for (PluginEntry entry : this.entries.values()) {
+                if (entry.plugin != null) {
+                    DataResource ret = entry.plugin.handleDataResourceRequest(dataResource, dataResourceContext);
+                    if(ret != null) {
+                        dataResource = ret;
+                        requestModified = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return dataResource;
     }
 }

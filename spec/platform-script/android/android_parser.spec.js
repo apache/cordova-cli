@@ -185,7 +185,7 @@ describe('android project parser', function() {
             });
             it('should write out android js to cordova.js', function() {
                 parser.update_www();
-                expect(fs.readFileSync(path.join(android_project_path, 'assets', 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(util.libDirectory, 'cordova-android', 'framework', 'assets', 'js', 'cordova.android.js'), 'utf-8'));
+                expect(fs.readFileSync(path.join(android_project_path, 'assets', 'www', 'cordova.js'),'utf-8')).toBe(fs.readFileSync(path.join(util.libDirectory, 'cordova-android', 'framework', 'assets', 'www', 'cordova.js'), 'utf-8'));
             });
         });
 

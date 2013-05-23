@@ -50,9 +50,8 @@ public class Config {
     private static Config self = null;
 
     public static void init(Activity action) {
-        if (self == null) {
-            self = new Config(action);
-        }
+        //Just re-initialize this! Seriously, we lose this all the time
+        self = new Config(action);
     }
 
     // Intended to be used for testing only; creates an empty configuration.
@@ -97,7 +96,7 @@ public class Config {
                 }
                 else if (strNode.equals("log")) {
                     String level = xml.getAttributeValue(null, "level");
-                    LOG.i("CordovaLog", "Found log level %s", level);
+                    Log.d(TAG, "The <log> tags is deprecated. Use <preference name=\"loglevel\" value=\"" + level + "\"/> instead.");
                     if (level != null) {
                         LOG.setLogLevel(level);
                     }
@@ -113,30 +112,27 @@ public class Config {
                        
                        Note: We should probably pass in the classname for the variable splash on splashscreen!
                        */
-                    if(name.equals("splashscreen")) {
+                    if (name.equals("loglevel")) {
+                        String level = xml.getAttributeValue(null, "value");
+                        LOG.setLogLevel(level);
+                    } else if (name.equals("splashscreen")) {
                         String value = xml.getAttributeValue(null, "value");
                         int resource = 0;
-                        if (value != null)
+                        if (value == null)
                         {
                             value = "splash";
                         }
                         resource = action.getResources().getIdentifier(value, "drawable", action.getPackageName());
                         
                         action.getIntent().putExtra(name, resource);
-                        LOG.i("CordovaLog", "Found preference for %s=%s", name, value);
-                        Log.d("CordovaLog", "Found preference for " + name + "=" + value);
                     }
                     else if(name.equals("backgroundColor")) {
                         int value = xml.getAttributeIntValue(null, "value", Color.BLACK);
                         action.getIntent().putExtra(name, value);
-                        LOG.i("CordovaLog", "Found preference for %s=%d", name, value);
-                        Log.d("CordovaLog", "Found preference for " + name + "=" + Integer.toString(value));
                     }
                     else if(name.equals("loadUrlTimeoutValue")) {
                         int value = xml.getAttributeIntValue(null, "value", 20000);
                         action.getIntent().putExtra(name, value);
-                        LOG.i("CordovaLog", "Found preference for %s=%d", name, value);
-                        Log.d("CordovaLog", "Found preference for " + name + "=" + Integer.toString(value));
                     }
                     else if(name.equals("keepRunning"))
                     {
@@ -157,12 +153,9 @@ public class Config {
                     {
                         String value = xml.getAttributeValue(null, "value");
                         action.getIntent().putExtra(name, value);
-                        LOG.i("CordovaLog", "Found preference for %s=%s", name, value);
-                        Log.d("CordovaLog", "Found preference for " + name + "=" + value);
                     }
                     /*
                     LOG.i("CordovaLog", "Found preference for %s=%s", name, value);
-                    Log.d("CordovaLog", "Found preference for " + name + "=" + value);
                      */
                 }
                 else if (strNode.equals("content")) {
