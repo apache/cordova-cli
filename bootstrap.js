@@ -54,7 +54,7 @@ shell.rm('-rf', cordovaDir);
 create(cordovaDir);
 var platformsDir = path.join(cordovaDir, 'platforms');
 // kill the stupid spec shit!
-shell.rm('-rf', path.join(cordovaDir, 'app', 'www', 'spec'));
+shell.rm('-rf', path.join(cordovaDir, 'www', 'spec'));
 
 var end = n(platforms.length, function() {
     // Check that we are installing globally into a root-only directory.
