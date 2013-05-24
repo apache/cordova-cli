@@ -26,7 +26,7 @@ var fs            = require('fs'),
 
 module.exports = function wp8_parser(project) {
     try {
-        // TODO : Check that it's not a wp7 project?
+        // TODO : Check that it's not a wp8 project?
         var csproj_file   = fs.readdirSync(project).filter(function(e) { return e.match(/\.csproj$/i); })[0];
         if (!csproj_file) throw new Error('The provided path "' + project + '" is not a Windows Phone 8 project.');
         this.wp8_proj_dir = project;
@@ -71,7 +71,9 @@ module.exports.prototype = {
             //update name of sln and csproj.
             name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a ligitamate name
             prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); 
-            var sln_path = path.join(this.wp8_proj_dir, prev_name + '.sln');
+            // TODO: might return .sln.user? (generated file)
+            var sln_name = fs.readdirSync(this.wp8_proj_dir).filter(function(e) { return e.match(/\.sln$/i); })[0];
+            var sln_path = path.join(this.wp8_proj_dir, sln_name);
             var sln_file = fs.readFileSync(sln_path, 'utf-8');
             var name_regex = new RegExp(prev_name, "g");
             fs.writeFileSync(sln_path, sln_file.replace(name_regex, name), 'utf-8');
@@ -130,7 +132,7 @@ module.exports.prototype = {
     },
     // copyies the app www folder into the wp8 project's www folder
     update_www:function() {
-        var project_www = path.join(this.wp8_proj_dir, '..', '..', util.projectWww());
+        var project_www = util.projectWww(path.join(this.wp8_proj_dir, '..', '..'));
         // remove stock platform assets
         shell.rm('-rf', this.www_dir());
         // copy over all app www assets
@@ -139,16 +141,17 @@ module.exports.prototype = {
         // copy over wp8 lib's cordova.js
         var raw_version = fs.readFileSync(path.join(util.libDirectory, 'cordova-wp8', 'VERSION'), 'utf-8')
         var VERSION = raw_version.replace(/\r\n/,'').replace(/\n/,'');
+        //TODO : update to cordova.js for version 2.8.0
         var cordovajs_path = path.join(util.libDirectory, 'cordova-wp8', 'templates', 'standalone', 'www', 'cordova-' + VERSION + '.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
     },
 
     staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
+        return path.join(this.wp8_proj_dir, '.staging', 'www');
     },
 
     update_staging: function() {
-        var projectRoot = util.isCordova(this.path);
+        var projectRoot = util.isCordova(this.wp8_proj_dir);
         if (fs.existsSync(this.staging_dir())) {
             var staging = path.join(this.staging_dir(), '*');
             shell.cp('-rf', staging, this.www_dir());

@@ -132,7 +132,7 @@ module.exports.prototype = {
     },
     // copyies the app www folder into the wp7 project's www folder
     update_www:function() {
-        var project_www = path.join(this.wp7_proj_dir, '..', '..', util.projectWww());
+        var project_www = util.projectWww(path.join(this.wp7_proj_dir, '..', '..'));
         // remove stock platform assets
         shell.rm('-rf', this.www_dir());
         // copy over all app www assets
@@ -141,16 +141,17 @@ module.exports.prototype = {
         // copy over wp7 lib's cordova.js
         var raw_version = fs.readFileSync(path.join(util.libDirectory, 'cordova-wp7', 'VERSION'), 'utf-8')
         var VERSION = raw_version.replace(/\r\n/,'').replace(/\n/,'');
+        //TODO : update to cordova.js for version 2.8.0
         var cordovajs_path = path.join(util.libDirectory, 'cordova-wp7', 'templates', 'standalone', 'www', 'cordova-' + VERSION + '.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
     },
 
     staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
+        return path.join(this.wp7_proj_dir, '.staging', 'www');
     },
 
     update_staging: function() {
-        var projectRoot = util.isCordova(this.path);
+        var projectRoot = util.isCordova(this.wp7_proj_dir);
         if (fs.existsSync(this.staging_dir())) {
             var staging = path.join(this.staging_dir(), '*');
             shell.cp('-rf', staging, this.www_dir());
