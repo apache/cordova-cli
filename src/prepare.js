@@ -26,6 +26,8 @@ var cordova_util      = require('./util'),
     android_parser    = require('./metadata/android_parser'),
     blackberry_parser = require('./metadata/blackberry_parser'),
     ios_parser        = require('./metadata/ios_parser'),
+    wp7_parser        = require('./metadata/wp7_parser'),
+    wp8_parser        = require('./metadata/wp8_parser'),
     hooker            = require('./hooker'),
     n                 = require('ncallbacks'),
     prompt            = require('prompt'),
@@ -35,7 +37,9 @@ var cordova_util      = require('./util'),
 var parsers = {
     "android":android_parser,
     "ios":ios_parser,
-    "blackberry":blackberry_parser
+    "blackberry":blackberry_parser,
+    "wp7":wp7_parser,
+    "wp8":wp8_parser
 };
 
 module.exports = function prepare(platforms, callback) {
