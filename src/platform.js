@@ -116,7 +116,7 @@ module.exports = function platform(command, targets, callback) {
                                         return;
                                     }
 
-                                    plugman.install(target, output, path.basename(plugin), pluginsDir, {}, parser.staging_dir());
+                                    plugman.install(target, output, path.basename(plugin), pluginsDir, { www_dir: parser.staging_dir() });
                                 });
                                 end();
                             });
