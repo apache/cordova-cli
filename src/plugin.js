@@ -77,7 +77,7 @@ module.exports = function plugin(command, targets, callback) {
                 }
 
                 // Fetch the plugin first.
-                plugman.fetch(target, pluginsDir, false /* no link */, undefined /* subdir */, undefined /* git_ref */, function(err, dir) {
+                plugman.fetch(target, pluginsDir, {}, function(err, dir) {
                     if (err) {
                         throw new Error('Error fetching plugin: ' + err);
                     }
@@ -88,7 +88,7 @@ module.exports = function plugin(command, targets, callback) {
                         var parser = new parsers[platform](platformRoot);
                         // TODO: unify use of blackberry in cli vs blackberry10 in plugman
                         plugman.install((platform=='blackberry'?'blackberry10':platform), platformRoot,
-                                        path.basename(dir), pluginsDir, undefined, {}, parser.staging_dir());
+                                        path.basename(dir), pluginsDir, { www_dir: parser.staging_dir() });
                     });
 
                     hooks.fire('after_plugin_add');
@@ -121,7 +121,7 @@ module.exports = function plugin(command, targets, callback) {
                     intersection.forEach(function(platform) {
                         var platformRoot = path.join(projectRoot, 'platforms', platform);
                         var parser = new parsers[platform](platformRoot);
-                        plugman.uninstall(platform, platformRoot, target, path.join(projectRoot, 'plugins'), {}, parser.staging_dir());
+                        plugman.uninstall(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
                     });
 
                     // Finally remove the plugin dir from plugins/
