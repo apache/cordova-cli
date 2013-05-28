@@ -139,10 +139,7 @@ module.exports.prototype = {
         shell.cp('-rf', project_www, this.wp8_proj_dir);
 
         // copy over wp8 lib's cordova.js
-        var raw_version = fs.readFileSync(path.join(util.libDirectory, 'cordova-wp8', 'VERSION'), 'utf-8')
-        var VERSION = raw_version.replace(/\r\n/,'').replace(/\n/,'');
-        //TODO : update to cordova.js for version 2.8.0
-        var cordovajs_path = path.join(util.libDirectory, 'cordova-wp8', 'templates', 'standalone', 'www', 'cordova-' + VERSION + '.js');
+        var cordovajs_path = path.join(util.libDirectory, 'cordova-wp8', 'templates', 'standalone', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
     },
 
@@ -173,4 +170,3 @@ module.exports.prototype = {
         if (callback) callback();
     }
 };
-

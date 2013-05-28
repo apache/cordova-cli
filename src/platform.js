@@ -26,8 +26,8 @@ var config_parser     = require('./config_parser'),
     android_parser    = require('./metadata/android_parser'),
     ios_parser        = require('./metadata/ios_parser'),
     blackberry_parser = require('./metadata/blackberry_parser'),
-    wp7_parser      = require('./metadata/wp7_parser'),
-    wp8_parser      = require('./metadata/wp8_parser'),
+    wp7_parser        = require('./metadata/wp7_parser'),
+    wp8_parser        = require('./metadata/wp8_parser'),
     plugman           = require('plugman'),
     shell             = require('shelljs');
 
