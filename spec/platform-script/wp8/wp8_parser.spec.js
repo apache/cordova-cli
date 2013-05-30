@@ -192,9 +192,7 @@ describe('wp8 project parser', function() {
             });
             it('should write out windows-phone js to cordova.js', function() {
                 parser.update_www();
-                var raw_version = fs.readFileSync(path.join(util.libDirectory, 'cordova-wp8', 'VERSION'), 'utf-8');
-                var wp8_version = raw_version.replace(/\r\n/,'').replace(/\n/,'');
-                expect(fs.readFileSync(path.join(wp8_project_path, 'www', 'cordova.js'),'utf-8')).toEqual(fs.readFileSync(path.join(util.libDirectory, 'cordova-wp8', 'templates', 'standalone', 'www', 'cordova-' + wp8_version + '.js'), 'utf-8'));
+                expect(fs.readFileSync(path.join(wp8_project_path, 'www', 'cordova.js'),'utf-8')).toEqual(fs.readFileSync(path.join(util.libDirectory, 'cordova-wp8', 'templates', 'standalone', 'www', 'cordova.js'), 'utf-8'));
             });
         });
 
