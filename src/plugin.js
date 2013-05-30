@@ -31,6 +31,8 @@ var cordova_util  = require('./util'),
 var parsers = {
     "android": require('./metadata/android_parser'),
     "ios": require('./metadata/ios_parser'),
+    "wp7": require('./metadata/wp7_parser'),
+    "wp8": require('./metadata/wp8_parser'),
     "blackberry": require('./metadata/blackberry_parser')
 };
 
