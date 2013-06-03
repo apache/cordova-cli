@@ -23,21 +23,9 @@ var config_parser     = require('./config_parser'),
     path              = require('path'),
     hooker            = require('./hooker'),
     n                 = require('ncallbacks'),
-    android_parser    = require('./metadata/android_parser'),
-    ios_parser        = require('./metadata/ios_parser'),
-    blackberry_parser = require('./metadata/blackberry_parser'),
-    wp7_parser        = require('./metadata/wp7_parser'),
-    wp8_parser        = require('./metadata/wp8_parser'),
+    platforms         = require('../platforms'),
     plugman           = require('plugman'),
     shell             = require('shelljs');
-
-var parsers = {
-    "android":android_parser,
-    "ios":ios_parser,
-    "blackberry":blackberry_parser,
-    "wp7":wp7_parser,
-    "wp8":wp8_parser
-};
 
 module.exports = function platform(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
@@ -103,7 +91,7 @@ module.exports = function platform(command, targets, callback) {
                                 throw new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output);
                             }
 
-                            var parser = new parsers[target](output);
+                            var parser = new platforms[target].parser(output);
                             parser.update_project(cfg, function() {
                                 createOverrides(target);
                                 hooks.fire('after_platform_add');
@@ -154,10 +142,17 @@ module.exports.supports = function(name, callback) {
     if (!name) throw new Error('requires a platform name parameter');
     if (!callback) throw new Error('requires a callback parameter');
 
-    // look up platform meta-data parser
-    var platformParser = parsers[name];
-    if (!platformParser) {
+    // check if platform exists
+    var platform = platforms[name];
+    if (!platform) {
         callback(new Error(util.format('"%s" platform does not exist', name)));
+        return;
+    }
+
+    // look up platform meta-data parser
+    var platformParser = platforms[name].parser;
+    if (!platformParser) {
+        callback(new Error(util.format('"%s" platform parser does not exist', name)));
         return;
     }
 

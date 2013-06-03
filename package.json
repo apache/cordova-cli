@@ -39,7 +39,7 @@
     "open": "0.0.3"
   },
   "devDependencies": {
-    "jasmine-node":"1.3.x"
+    "jasmine-node":"1.8.x"
   },
   "author": "Anis Kadri",
   "contributors": [

@@ -20,19 +20,12 @@
 var cordova_util = require('./util'),
     path = require('path'),
     shell = require('shelljs'),
+    platforms     = require('../platforms'),
     config_parser = require('./config_parser'),
     fs = require('fs'),
     util = require('util'),
     http = require("http"),
     url = require("url");
-
-var parsers = {
-    'android': require('./metadata/android_parser'),
-    'ios': require('./metadata/ios_parser'),
-    'blackberry': require('./metadata/blackberry_parser'),
-    'wp7': require('./metadata/wp7_parser'),
-    'wp8': require('./metadata/wp8_parser')
-};
 
 function launch_server(www, platform_www, config_xml_path, port) {
     port = port || 8000;
@@ -107,12 +100,12 @@ module.exports.config = function (platform, port, callback) {
     var cfg = new config_parser(xml);
 
     // Retrieve the platforms.
-    var platforms = cordova_util.listPlatforms(projectRoot);
+    var platformList = cordova_util.listPlatforms(projectRoot);
     if (!platform) {
         throw new Error('You need to specify a platform.');
-    } else if (platforms.length == 0) {
+    } else if (platformList.length == 0) {
         throw new Error('No platforms to serve.');
-    } else if (platforms.filter(function(x) { return x == platform }).length == 0) {
+    } else if (platformList.filter(function(x) { return x == platform }).length == 0) {
         throw new Error(platform + ' is not an installed platform.');
     }
 
@@ -129,7 +122,7 @@ module.exports.config = function (platform, port, callback) {
     // Top-level www directory.
     result.paths.push(cordova_util.projectWww(projectRoot));
 
-    var parser = parsers[platform](path.join(projectRoot, 'platforms', platform));
+    var parser = platforms[platform].parser(path.join(projectRoot, 'platforms', platform));
 
     // Update the related platform project from the config
     parser.update_project(cfg, function() {

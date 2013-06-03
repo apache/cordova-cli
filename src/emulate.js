@@ -20,25 +20,13 @@ var cordova_util      = require('./util'),
     path              = require('path'),
     shell             = require('shelljs'),
     config_parser     = require('./config_parser'),
-    android_parser    = require('./metadata/android_parser'),
-    ios_parser        = require('./metadata/ios_parser'),
-    blackberry_parser = require('./metadata/blackberry_parser'),
-    wp7_parser        = require('./metadata/wp7_parser'),
-    wp8_parser        = require('./metadata/wp8_parser'),
+    platforms         = require('../platforms'),
     platform          = require('./platform'),
     fs                = require('fs'),
     ls                = fs.readdirSync,
     n                 = require('ncallbacks'),
     hooker            = require('../src/hooker'),
     util              = require('util');
-
-var parsers = {
-    "android":android_parser,
-    "ios":ios_parser,
-    "blackberry":blackberry_parser,
-    "wp7":wp7_parser,
-    "wp8":wp8_parser
-};
 
 function shell_out_to_emulate(root, platform, callback) {
     var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '"';
@@ -55,7 +43,7 @@ function shell_out_to_emulate(root, platform, callback) {
     });
 }
 
-module.exports = function emulate (platforms, callback) {
+module.exports = function emulate (platformList, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -65,22 +53,22 @@ module.exports = function emulate (platforms, callback) {
     var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new config_parser(xml);
 
-    if (arguments.length === 0 || (platforms instanceof Array && platforms.length === 0)) {
-        platforms = cordova_util.listPlatforms(projectRoot);
-    } else if (typeof platforms == 'string') platforms = [platforms];
-    else if (platforms instanceof Function && callback === undefined) {
-        callback = platforms;
-        platforms = cordova_util.listPlatforms(projectRoot);
+    if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
+        platformList = cordova_util.listPlatforms(projectRoot);
+    } else if (typeof platformList == 'string') platformList = [platformList];
+    else if (platformList instanceof Function && callback === undefined) {
+        callback = platformList;
+        platformList = cordova_util.listPlatforms(projectRoot);
     }
 
-    if (platforms.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+    if (platformList.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
 
     var hooks = new hooker(projectRoot);
     if (!(hooks.fire('before_emulate'))) {
         throw new Error('before_emulate hooks exited with non-zero code. Aborting build.');
     }
 
-    var end = n(platforms.length, function() {
+    var end = n(platformList.length, function() {
         if (!(hooks.fire('after_emulate'))) {
             throw new Error('after_emulate hooks exited with non-zero code. Aborting.');
         }
@@ -88,9 +76,9 @@ module.exports = function emulate (platforms, callback) {
     });
 
     // Iterate over each added platform and shell out to debug command
-    platforms.forEach(function(platform) {
+    platformList.forEach(function(platform) {
         var platformPath = path.join(projectRoot, 'platforms', platform);
-        var parser = new parsers[platform](platformPath);
+        var parser = new platforms[platform].parser(platformPath);
         parser.update_project(cfg, function() {
             shell_out_to_emulate(projectRoot, platform, end);
         });

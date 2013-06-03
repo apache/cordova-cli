@@ -14,7 +14,7 @@ shell.rm('-rf', tmp);
 shell.mkdir('-p', path.join(tmp, 'platform-script'));
 shell.cp('-r', path.join(__dirname, 'spec', 'fixtures'), tmp);
 
-var end = n(platforms.length, function() {
+var end = n(Object.keys(platforms).length, function() {
     console.log('Testing core cli and the following platforms: ' + supported.join(', '));
     var cmd = 'node ' + path.join('node_modules', 'jasmine-node', 'bin', 'jasmine-node') + ' --color ' + tmp;
     specs.forEach(function(s) { 
@@ -23,10 +23,13 @@ var end = n(platforms.length, function() {
     });
     shell.cp('-r', path.join(__dirname, 'spec', 'cordova-cli'), tmp);
     shell.exec(cmd, {async:true, silent:false}, function(code, output) {
+        if(code > 0) {
+            console.log(output);
+        }
     });
 });
 console.log('Determining which platforms to run tests for...');
-platforms.forEach(function(p) {
+Object.keys(platforms).forEach(function(p) {
     platform.supports(p, function(e) {
         if (e) {
         } else {

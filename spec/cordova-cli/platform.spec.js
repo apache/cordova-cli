@@ -27,6 +27,7 @@ var cordova = require('../../cordova'),
     util = require('../../src/util'),
     hooker = require('../../src/hooker'),
     platforms = require('../../platforms'),
+    platform  = require('../../src/platform'),
     tempDir = path.join(__dirname, '..', '..', 'temp');
     android_parser = require('../../src/metadata/android_parser'),
     ios_parser = require('../../src/metadata/ios_parser'),
@@ -104,16 +105,15 @@ describe('platform command', function() {
         });
 
         it('should handle multiple platforms', function() {
-            var arc = spyOn(android_parser, 'check_requirements');
-            var brc = spyOn(blackberry_parser, 'check_requirements');
+            spyOn(platform, 'supports').andCallFake(function(target, callback) {
+                    callback(null);
+            });
             var sh = spyOn(shell, 'exec');
-            cordova.platform('add', ['android', 'blackberry']);
-            arc.mostRecentCall.args[0](false);
-            brc.mostRecentCall.args[0](false);
-            var android_create = path.join('android', 'bin', 'create');
-            var bb_create      = path.join('blackberry', 'bin', 'create');
-            expect(sh.argsForCall[0][0]).toContain(android_create);
-            expect(sh.argsForCall[1][0]).toContain(bb_create);
+            cordova.platform('add', ['foo', 'bar']);
+            var foo_create = path.join('foo', 'bin', 'create');
+            var bar_create      = path.join('bar', 'bin', 'create');
+            expect(sh.argsForCall[0][0]).toContain(foo_create);
+            expect(sh.argsForCall[1][0]).toContain(bar_create);
         });
     });
 
