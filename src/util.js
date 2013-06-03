@@ -19,7 +19,6 @@
 */
 var fs         = require('fs'),
     path       = require('path'),
-    core_platforms = require('../platforms'),
     shell      = require('shelljs');
 
 var lib_path = path.join(__dirname, '..', 'lib')
@@ -59,8 +58,9 @@ module.exports = {
         });
     },
     listPlatforms:function(project_dir) {
+        var core_platforms = require('../platforms');
         return fs.readdirSync(path.join(project_dir, 'platforms')).filter(function(p) {
-            return core_platforms.indexOf(p) > -1;
+            return Object.keys(core_platforms).indexOf(p) > -1;
         });
     },
     // list the directories in the path, ignoring any files

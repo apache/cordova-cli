@@ -17,4 +17,25 @@
     under the License.
 */
 
-module.exports = ['ios', 'android', /*'blackberry',*/ 'wp7', 'wp8'];
+module.exports = {
+    'ios' : {
+        parser : require('./src/metadata/ios_parser'),
+        url    : 'https://git-wip-us.apache.org/repos/asf/cordova-ios.git'
+    }, 
+    'android' : {
+        parser : require('./src/metadata/android_parser'),
+        url    : 'https://git-wip-us.apache.org/repos/asf/cordova-ios.git'
+    }, 
+    'wp7' : {
+        parser : require('./src/metadata/wp7_parser'),
+        url    : 'https://git-wip-us.apache.org/repos/asf/cordova-wp7.git'
+    },
+    'wp8' : {
+        parser : require('./src/metadata/wp8_parser'),
+        url    : 'https://git-wip-us.apache.org/repos/asf/cordova-wp8.git'
+    }/*,
+    blackberry : {
+        parser : require('./metadata/blackberry_parser'),
+        url    : 'https://git-wip-us.apache.org/repos/asf/cordova-blackberry.git'
+    }*/
+};

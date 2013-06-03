@@ -45,7 +45,7 @@ function shell_out_to_debug(projectRoot, platform, callback) {
 }
 
 
-module.exports = function compile(platforms, callback) {
+module.exports = function compile(platformList, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -55,22 +55,22 @@ module.exports = function compile(platforms, callback) {
     var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new config_parser(xml);
 
-    if (arguments.length === 0 || (platforms instanceof Array && platforms.length === 0)) {
-        platforms = cordova_util.listPlatforms(projectRoot);
-    } else if (typeof platforms == 'string') platforms = [platforms];
-    else if (platforms instanceof Function && callback === undefined) {
-        callback = platforms;
-        platforms = cordova_util.listPlatforms(projectRoot);
+    if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
+        platformList = cordova_util.listPlatforms(projectRoot);
+    } else if (typeof platformList == 'string') platformList = [platformList];
+    else if (platformList instanceof Function && callback === undefined) {
+        callback = platformList;
+        platformList = cordova_util.listPlatforms(projectRoot);
     }
 
-    if (platforms.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+    if (platformList.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
 
     var hooks = new hooker(projectRoot);
     if (!(hooks.fire('before_compile'))) {
         throw new Error('before_compile hooks exited with non-zero code. Aborting.');
     }
 
-    var end = n(platforms.length, function() {
+    var end = n(platformList.length, function() {
         if (!(hooks.fire('after_compile'))) {
             throw new Error('after_compile hooks exited with non-zero code. Aborting.');
         }
@@ -78,7 +78,7 @@ module.exports = function compile(platforms, callback) {
     });
 
     // Iterate over each added platform
-    platforms.forEach(function(platform) {
+    platformList.forEach(function(platform) {
         shell_out_to_debug(projectRoot, platform, end);
     });
 };

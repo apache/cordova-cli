@@ -22,19 +22,12 @@ var cordova_util  = require('./util'),
     shell         = require('shelljs'),
     path          = require('path'),
     shell         = require('shelljs'),
+    platforms     = require('../platforms'),
     config_parser = require('./config_parser'),
     hooker        = require('./hooker'),
     plugin_parser = require('./plugin_parser'),
     ls            = fs.readdirSync,
     plugman       = require('plugman');
-
-var parsers = {
-    "android": require('./metadata/android_parser'),
-    "ios": require('./metadata/ios_parser'),
-    "wp7": require('./metadata/wp7_parser'),
-    "wp8": require('./metadata/wp8_parser'),
-    "blackberry": require('./metadata/blackberry_parser')
-};
 
 module.exports = function plugin(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
@@ -49,7 +42,7 @@ module.exports = function plugin(command, targets, callback) {
     // Grab config info for the project
     var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new config_parser(xml);
-    var platforms = cordova_util.listPlatforms(projectRoot);
+    var platformList = cordova_util.listPlatforms(projectRoot);
 
     // Massage plugin name(s) / path(s)
     var pluginPath, plugins;
@@ -85,9 +78,9 @@ module.exports = function plugin(command, targets, callback) {
                     }
 
                     // Iterate over all platforms in the project and install the plugin.
-                    platforms.forEach(function(platform) {
+                    platformList.forEach(function(platform) {
                         var platformRoot = path.join(projectRoot, 'platforms', platform);
-                        var parser = new parsers[platform](platformRoot);
+                        var parser = new platforms[platform].parser(platformRoot);
                         // TODO: unify use of blackberry in cli vs blackberry10 in plugman
                         plugman.install((platform=='blackberry'?'blackberry10':platform), platformRoot,
                                         path.basename(dir), pluginsDir, { www_dir: parser.staging_dir() });
@@ -100,7 +93,7 @@ module.exports = function plugin(command, targets, callback) {
             break;
         case 'rm':
         case 'remove':
-            if (platforms.length === 0) {
+            if (platformList.length === 0) {
                 throw new Error('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
             }
             targets.forEach(function(target, index) {
@@ -112,7 +105,7 @@ module.exports = function plugin(command, targets, callback) {
                     // supported platforms and app platforms
                     var pluginXml = new plugin_parser(path.join(targetPath, 'plugin.xml'));
                     var intersection = pluginXml.platforms.filter(function(e) {
-                        if (platforms.indexOf(e) == -1) return false;
+                        if (platformList.indexOf(e) == -1) return false;
                         else return true;
                     });
 
@@ -122,7 +115,7 @@ module.exports = function plugin(command, targets, callback) {
                     // is not needed and we just --remove the plugin below.
                     intersection.forEach(function(platform) {
                         var platformRoot = path.join(projectRoot, 'platforms', platform);
-                        var parser = new parsers[platform](platformRoot);
+                        var parser = new platforms[platform].parser(platformRoot);
                         plugman.uninstall(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
                     });
 

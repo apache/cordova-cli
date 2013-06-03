@@ -18,7 +18,6 @@
     under the License.
 */
 var et = require('elementtree'),
-    platforms = require('./../platforms'),
     fs = require('fs');
 
 function plugin_parser(xmlPath) {
