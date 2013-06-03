@@ -124,9 +124,6 @@ module.exports = function plugin(command, targets, callback) {
                         plugman.uninstall(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
                     });
 
-                    // Finally remove the plugin dir from plugins/
-                    plugman.remove(target, path.join(projectRoot, 'plugins'));
-
                     hooks.fire('after_plugin_rm');
                 } else {
                     throw new Error('Plugin "' + target + '" not added to project.');
