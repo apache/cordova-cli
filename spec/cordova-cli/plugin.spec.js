@@ -101,6 +101,12 @@ describe('plugin command', function() {
 
             expect(cordova.plugin('list')).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
         });
+        it('should list out any added plugins in a project', function() {
+            process.chdir(tempDir);
+            var random_plug = 'randomplug';
+            shell.mkdir('-p', path.join(tempDir, 'plugins', random_plug));
+            expect(cordova.plugin('list')).toEqual([random_plug]);
+        });
     });
 
     describe('`add`', function() {
