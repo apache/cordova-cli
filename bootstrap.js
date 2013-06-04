@@ -39,7 +39,7 @@ var min_reqs = {
     "ios":i_parser.check_requirements,
     "blackberry":b_parser.check_requirements,
     "wp7":wp7_parser.check_requirements,
-    "wp8":wp7_parser.check_requirements
+    "wp8":wp8_parser.check_requirements
 }
 
 // Create native projects using bin/create
