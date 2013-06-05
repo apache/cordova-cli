@@ -36,8 +36,9 @@ function shell_out_to_emulate(root, platform, callback) {
     if (platform == 'blackberry') {
         cmd = 'ant -f "' + path.join(root, 'platforms', platform, 'build.xml') + '" qnx load-simulator';
     }
-    events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '"');
+    events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
+        events.emit('log', output);
         if (code > 0) {
             throw new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + output);
         } else {

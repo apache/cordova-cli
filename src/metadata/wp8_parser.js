@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -21,6 +20,7 @@ var fs            = require('fs'),
     path          = require('path'),
     et            = require('elementtree'),
     util          = require('../util'),
+    events        = require('../events'),
     shell         = require('shelljs'),
     events        = require('../events'),
     config_parser = require('../config_parser');
@@ -40,7 +40,7 @@ module.exports = function wp8_parser(project) {
 };
 
 module.exports.check_requirements = function(callback) {
-    events.emit('log', 'Checking wp8 requirements...');
+    events.emit('log', 'Checking WP8 requirements...');
     var command = '"' + path.join(util.libDirectory, 'cordova-wp8', 'bin', 'check_reqs') + '"';
     events.emit('log', 'Running "' + command + '" (output to follow)');
     shell.exec(command, {silent:true, async:true}, function(code, output) {
@@ -48,7 +48,7 @@ module.exports.check_requirements = function(callback) {
         if (code != 0) {
             callback(output);
         } else {
-                callback(false);
+            callback(false);
         }
     });
 };
