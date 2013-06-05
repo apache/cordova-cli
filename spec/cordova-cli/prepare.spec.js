@@ -19,11 +19,13 @@
 var cordova = require('../../cordova'),
     et = require('elementtree'),
     shell = require('shelljs'),
+    plugman = require('plugman'),
     path = require('path'),
     fs = require('fs'),
     config_parser = require('../../src/config_parser'),
     hooker = require('../../src/hooker'),
     fixtures = path.join(__dirname, '..', 'fixtures'),
+    test_plugin = path.join(fixtures, 'plugins', 'android'),
     hooks = path.join(fixtures, 'hooks'),
     tempDir = path.join(__dirname, '..', '..', 'temp'),
     cordova_project = path.join(fixtures, 'projects', 'cordova');
@@ -74,6 +76,37 @@ describe('prepare command', function() {
         expect(function() {
             cordova.prepare();
         }).toThrow();
+    });
+
+    describe('plugman integration', function() {
+        beforeEach(function() {
+            shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
+            process.chdir(tempDir);
+        });
+        afterEach(function() {
+            process.chdir(cwd);
+        });
+
+        it('should invoke plugman.prepare after update_project', function() {
+            var a_parser_spy = spyOn(android_parser.prototype, 'update_project');
+            var prep_spy = spyOn(plugman, 'prepare');
+            cordova.prepare();
+            a_parser_spy.mostRecentCall.args[1](); // fake out android_parser
+            var android_path = path.join(tempDir, 'platforms', 'android');
+            var plugins_dir = path.join(tempDir, 'plugins');
+            expect(prep_spy).toHaveBeenCalledWith(android_path, 'android', plugins_dir);
+        });
+        it('should invoke add_plugin_changes for any added plugins to verify configuration changes for plugins are in place', function() {
+            var platform_path  = path.join(tempDir, 'platforms', 'android');
+            var plugins_dir = path.join(tempDir, 'plugins');
+            plugman.install('android', platform_path, test_plugin, plugins_dir, {});
+            var a_parser_spy = spyOn(android_parser.prototype, 'update_project');
+            var prep_spy = spyOn(plugman, 'prepare');
+            var plugin_changes_spy = spyOn(plugman.config_changes, 'add_plugin_changes');
+            cordova.prepare();
+            a_parser_spy.mostRecentCall.args[1](); // fake out android_parser
+            expect(plugin_changes_spy).toHaveBeenCalledWith('android', platform_path, plugins_dir, 'ca.filmaj.AndroidPlugin', {PACKAGE_NAME:"org.apache.cordova.cordovaExample"}, true, false); 
+        });
     });
 
     describe('hooks', function() {
