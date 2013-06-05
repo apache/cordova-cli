@@ -22,6 +22,7 @@ var fs            = require('fs'),
     et            = require('elementtree'),
     util          = require('../util'),
     shell         = require('shelljs'),
+    events        = require('../events'),
     config_parser = require('../config_parser');
 
 module.exports = function wp7_parser(project) {
@@ -39,7 +40,10 @@ module.exports = function wp7_parser(project) {
 };
 
 module.exports.check_requirements = function(callback) {
-    shell.exec(path.join(util.libDirectory, 'cordova-wp7', 'bin', 'check_reqs'), {silent:true, async:true}, function(code, output) {
+    events.emit('log', 'Checking wp7 requirements...');
+    var command = '"' + path.join(util.libDirectory, 'cordova-wp7', 'bin', 'check_reqs') + '"';
+    events.emit('log', 'Running "' + command + '" (output to follow)');
+    shell.exec(command, {silent:true, async:true}, function(code, output) {
         if (code != 0) {
             callback(output);
         } else {
