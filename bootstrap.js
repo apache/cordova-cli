@@ -42,7 +42,7 @@ var platformsDir = path.join(cordovaDir, 'platforms');
 // kill the stupid spec shit!
 shell.rm('-rf', path.join(cordovaDir, 'www', 'spec'));
 
-var end = n(platforms.length, function() {
+var end = n(Object.keys(platforms).length, function() {
     // Check that we are installing globally into a root-only directory.
     if (process.env.USER == 'root') {
         console.log("**************************************************************************");
@@ -61,6 +61,7 @@ Object.keys(platforms).forEach(function(platform) {
             console.error('WARNING: Your system does not meet requirements to create ' + platform + ' projects. See error output below.');
             console.error(err);
             console.error('SKIPPING ' + platform + ' bootstrap.');
+            end();
         } else {
             console.log('SUCCESS: Minimum requirements for ' + platform + ' met.');
             var fix_path = path.join(tempDir, platform + '_fixture');
@@ -93,8 +94,8 @@ Object.keys(platforms).forEach(function(platform) {
                         shell.chmod('+x', other_script_path);
                     });
                     console.log('SUCCESS: ' + platform + ' ready to rock!');
-                    end();
                 }
+                end();
             });
         }
     });
