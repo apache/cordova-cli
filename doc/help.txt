@@ -5,23 +5,30 @@ Synopsis
 Global Commands
 
     create [path] [id] [name] ......... creates a cordova project in the specified directory optional name and id (package name, reverse-domain style)
-    -v ................................ prints out this utility's version
 
 Project-Level Commands
 
     platform(s) [add|remove|ls [name]] ... adds or removes a platform, or lists all currently-added platforms
     plugin(s) [add|remove|ls [path]] ..... adds or removes a plugin (from the specified path), or lists all currently-added plugins
-    prepare [platform...] ............. copies files into the specified platforms, or all platforms.
-                                        it is then ready for building by Eclipse/Xcode/etc.
-    compile [platform...] ............. builds the app for the specified (or all) platforms
-    build ............................. alias for prepare and then compile
-    emulate ........................... starts emulator for cordova project
-    serve <platform> [port] ........... runs a local web server for the www/ directory of the given platform
+    prepare [platform...] ................ copies files into the specified platforms, or all platforms
+                                        it is then ready for building by Eclipse/Xcode/etc
+    compile [platform...] ................ builds the app for the specified (or all) platforms
+    build [platform...]................... alias for prepare and then compile
+    emulate [platform...] ................ starts emulator for the specified (or all) platforms, then deploys application to emulator 
+    run [platform...] .................... deployes the application to the specified (or all) platform devices, which must be
+                                        connected and configured for running via your machine
+    serve <platform> [port] .............. runs a local web server for the www/ directory of the given platform
                                         the default port is 8000
                                         note that you must edit the native code to point at the server!
-    ripple <platform> [port] .......... uses the serve command as a base and then wraps the server
-                                        with ripple to test your app in your desktop browser.
-    help .............................. shows this!
+    ripple <platform> [port] ............. uses the serve command as a base and then wraps the server
+                                        with ripple to test your app in your desktop browser
+    help ................................. shows this!
+
+Command-line Flags/Options
+
+    -v, --version ......................... prints out this utility's version
+    -d, --verbose ......................... debug, or verbose, mode. Makes this utility very chatty, logging everything it does, including
+                                        redirecting output of commands it shells out to back to stdout
 
 Example usage
 

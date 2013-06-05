@@ -42,6 +42,8 @@ describe('create command', function () {
         expect(fs.existsSync(path.join(hooks, 'after_emulate'))).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'before_docs'))).toBe(true);
         expect(fs.existsSync(path.join(hooks, 'after_docs'))).toBe(true);
+        expect(fs.existsSync(path.join(hooks, 'before_run'))).toBe(true);
+        expect(fs.existsSync(path.join(hooks, 'after_run'))).toBe(true);
     });
     it('should throw if the directory is already a cordova project', function() {
         shell.mkdir('-p', path.join(tempDir, '.cordova'));
