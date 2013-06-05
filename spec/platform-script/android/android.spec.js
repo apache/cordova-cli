@@ -64,6 +64,7 @@ describe('Test:', function() {
         it('should shell out to run command on Android', function() {
             var proj_spy = spyOn(android_parser.prototype, 'update_project');
             var s = spyOn(require('shelljs'), 'exec');
+            spyOn(require('plugman'), 'prepare');
             cordova.emulate('android');
             proj_spy.mostRecentCall.args[1](); // update_project fake
             expect(s).toHaveBeenCalled();

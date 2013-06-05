@@ -20,6 +20,7 @@ var fs            = require('fs'),
     path          = require('path'),
     xcode         = require('xcode'),
     util          = require('../util'),
+    events        = require('../events'),
     shell         = require('shelljs'),
     plist         = require('plist'),
     semver        = require('semver'),
@@ -76,7 +77,12 @@ module.exports.check_requirements = function(callback) {
 module.exports.prototype = {
     update_from_config:function(config, callback) {
         if (config instanceof config_parser) {
-        } else throw new Error('update_from_config requires a config_parser object');
+        } else {
+            var err = new Error('update_from_config requires a config_parser object');
+            if (callback) callback(err);
+            else throw err;
+            return;
+        }
         var name = config.name();
         var pkg = config.packageName();
 
@@ -87,6 +93,7 @@ module.exports.prototype = {
         var info_contents = plist.build(infoPlist);
         info_contents = info_contents.replace(/<string>[\s\r\n]*<\/string>/g,'<string></string>');
         fs.writeFileSync(plistFile, info_contents, 'utf-8');
+        events.emit('log', 'Wrote out iOS Bundle Identifier to "' + pkg + '"');
 
         // Update whitelist
         var self = this;
@@ -124,10 +131,14 @@ module.exports.prototype = {
         var proj = new xcode.project(this.pbxproj);
         var parser = this;
         proj.parse(function(err,hash) {
-            if (err) throw new Error('An error occured during parsing of project.pbxproj. Start weeping.');
-            else {
+            if (err) {
+                var err = new Error('An error occured during parsing of project.pbxproj. Start weeping. Output: ' + err);
+                if (callback) callback(err);
+                else throw err;
+            } else {
                 proj.updateProductName(name);
                 fs.writeFileSync(parser.pbxproj, proj.writeSync(), 'utf-8');
+                events.emit('log', 'Wrote out iOS Product Name to "' + name + '"');
                 if (callback) callback();
             }
         });
@@ -183,12 +194,17 @@ module.exports.prototype = {
 
     update_project:function(cfg, callback) {
         var self = this;
-        this.update_from_config(cfg, function() {
-            self.update_www();
-            self.update_overrides();
-            self.update_staging();
-            util.deleteSvnFolders(self.www_dir());
-            if (callback) callback();
+        this.update_from_config(cfg, function(err) {
+            if (err) {
+                if (callback) callback(err);
+                else throw err;
+            } else {
+                self.update_www();
+                self.update_overrides();
+                self.update_staging();
+                util.deleteSvnFolders(self.www_dir());
+                if (callback) callback();
+            }
         });
     }
 };

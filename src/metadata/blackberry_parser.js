@@ -22,6 +22,7 @@ var fs            = require('fs'),
     prompt        = require('prompt'),
     shell         = require('shelljs'),
     util          = require('../util'),
+    events        = require('../events'),
     config_parser = require('../config_parser');
 
 module.exports = function blackberry_parser(project) {
@@ -44,7 +45,9 @@ module.exports.prototype = {
         } else throw new Error('update_from_config requires a config_parser object');
 
         this.xml.name(config.name());
+        events.emit('log', 'Wrote out BlackBerry application name to "' + config.name() + '"');
         this.xml.packageName(config.packageName());
+        events.emit('log', 'Wrote out BlackBerry package name to "' + config.packageName() + '"');
         this.xml.access.remove();
         var self = this;
         this.xml.doc.findall('access').forEach(function(a) {
@@ -61,7 +64,13 @@ module.exports.prototype = {
     update_project:function(cfg, callback) {
         var self = this;
 
-        self.update_from_config(cfg);
+        try {
+            self.update_from_config(cfg);
+        } catch(e) {
+            if (callback) callback(e);
+            else throw e;
+            return;
+        }
         self.update_www();
         self.update_overrides();
         self.update_staging();
@@ -72,17 +81,18 @@ module.exports.prototype = {
         var dotFile = path.join(projectRoot, '.cordova', 'config.json');
         var dot = JSON.parse(fs.readFileSync(dotFile, 'utf-8'));
         if (dot.blackberry === undefined || dot.blackberry.qnx === undefined) {
+            events.emit('warn', 'WARNING! Missing BlackBerry configuration file.');
             this.get_blackberry_environment(function() {
                 // Update project.properties
                 self.write_project_properties();
 
                 if (callback) callback();
             });
-            return;
+        } else {
+            // Write out config stuff to project.properties file
+            this.write_project_properties();
+            if (callback) callback();
         }
-        // Write out config stuff to project.properties file
-        this.write_project_properties();
-        if (callback) callback();
     },
 
     // Returns the platform-specific www directory.
@@ -144,7 +154,6 @@ module.exports.prototype = {
     },
 
     write_project_properties:function() {
-        // TODO: eventually support all blackberry sub-platforms
         var projectRoot = util.isCordova(this.path);
 
         var projFile = path.join(this.path, 'project.properties');
@@ -160,14 +169,14 @@ module.exports.prototype = {
         props = props.replace(/qnx\.sim\.ip=.*\n/, 'qnx.sim.ip=' + dot.blackberry.qnx.sim_ip + '\n');
         props = props.replace(/qnx\.sim\.password=.*\n/, 'qnx.sim.password=' + dot.blackberry.qnx.sim_password + '\n');
         fs.writeFileSync(projFile, props, 'utf-8');
+        events.emit('log', 'Wrote out BlackBerry 10 configuration file to "' + projFile + '"');
     },
     get_blackberry_environment:function(callback) {
-        // TODO: add other blackberry sub-platforms
         var projectRoot = util.isCordova(this.path);
         var dotFile = path.join(projectRoot, '.cordova', 'config.json');
         var dot = JSON.parse(fs.readFileSync(dotFile, 'utf-8'));
         // Let's save relevant BB SDK + signing info to .cordova/config.json
-        console.log('Looks like we need some of your BlackBerry development environment information. We\'ll just ask you a few questions and we\'ll be on our way to building.');
+        events.emit('log', 'Prompting for BlackBerry 10 configuration information...');
         prompt.start();
         prompt.get([{
             name:'bbwp',
@@ -192,19 +201,23 @@ module.exports.prototype = {
             description:'Enter the password for your BB10 simulator'
         }
         ], function(err, results) {
-            if (err) throw new Error('Error during BlackBerry environment config retrieval');
-            // Write out .cordova/config.json file
-            if (dot.blackberry === undefined) dot.blackberry = {};
-            if (dot.blackberry.qnx === undefined) dot.blackberry.qnx = {};
-            dot.blackberry.qnx.bbwp = results.bbwp;
-            dot.blackberry.qnx.signing_password = results.signing_password;
-            dot.blackberry.qnx.device_ip = results.device_ip;
-            dot.blackberry.qnx.device_password = results.device_password;
-            dot.blackberry.qnx.sim_ip = results.sim_ip;
-            dot.blackberry.qnx.sim_password = results.sim_password;
-            fs.writeFileSync(dotFile, JSON.stringify(dot), 'utf-8');
-            console.log('Perfect! If you need to change any of these properties, just edit the .cordova/config.json file in the root of your cordova project.');
-            if (callback) callback();
+            if (err) {
+                if (callback) callback(err);
+                else throw err;
+            } else {
+                // Write out .cordova/config.json file
+                if (dot.blackberry === undefined) dot.blackberry = {};
+                if (dot.blackberry.qnx === undefined) dot.blackberry.qnx = {};
+                dot.blackberry.qnx.bbwp = results.bbwp;
+                dot.blackberry.qnx.signing_password = results.signing_password;
+                dot.blackberry.qnx.device_ip = results.device_ip;
+                dot.blackberry.qnx.device_password = results.device_password;
+                dot.blackberry.qnx.sim_ip = results.sim_ip;
+                dot.blackberry.qnx.sim_password = results.sim_password;
+                fs.writeFileSync(dotFile, JSON.stringify(dot), 'utf-8');
+                events.emit('log', 'Wrote out BlackBerry 10 configuration file to "' + dotFile + '"');
+                if (callback) callback();
+            }
         });
     }
 };

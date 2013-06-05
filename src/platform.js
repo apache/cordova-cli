@@ -22,6 +22,7 @@ var config_parser     = require('./config_parser'),
     fs                = require('fs'),
     path              = require('path'),
     hooker            = require('./hooker'),
+    events            = require('./events'),
     n                 = require('ncallbacks'),
     platforms         = require('../platforms'),
     plugman           = require('plugman'),
@@ -31,7 +32,10 @@ module.exports = function platform(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw new Error('Current working directory is not a Cordova-based project.');
+        var err = new Error('Current working directory is not a Cordova-based project.');
+        if (callback) callback(err);
+        else throw err;
+        return;
     }
 
     var hooks = new hooker(projectRoot),
@@ -67,16 +71,22 @@ module.exports = function platform(command, targets, callback) {
 
                 // Check if output directory already exists.
                 if (fs.existsSync(output)) {
-                    throw new Error('Platform "' + target + '" already exists' );
+                    var err = new Error('Platform "' + target + '" already exists' );
+                    if (callback) callback(err);
+                    else throw err;
+                    return;
                 }
 
                 // Make sure we have minimum requirements to work with specified platform
+                events.emit('log', 'Checking if platform "' + target + '" passes minimum requirements.');
                 module.exports.supports(target, function(err) {
                     if (err) {
-                        throw new Error('Your system does not meet the requirements to create ' + target + ' projects: ' + err.message);
+                        var err = new Error('Your system does not meet the requirements to create ' + target + ' projects: ' + err.message);
+                        if (callback) callback(err);
+                        else throw err;
+                        return;
                     } else {
                         // Create a platform app using the ./bin/create scripts that exist in each repo.
-                        // TODO: eventually refactor to allow multiple versions to be created.
                         // Run platform's create script
                         var bin = path.join(cordova_util.libDirectory, 'cordova-' + target, 'bin', 'create');
                         var args = (target=='ios') ? '--arc' : '';
@@ -85,13 +95,18 @@ module.exports = function platform(command, targets, callback) {
                         // TODO: PLATFORM LIBRARY INCONSISTENCY: order/number of arguments to create
                         // TODO: keep tabs on CB-2300
                         var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, (target=='blackberry'?name:pkg), name);
+                        events.emit('log', 'Running bin/create for platform "' + target + '" with command: "' + command + '"');
 
                         shell.exec(command, {silent:true,async:true}, function(code, create_output) {
                             if (code > 0) {
-                                throw new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output);
+                                var err = new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output);
+                                if (callback) callback(err);
+                                else throw err;
+                                return;
                             }
 
                             var parser = new platforms[target].parser(output);
+                            events.emit('log', 'Updating ' + target + ' project from config.xml...');
                             parser.update_project(cfg, function() {
                                 createOverrides(target);
                                 hooks.fire('after_platform_add');
@@ -104,6 +119,7 @@ module.exports = function platform(command, targets, callback) {
                                         return;
                                     }
 
+                                    events.emit('log', 'Installing plugin "' + plugin + '" following success platform add of ' + target);
                                     plugman.install(target, output, path.basename(plugin), pluginsDir, { www_dir: parser.staging_dir() });
                                 });
                                 end();
