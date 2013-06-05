@@ -47,6 +47,9 @@ cordova-cli has a single global `create` command that creates new cordova projec
 - `emulate [<platform> [<platform> [...]]]` launch emulators and deploy app to them. With no parameters emulates for all platforms added to the project, otherwise emulates for the specified platforms
 - `serve <platform> [port]` launch a local web server for that platform's www directory on the given port (default 8000).
 
+### Optional Flags
+
+- `-d` or `--verbose` will pipe out more verbose output to your shell. You can also subscribe to `log` and `warn` events if you are consuming cordova-cli as a node module by calling `cordova.on('log', function() {})` or `cordova.on('warn', function() {})`.
 
 # Project Directory Structure
 A Cordova application built with cordova-cli will have the following directory structure:
