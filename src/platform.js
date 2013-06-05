@@ -95,9 +95,10 @@ module.exports = function platform(command, targets, callback) {
                         // TODO: PLATFORM LIBRARY INCONSISTENCY: order/number of arguments to create
                         // TODO: keep tabs on CB-2300
                         var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, (target=='blackberry'?name:pkg), name);
-                        events.emit('log', 'Running bin/create for platform "' + target + '" with command: "' + command + '"');
+                        events.emit('log', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
 
                         shell.exec(command, {silent:true,async:true}, function(code, create_output) {
+                            events.emit('log', create_output);
                             if (code > 0) {
                                 var err = new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output);
                                 if (callback) callback(err);

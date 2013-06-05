@@ -61,10 +61,14 @@ module.exports = function ios_parser(project) {
 };
 
 module.exports.check_requirements = function(callback) {
+    events.emit('log', 'Checking iOS requirements...');
     // Check xcode + version.
-    shell.exec('xcodebuild -version', {silent:true, async:true}, function(code, output) {
+    var command = 'xcodebuild -version';
+    events.emit('log', 'Running "' + command + '" (output to follow)');
+    shell.exec(command, {silent:true, async:true}, function(code, output) {
+        events.emit('log', output);
         if (code != 0) {
-            callback('Xcode is (probably) not installed, specifically the command `xcodebuild` is unavailable or erroring out. Output of `xcodebuild -version` is: ' + output);
+            callback('Xcode is (probably) not installed, specifically the command `xcodebuild` is unavailable or erroring out. Output of `'+command+'` is: ' + output);
         } else {
             var xc_version = output.split('\n')[0].split(' ')[1];
             if (semver.lt(xc_version, MIN_XCODE_VERSION)) {

@@ -36,8 +36,9 @@ function shell_out_to_debug(projectRoot, platform, callback) {
     } else {
         cmd = '"' + path.join(cmd, 'cordova', 'build') + '"';
     }
-    events.emit('log', 'Compiling platform "' + platform + '" with command "' + cmd + '"');
+    events.emit('log', 'Compiling platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
+        events.emit('log', output);
         if (code > 0) {
             throw new Error('An error occurred while building the ' + platform + ' project. ' + output);
         } else {
