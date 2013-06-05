@@ -183,3 +183,8 @@ module.exports.supports = function(name, callback) {
         callback(e);
     });
 };
+
+// Expose the platform parsers on top of this command
+for (var p in platforms) {
+    module.exports[p] = platforms[p];
+}

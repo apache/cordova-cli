@@ -258,3 +258,14 @@ describe('platform.supports(name, callback)', function() {
         });
     });
 });
+
+describe('platform parsers', function() {
+    it('should be exposed on the platform module', function() {
+        for (var platform in platforms) {
+            expect(cordova.platform[platform]).toBeDefined();
+            for (var prop in platforms[platform]) {
+                expect(cordova.platform[platform][prop]).toBeDefined();
+            }
+        }
+    });
+});
