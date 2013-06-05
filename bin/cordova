@@ -2,12 +2,6 @@
 var tokens = process.argv.slice(2, process.argv.length),
     cordova= require('../cordova');
 
-// provide clean output on exceptions rather than dumping a stack trace
-process.on('uncaughtException', function(err){
-	console.error(err);
-    process.exit(1);
-});
-
 var cmd, version = false, verbose = false, current;
 
 while (current = tokens.shift()) {
@@ -18,6 +12,16 @@ while (current = tokens.shift()) {
         cmd = current;
         break;
     }
+}
+
+// provide clean output on exceptions rather than dumping a stack trace
+process.on('uncaughtException', function(err){
+	console.error(err);
+    process.exit(1);
+});
+if (verbose) {
+    cordova.on('log', console.log);
+    cordova.on('warn', console.warn);
 }
 
 if (version) {
@@ -41,5 +45,5 @@ if (version) {
     }
     if (r) console.log(r);
 } else {
-    console.error('Cordova does not know ' + cmd + '; try help for a list of all the available commands.')
+    throw new Error('Cordova does not know ' + cmd + '; try help for a list of all the available commands.');
 }

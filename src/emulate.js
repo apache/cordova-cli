@@ -22,6 +22,8 @@ var cordova_util      = require('./util'),
     config_parser     = require('./config_parser'),
     platforms         = require('../platforms'),
     platform          = require('./platform'),
+    events            = require('./events'),
+    prepare           = require('./prepare'),
     fs                = require('fs'),
     ls                = fs.readdirSync,
     n                 = require('ncallbacks'),
@@ -34,10 +36,12 @@ function shell_out_to_emulate(root, platform, callback) {
     if (platform == 'blackberry') {
         cmd = 'ant -f "' + path.join(root, 'platforms', platform, 'build.xml') + '" qnx load-simulator';
     }
+    events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '"');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         if (code > 0) {
             throw new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + output);
         } else {
+            events.emit('log', 'Platform "' + platform + '" deployed to emulator.');
             callback();
         }
     });
@@ -47,7 +51,10 @@ module.exports = function emulate (platformList, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw new Error('Current working directory is not a Cordova-based project.');
+        var err = new Error('Current working directory is not a Cordova-based project.');
+        if (callback) callback(err);
+        else throw err;
+        return;
     }
 
     var xml = cordova_util.projectConfig(projectRoot);
@@ -61,27 +68,41 @@ module.exports = function emulate (platformList, callback) {
         platformList = cordova_util.listPlatforms(projectRoot);
     }
 
-    if (platformList.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+    if (platformList.length === 0) {
+        var err = new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+        if (callback) callback(err);
+        else throw err;
+        return;
+    }
 
     var hooks = new hooker(projectRoot);
     if (!(hooks.fire('before_emulate'))) {
-        throw new Error('before_emulate hooks exited with non-zero code. Aborting build.');
+        var err = new Error('before_emulate hooks exited with non-zero code. Aborting build.');
+        if (callback) callback(err);
+        else throw err;
+        return;
     }
 
     var end = n(platformList.length, function() {
         if (!(hooks.fire('after_emulate'))) {
-            throw new Error('after_emulate hooks exited with non-zero code. Aborting.');
+            var err = new Error('after_emulate hooks exited with non-zero code. Aborting.');
+            if (callback) callback(err);
+            else throw err;
+            return;
         }
         if (callback) callback();
     });
 
-    // Iterate over each added platform and shell out to debug command
-    platformList.forEach(function(platform) {
-        var platformPath = path.join(projectRoot, 'platforms', platform);
-        var parser = new platforms[platform].parser(platformPath);
-        parser.update_project(cfg, function() {
-            shell_out_to_emulate(projectRoot, platform, end);
-        });
+    // Run a prepare first!
+    prepare(platformList, function(err) {
+        if (err) {
+            if (callback) callback(err);
+            else throw err;
+        } else {
+            platformList.forEach(function(platform) {
+                shell_out_to_emulate(projectRoot, platform, end);
+            });
+        }
     });
 };
 

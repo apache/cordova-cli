@@ -25,6 +25,7 @@ var cordova_util  = require('./util'),
     platforms     = require('../platforms'),
     config_parser = require('./config_parser'),
     hooker        = require('./hooker'),
+    events        = require('./events'),
     plugin_parser = require('./plugin_parser'),
     ls            = fs.readdirSync,
     plugman       = require('plugman');
@@ -33,7 +34,10 @@ module.exports = function plugin(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw new Error('Current working directory is not a Cordova-based project.');
+        var err = new Error('Current working directory is not a Cordova-based project.');
+        if (callback) callback(err);
+        else throw err;
+        return;
     }
     if (arguments.length === 0) command = 'ls';
 
@@ -72,9 +76,13 @@ module.exports = function plugin(command, targets, callback) {
                 }
 
                 // Fetch the plugin first.
+                events.emit('log', 'Calling plugman.fetch on plugin "' + target + '"');
                 plugman.fetch(target, pluginsDir, {}, function(err, dir) {
                     if (err) {
-                        throw new Error('Error fetching plugin: ' + err);
+                        var err = new Error('Error fetching plugin: ' + err);
+                        if (callback) callback(err);
+                        else throw err;
+                        return;
                     }
 
                     // Iterate over all platforms in the project and install the plugin.
@@ -82,6 +90,7 @@ module.exports = function plugin(command, targets, callback) {
                         var platformRoot = path.join(projectRoot, 'platforms', platform);
                         var parser = new platforms[platform].parser(platformRoot);
                         // TODO: unify use of blackberry in cli vs blackberry10 in plugman
+                        events.emit('log', 'Calling plugman.install on plugin "' + dir + '" for platform "' + platform + '"');
                         plugman.install((platform=='blackberry'?'blackberry10':platform), platformRoot,
                                         path.basename(dir), pluginsDir, { www_dir: parser.staging_dir() });
                     });
@@ -94,7 +103,10 @@ module.exports = function plugin(command, targets, callback) {
         case 'rm':
         case 'remove':
             if (platformList.length === 0) {
-                throw new Error('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
+                var err = new Error('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
+                if (callback) callback(err);
+                else throw err;
+                return;
             }
             targets.forEach(function(target, index) {
                 // Check if we have the plugin.
@@ -116,17 +128,23 @@ module.exports = function plugin(command, targets, callback) {
                     intersection.forEach(function(platform) {
                         var platformRoot = path.join(projectRoot, 'platforms', platform);
                         var parser = new platforms[platform].parser(platformRoot);
+                        events.emit('log', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
                         plugman.uninstall(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
                     });
 
                     hooks.fire('after_plugin_rm');
                 } else {
-                    throw new Error('Plugin "' + target + '" not added to project.');
+                    var err = new Error('Plugin "' + target + '" not added to project.');
+                    if (callback) callback(err);
+                    else throw err;
+                    return;
                 }
             });
             if (callback) callback();
             break;
         default:
-            throw new Error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.');
+            var err = new Error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.');
+            if (callback) callback(err);
+            else throw err;
     }
 };

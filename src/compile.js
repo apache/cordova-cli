@@ -23,6 +23,7 @@ var cordova_util      = require('./util'),
     shell             = require('shelljs'),
     et                = require('elementtree'),
     hooker            = require('./hooker'),
+    events            = require('./events'),
     n                 = require('ncallbacks');
 
 
@@ -35,21 +36,25 @@ function shell_out_to_debug(projectRoot, platform, callback) {
     } else {
         cmd = '"' + path.join(cmd, 'cordova', 'build') + '"';
     }
+    events.emit('log', 'Compiling platform "' + platform + '" with command "' + cmd + '"');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         if (code > 0) {
             throw new Error('An error occurred while building the ' + platform + ' project. ' + output);
         } else {
+            events.emit('log', 'Platform "' + platform + '" compiled successfully.');
             if (callback) callback();
         }
     });
 }
 
-
 module.exports = function compile(platformList, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw new Error('Current working directory is not a Cordova-based project.');
+        var err = new Error('Current working directory is not a Cordova-based project.');
+        if (callback) callback(err);
+        else throw err;
+        return;
     }
 
     var xml = cordova_util.projectConfig(projectRoot);
@@ -63,16 +68,27 @@ module.exports = function compile(platformList, callback) {
         platformList = cordova_util.listPlatforms(projectRoot);
     }
 
-    if (platformList.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+    if (platformList.length === 0) {
+        var err = new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+        if (callback) callback(err);
+        else throw err;
+        return;
+    }
 
     var hooks = new hooker(projectRoot);
     if (!(hooks.fire('before_compile'))) {
-        throw new Error('before_compile hooks exited with non-zero code. Aborting.');
+        var err = new Error('before_compile hooks exited with non-zero code. Aborting.');
+        if (callback) callback(err);
+        else throw err;
+        return;
     }
 
     var end = n(platformList.length, function() {
         if (!(hooks.fire('after_compile'))) {
-            throw new Error('after_compile hooks exited with non-zero code. Aborting.');
+            var err = new Error('after_compile hooks exited with non-zero code. Aborting.');
+            if (callback) callback(err);
+            else throw err;
+            return;
         }
         if (callback) callback();
     });

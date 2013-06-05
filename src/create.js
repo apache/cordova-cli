@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -22,6 +21,7 @@ var path          = require('path'),
     shell         = require('shelljs'),
     help          = require('./help'),
     config_parser = require('./config_parser'),
+    events        = require('./events'),
     util          = require('./util');
 
 var DEFAULT_NAME = "HelloCordova",
@@ -48,6 +48,8 @@ module.exports = function create (dir, id, name) {
 
     // Make absolute.
     dir = path.resolve(dir);
+
+    events.emit('log', 'Creating a new cordova project with name "' + name + '" and id "' + id + '" at location "' + dir + '"');
 
     var dotCordova = path.join(dir, '.cordova');
 
@@ -95,6 +97,7 @@ module.exports = function create (dir, id, name) {
     }));
 
     // Copy in base template
+    events.emit('log', 'Copying stock application assets into "' + path.join(dir, 'www') + '"');
     shell.cp('-r', path.join(__dirname, '..', 'templates', 'www'), dir);
 
     // Write out id and name to config.xml

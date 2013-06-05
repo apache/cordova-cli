@@ -20,6 +20,7 @@ var fs            = require('fs'),
     path          = require('path'),
     et            = require('elementtree'),
     util          = require('../util'),
+    events        = require('../events'),
     shell         = require('shelljs'),
     config_parser = require('../config_parser');
 
@@ -69,6 +70,7 @@ module.exports.prototype = {
         var strings = new et.ElementTree(et.XML(fs.readFileSync(this.strings, 'utf-8')));
         strings.find('string[@name="app_name"]').text = name;
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
+        events.emit('log', 'Wrote out Android application name to "' + name + '"');
 
         // Update package name by changing the AndroidManifest id and moving the entry class around to the proper package directory
         var manifest = new et.ElementTree(et.XML(fs.readFileSync(this.manifest, 'utf-8')));
@@ -85,6 +87,7 @@ module.exports.prototype = {
         var new_javs = path.join(pkgDir, orig_java_class);
         var javs_contents = fs.readFileSync(orig_javs, 'utf-8');
         javs_contents = javs_contents.replace(/package [\w\.]*;/, 'package ' + pkg + ';');
+        events.emit('log', 'Wrote out Android package name to "' + pkg + '"');
         fs.writeFileSync(new_javs, javs_contents, 'utf-8');
 
         // Update whitelist by changing res/xml/config.xml
@@ -171,7 +174,13 @@ module.exports.prototype = {
 
     update_project:function(cfg, callback) {
         var platformWww = path.join(this.path, 'assets');
-        this.update_from_config(cfg);
+        try {
+            this.update_from_config(cfg);
+        } catch(e) {
+            if (callback) callback(e);
+            else throw e;
+            return;
+        }
         this.update_www();
         this.update_overrides();
         this.update_staging();
