@@ -26,22 +26,22 @@ var cordova_util      = require('./util'),
     events            = require('./events'),
     n                 = require('ncallbacks');
 
+function shell_out_to_run(projectRoot, platform, callback) {
+    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '"';
 
-function shell_out_to_build(projectRoot, platform, callback) {
-    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'build') + '"';
-    events.emit('log', 'Compiling platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
+    events.emit('log', 'Running app on platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
         if (code > 0) {
-            throw new Error('An error occurred while building the ' + platform + ' project. ' + output);
+            throw new Error('An error occurred while running the ' + platform + ' project. ' + output);
         } else {
-            events.emit('log', 'Platform "' + platform + '" compiled successfully.');
+            events.emit('log', 'Platform "' + platform + '" ran successfully.');
             if (callback) callback();
         }
     });
 }
 
-module.exports = function compile(platformList, callback) {
+module.exports = function run(platformList, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -70,16 +70,16 @@ module.exports = function compile(platformList, callback) {
     }
 
     var hooks = new hooker(projectRoot);
-    if (!(hooks.fire('before_compile'))) {
-        var err = new Error('before_compile hooks exited with non-zero code. Aborting.');
+    if (!(hooks.fire('before_run'))) {
+        var err = new Error('before_run hooks exited with non-zero code. Aborting.');
         if (callback) callback(err);
         else throw err;
         return;
     }
 
     var end = n(platformList.length, function() {
-        if (!(hooks.fire('after_compile'))) {
-            var err = new Error('after_compile hooks exited with non-zero code. Aborting.');
+        if (!(hooks.fire('after_run'))) {
+            var err = new Error('after_run hooks exited with non-zero code. Aborting.');
             if (callback) callback(err);
             else throw err;
             return;
@@ -87,8 +87,15 @@ module.exports = function compile(platformList, callback) {
         if (callback) callback();
     });
 
-    // Iterate over each added platform
-    platformList.forEach(function(platform) {
-        shell_out_to_build(projectRoot, platform, end);
+    // Run a prepare first, then shell out to run
+    require('../cordova').prepare(platformList, function(err) {
+        if (err) {
+            if (callback) callback(err);
+            else throw err;
+        } else {
+            platformList.forEach(function(platform) {
+                shell_out_to_run(projectRoot, platform, end);
+            });
+        }
     });
 };

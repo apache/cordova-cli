@@ -31,11 +31,7 @@ var cordova_util      = require('./util'),
     util              = require('util');
 
 function shell_out_to_emulate(root, platform, callback) {
-    var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '"';
-    // TODO: PLATFORM LIBRARY INCONSISTENCY 
-    if (platform == 'blackberry') {
-        cmd = 'ant -f "' + path.join(root, 'platforms', platform, 'build.xml') + '" qnx load-simulator';
-    }
+    var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'emulate') + '"';
     events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);

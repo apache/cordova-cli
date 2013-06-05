@@ -33,7 +33,7 @@ if (version) {
     var r;
     if (cmd == 'create' || cmd == 'docs' || cmd == 'serve') {
         r = cordova[cmd].apply(this, opts);
-    } else if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile') {
+    } else if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
         r = cordova[cmd].call(this, opts);
     } else {
         // platform or plugin cmds

@@ -35,53 +35,49 @@ describe('compile command', function() {
         shell.mkdir('-p', tempDir);
     });
 
-    it('should not run inside a Cordova-based project with no added platforms', function() {
-        this.after(function() {
+    describe('failure', function() {
+        afterEach(function() {
+            process.chdir(cwd);
+            spyOn(shell, 'exec');
+        });
+        it('should not run inside a Cordova-based project with no added platforms', function() {
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+            expect(function() {
+                cordova.compile();
+            }).toThrow();
+        });
+        it('should not run outside of a Cordova-based project', function() {
+            shell.mkdir('-p', tempDir);
+            process.chdir(tempDir);
+            expect(function() {
+                cordova.compile();
+            }).toThrow();
+        });
+    });
+
+    describe('success', function() {
+        beforeEach(function() {
+            cordova.create(tempDir);
+            shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
+            process.chdir(tempDir);
+        });
+        afterEach(function() {
             process.chdir(cwd);
         });
+        it('should run inside a Cordova-based project with at least one added platform', function() {
+            // move platform project fixtures over to fake cordova into thinking platforms were added
+            // TODO: possibly add this to helper?
+            var sh_spy = spyOn(shell, 'exec');
 
-        cordova.create(tempDir);
-        process.chdir(tempDir);
-        expect(function() {
-            cordova.compile();
-        }).toThrow();
-    });
-    
-    it('should run inside a Cordova-based project with at least one added platform', function() {
-        // move platform project fixtures over to fake cordova into thinking platforms were added
-        // TODO: possibly add this to helper?
-        // Just make a folder instead of moving the whole platform? 
-        shell.mkdir('-p', tempDir);
-        shell.mv('-f', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir));
-        this.after(function() {
-            process.chdir(cwd);
-            shell.mv('-f', path.join(tempDir, 'android'), path.join(cordova_project, 'platforms', 'android'));
+            expect(function() {
+                cordova.compile();
+                expect(sh_spy).toHaveBeenCalled();
+                expect(sh_spy.mostRecentCall.args[0]).toMatch(/cordova.build"$/gi);
+            }).not.toThrow();
         });
-
-        process.chdir(cordova_project);
-
-        var sh_spy = spyOn(shell, 'exec');
-
-        expect(function() {
-            cordova.compile();
-            expect(sh_spy).toHaveBeenCalled();
-        }).not.toThrow();
     });
-    it('should not run outside of a Cordova-based project', function() {
-        this.after(function() {
-            process.chdir(cwd);
-        });
 
-        shell.mkdir('-p', tempDir);
-        process.chdir(tempDir);
-
-        // we don't actually want it building the project (if it does somehow exist)
-        var sh_spy = spyOn(shell, 'exec');
-
-        expect(function() {
-            cordova.compile();
-        }).toThrow();
-    });
     /* Is this a repeat of the util.spec.js test? */
     it('should not treat a .gitignore file as a platform', function() {
         var gitignore = path.join(cordova_project, 'platforms', '.gitignore');

@@ -31,7 +31,7 @@ var cordova = require('../../cordova'),
 
 var cwd = process.cwd();
 
-describe('emulate command', function() {
+describe('run command', function() {
     beforeEach(function() {
         shell.rm('-rf', tempDir);
         cordova.create(tempDir);
@@ -44,7 +44,7 @@ describe('emulate command', function() {
         it('should not run inside a Cordova-based project with no added platforms', function() {
             process.chdir(tempDir);
             expect(function() {
-                cordova.emulate();
+                cordova.run();
             }).toThrow();
         });
         it('should not run outside of a Cordova-based project', function() {
@@ -52,11 +52,11 @@ describe('emulate command', function() {
             process.chdir(tempDir);
 
             expect(function() {
-                cordova.emulate();
+                cordova.run();
             }).toThrow();
         });
     });
-
+    
     describe('success', function() {
         beforeEach(function() {
             shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
@@ -65,17 +65,26 @@ describe('emulate command', function() {
         afterEach(function() {
             process.chdir(cwd);
         });
-        it('should run inside a Cordova-based project with at least one added platform', function() {
-            var s = spyOn(shell, 'exec');
-            var a_spy = spyOn(android_parser.prototype, 'update_project');
-            expect(function() {
-                cordova.emulate();
-                a_spy.mostRecentCall.args[1](); // fake out android parser
-                expect(s).toHaveBeenCalled();
-                expect(s.mostRecentCall.args[0]).toMatch(/cordova.emulate"$/gi);
-            }).not.toThrow();
+        it('should invoke prepare', function() {
+            var spy = spyOn(cordova, 'prepare');
+            spyOn(shell, 'exec');
+            cordova.run();
+            expect(spy).toHaveBeenCalled();
+        });
+        it('should shell out to underlying `run` platform-level scripts', function(done) {
+            spyOn(cordova, 'prepare').andCallFake(function(platforms, callback) {
+                callback(false);
+            });
+            var spy = spyOn(shell, 'exec').andCallFake(function(cmd, options, cb) {
+                cb(0, 'yep');
+            });
+            cordova.run('android', function() {
+                 expect(spy.mostRecentCall.args[0]).toMatch(/cordova.run"$/gi);
+                 done();
+            });
         });
     });
+
 
     describe('hooks', function() {
         var s;
@@ -95,15 +104,16 @@ describe('emulate command', function() {
             it('should fire before hooks through the hooker module', function() {
 
                 spyOn(shell, 'exec');
-                cordova.emulate();
-                expect(hooker.prototype.fire).toHaveBeenCalledWith('before_emulate');
+                cordova.run();
+                expect(hooker.prototype.fire).toHaveBeenCalledWith('before_run');
             });
-            it('should fire after hooks through the hooker module', function() {
+            it('should fire after hooks through the hooker module', function(done) {
                 spyOn(shell, 'exec').andCallFake(function(cmd, options, callback) {
                     callback(0, 'fucking eh');
                 });
-                cordova.emulate('android', function() {
-                     expect(hooker.prototype.fire).toHaveBeenCalledWith('after_emulate');
+                cordova.run('android', function() {
+                     expect(hooker.prototype.fire).toHaveBeenCalledWith('after_run');
+                     done();
                 });
             });
         });
@@ -118,10 +128,10 @@ describe('emulate command', function() {
             it('should not fire the hooker', function() {
                 spyOn(shell, 'exec');
                 expect(function() {
-                    cordova.emulate();
+                    cordova.run();
                 }).toThrow();
-                expect(s).not.toHaveBeenCalledWith('before_emulate');
-                expect(s).not.toHaveBeenCalledWith('after_emulate');
+                expect(s).not.toHaveBeenCalledWith('before_run');
+                expect(s).not.toHaveBeenCalledWith('after_run');
             });
         });
     });

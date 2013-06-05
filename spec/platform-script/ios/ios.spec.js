@@ -62,16 +62,6 @@ describe('Test:', function() {
         shell.rm('-rf', tempDir);
         cordova.create(tempDir);
         shell.cp('-rf', path.join(cordova_project, 'platforms', 'ios'), path.join(tempDir, 'platforms'));
-        it('should shell out to run command on ios', function() {
-            var proj_spy = spyOn(ios_parser.prototype, 'update_project');
-            var s = spyOn(require('shelljs'), 'exec');
-            spyOn(require('plugman'), 'prepare');
-            cordova.emulate('ios');
-            proj_spy.mostRecentCall.args[1](); // update_project fake
-            expect(s).toHaveBeenCalled();
-            var emulate_cmd = path.join('ios', 'cordova', 'run');
-            expect(s.mostRecentCall.args[0]).toContain(emulate_cmd);
-        });
         it('should call ios_parser\'s update_project', function() {
             spyOn(require('shelljs'), 'exec');
             spyOn(ios_parser.prototype, 'update_project');
