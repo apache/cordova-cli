@@ -72,7 +72,7 @@ describe('emulate command', function() {
                 cordova.emulate();
                 a_spy.mostRecentCall.args[1](); // fake out android parser
                 expect(s).toHaveBeenCalled();
-                expect(s.mostRecentCall.args[0]).toMatch(/cordova.run" --emulator$/gi);
+                expect(s.mostRecentCall.args[0]).toMatch(/cordova.run" --debug --emulator$/gi);
             }).not.toThrow();
         });
     });
