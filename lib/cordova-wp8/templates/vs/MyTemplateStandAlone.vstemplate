@@ -1,13 +1,13 @@
 <VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
   <TemplateData>
-    <Name>CordovaWP8_2_8_0rc1</Name>
-    <Description>Cordova 2.8.0rc1 for Windows Phone 8 using the Cordova source code directly.</Description>
+    <Name>CordovaWP8_2_8_0</Name>
+    <Description>Cordova 2.8.0 for Windows Phone 8 using the Cordova source code directly.</Description>
     <ProjectType>CSharp</ProjectType>
     <ProjectSubType>
     </ProjectSubType>
     <SortOrder>1000</SortOrder>
     <CreateNewFolder>true</CreateNewFolder>
-    <DefaultName>CordovaWP8_2_8_0rc1</DefaultName>
+    <DefaultName>CordovaWP8_2_8_0</DefaultName>
     <ProvideDefaultName>true</ProvideDefaultName>
     <LocationField>Enabled</LocationField>
     <EnableLocationBrowseButton>true</EnableLocationBrowseButton>

@@ -22,6 +22,7 @@ var fs            = require('fs'),
     util          = require('../util'),
     events        = require('../events'),
     shell         = require('shelljs'),
+    events        = require('../events'),
     config_parser = require('../config_parser');
 
 module.exports = function wp7_parser(project) {
