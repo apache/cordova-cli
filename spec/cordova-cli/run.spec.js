@@ -79,7 +79,7 @@ describe('run command', function() {
                 cb(0, 'yep');
             });
             cordova.run('android', function() {
-                 expect(spy.mostRecentCall.args[0]).toMatch(/cordova.run"$/gi);
+                 expect(spy.mostRecentCall.args[0]).toMatch(/cordova.run" --device$/gi);
                  done();
             });
         });
