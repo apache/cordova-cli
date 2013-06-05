@@ -27,7 +27,7 @@ var cordova_util      = require('./util'),
     n                 = require('ncallbacks');
 
 function shell_out_to_run(projectRoot, platform, callback) {
-    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '"';
+    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" --device';
 
     events.emit('log', 'Running app on platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
