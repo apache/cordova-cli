@@ -22,4 +22,18 @@
 #   ./create [path package appname]
 #
 #!/bin/sh
-node $( dirname "$0" )"/create.js" "$@"
+
+CURRENT_DIR=$(pwd)
+BIN_DIR=$(dirname "$0")
+
+#Run npm install every time (even if node_modules folder is present) to cover platform upgrade
+cd "$BIN_DIR"/..
+#Removed sudo usage so that node modules are not ownder by root
+npm install
+cd "$CURRENT_DIR"
+
+if ! [ $? -eq 0 ]; then
+  echo "NPM install failed. Aborting."
+else
+  node "$BIN_DIR"/create.js "$@"
+fi

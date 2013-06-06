@@ -18,4 +18,29 @@ goto comment
        under the License.
 :comment
 
-@node.exe %~dp0\check_reqs %*
+set FOUNDNODE=
+for %%e in (%PATHEXT%) do (
+  for %%X in (node%%e) do (
+    if not defined FOUNDNODE (
+      set FOUNDNODE=%%~$PATH:X
+    )
+  )
+)
+
+set FOUNDNPM=
+for %%X in (npm) do (
+  if not defined FOUNDNPM (
+    set FOUNDNPM=%%~$PATH:X
+  )
+)
+
+if not defined FOUNDNODE (
+  echo "npm cannot be found on the path. Aborting."
+  exit /b 1
+)
+if not defined FOUNDNPM (
+  echo "Node cannot be found on the path. Aborting."
+  exit /b 1
+)
+
+@node.exe "%~dp0\check_reqs.js" %*

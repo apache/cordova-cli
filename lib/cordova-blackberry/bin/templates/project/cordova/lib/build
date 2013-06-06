@@ -18,11 +18,7 @@
 
 var path = require("path"),
     command = require("commander"),
-    jWorkflow = require("jWorkflow"),
-    localize = require("./localize"),
-    logger = require("./logger"),
     projectProperties = require("../../project.json"),
-    debugTokenHelper = require("./debugtoken-helper"),
     bbwpArgv = [
         process.argv[0],
         path.resolve(path.join(__dirname, process.argv[1])),
@@ -30,12 +26,10 @@ var path = require("path"),
         "-o",
         path.resolve(path.join(__dirname, "..", "..", "build"))
     ],
-    built = false,
-    debugtoken = false;
-
-function getTarget() {
-    return typeof command.args[0] === "string" ? command.args[0] : undefined;
-}
+    jWorkflow = require("jWorkflow"),
+    childProcess = require("child_process"),
+    pkgrUtils = require("./packager-utils"),
+    commandStr;
 
 function copyArgIfExists(arg) {
     if (command[arg]) {
@@ -44,49 +38,14 @@ function copyArgIfExists(arg) {
     }
 }
 
-function createDebugtoken(previous, baton) {
-    var keystorepass = command["keystorepass"] ? command["keystorepass"] : projectProperties.keystorepass;
-    baton.take();
-    logger.info(localize.translate("PROGRESS_WILL_CREATE_DEBUG_TOKEN"));
-    debugTokenHelper.createToken(projectProperties, getTarget(), keystorepass, function (code) {
-        if (code === 0) {
-            debugtoken = true;
-        }
-
-        baton.pass();
-    });
-}
-
-function deployDebugToken(previous, baton) {
-    baton.take();
-
-    // If in debug build and debug token was created, deploy the debug token and wait until the deployment is finished
-    if (debugtoken) {
-        logger.info(localize.translate("PROGRESS_WILL_DEPLOY_DEBUG_TOKEN"));
-        debugTokenHelper.deployToken(projectProperties, getTarget(), function () {
-            baton.pass();
-        });
-    } else {
-        baton.pass();
-    }
-}
-
 function doDebugBuild() {
-    built = true;
-
     //build in debug mode by default
     bbwpArgv.push("-d");
 
-    // In debug build, it needs to create debug token first
-    jWorkflow.order(createDebugtoken)
-             .andThen(deployDebugToken)
-             .andThen(build)
-             .start();
+    build();
 }
 
 function doReleaseBuild() {
-    built = true;
-
     //Note: Packager refers to signing password as "password" not "keystorepass"
     if (command["keystorepass"]) {
         bbwpArgv.push("--password");
@@ -95,7 +54,9 @@ function doReleaseBuild() {
         bbwpArgv.push("--password");
         bbwpArgv.push( projectProperties.keystorepass);
     } else {
-        throw "No signing password provided. Please use --keystorepass via command-line or enter a value for keystorepass in project.json";
+        console.log("No signing password provided. Please use --keystorepass via command-line or enter a value for keystorepass in project.json");
+        console.log(command.helpInformation()); 
+        process.exit(2);
     }
 
     copyArgIfExists("buildId");
@@ -107,68 +68,71 @@ function build() {
     copyArgIfExists("params");
     copyArgIfExists("loglevel");
 
-    //Overrite process.argv, before calling packager
+    //Overwrite process.argv, before calling packager
     process.argv = bbwpArgv;
 
     //Delete cached commander object. It will conflict with the packagers commander
     delete require.cache[require.resolve("commander")];
     delete require.cache[require.resolve("commander/lib/commander")];
 
-    //Package app. If successfull call run
-    require("./packager").start(run);
+    require("./packager").start(function() {});
 }
 
-function run() {
-    var target = getTarget();
-
-    //Overrite process.argv, before calling run
-    process.argv = [
-        process.argv[0],
-        process.argv[1],
-    ];
-
-    if (target) {
-        process.argv.push(target);
+function postClean() {
+    if (command.release) {
+        doReleaseBuild();
+    } else {
+        doDebugBuild();
     }
+}
 
-    //deploy app
-    require("./run");
+function clean(previous, baton) {
+    var cleanScript,
+        execName = "./clean";
+
+    if (pkgrUtils.isWindows()) {
+        execName = "clean";
+    } 
+
+    baton.take();
+
+    cleanScript = childProcess.exec(execName, {
+        "cwd": path.normalize(__dirname + "/.."),
+        "env": process.env
+    });
+
+    cleanScript.stdout.on("data", pkgrUtils.handleProcessOutput);
+    cleanScript.stderr.on("data", pkgrUtils.handleProcessOutput);
+
+    cleanScript.on("exit", function (code) {
+        baton.pass();
+    });
 }
 
 command
-    .usage('command [<target>] [-k | --keystorepass] [-b | --buildId <number>] [-p | --params <json>] [-ll | --loglevel <level>]')
-    .option('-k, --keystorepass <password>', 'Signing key password')
-    .option('-b, --buildId <num>', 'Specifies the build number for signing (typically incremented from previous signing).')
-    .option('-p, --params <params JSON file>', 'Specifies additional parameters to pass to downstream tools.')
+    .usage('[--debug] [--release] [-k | --keystorepass] [-b | --buildId <number>] [-p | --params <json>] [-ll | --loglevel <level>]')
+    .option('--debug', 'build in debug mode.')
+    .option('--release', 'build in release mode. This will sign the resulting bar.')
+    .option('-k, --keystorepass <password>', 'signing key password')
+    .option('-b, --buildId <num>', 'specifies the build number for signing (typically incremented from previous signing).')
+    .option('-p, --params <params JSON file>', 'specifies additional parameters to pass to downstream tools.')
     .option('-ll, --loglevel <loglevel>', 'set the logging level (error, warn, verbose)');
-
-command
-    .command('release')
-    .usage('[<target>] [-k | --keystorepass] [-b | --buildId <number>] [-p | --params <json>] [-ll | --loglevel <level>]')
-    .description('    Build in release mode. This will sign the resulting bar.')
-    .option('-k, --keystorepass <password>', 'Signing key password')
-    .option('-b, --buildId <num>', 'Specifies the build number for signing (typically incremented from previous signing).')
-    .option('-p, --params <params JSON file>', 'Specifies additional parameters to pass to downstream tools.')
-    .option('-ll, --loglevel <loglevel>', 'set the logging level (error, warn, verbose)')
-    .action(doReleaseBuild);
-
-command
-    .command('debug')
-    .usage('[<target>] [-p | --params <json>] [-ll | --loglevel <level>]')
-    .description('    Build in debug mode.')
-    .option('-p, --params <params JSON file>', 'Specifies additional parameters to pass to downstream tools.')
-    .option('-ll, --loglevel <loglevel>', 'set the logging level (error, warn, verbose)')
-    .action(doDebugBuild);
 
 try {
     command.parse(process.argv);
 
-    //if we get here and haven't built yet then no mode was provided [debug, release], default to debug mode
-    if (!built) {
-        doDebugBuild();
+    if (command.debug && command.release) {
+        console.log("Invalid build command: cannot specify both debug and release parameters.");
+        console.log(command.helpInformation());
+        process.exit(2);
     }
+
+    // Implicitly call clean first
+    jWorkflow.order(clean)
+             .andThen(postClean)
+             .start();
 } catch (e) {
     console.log(e);
-    process.exit();
+    process.exit(2);
 }
 

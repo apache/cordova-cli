@@ -24,20 +24,24 @@ var childProcess = require("child_process"),
     conf = require("./conf"),
     localize = require("./localize"),
     pkgrUtils = require("./packager-utils"),
+    debugTokenHelper = require("./debugtoken-helper"),
     properties = require('../../project.json'),
     program = require('commander'),
     xml2js = require('xml2js'),
+    jWorkflow = require("jWorkflow"),
+    logger = require("./logger"),
+    pin,
+    needCreateDebugToken = false,
+    needDeployDebugToken = false,
+    commandStr,
     target,
     ip,
     password,
-    workingdir,
-    barPath;
+    workingdir = path.normalize(__dirname + "/..");
 
 function generateOptions(uninstall) {
     var options = [];
-
-    workingdir = path.normalize(__dirname + "/.."),
-    barPath = path.normalize(__dirname + "/../../build/" + properties.targets[target].type + "/" + properties.barName + ".bar");
+        barPath = pkgrUtils.escapeStringForShell(path.normalize(__dirname + "/../../build/" + properties.targets[target].type + "/" + properties.barName + ".bar"));
 
     options.push("-device");
     options.push(ip);
@@ -96,49 +100,29 @@ function execNativeDeploy(optionsArray, callback) {
 
 function checkTarget() {
     if (!target) {
-        console.log("No target exists, to add that target please run target add <name> <ip> [-t | --type <device | simulator>] [-p <password>] [--pin <devicepin>]\n");
+        console.log("No target exists, to add that target please run target add <name> <ip> [-t | --type <device | simulator>] [-p <password>] [--pin <devicepin>]");
+        console.log(program.helpInformation());
         return false;
     }
     if (!properties.targets[target]) {
-        console.log("The target \""+target+"\" does not exist, to add that target please run target add "+target+" <ip> [-t | --type <device | simulator>] [-p <password>] [--pin <devicepin>]\n");
+        console.log("The target \""+target+"\" does not exist, to add that target please run target add "+target+" <ip> [-t | --type <device | simulator>] [-p <password>] [--pin <devicepin>]");
+        console.log(program.helpInformation());
         return false;
     }
     if (properties.targets[target].ip) {
-       ip = properties.targets[target].ip; 
+       ip = properties.targets[target].ip;
     } else {
-        console.log("IP is not defined in target \""+target+"\"\n");
+        console.log("IP is not defined in target \""+target+"\"");
+        console.log(program.helpInformation());
         return false;
     }
     if (properties.targets[target].password) {
        password = properties.targets[target].password;
-    } 
-    return true;
-
-}
-
-function deployAll(keys) {
-    target = keys[0];
-
-    if (target) {
-        if (checkTarget()) {
-            var options = generateOptions();
-            if (program.uninstall) {
-                uninstall(
-                    function() {
-                        keys.shift();
-                        deployAll(keys);
-                });
-            } else {
-                execNativeDeploy(options,
-                    function() {
-                        deployAll(keys);
-                });
-            }
-        }
     }
+    return true;
 }
 
-function uninstall(callback) {
+function uninstall() {
     var script = "/bin/blackberry-deploy",
         nativeDeploy;
 
@@ -158,12 +142,10 @@ function uninstall(callback) {
                         var options = generateOptions(true);
                         execNativeDeploy(options,
                             function(){
-                                options = generateOptions(false);
-                                execNativeDeploy(options, callback);
+                                deploy();
                         });
                     } else {
-                        options = generateOptions(false);
-                        execNativeDeploy(options, callback);
+                        deploy();
                     }
                 });
             });
@@ -171,34 +153,143 @@ function uninstall(callback) {
     }
 }
 
-function exec(callback) {
-    program
-        .usage('command [<target>] [--no-launch] [--no-uninstall]')
-        .option('--no-uninstall', 'does not uninstall app from device')
-        .option('--no-launch', 'do not launch the app on device')
+function deploy() {
+    options = generateOptions(false);
+    execNativeDeploy(options, function (code) {
+        if (code) {
+            process.exit(2);
+        } else {
+            process.exit(0);
+        }
+    });
+}
 
-    program
-        .command('all')
-        .usage('all [--no-launch] [--no-uninstall]')
-        .description('    Deploy the app on all targets')
-        .option('--no-uninstall', 'does not uninstall app from device')
-        .option('--no-launch', 'do not launch the app on device')
-    
-    program.parse(process.argv);
-    target = program.args[0] ? program.args[0] : properties.defaultTarget
+function checkDebugtoken(previous, baton) {
+    baton.take();
 
-    if (target === "all") {
-        deployAll(Object.keys(properties.targets));
-    } else {
-        if (checkTarget()) {
-            if (program.uninstall) {
-                uninstall(callback);
+    // if target has no pin, skip the debug token feature
+    if (properties.targets[target].pin) {
+        debugTokenHelper.checkDebugToken(properties.targets[target].pin, function (valid) {
+            // If the debug token is not valid, we need create new debug token
+            if (valid) {
+                // No need to create the debug token
+                logger.info(localize.translate("PROGRESS_DEBUG_TOKEN_IS_VALID"));
+                needDeployDebugToken = true;
             } else {
-                options = generateOptions(false);
-                execNativeDeploy(options, callback)
+                needCreateDebugToken = true;
             }
+            baton.pass();
+        });
+    } else {
+        baton.pass();
+    }
+}
+
+function createDebugToken(previous, baton) {
+    var keystorepass = program["keystorepass"] ? program["keystorepass"] : properties.keystorepass;
+
+    baton.take();
+
+    if (needCreateDebugToken) {
+        debugTokenHelper.createToken(properties, "all", keystorepass, function (code) {
+            if (code === 0) {
+                // Deploy the debug token if created
+                needDeployDebugToken = true;
+            }
+
+            baton.pass();
+        });
+    } else {
+            baton.pass();
+    }
+}
+
+function deployDebugToken(previous, baton) {
+    baton.take();
+
+    // If in debug build and debug token was created, deploy the debug token and wait until the deployment is finished
+    if (needDeployDebugToken) {
+        debugTokenHelper.deployToken(properties, target, function () {
+            baton.pass();
+        });
+    } else {
+        baton.pass();
+    }
+}
+
+function handleBuildOutput(data) {
+    var msg = data.toString().replace(/[\n\r]/g, '');
+    console.log(msg);
+}
+
+function build(previous, baton) {
+    var nativeDeploy,
+        execName = "./build";
+
+    baton.take();
+
+    if (pkgrUtils.isWindows()) {
+        execName = "build";
+    } 
+
+    nativeDeploy = childProcess.exec(execName, {
+        "cwd": path.normalize(__dirname + "/.."),
+        "env": process.env
+    });
+
+    nativeDeploy.stdout.on("data", handleBuildOutput);
+
+    nativeDeploy.stderr.on("data", handleBuildOutput);
+
+    nativeDeploy.on("exit", function (code) {
+        // If error happened during building the bar, exit
+        if (code === 2) {
+            process.exit(2);
+        }
+
+        baton.pass();
+    });
+}
+
+function postBuild() {
+    if (program.uninstall) {
+        uninstall();
+    } else {
+        deploy();
+    }
+}
+
+function exec() {
+    program
+        .usage('[--target=<id>] [-k | --keystorepass] [--no-launch] [--no-uninstall] [--no-build]')
+        .option('-k, --keystorepass <password>', 'the password of signing key; needed for creating debug token')
+        .option('--target', 'specifies the target to run the application')
+        .option('--no-uninstall', 'does not uninstall application from device')
+        .option('--no-launch', 'do not launch the application on device')
+        .option('--no-build', 'deploy the pre-built bar file and skip building');
+
+    commandStr = typeof process.argv[2] === "string" ? process.argv[2] : undefined;
+    if (commandStr && commandStr.indexOf("--target=") === 0) {
+        // Convert "--target=<id>" into "--target id"
+        process.argv[2] = "--target";
+        process.argv.splice(3, 0, commandStr.substring("--target=".length));
+    }
+
+    program.parse(process.argv);
+    target = program.args[0] ? program.args[0] : properties.defaultTarget;
+
+    if (checkTarget()) {
+        if (program.build) {
+            jWorkflow.order(checkDebugtoken)
+                     .andThen(createDebugToken)
+                     .andThen(deployDebugToken)
+                     .andThen(build)
+                     .andThen(postBuild)
+                     .start();
+        } else {
+            postBuild();
         }
     }
 }
 
-exec(null);
+exec();
