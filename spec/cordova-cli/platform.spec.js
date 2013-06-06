@@ -69,7 +69,8 @@ describe('platform command', function() {
 
     describe('`ls`', function() { 
         beforeEach(function() {
-            process.chdir(cordova_project);
+            cordova.create(tempDir);
+            process.chdir(tempDir);
         });
 
         afterEach(function() {
@@ -77,19 +78,14 @@ describe('platform command', function() {
         });
 
         it('should list out no platforms for a fresh project', function() {
-            shell.mv('-f', path.join(cordova_project, 'platforms', '*'), tempDir);
-            this.after(function() {
-                shell.mv('-f', path.join(tempDir, '*'), path.join(cordova_project, 'platforms'));
-            });
+            shell.rm('-rf', path.join(tempDir, 'platforms', '*'));
             expect(cordova.platform('list').length).toEqual(0);
         });
 
-        // TODO: false test as environment where these tests are running may or may not have the specific platform's project built for it. if user does not have the appropriate sdk installed, this will fail.
-        xit('should list out added platforms in a project', function() {
-            process.chdir(tempDir);
-            cordova.create(tempDir);
-            shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
-            shell.cp('-Rf', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir, 'platforms'));
+        it('should list out added platforms in a project', function() {
+            var platforms = path.join(tempDir, 'platforms');
+            shell.mkdir(path.join(platforms, 'android'));
+            shell.mkdir(path.join(platforms, 'ios'));
             expect(cordova.platform('list').length).toEqual(2);
         });
     });
@@ -118,26 +114,28 @@ describe('platform command', function() {
     });
 
     describe('`remove`',function() {
-        var num_platforms = fs.readdirSync(path.join(cordova_project, 'platforms')).length; 
         beforeEach(function() {
-            process.chdir(cordova_project);
-            shell.cp('-rf', path.join(cordova_project, 'platforms' ,'*'), tempDir);
+            cordova.create(tempDir);
+            process.chdir(tempDir);
         });
 
         afterEach(function() {
             process.chdir(cwd);
-            shell.cp('-rf', path.join(tempDir, '*'), path.join(cordova_project, 'platforms')); 
         });
 
         it('should remove a supported and added platform', function() {
+            shell.mkdir(path.join(tempDir, 'platforms', 'android'));
+            shell.mkdir(path.join(tempDir, 'platforms', 'ios'));
             cordova.platform('remove', 'android');
-            expect(cordova.platform('ls').length).toEqual(num_platforms - 1);
+            expect(cordova.platform('ls').length).toEqual(1);
         });
-        // TODO: fails if environemtn not configured for the specified paltforms.
-        // need to rethink this.
-        xit('should be able to remove multiple platforms', function() {
+
+        it('should be able to remove multiple platforms', function() {
+            shell.mkdir(path.join(tempDir, 'platforms', 'android'));
+            shell.mkdir(path.join(tempDir, 'platforms', 'blackberry'));
+            shell.mkdir(path.join(tempDir, 'platforms', 'ios'));
             cordova.platform('remove', ['android','blackberry']);
-            expect(cordova.platform('ls').length).toEqual(num_platforms - 2);
+            expect(cordova.platform('ls').length).toEqual(1);
         });
     });
 
