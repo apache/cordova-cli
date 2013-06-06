@@ -26,8 +26,8 @@ var fs            = require('fs'),
     config_parser = require('../config_parser');
 
 module.exports = function blackberry_parser(project) {
-    if (!fs.existsSync(path.join(project, 'project.properties')) || !fs.existsSync(path.join(project, 'build.xml'))) {
-        throw new Error('The provided path "' + project + '" is not a Cordova BlackBerry WebWorks project.');
+    if (!fs.existsSync(path.join(project, 'project.json')) || !fs.existsSync(path.join(project, 'www'))) {
+        throw new Error('The provided path "' + project + '" is not a Cordova BlackBerry10 WebWorks project.');
     }
     this.path = project;
     this.config_path = path.join(this.path, 'www', 'config.xml');
@@ -35,8 +35,11 @@ module.exports = function blackberry_parser(project) {
 };
 
 module.exports.check_requirements = function(callback) {
-    // TODO: below, we ask for users to fill out SDK paths, etc. into config.json. Android requires the sdk path be on the PATH. Which to choose? 
-    callback(false);
+    if (process.env && process.env.QNX_HOST) {
+        callback(false);
+    } else {
+        callback('The BB10NDK environment variable QNX_HOST is missing. Make sure you run `source <path to bb10ndk>/bbndk-env.sh`. Even better, add `source`ing that script to your .bash_profile or equivalent so you don\'t have to do it manually every time.');
+    }
 };
 
 module.exports.prototype = {
@@ -81,16 +84,13 @@ module.exports.prototype = {
         var dotFile = path.join(projectRoot, '.cordova', 'config.json');
         var dot = JSON.parse(fs.readFileSync(dotFile, 'utf-8'));
         if (dot.blackberry === undefined || dot.blackberry.qnx === undefined) {
-            events.emit('warn', 'WARNING! Missing BlackBerry configuration file.');
+            events.emit('warn', 'WARNING! Missing BlackBerry 10 configuration file, prompting for information...');
             this.get_blackberry_environment(function() {
-                // Update project.properties
-                self.write_project_properties();
-
+                self.write_blackberry_environment();
                 if (callback) callback();
             });
         } else {
-            // Write out config stuff to project.properties file
-            this.write_project_properties();
+            self.write_blackberry_environment();
             if (callback) callback();
         }
     },
@@ -120,7 +120,7 @@ module.exports.prototype = {
         shell.cp('-rf', www, this.path);
 
         // add cordova.js
-        shell.cp('-f', path.join(util.libDirectory, 'cordova-blackberry', 'javascript', 'cordova.blackberry.js'), path.join(this.www_dir(), 'cordova.js'));
+        shell.cp('-f', path.join(util.libDirectory, 'cordova-blackberry', 'javascript', 'cordova.blackberry10.js'), path.join(this.www_dir(), 'cordova.js'));
 
         // add webworks ext directories
         shell.cp('-rf', path.join(util.libDirectory, 'cordova-blackberry', 'framework', 'ext*'), this.www_dir());
@@ -152,24 +152,11 @@ module.exports.prototype = {
             shell.cp('-rf', staging, this.www_dir());
         }
     },
-
-    write_project_properties:function() {
+    get_cordova_config:function() {
         var projectRoot = util.isCordova(this.path);
-
-        var projFile = path.join(this.path, 'project.properties');
-        var props = fs.readFileSync(projFile, 'utf-8');
-
         var dotFile = path.join(projectRoot, '.cordova', 'config.json');
         var dot = JSON.parse(fs.readFileSync(dotFile, 'utf-8'));
-
-        props = props.replace(/qnx\.bbwp\.dir=.*\n/, 'qnx.bbwp.dir=' + dot.blackberry.qnx.bbwp + '\n');
-        props = props.replace(/qnx\.sigtool\.password=.*\n/, 'qnx.sigtool.password=' + dot.blackberry.qnx.signing_password + '\n');
-        props = props.replace(/qnx\.device\.ip=.*\n/, 'qnx.device.ip=' + dot.blackberry.qnx.device_ip + '\n');
-        props = props.replace(/qnx\.device\.password=.*\n/, 'qnx.device.password=' + dot.blackberry.qnx.device_password + '\n');
-        props = props.replace(/qnx\.sim\.ip=.*\n/, 'qnx.sim.ip=' + dot.blackberry.qnx.sim_ip + '\n');
-        props = props.replace(/qnx\.sim\.password=.*\n/, 'qnx.sim.password=' + dot.blackberry.qnx.sim_password + '\n');
-        fs.writeFileSync(projFile, props, 'utf-8');
-        events.emit('log', 'Wrote out BlackBerry 10 configuration file to "' + projFile + '"');
+        return dot.blackberry.qnx;
     },
     get_blackberry_environment:function(callback) {
         var projectRoot = util.isCordova(this.path);
@@ -179,20 +166,25 @@ module.exports.prototype = {
         events.emit('log', 'Prompting for BlackBerry 10 configuration information...');
         prompt.start();
         prompt.get([{
-            name:'bbwp',
-            required:true,
-            description:'Enter the full path to your BB10 bbwp executable'
-        },{
             name:'signing_password',
             required:true,
-            description:'Enter your BlackBerry signing password',
+            description:'Enter your BlackBerry 10 signing/keystore password',
             hidden:true
+        },{
+            name:'device_name',
+            description:'Enter a name for your BB10 device'
         },{
             name:'device_ip',
             description:'Enter the IP to your BB10 device'
         },{
             name:'device_password',
             description:'Enter the password for your BB10 device'
+        },{
+            name:'device_pin',
+            description:'Enter the PIN for your BB10 device (under Settings->About->Hardware)'
+        },{
+            name:'sim_name',
+            description:'Enter a name for your BB10 simulator'
         },{
             name:'sim_ip',
             description:'Enter the IP to your BB10 simulator'
@@ -208,16 +200,73 @@ module.exports.prototype = {
                 // Write out .cordova/config.json file
                 if (dot.blackberry === undefined) dot.blackberry = {};
                 if (dot.blackberry.qnx === undefined) dot.blackberry.qnx = {};
-                dot.blackberry.qnx.bbwp = results.bbwp;
                 dot.blackberry.qnx.signing_password = results.signing_password;
                 dot.blackberry.qnx.device_ip = results.device_ip;
+                dot.blackberry.qnx.device_name = results.device_name;
                 dot.blackberry.qnx.device_password = results.device_password;
+                dot.blackberry.qnx.device_pin = results.device_pin;
                 dot.blackberry.qnx.sim_ip = results.sim_ip;
+                dot.blackberry.qnx.sim_name = results.sim_name;
                 dot.blackberry.qnx.sim_password = results.sim_password;
                 fs.writeFileSync(dotFile, JSON.stringify(dot), 'utf-8');
                 events.emit('log', 'Wrote out BlackBerry 10 configuration file to "' + dotFile + '"');
                 if (callback) callback();
             }
         });
+    },
+    write_blackberry_environment:function() {
+        var projectRoot = util.isCordova(this.path);
+        // Write it out to project.json as well
+        var project_json_file = path.join(projectRoot, 'platforms', 'blackberry', 'project.json');
+        var proj_json = JSON.parse(fs.readFileSync(project_json_file,'utf-8'));
+
+        // write out stuff to the project.json if user specified it
+        var bb_config = this.get_cordova_config();
+        if (bb_config.device_name && bb_config.device_ip && bb_config.device_password && bb_config.device_pin) {
+            proj_json.targets[bb_config.device_name] = {
+                ip:bb_config.device_ip,
+                type:"device",
+                password:bb_config.device_password,
+                pin:bb_config.device_pin
+            };
+            proj_json.defaultTarget = bb_config.device_name;
+            events.emit('log', 'Wrote out BlackBerry 10 device information to ' + project_json_file);
+        }
+        if (bb_config.sim_name && bb_config.sim_ip && bb_config.sim_password) {
+            proj_json.targets[bb_config.sim_name] = {
+                ip:bb_config.sim_ip,
+                type:"simulator",
+                password:bb_config.sim_password
+            };
+            events.emit('log', 'Wrote out BlackBerry 10 simulator information to ' + project_json_file);
+        }
+        fs.writeFileSync(project_json_file, JSON.stringify(proj_json), 'utf-8');
+    },
+    get_all_targets:function() {
+        var json_file = path.join(this.path, 'project.json');
+        var json = JSON.parse(fs.readFileSync(json_file, 'utf-8'));
+        var targets = [];
+        Object.keys(json.targets).forEach(function(target) {
+            var t = json.targets[target];
+            t.name = target;
+            targets.push(t);
+        });
+        return targets;
+    },
+    get_device_targets:function() {
+        return this.get_all_targets().filter(function(t) {
+            return t.type == 'device';
+        });
+    },
+    get_simulator_targets:function() {
+        return this.get_all_targets().filter(function(t) {
+            return t.type == 'simulator';
+        });
+    },
+    has_device_target:function() {
+        return this.get_device_targets().length > 0;
+    },
+    has_simulator_target:function() {
+        return this.get_simulator_targets().length > 0;
     }
 };

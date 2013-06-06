@@ -23,8 +23,7 @@ describe('Test:', function() {
         };
         var fake_create = function(a_path) {
             shell.mkdir('-p', path.join(a_path, 'www'));
-            fs.writeFileSync(path.join(a_path, 'project.properties'), 'hi', 'utf-8');
-            fs.writeFileSync(path.join(a_path, 'build.xml'), 'hi', 'utf-8');
+            fs.writeFileSync(path.join(a_path, 'project.json'), 'hi', 'utf-8');
             shell.cp('-rf', path.join(cordova_project, 'platforms', 'blackberry', 'www', 'config.xml'), path.join(a_path, 'www'));
             sh.mostRecentCall.args[2](0, '');
         };
@@ -61,6 +60,9 @@ describe('Test:', function() {
     describe('\'emulate blackberry\'', function() {
         beforeEach(function() {
             process.chdir(tempDir);
+            spyOn(blackberry_parser.prototype, 'get_cordova_config').andReturn({
+                signing_password:'pwd'
+            });
         });
         afterEach(function() {
             process.chdir(cwd);
@@ -68,13 +70,14 @@ describe('Test:', function() {
         shell.rm('-rf', tempDir);
         cordova.create(tempDir);
         shell.cp('-rf', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir, 'platforms'));
-        it('should shell out to ant command on blackberry', function() {
+        it('should shell out to run command with a specific target', function() {
             var proj_spy = spyOn(blackberry_parser.prototype, 'update_project');
+            spyOn(blackberry_parser.prototype, 'get_all_targets').andReturn([{name:'fakesim',type:'simulator'}]);
             var s = spyOn(require('shelljs'), 'exec');
             cordova.emulate('blackberry');
             proj_spy.mostRecentCall.args[1](); // update_project fake
             expect(s).toHaveBeenCalled();
-            var emulate_cmd = 'ant -f .*build\.xml" qnx load-simulator';
+            var emulate_cmd = 'cordova.run" --target=fakesim -k pwd$';
             expect(s.mostRecentCall.args[0]).toMatch(emulate_cmd);
         });
         it('should call blackberry_parser\'s update_project', function() {
@@ -96,10 +99,9 @@ describe('Test:', function() {
         cordova.create(tempDir);
         shell.cp('-rf', path.join(cordova_project, 'platforms', 'blackberry'), path.join(tempDir, 'platforms'));
         it('should shell out to build command', function() {
-            var build_cmd = 'build.xml" qnx load-device';
             var s = spyOn(require('shelljs'), 'exec').andReturn({code:0});
             cordova.compile('blackberry');
-            expect(s.mostRecentCall.args[0]).toContain(build_cmd);
+            expect(s.mostRecentCall.args[0]).toMatch(/blackberry.cordova.build"$/gi);
         });
     });
 });

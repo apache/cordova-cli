@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -204,7 +203,7 @@ describe('blackberry project parser', function() {
                     expect(spyEnv).not.toHaveBeenCalled();
                 });
                 it('should write out project properties', function(done) {
-                    var spyProps = spyOn(parser, 'write_project_properties');
+                    var spyProps = spyOn(parser, 'write_blackberry_environment');
                     parser.update_project(config, function() { 
                         expect(spyProps).toHaveBeenCalled();
                         done();
@@ -229,7 +228,7 @@ describe('blackberry project parser', function() {
                     expect(spyEnv).toHaveBeenCalled();
                 });
                 it('should write out project properties', function(done) {
-                    var spyProps = spyOn(parser, 'write_project_properties');
+                    var spyProps = spyOn(parser, 'write_blackberry_environment');
                     var promptSpy = spyOn(require('prompt'), 'get');
                     parser.update_project(config, function() {
                         expect(spyProps).toHaveBeenCalled();

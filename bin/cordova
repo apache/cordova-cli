@@ -22,6 +22,7 @@ process.on('uncaughtException', function(err){
 if (verbose) {
     cordova.on('log', console.log);
     cordova.on('warn', console.warn);
+    process.on('uncaughtException', function(err) { console.error(err.stack) });
 }
 
 if (version) {
