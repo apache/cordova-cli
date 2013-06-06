@@ -26,7 +26,6 @@ var cordova_util      = require('./util'),
     events            = require('./events'),
     n                 = require('ncallbacks');
 
-
 function shell_out_to_build(projectRoot, platform, callback) {
     var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'build') + '"';
     events.emit('log', 'Compiling platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
@@ -70,25 +69,26 @@ module.exports = function compile(platformList, callback) {
     }
 
     var hooks = new hooker(projectRoot);
-    if (!(hooks.fire('before_compile'))) {
-        var err = new Error('before_compile hooks exited with non-zero code. Aborting.');
-        if (callback) callback(err);
-        else throw err;
-        return;
-    }
+    hooks.fire('before_compile', function(err) {
+        if (err) {
+            var error = new Error('before_compile hooks exited with non-zero code or caused an error: ' + err.message);
+            if (callback) callback(error);
+            else throw error;
+        } else {
+            var end = n(platformList.length, function() {
+                hooks.fire('after_compile', function(error) {
+                    if (error) {
+                        var arr = new Error('after_compile hooks exited with non-zero code. Aborting.');
+                        if (callback) callback(arr);
+                        else throw arr;
+                    } else if (callback) callback();
+                });
+            });
 
-    var end = n(platformList.length, function() {
-        if (!(hooks.fire('after_compile'))) {
-            var err = new Error('after_compile hooks exited with non-zero code. Aborting.');
-            if (callback) callback(err);
-            else throw err;
-            return;
+            // Iterate over each added platform
+            platformList.forEach(function(platform) {
+                shell_out_to_build(projectRoot, platform, end);
+            });
         }
-        if (callback) callback();
-    });
-
-    // Iterate over each added platform
-    platformList.forEach(function(platform) {
-        shell_out_to_build(projectRoot, platform, end);
     });
 };
