@@ -18,4 +18,4 @@ goto comment
        under the License.
 :comment
 
-@node.exe %~dp0\lib\clean %*
+@node.exe %~dps0\lib\clean %*

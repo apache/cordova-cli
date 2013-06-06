@@ -33,9 +33,9 @@ module.exports = {
     'wp8' : {
         parser : require('./src/metadata/wp8_parser'),
         url    : 'https://git-wip-us.apache.org/repos/asf/cordova-wp8.git'
-    }/*,
+    },
     blackberry : {
         parser : require('./metadata/blackberry_parser'),
         url    : 'https://git-wip-us.apache.org/repos/asf/cordova-blackberry.git'
-    }*/
+    }
 };

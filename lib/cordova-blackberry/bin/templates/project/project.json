@@ -1,6 +1,5 @@
 {
     "barName": "cordova-BB10-app",
-    "keystorepass": "password",
     "defaultTarget": "",
     "targets": {}
 }

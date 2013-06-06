@@ -11,11 +11,13 @@
     "type": "Apache 2.0",
     "url": "http://www.apache.org/licenses/LICENSE-2.0"
   }],
+  "engines": {
+    "node": ">=0.9.9"
+  },
   "scripts": {
     "test": "./node_modules/jake/bin/cli.js"
   },
   "dependencies": {
-    "jasmine-node": "1.0.7",
     "jWorkflow": "0.8.0",
     "commander": "0.5.2",
     "localize": "*0.4.2",
@@ -28,6 +30,8 @@
     "plugman": "0.7.7"
   },
   "devDependencies": {
-    "jake":"*"
-  }
+    "jake":"*",
+    "jasmine-node": "1.0.7"
+  },
+  "readmeFilename": "README.md"
 }

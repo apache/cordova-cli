@@ -41,7 +41,9 @@ function isValidIp(ip) {
         ipArray;
 
     if (typeof ip !== 'string') {
-        throw "IP is required";
+        console.log("IP is required");
+        console.log(commander.helpInformation());
+        process.exit(2); 
     } else {
         ipArray = ip.split('.');
         if (ipArray.length !== 4) {
@@ -61,7 +63,9 @@ function isValidType(type) {
     var result = true;
 
     if (typeof type !== 'string') {
-        throw "target type is required";
+        console.log("target type is required");
+        console.log(commander.helpInformation());
+        process.exit(2); 
     }
     else if (!(type === 'device' || type === 'simulator')) {
         result = false;
@@ -98,7 +102,9 @@ commander
     .description("Add specified target")
     .action(function () {
         if (commander.args.length === 1) {
-            throw "Target details not specified";
+            console.log("Target details not specified");
+            console.log(commander.helpInformation());
+            process.exit(2); 
         }
         name = commander.args[0];
         ip = commander.args[1];
@@ -110,13 +116,19 @@ commander
             pin = commander.pin;
         }
         if (!isValidIp(ip)) {
-            throw "Invalid IP: " + ip;
+            console.log("Invalid IP: " + ip);
+            console.log(commander.helpInformation());
+            process.exit(2); 
         }
         if (!isValidType(type)) {
-            throw "Invalid target type: " + type;
+            console.log("Invalid target type: " + type);
+            console.log(commander.helpInformation());
+            process.exit(2); 
         }
         if (!isValidPin(pin)) {
-            throw "Invalid PIN: " + pin;
+            console.log("Invalid PIN: " + pin);
+            console.log(commander.helpInformation());
+            process.exit(2); 
         }
         if (properties.targets.hasOwnProperty(name)) {
             console.log("Overwriting target: " + name);
@@ -129,11 +141,15 @@ commander
     .description("Remove specified target")
     .action(function () {
         if (commander.args.length === 1) {
-            throw 'No target specified';
+            console.log('No target specified');
+            console.log(commander.helpInformation());
+            process.exit(2); 
         }
         name = commander.args[0];
         if (!properties.targets.hasOwnProperty(name)) {
-            throw "Target: '" + name + "' not found";
+            console.log("Target: '" + name + "' not found");
+            console.log(commander.helpInformation());
+            process.exit(2); 
         }
         if (name === properties.defaultTarget) {
             console.log("Deleting default target, please set a new default target");
@@ -154,14 +170,18 @@ commander
         if (properties.targets.hasOwnProperty(name)) {
             properties.defaultTarget = name;
         } else {
-            throw "Target '" + name + "' not found";
+            console.log("Target '" + name + "' not found");
+            console.log(commander.helpInformation());
+            process.exit(2); 
         }
     });
 
 commander
     .command('*')
     .action(function () {
-        throw 'Unrecognized command';
+        console.log('Unrecognized command');
+        console.log(commander.helpInformation());
+        process.exit(2);
     });
 
 
