@@ -29,25 +29,63 @@ module.exports = function hooker(root) {
 }
 
 module.exports.prototype = {
-    fire:function fire(hook) {
+    fire:function fire(hook, callback) {
+        var self = this;
         var dir = path.join(this.root, '.cordova', 'hooks', hook);
         if (!(fs.existsSync(dir))) return true; // hooks directory got axed post-create; ignore.
 
-        // Fire JS hook/event
-        events.emit(hook, this.root);
-
-        // Fire script-based hooks
-        var contents = fs.readdirSync(dir);
-        var self = this;
-        contents.forEach(function(script) {
-            var fullpath = path.join(dir, script);
-            if (fs.statSync(fullpath).isDirectory()) return; // skip directories if they're in there.
-            var command = fullpath + ' "' + self.root + '"';
-            events.emit('log', 'Executing hook "' + hook + '" (output to follow)...');
-            var status = shell.exec(command);
-            events.emit('log', status.output);
-            if (status.code !== 0) throw new Error('Script "' + path.basename(script) + '"' + 'in the ' + hook + ' hook exited with non-zero status code. Aborting.');
+        // Fire JS hook for the event
+        // These ones need to "serialize" events, that is, each handler attached to the event needs to finish processing (if it "opted in" to the callback) before the next one will fire.
+        var handlers = events.listeners(hook);
+        execute_handlers_serially(handlers, this.root, function() {
+            // Fire script-based hooks
+            var scripts = fs.readdirSync(dir);
+            execute_scripts_serially(scripts, self.root, dir, function(err) {
+                if (err) {
+                    callback(err);
+                } else {
+                    callback();
+                }
+            });
         });
-        return true;
+    }
+}
+
+function execute_scripts_serially(scripts, root, dir, callback) {
+    if (scripts.length) {
+        var s = scripts.shift();
+        var fullpath = path.join(dir, s);
+        if (fs.statSync(fullpath).isDirectory()) {
+            execute_scripts_serially(scripts, root, dir, callback); // skip directories if they're in there.
+        } else {
+            var command = fullpath + ' "' + root + '"';
+            events.emit('log', 'Executing hook "' + command + '" (output to follow)...');
+            shell.exec(command, {silent:true, async:true}, function(code, output) {
+                events.emit('log', output);
+                if (code !== 0) {
+                    callback(new Error('Script "' + fullpath + '" exited with non-zero status code. Aborting. Output: ' + output));
+                } else {
+                    execute_scripts_serially(scripts, root, dir, callback);
+                }
+            });
+        }
+    } else {
+        callback();
+    }
+}
+
+function execute_handlers_serially(handlers, root, callback) {
+    if (handlers.length) {
+        var h = handlers.shift();
+        if (h.length > 1) {
+            h(root, function() {
+                execute_handlers_serially(handlers, root, callback);
+            });
+        } else {
+            h(root);
+            execute_handlers_serially(handlers, root, callback);
+        }
+    } else {
+        callback();
     }
 }
