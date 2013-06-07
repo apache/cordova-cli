@@ -23,9 +23,7 @@ var cordova_util      = require('./util'),
     platforms         = require('../platforms'),
     platform          = require('./platform'),
     events            = require('./events'),
-    prepare           = require('./prepare'),
     fs                = require('fs'),
-    ls                = fs.readdirSync,
     n                 = require('ncallbacks'),
     hooker            = require('../src/hooker'),
     util              = require('util');
@@ -105,7 +103,7 @@ module.exports = function emulate (platformList, callback) {
             });
 
             // Run a prepare first!
-            prepare(platformList, function(err) {
+            require('../cordova').prepare(platformList, function(err) {
                 if (err) {
                     if (callback) callback(err);
                     else throw err;

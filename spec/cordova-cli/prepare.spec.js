@@ -50,21 +50,15 @@ describe('prepare command', function() {
         }).toThrow();
     });
     
-    it('should run inside a Cordova-based project with at least one added platform', function() {
-        // move platform project fixtures over to fake cordova into thinking platforms were added
-        // TODO: possibly add this to helper?
-        this.after(function() {
-            process.chdir(cwd);
+    it('should run inside a Cordova-based project with at least one added platform', function(done) {
+        process.chdir(tempDir);
+        var android_path = path.join(tempDir, 'platforms', 'android');
+        shell.mkdir(android_path);
+        fs.writeFileSync(path.join(android_path, 'AndroidManifest.xml'), 'hi', 'utf-8');
+        spyOn(plugman, 'prepare');
+        cordova.prepare(['android'], function(err) {
+            done();
         });
-
-        spyOn(shell, 'exec');
-        expect(function() {
-            shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
-            process.chdir(tempDir);
-            var a_parser_spy = spyOn(android_parser.prototype, 'update_project');
-            cordova.prepare();
-            expect(a_parser_spy).toHaveBeenCalled();
-        }).not.toThrow();
     });
     it('should not run outside of a Cordova-based project', function() {
         this.after(function() {

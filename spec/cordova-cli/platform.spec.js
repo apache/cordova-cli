@@ -19,20 +19,13 @@
 var cordova = require('../../cordova'),
     path = require('path'),
     shell = require('shelljs'),
-    request = require('request'),
     fs = require('fs'),
-    et = require('elementtree'),
-    config_parser = require('../../src/config_parser'),
-    helper = require('./helper'),
     util = require('../../src/util'),
     hooker = require('../../src/hooker'),
+    platform = require('../../src/platform'),
     platforms = require('../../platforms'),
-    platform  = require('../../src/platform'),
     tempDir = path.join(__dirname, '..', '..', 'temp');
-    android_parser = require('../../src/metadata/android_parser'),
-    ios_parser = require('../../src/metadata/ios_parser'),
-    blackberry_parser = require('../../src/metadata/blackberry_parser'),
-    cordova_project = path.join(__dirname, '..', 'fixtures', 'projects', 'cordova');
+    android_parser = require('../../src/metadata/android_parser');
 
 var cwd = process.cwd();
 
@@ -110,14 +103,14 @@ describe('platform command', function() {
             process.chdir(cwd);
         });
 
-        it('should handle multiple platforms', function() {
+        it('should handle multiple platforms and shell out to specified platform\'s bin/create', function() {
             spyOn(platform, 'supports').andCallFake(function(target, callback) {
                     callback(null);
             });
             var sh = spyOn(shell, 'exec');
             cordova.platform('add', ['foo', 'bar']);
             var foo_create = path.join('foo', 'bin', 'create');
-            var bar_create      = path.join('bar', 'bin', 'create');
+            var bar_create = path.join('bar', 'bin', 'create');
             expect(sh.argsForCall[0][0]).toContain(foo_create);
             expect(sh.argsForCall[1][0]).toContain(bar_create);
         });
@@ -197,24 +190,22 @@ describe('platform command', function() {
         });
         describe('add hooks', function() {
             var sh, cr;
-            var fake_reqs_check = function() {
-                cr.mostRecentCall.args[0](false);
-            };
-            var fake_create = function(a_path) {
-                shell.mkdir('-p', a_path);
-                fs.writeFileSync(path.join(a_path, 'AndroidManifest.xml'), 'hi', 'utf-8');
-                sh.mostRecentCall.args[2](0, '');
-            };
             beforeEach(function() {
-                sh = spyOn(shell, 'exec');
-                cr = spyOn(android_parser, 'check_requirements');
+                sh = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
+                    var a_path = path.join(tempDir, 'platforms','android'); 
+                    shell.mkdir('-p',a_path); 
+                    fs.writeFileSync(path.join(a_path, 'AndroidManifest.xml'), 'hi', 'utf-8');
+                    cb(0, 'mkay');
+                });
+                cr = spyOn(android_parser.prototype, 'update_project').andCallFake(function(cfg, cb) {
+                    cb();
+                });
+                spyOn(platform, 'supports').andCallFake(function (t, cb) {
+                    cb();
+                });
             });
             it('should fire before and after hooks through the hooker module', function() {
-                var ap = spyOn(android_parser.prototype, 'update_project');
                 cordova.platform('add', 'android');
-                fake_reqs_check();
-                fake_create(path.join(tempDir, 'platforms', 'android'));
-                ap.mostRecentCall.args[1](); // fake out update_project
                 expect(s).toHaveBeenCalledWith('before_platform_add', {platforms:['android']}, jasmine.any(Function));
                 expect(s).toHaveBeenCalledWith('after_platform_add', {platforms:['android']}, jasmine.any(Function));
             });

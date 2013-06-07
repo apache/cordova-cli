@@ -57,31 +57,5 @@ module.exports = {
     },
     emit:      emit,
     trigger:   emit,
-    build:     function() {
-        var projectRoot = util.isCordova(process.cwd());
-        if (!projectRoot) {
-            throw new Error('Current working directory is not a Cordova-based project.');
-        }
-        var platforms_dir = path.join(projectRoot, 'platforms');
-        var platforms = fs.readdirSync(platforms_dir);
-        if (platforms.length === 0) {
-            throw new Error('No platforms added! `cordova platform add <platform>` to add a platform.');
-        }
-
-        // fire build hooks
-        var hooks = new hooker(projectRoot);
-        hooks.fire('before_build');
-
-        var prep_args = Array.prototype.slice.call(arguments, 0);
-        var compile_args = Array.prototype.slice.call(arguments, 0);
-
-        var self = this;
-        compile_args = compile_args.concat(function() {
-            hooks.fire('after_build');
-        });
-        prep_args = prep_args.concat(function() {
-            module.exports.compile.apply(self, compile_args);
-        });
-        module.exports.prepare.apply(this, prep_args);
-    }
+    build:     require('./src/build')
 };
