@@ -60,46 +60,47 @@ module.exports = function prepare(platformList, callback) {
     }
 
     var hooks = new hooker(projectRoot);
-    if (!(hooks.fire('before_prepare'))) {
-        var err = new Error('before_prepare hooks exited with non-zero code. Aborting.');
-        if (callback) callback(err);
-        else throw err;
-        return;
-    }
-
-    var end = n(platformList.length, function() {
-        if (!(hooks.fire('after_prepare'))) {
-            var err = new Error('after_prepare hooks exited with non-zero code. Aborting.');
+    hooks.fire('before_prepare', function(err) {
+        if (err) {
             if (callback) callback(err);
             else throw err;
-            return;
-        }
-        if (callback) callback();
-    });
-
-    // Iterate over each added platform
-    platformList.forEach(function(platform) {
-        var platformPath = path.join(projectRoot, 'platforms', platform);
-        var parser = new platforms[platform].parser(platformPath);
-        parser.update_project(cfg, function() {
-            // Call plugman --prepare for this platform. sets up js-modules appropriately.
-            var plugins_dir = path.join(projectRoot, 'plugins');
-            events.emit('log', 'Calling plugman.prepare for platform "' + platform + '"');
-            plugman.prepare(platformPath, (platform=='blackberry'?'blackberry10':platform), plugins_dir);
-            // Make sure that config changes for each existing plugin is in place
-            var plugins = cordova_util.findPlugins(plugins_dir);
-            var platform_json = plugman.config_changes.get_platform_json(plugins_dir, (platform=='blackberry'?'blackberry10':platform));
-            plugins && plugins.forEach(function(plugin_id) {
-                if (platform_json.installed_plugins[plugin_id]) {
-                    events.emit('log', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
-                    plugman.config_changes.add_plugin_changes((platform=='blackberry'?'blackberry10':platform), platformPath, plugins_dir, plugin_id, /* variables for plugin */ platform_json.installed_plugins[plugin_id], /* top level plugin? */ true, /* should increment config munge? cordova-cli never should, only plugman */ false);
-                } else if (platform_json.dependent_plugins[plugin_id]) {
-                    events.emit('log', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
-                    plugman.config_changes.add_plugin_changes((platform=='blackberry'?'blackberry10':platform), platformPath, plugins_dir, plugin_id, /* variables for plugin */ platform_json.dependent_plugins[plugin_id], /* top level plugin? */ false, /* should increment config munge? cordova-cli never should, only plugman */ false);
-                }
-                events.emit('log', 'Plugin "' + plugin_id + '" is good to go.');
+        } else {
+            var end = n(platformList.length, function() {
+                hooks.fire('after_prepare', function(err) {
+                    if (err) {
+                        if (callback) callback(err);
+                        else throw err;
+                    } else {
+                        if (callback) callback();
+                    }
+                });
             });
-            end();
-        });
+
+            // Iterate over each added platform
+            platformList.forEach(function(platform) {
+                var platformPath = path.join(projectRoot, 'platforms', platform);
+                var parser = new platforms[platform].parser(platformPath);
+                parser.update_project(cfg, function() {
+                    // Call plugman --prepare for this platform. sets up js-modules appropriately.
+                    var plugins_dir = path.join(projectRoot, 'plugins');
+                    events.emit('log', 'Calling plugman.prepare for platform "' + platform + '"');
+                    plugman.prepare(platformPath, (platform=='blackberry'?'blackberry10':platform), plugins_dir);
+                    // Make sure that config changes for each existing plugin is in place
+                    var plugins = cordova_util.findPlugins(plugins_dir);
+                    var platform_json = plugman.config_changes.get_platform_json(plugins_dir, (platform=='blackberry'?'blackberry10':platform));
+                    plugins && plugins.forEach(function(plugin_id) {
+                        if (platform_json.installed_plugins[plugin_id]) {
+                            events.emit('log', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
+                            plugman.config_changes.add_plugin_changes((platform=='blackberry'?'blackberry10':platform), platformPath, plugins_dir, plugin_id, /* variables for plugin */ platform_json.installed_plugins[plugin_id], /* top level plugin? */ true, /* should increment config munge? cordova-cli never should, only plugman */ false);
+                        } else if (platform_json.dependent_plugins[plugin_id]) {
+                            events.emit('log', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
+                            plugman.config_changes.add_plugin_changes((platform=='blackberry'?'blackberry10':platform), platformPath, plugins_dir, plugin_id, /* variables for plugin */ platform_json.dependent_plugins[plugin_id], /* top level plugin? */ false, /* should increment config munge? cordova-cli never should, only plugman */ false);
+                        }
+                        events.emit('log', 'Plugin "' + plugin_id + '" is good to go.');
+                    });
+                    end();
+                });
+            });
+        }
     });
 };

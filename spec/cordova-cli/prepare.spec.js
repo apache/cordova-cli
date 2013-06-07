@@ -23,6 +23,7 @@ var cordova = require('../../cordova'),
     path = require('path'),
     fs = require('fs'),
     config_parser = require('../../src/config_parser'),
+    android_parser = require('../../src/metadata/android_parser'),
     hooker = require('../../src/hooker'),
     fixtures = path.join(__dirname, '..', 'fixtures'),
     test_plugin = path.join(fixtures, 'plugins', 'android'),
@@ -127,7 +128,7 @@ describe('prepare command', function() {
 
             it('should fire before hooks through the hooker module', function() {
                 cordova.prepare();
-                expect(s).toHaveBeenCalledWith('before_prepare');
+                expect(s).toHaveBeenCalledWith('before_prepare', jasmine.any(Function));
             });
             it('should fire after hooks through the hooker module', function() {
                 spyOn(shell, 'exec');

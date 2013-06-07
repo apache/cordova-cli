@@ -69,6 +69,7 @@ describe('plugin command', function() {
 
        afterEach(function() {
            process.chdir(cwd);
+           cordova.removeAllListeners('results');
        });
 
        it('should not fail when the plugins directory is missing', function() {
@@ -79,33 +80,44 @@ describe('plugin command', function() {
            }).not.toThrow();
        });
 
-       it('should ignore files, like .gitignore, in the plugins directory', function() {
+       it('should ignore files, like .gitignore, in the plugins directory', function(done) {
            var someFile = path.join(tempDir, 'plugins', '.gitignore');
            fs.writeFileSync(someFile, 'not a plugin');
+           cordova.on('results', function(res) {
+               expect(res).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
+               done();
+           });
 
-           expect(cordova.plugin('list')).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
+           cordova.plugin('list');
        });
     });
 
     describe('`ls`', function() {
         beforeEach(function() {
             cordova.create(tempDir);
+            process.chdir(tempDir);
         });
 
         afterEach(function() {
             process.chdir(cwd);
+            cordova.removeAllListeners('results');
         });
 
-        it('should list out no plugins for a fresh project', function() {
-            process.chdir(tempDir);
-
-            expect(cordova.plugin('list')).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
+        it('should list out no plugins for a fresh project', function(done) {
+            cordova.on('results', function(res) {
+                expect(res).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
+                done();
+            });
+            cordova.plugin('list');
         });
-        it('should list out any added plugins in a project', function() {
-            process.chdir(tempDir);
+        it('should list out any added plugins in a project', function(done) {
             var random_plug = 'randomplug';
             shell.mkdir('-p', path.join(tempDir, 'plugins', random_plug));
-            expect(cordova.plugin('list')).toEqual([random_plug]);
+            cordova.on('results', function(res) {
+                expect(res).toEqual([random_plug]);
+                done();
+            });
+            cordova.plugin('list');
         });
     });
 

@@ -29,24 +29,32 @@ module.exports = function hooker(root) {
 }
 
 module.exports.prototype = {
-    fire:function fire(hook, callback) {
+    fire:function fire(hook, opts, callback) {
+        if (arguments.length == 2) {
+            callback = opts;
+            opts = {};
+        }
         var self = this;
         var dir = path.join(this.root, '.cordova', 'hooks', hook);
-        if (!(fs.existsSync(dir))) return true; // hooks directory got axed post-create; ignore.
+        opts.root = this.root;
 
         // Fire JS hook for the event
         // These ones need to "serialize" events, that is, each handler attached to the event needs to finish processing (if it "opted in" to the callback) before the next one will fire.
         var handlers = events.listeners(hook);
-        execute_handlers_serially(handlers, this.root, function() {
+        execute_handlers_serially(handlers, opts, function() {
             // Fire script-based hooks
-            var scripts = fs.readdirSync(dir);
-            execute_scripts_serially(scripts, self.root, dir, function(err) {
-                if (err) {
-                    callback(err);
-                } else {
-                    callback();
-                }
-            });
+            if (!(fs.existsSync(dir))) {
+                callback(); // hooks directory got axed post-create; ignore.
+            } else {
+                var scripts = fs.readdirSync(dir);
+                execute_scripts_serially(scripts, self.root, dir, function(err) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        callback();
+                    }
+                });
+            }
         });
     }
 }
@@ -74,16 +82,16 @@ function execute_scripts_serially(scripts, root, dir, callback) {
     }
 }
 
-function execute_handlers_serially(handlers, root, callback) {
+function execute_handlers_serially(handlers, opts, callback) {
     if (handlers.length) {
         var h = handlers.shift();
         if (h.length > 1) {
             h(root, function() {
-                execute_handlers_serially(handlers, root, callback);
+                execute_handlers_serially(handlers, opts, callback);
             });
         } else {
-            h(root);
-            execute_handlers_serially(handlers, root, callback);
+            h(opts);
+            execute_handlers_serially(handlers, opts, callback);
         }
     } else {
         callback();
