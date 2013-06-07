@@ -1,0 +1,9 @@
+[submodule "mca-lib/cordova-android"]
+	path = mca-lib/cordova-android
+	url = https://git-wip-us.apache.org/repos/asf/cordova-android.git
+[submodule "mca-lib/cordova-ios"]
+	path = mca-lib/cordova-ios
+	url = https://git-wip-us.apache.org/repos/asf/cordova-ios.git
+[submodule "mca-lib/cordova-js"]
+	path = mca-lib/cordova-js
+	url = https://git-wip-us.apache.org/repos/asf/cordova-js.git
