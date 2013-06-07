@@ -38,8 +38,7 @@ module.exports = function platform(command, targets, callback) {
         return;
     }
 
-    var hooks = new hooker(projectRoot),
-        end;
+    var hooks = new hooker(projectRoot);
 
     var createOverrides = function(target) {
         shell.mkdir('-p', path.join(cordova_util.appDir(projectRoot), 'merges', target));
@@ -48,95 +47,128 @@ module.exports = function platform(command, targets, callback) {
     if (arguments.length === 0) command = 'ls';
     if (targets) {
         if (!(targets instanceof Array)) targets = [targets];
-        end = n(targets.length, function() {
-            if (callback) callback();
-        });
     }
 
     var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new config_parser(xml);
+    var opts = {
+        platforms:targets
+    };
 
     switch(command) {
         case 'ls':
         case 'list':
-            // TODO before+after hooks here are awkward
-            hooks.fire('before_platform_ls');
-            hooks.fire('after_platform_ls');
-            return fs.readdirSync(path.join(projectRoot, 'platforms'));
-            break;
-        case 'add':
-            targets.forEach(function(target) {
-                hooks.fire('before_platform_add');
-                var output = path.join(projectRoot, 'platforms', target);
-
-                // Check if output directory already exists.
-                if (fs.existsSync(output)) {
-                    var err = new Error('Platform "' + target + '" already exists' );
+            var platforms_on_fs = fs.readdirSync(path.join(projectRoot, 'platforms'));
+            hooks.fire('before_platform_ls', function(err) {
+                if (err) {
                     if (callback) callback(err);
                     else throw err;
-                    return;
+                } else {
+                    events.emit('results', (platforms_on_fs.length ? platforms_on_fs : 'No platforms added. Use `cordova platform add <platform>`.'));
+                    hooks.fire('after_platform_ls', function(err) {
+                        if (err) {
+                            if (callback) callback(err);
+                            else throw err;
+                        }
+                    });
                 }
-
-                // Make sure we have minimum requirements to work with specified platform
-                events.emit('log', 'Checking if platform "' + target + '" passes minimum requirements.');
-                module.exports.supports(target, function(err) {
+            });
+            break;
+        case 'add':
+            var end = n(targets.length, function() {
+                hooks.fire('after_platform_add', opts, function(err) {
                     if (err) {
-                        var err = new Error('Your system does not meet the requirements to create ' + target + ' projects: ' + err.message);
                         if (callback) callback(err);
                         else throw err;
-                        return;
                     } else {
-                        // Create a platform app using the ./bin/create scripts that exist in each repo.
-                        // Run platform's create script
-                        var bin = path.join(cordova_util.libDirectory, 'cordova-' + target, 'bin', 'create');
-                        var args = (target=='ios') ? '--arc' : '';
-                        var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
-                        var name = cfg.name().replace(/\W/g,'_');
-                        // TODO: PLATFORM LIBRARY INCONSISTENCY: order/number of arguments to create
-                        // TODO: keep tabs on CB-2300
-                        var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, (target=='blackberry'?name:pkg), name);
-                        events.emit('log', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
-
-                        shell.exec(command, {silent:true,async:true}, function(code, create_output) {
-                            events.emit('log', create_output);
-                            if (code > 0) {
-                                var err = new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output);
-                                if (callback) callback(err);
-                                else throw err;
-                                return;
-                            }
-
-                            var parser = new platforms[target].parser(output);
-                            events.emit('log', 'Updating ' + target + ' project from config.xml...');
-                            parser.update_project(cfg, function() {
-                                createOverrides(target);
-                                hooks.fire('after_platform_add');
-
-                                // Install all currently installed plugins into this new platform.
-                                var pluginsDir = path.join(projectRoot, 'plugins');
-                                var plugins = fs.readdirSync(pluginsDir);
-                                plugins && plugins.forEach(function(plugin) {
-                                    if (!fs.statSync(path.join(projectRoot, 'plugins', plugin)).isDirectory()) {
-                                        return;
-                                    }
-
-                                    events.emit('log', 'Installing plugin "' + plugin + '" following success platform add of ' + target);
-                                    plugman.install(target, output, path.basename(plugin), pluginsDir, { www_dir: parser.staging_dir() });
-                                });
-                                end();
-                            });
-                        });
+                        if (callback) callback();
                     }
                 });
+            });
+            hooks.fire('before_platform_add', opts, function(err) {
+                if (err) {
+                    if (callback) callback(err);
+                    else throw err;
+                } else {
+                    targets.forEach(function(target) {
+                        var output = path.join(projectRoot, 'platforms', target);
+
+                        // Check if output directory already exists.
+                        if (fs.existsSync(output)) {
+                            var err = new Error('Platform "' + target + '" already exists at "' + output + '"');
+                            if (callback) callback(err);
+                            else throw err;
+                        } else {
+                            // Make sure we have minimum requirements to work with specified platform
+                            events.emit('log', 'Checking if platform "' + target + '" passes minimum requirements...');
+                            module.exports.supports(target, function(err) {
+                                if (err) {
+                                    if (callback) callback(err);
+                                    else throw err;
+                                } else {
+                                    // Create a platform app using the ./bin/create scripts that exist in each repo.
+                                    // Run platform's create script
+                                    var bin = path.join(cordova_util.libDirectory, 'cordova-' + target, 'bin', 'create');
+                                    var args = (target=='ios') ? '--arc' : '';
+                                    var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
+                                    var name = cfg.name().replace(/\W/g,'_');
+                                    var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, pkg, name);
+                                    events.emit('log', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
+
+                                    shell.exec(command, {silent:true,async:true}, function(code, create_output) {
+                                        events.emit('log', create_output);
+                                        if (code > 0) {
+                                            var err = new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output);
+                                            if (callback) callback(err);
+                                            else throw err;
+                                        } else {
+                                            var parser = new platforms[target].parser(output);
+                                            events.emit('log', 'Updating ' + target + ' project from config.xml...');
+                                            parser.update_project(cfg, function() {
+                                                createOverrides(target);
+                                                end(); //platform add is done by now.
+                                                // Install all currently installed plugins into this new platform.
+                                                var pluginsDir = path.join(projectRoot, 'plugins');
+                                                var plugins = fs.readdirSync(pluginsDir);
+                                                plugins && plugins.forEach(function(plugin) {
+                                                    if (fs.statSync(path.join(projectRoot, 'plugins', plugin)).isDirectory()) {
+                                                        events.emit('log', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
+                                                        plugman.install(target, output, path.basename(plugin), pluginsDir, { www_dir: parser.staging_dir() });
+                                                    }
+                                                });
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
             });
             break;
         case 'rm':
         case 'remove':
-            targets.forEach(function(target) {
-                hooks.fire('before_platform_rm');
-                shell.rm('-rf', path.join(projectRoot, 'platforms', target));
-                shell.rm('-rf', path.join(cordova_util.appDir(projectRoot), 'merges', target));
-                hooks.fire('after_platform_rm');
+            var end = n(targets.length, function() {
+                hooks.fire('after_platform_rm', opts, function(err) {
+                    if (err) {
+                        if (callback) callback(err);
+                        else throw err;
+                    } else {
+                        if (callback) callback();
+                    }
+                });
+            });
+            hooks.fire('before_platform_rm', opts, function(err) {
+                if (err) {
+                    if (callback) callback(err);
+                    else throw err;
+                } else {
+                    targets.forEach(function(target) {
+                        shell.rm('-rf', path.join(projectRoot, 'platforms', target));
+                        shell.rm('-rf', path.join(cordova_util.appDir(projectRoot), 'merges', target));
+                        end();
+                    });
+                }
             });
             break;
         default:

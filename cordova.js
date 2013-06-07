@@ -52,6 +52,9 @@ module.exports = {
     },
     off:       off,
     removeListener:off,
+    removeAllListeners:function() {
+        cordova_events.removeAllListeners.apply(cordova_events, arguments);
+    },
     emit:      emit,
     trigger:   emit,
     build:     function() {

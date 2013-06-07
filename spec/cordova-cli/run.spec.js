@@ -79,7 +79,7 @@ describe('run command', function() {
                 cb(0, 'yep');
             });
             cordova.run('android', function() {
-                 expect(spy.mostRecentCall.args[0]).toMatch(/cordova.run" --debug --device$/gi);
+                 expect(spy.mostRecentCall.args[0]).toMatch(/cordova.run" --device$/gi);
                  done();
             });
         });
@@ -89,7 +89,10 @@ describe('run command', function() {
     describe('hooks', function() {
         var s;
         beforeEach(function() {
-            s = spyOn(hooker.prototype, 'fire').andReturn(true);
+            s = spyOn(hooker.prototype, 'fire').andCallFake(function(hook, opts, cb) {
+                if (cb) cb();
+                else opts();
+            });
         });
 
         describe('when platforms are added', function() {
@@ -105,14 +108,14 @@ describe('run command', function() {
 
                 spyOn(shell, 'exec');
                 cordova.run();
-                expect(hooker.prototype.fire).toHaveBeenCalledWith('before_run');
+                expect(hooker.prototype.fire).toHaveBeenCalledWith('before_run', {platforms:['android']}, jasmine.any(Function));
             });
             it('should fire after hooks through the hooker module', function(done) {
                 spyOn(shell, 'exec').andCallFake(function(cmd, options, callback) {
                     callback(0, 'fucking eh');
                 });
                 cordova.run('android', function() {
-                     expect(hooker.prototype.fire).toHaveBeenCalledWith('after_run');
+                     expect(hooker.prototype.fire).toHaveBeenCalledWith('after_run', {platforms:['android']}, jasmine.any(Function));
                      done();
                 });
             });

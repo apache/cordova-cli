@@ -75,18 +75,28 @@ describe('platform command', function() {
 
         afterEach(function() {
             process.chdir(cwd);
+            cordova.removeAllListeners('results'); // clean up event listener
         });
 
-        it('should list out no platforms for a fresh project', function() {
+        it('should list out no platforms for a fresh project', function(done) {
             shell.rm('-rf', path.join(tempDir, 'platforms', '*'));
-            expect(cordova.platform('list').length).toEqual(0);
+            cordova.on('results', function(res) {
+                expect(res).toEqual('No platforms added. Use `cordova platform add <platform>`.');
+                done();
+            });
+            cordova.platform('list');
         });
 
-        it('should list out added platforms in a project', function() {
+        it('should list out added platforms in a project', function(done) {
             var platforms = path.join(tempDir, 'platforms');
             shell.mkdir(path.join(platforms, 'android'));
             shell.mkdir(path.join(platforms, 'ios'));
-            expect(cordova.platform('list').length).toEqual(2);
+            
+            cordova.on('results', function(res) {
+                expect(res.length).toEqual(2);
+                done();
+            });
+            cordova.platform('list');
         });
     });
 
@@ -121,21 +131,32 @@ describe('platform command', function() {
 
         afterEach(function() {
             process.chdir(cwd);
+            cordova.removeAllListeners('results');
         });
 
-        it('should remove a supported and added platform', function() {
+        it('should remove a supported and added platform', function(done) {
             shell.mkdir(path.join(tempDir, 'platforms', 'android'));
             shell.mkdir(path.join(tempDir, 'platforms', 'ios'));
-            cordova.platform('remove', 'android');
-            expect(cordova.platform('ls').length).toEqual(1);
+            cordova.platform('remove', 'android', function() {
+                cordova.on('results', function(res) {
+                    expect(res.length).toEqual(1);
+                    done();
+                });
+                cordova.platform('list');
+            });
         });
 
-        it('should be able to remove multiple platforms', function() {
+        it('should be able to remove multiple platforms', function(done) {
             shell.mkdir(path.join(tempDir, 'platforms', 'android'));
             shell.mkdir(path.join(tempDir, 'platforms', 'blackberry'));
             shell.mkdir(path.join(tempDir, 'platforms', 'ios'));
-            cordova.platform('remove', ['android','blackberry']);
-            expect(cordova.platform('ls').length).toEqual(1);
+            cordova.platform('remove', ['android','blackberry'], function() {
+                cordova.on('results', function(res) {
+                    expect(res.length).toEqual(1);
+                    done();
+                });
+                cordova.platform('list');
+            });
         });
     });
 
@@ -144,7 +165,10 @@ describe('platform command', function() {
         beforeEach(function() {
             cordova.create(tempDir);
             process.chdir(tempDir);
-            s = spyOn(hooker.prototype, 'fire').andReturn(true);
+            s = spyOn(hooker.prototype, 'fire').andCallFake(function(hook, opts, cb) {
+                if (cb) cb();
+                else opts();
+            });
         });
         afterEach(function() {
             process.chdir(cwd);
@@ -154,21 +178,21 @@ describe('platform command', function() {
         describe('list (ls) hooks', function() {
             it('should fire before hooks through the hooker module', function() {
                 cordova.platform();
-                expect(s).toHaveBeenCalledWith('before_platform_ls');
+                expect(s).toHaveBeenCalledWith('before_platform_ls', jasmine.any(Function));
             });
             it('should fire after hooks through the hooker module', function() {
                 cordova.platform();
-                expect(s).toHaveBeenCalledWith('after_platform_ls');
+                expect(s).toHaveBeenCalledWith('after_platform_ls', jasmine.any(Function));
             });
         });
         describe('remove (rm) hooks', function() {
             it('should fire before hooks through the hooker module', function() {
                 cordova.platform('rm', 'android');
-                expect(s).toHaveBeenCalledWith('before_platform_rm');
+                expect(s).toHaveBeenCalledWith('before_platform_rm', {platforms:['android']}, jasmine.any(Function));
             });
             it('should fire after hooks through the hooker module', function() {
                 cordova.platform('rm', 'android');
-                expect(s).toHaveBeenCalledWith('after_platform_rm');
+                expect(s).toHaveBeenCalledWith('after_platform_rm', {platforms:['android']}, jasmine.any(Function));
             });
         });
         describe('add hooks', function() {
@@ -191,8 +215,8 @@ describe('platform command', function() {
                 fake_reqs_check();
                 fake_create(path.join(tempDir, 'platforms', 'android'));
                 ap.mostRecentCall.args[1](); // fake out update_project
-                expect(s).toHaveBeenCalledWith('before_platform_add');
-                expect(s).toHaveBeenCalledWith('after_platform_add');
+                expect(s).toHaveBeenCalledWith('before_platform_add', {platforms:['android']}, jasmine.any(Function));
+                expect(s).toHaveBeenCalledWith('after_platform_add', {platforms:['android']}, jasmine.any(Function));
             });
         });
     });

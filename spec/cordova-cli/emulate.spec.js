@@ -72,56 +72,56 @@ describe('emulate command', function() {
                 cordova.emulate();
                 a_spy.mostRecentCall.args[1](); // fake out android parser
                 expect(s).toHaveBeenCalled();
-                expect(s.mostRecentCall.args[0]).toMatch(/cordova.run" --debug --emulator$/gi);
+                expect(s.mostRecentCall.args[0]).toMatch(/cordova.run" --emulator$/gi);
             }).not.toThrow();
         });
     });
 
     describe('hooks', function() {
-        var s;
+        var hook_spy;
+        var shell_spy;
         beforeEach(function() {
-            s = spyOn(hooker.prototype, 'fire').andReturn(true);
+            hook_spy = spyOn(hooker.prototype, 'fire').andCallFake(function(hook, opts, cb) {
+                if (cb) cb();
+                else opts();
+            });
+            shell_spy = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
+                cb(0, 'yup'); // fake out shell so system thinks every shell-out is successful
+            });
+            process.chdir(tempDir);
+        });
+        afterEach(function() {
+            hook_spy.reset();
+            shell_spy.reset();
+            process.chdir(cwd);
         });
 
         describe('when platforms are added', function() {
+            var android_platform = path.join(tempDir, 'platforms', 'android');
             beforeEach(function() {
-                shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
-                process.chdir(tempDir);
+                shell.mkdir('-p', path.join(android_platform, 'assets', 'www'));
+                fs.writeFileSync(path.join(android_platform, 'AndroidManifest.xml'), '<xml></xml>', 'utf-8');
             });
-            afterEach(function() {
-                process.chdir(cwd);
-            });
-
             it('should fire before hooks through the hooker module', function() {
 
-                spyOn(shell, 'exec');
                 cordova.emulate();
-                expect(hooker.prototype.fire).toHaveBeenCalledWith('before_emulate');
+                expect(hook_spy).toHaveBeenCalledWith('before_emulate', {platforms:['android']}, jasmine.any(Function));
             });
-            it('should fire after hooks through the hooker module', function() {
-                spyOn(shell, 'exec').andCallFake(function(cmd, options, callback) {
-                    callback(0, 'fucking eh');
-                });
+            it('should fire after hooks through the hooker module', function(done) {
                 cordova.emulate('android', function() {
-                     expect(hooker.prototype.fire).toHaveBeenCalledWith('after_emulate');
+                     expect(hook_spy).toHaveBeenCalledWith('after_emulate', {platforms:['android']}, jasmine.any(Function));
+                     done();
                 });
             });
         });
 
         describe('with no platforms added', function() {
-            beforeEach(function() {
-                process.chdir(tempDir);
-            });
-            afterEach(function() {
-                process.chdir(cwd);
-            });
             it('should not fire the hooker', function() {
-                spyOn(shell, 'exec');
                 expect(function() {
                     cordova.emulate();
                 }).toThrow();
-                expect(s).not.toHaveBeenCalledWith('before_emulate');
-                expect(s).not.toHaveBeenCalledWith('after_emulate');
+                expect(hook_spy).not.toHaveBeenCalled();
+                expect(hook_spy).not.toHaveBeenCalled();
             });
         });
     });

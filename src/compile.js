@@ -67,27 +67,35 @@ module.exports = function compile(platformList, callback) {
         else throw err;
         return;
     }
+    var opts = {
+        platforms:platformList
+    };
 
     var hooks = new hooker(projectRoot);
-    hooks.fire('before_compile', function(err) {
+    hooks.fire('before_compile', opts, function(err) {
         if (err) {
-            var error = new Error('before_compile hooks exited with non-zero code or caused an error: ' + err.message);
-            if (callback) callback(error);
-            else throw error;
+            if (callback) callback(err);
+            else throw err;
         } else {
             var end = n(platformList.length, function() {
-                hooks.fire('after_compile', function(error) {
-                    if (error) {
-                        var arr = new Error('after_compile hooks exited with non-zero code. Aborting.');
-                        if (callback) callback(arr);
-                        else throw arr;
-                    } else if (callback) callback();
+                hooks.fire('after_compile', opts, function(err) {
+                    if (err) {
+                        if (callback) callback(err);
+                        else throw err;
+                    } else {
+                        if (callback) callback();
+                    }
                 });
             });
 
             // Iterate over each added platform
             platformList.forEach(function(platform) {
-                shell_out_to_build(projectRoot, platform, end);
+                try {
+                    shell_out_to_build(projectRoot, platform, end);
+                } catch(e) {
+                    if (callback) callback(e);
+                    else throw e;
+                }
             });
         }
     });

@@ -96,51 +96,49 @@ describe('compile command', function() {
     });
 
     describe('hooks', function() {
-        var s;
+        var hook_spy;
+        var shell_spy;
         beforeEach(function() {
-            s = spyOn(hooker.prototype, 'fire').andReturn(true);
+            hook_spy = spyOn(hooker.prototype, 'fire').andCallFake(function(hook, opts, cb) {
+                cb();
+            });
+            shell_spy = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
+                cb(0, 'yup'); // fake out shell so system thinks every shell-out is successful
+            });
+            cordova.create(tempDir);
+            process.chdir(tempDir);
+        });
+        afterEach(function() {
+            hook_spy.reset();
+            shell_spy.reset();
+            process.chdir(cwd);
         });
 
         describe('when platforms are added', function() {
             beforeEach(function() {
-                shell.mv('-f', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir));
-                process.chdir(cordova_project);
-            });
-            afterEach(function() {
-                shell.mv('-f', path.join(tempDir, 'android'), path.join(cordova_project, 'platforms', 'android'));
-                process.chdir(cwd);
+                shell.mkdir(path.join(tempDir, 'platforms', 'android'));
+                shell.mkdir(path.join(tempDir, 'platforms', 'blackberry'));
             });
 
             it('should fire before hooks through the hooker module', function() {
-                spyOn(shell, 'exec');
                 cordova.compile();
-                expect(s).toHaveBeenCalledWith('before_compile');
+                expect(hook_spy).toHaveBeenCalledWith('before_compile', {platforms:['android', 'blackberry']}, jasmine.any(Function));
             });
             it('should fire after hooks through the hooker module', function(done) {
-                spyOn(shell, 'exec').andCallFake(function(cmd, options, callback) {
-                    callback(0, 'fucking eh');
-                });
                 cordova.compile('android', function() {
-                     expect(hooker.prototype.fire).toHaveBeenCalledWith('after_compile');
+                     expect(hook_spy).toHaveBeenCalledWith('after_compile', {platforms:['android']}, jasmine.any(Function));
                      done();
                 });
             });
         });
 
         describe('with no platforms added', function() {
-            beforeEach(function() {
-                cordova.create(tempDir);
-                process.chdir(tempDir);
-            });
-            afterEach(function() {
-                process.chdir(cwd);
-            });
             it('should not fire the hooker', function() {
                 expect(function() {
                     cordova.compile();
                 }).toThrow();
-                expect(s).not.toHaveBeenCalledWith('before_compile');
-                expect(s).not.toHaveBeenCalledWith('after_compile');
+                expect(hook_spy).not.toHaveBeenCalled();
+                expect(hook_spy).not.toHaveBeenCalled();
             });
         });
     });

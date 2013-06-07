@@ -24,6 +24,7 @@ var cordova_util  = require('./util'),
     shell         = require('shelljs'),
     platforms     = require('../platforms'),
     config_parser = require('./config_parser'),
+    n             = require('ncallbacks'),
     hooker        = require('./hooker'),
     events        = require('./events'),
     plugin_parser = require('./plugin_parser'),
@@ -55,92 +56,124 @@ module.exports = function plugin(command, targets, callback) {
     if (targets && !(targets instanceof Array)) {
         targets = [targets];
     }
+    var opts = {
+        plugins:targets
+    };
 
     switch(command) {
         case 'ls':
         case 'list':
-            // TODO awkward before+after hooks here
-            hooks.fire('before_plugin_ls');
-            hooks.fire('after_plugin_ls');
-            if (plugins.length) {
-                return plugins;
-            } else return 'No plugins added. Use `cordova plugin add <plugin>`.';
+            hooks.fire('before_plugin_ls', function(err) {
+                if (err) {
+                    if (callback) callback(err);
+                    else throw err;
+                } else {
+                    events.emit('results', (plugins.length ? plugins : 'No plugins added. Use `cordova plugin add <plugin>`.'));
+                    hooks.fire('after_plugin_ls', function(err) {
+                        if (err) {
+                            if (callback) callback(err);
+                            else throw err;
+                        }
+                    });
+                }
+            });
             break;
         case 'add':
-            targets.forEach(function(target, index) {
-                hooks.fire('before_plugin_add');
-                var pluginsDir = path.join(projectRoot, 'plugins');
-
-                if (target[target.length - 1] == path.sep) {
-                    target = target.substring(0, target.length - 1);
-                }
-
-                // Fetch the plugin first.
-                events.emit('log', 'Calling plugman.fetch on plugin "' + target + '"');
-                plugman.fetch(target, pluginsDir, {}, function(err, dir) {
+            var end = n(targets.length, function() {
+                hooks.fire('after_plugin_add', opts, function(err) {
                     if (err) {
-                        var err = new Error('Error fetching plugin: ' + err);
                         if (callback) callback(err);
                         else throw err;
-                        return;
+                    } else {
+                        if (callback) callback();
                     }
-
-                    // Iterate over all platforms in the project and install the plugin.
-                    platformList.forEach(function(platform) {
-                        var platformRoot = path.join(projectRoot, 'platforms', platform);
-                        var parser = new platforms[platform].parser(platformRoot);
-                        // TODO: unify use of blackberry in cli vs blackberry10 in plugman
-                        events.emit('log', 'Calling plugman.install on plugin "' + dir + '" for platform "' + platform + '"');
-                        plugman.install((platform=='blackberry'?'blackberry10':platform), platformRoot,
-                                        path.basename(dir), pluginsDir, { www_dir: parser.staging_dir() });
-                    });
-
-                    hooks.fire('after_plugin_add');
                 });
             });
-            if (callback) callback();
+            hooks.fire('before_plugin_add', opts, function(err) {
+                if (err) {
+                    if (callback) callback(err);
+                    else throw err;
+                } else {
+                    targets.forEach(function(target, index) {
+                        var pluginsDir = path.join(projectRoot, 'plugins');
+
+                        if (target[target.length - 1] == path.sep) {
+                            target = target.substring(0, target.length - 1);
+                        }
+
+                        // Fetch the plugin first.
+                        events.emit('log', 'Calling plugman.fetch on plugin "' + target + '"');
+                        plugman.fetch(target, pluginsDir, {}, function(err, dir) {
+                            if (err) {
+                                var err = new Error('Error fetching plugin: ' + err);
+                                if (callback) callback(err);
+                                else throw err;
+                            } else {
+                                // Iterate over all platforms in the project and install the plugin.
+                                platformList.forEach(function(platform) {
+                                    var platformRoot = path.join(projectRoot, 'platforms', platform);
+                                    var parser = new platforms[platform].parser(platformRoot);
+                                    // TODO: unify use of blackberry in cli vs blackberry10 in plugman
+                                    events.emit('log', 'Calling plugman.install on plugin "' + dir + '" for platform "' + platform + '"');
+                                    plugman.install((platform=='blackberry'?'blackberry10':platform), platformRoot,
+                                                    path.basename(dir), pluginsDir, { www_dir: parser.staging_dir() });
+                                });
+                                end();
+                            }
+                        });
+                    });
+                }
+            });
             break;
         case 'rm':
         case 'remove':
-            if (platformList.length === 0) {
-                var err = new Error('You need at least one platform added to your app. Use `cordova platform add <platform>`.');
-                if (callback) callback(err);
-                else throw err;
-                return;
-            }
-            targets.forEach(function(target, index) {
-                // Check if we have the plugin.
-                if (plugins.indexOf(target) > -1) {
-                    var targetPath = path.join(pluginPath, target);
-                    hooks.fire('before_plugin_rm');
-                    // Check if there is at least one match between plugin
-                    // supported platforms and app platforms
-                    var pluginXml = new plugin_parser(path.join(targetPath, 'plugin.xml'));
-                    var intersection = pluginXml.platforms.filter(function(e) {
-                        if (platformList.indexOf(e) == -1) return false;
-                        else return true;
-                    });
-
-                    // Iterate over all the common platforms between the plugin
-                    // and the app, and uninstall.
-                    // If this is a web-only plugin with no platform tags, this step
-                    // is not needed and we just --remove the plugin below.
-                    intersection.forEach(function(platform) {
-                        var platformRoot = path.join(projectRoot, 'platforms', platform);
-                        var parser = new platforms[platform].parser(platformRoot);
-                        events.emit('log', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
-                        plugman.uninstall(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
-                    });
-
-                    hooks.fire('after_plugin_rm');
-                } else {
-                    var err = new Error('Plugin "' + target + '" not added to project.');
+            var end = n(targets.length, function() {
+                hooks.fire('after_plugin_rm', opts, function(err) {
+                    if (err) {
+                        if (callback) callback(err);
+                        else throw err;
+                    } else {
+                        if (callback) callback();
+                    }
+                });
+            });
+            hooks.fire('before_plugin_rm', opts, function(err) {
+                if (err) {
                     if (callback) callback(err);
                     else throw err;
-                    return;
+                } else {
+                    targets.forEach(function(target, index) {
+                        // Check if we have the plugin.
+                        if (plugins.indexOf(target) > -1) {
+                            var targetPath = path.join(pluginPath, target);
+                            // Check if there is at least one match between plugin
+                            // supported platforms and app platforms
+                            var pluginXml = new plugin_parser(path.join(targetPath, 'plugin.xml'));
+                            var intersection = pluginXml.platforms.filter(function(e) {
+                                if (platformList.indexOf(e) == -1) return false;
+                                else return true;
+                            });
+
+                            // Iterate over all the common platforms between the plugin
+                            // and the app, and uninstall.
+                            // If this is a web-only plugin with no platform tags, this step
+                            // is not needed and we just --remove the plugin below.
+                            intersection.forEach(function(platform) {
+                                var platformRoot = path.join(projectRoot, 'platforms', platform);
+                                var parser = new platforms[platform].parser(platformRoot);
+                                events.emit('log', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
+                                plugman.uninstall(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
+                            });
+                            end();
+                        } else {
+                            var err = new Error('Plugin "' + target + '" not added to project.');
+                            if (callback) callback(err);
+                            else throw err;
+                            return;
+                        }
+                    });
                 }
             });
-            if (callback) callback();
             break;
         default:
             var err = new Error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.');

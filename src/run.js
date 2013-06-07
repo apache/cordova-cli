@@ -28,7 +28,7 @@ var cordova_util      = require('./util'),
     n                 = require('ncallbacks');
 
 function shell_out_to_run(projectRoot, platform, callback) {
-    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" --debug --device';
+    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" --device';
     // TODO: inconsistent API for BB10 run command
     if (platform == 'blackberry') {
         var bb_project = path.join(projectRoot, 'platforms', 'blackberry')
@@ -83,35 +83,39 @@ module.exports = function run(platformList, callback) {
     }
 
     var hooks = new hooker(projectRoot);
-    if (!(hooks.fire('before_run'))) {
-        var err = new Error('before_run hooks exited with non-zero code. Aborting.');
-        if (callback) callback(err);
-        else throw err;
-        return;
+    var opts = {
+        platforms:platformList
     }
-
-    var end = n(platformList.length, function() {
-        if (!(hooks.fire('after_run'))) {
-            var err = new Error('after_run hooks exited with non-zero code. Aborting.');
-            if (callback) callback(err);
-            else throw err;
-            return;
-        }
-        if (callback) callback();
-    });
-
-    // Run a prepare first, then shell out to run
-    require('../cordova').prepare(platformList, function(err) {
+    hooks.fire('before_run', opts, function(err) {
         if (err) {
             if (callback) callback(err);
             else throw err;
         } else {
-            platformList.forEach(function(platform) {
-                try {
-                    shell_out_to_run(projectRoot, platform, end);
-                } catch(e) {
-                    if (callback) callback(e);
-                    else throw e;
+            var end = n(platformList.length, function() {
+                hooks.fire('after_run', opts, function(err) {
+                    if (err) {
+                        if (callback) callback(err);
+                        else throw err;
+                    } else {
+                        if (callback) callback();
+                    }
+                });
+            });
+
+            // Run a prepare first, then shell out to run
+            require('../cordova').prepare(platformList, function(err) {
+                if (err) {
+                    if (callback) callback(err);
+                    else throw err;
+                } else {
+                    platformList.forEach(function(platform) {
+                        try {
+                            shell_out_to_run(projectRoot, platform, end);
+                        } catch(e) {
+                            if (callback) callback(e);
+                            else throw e;
+                        }
+                    });
                 }
             });
         }

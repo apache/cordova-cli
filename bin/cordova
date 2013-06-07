@@ -19,6 +19,7 @@ process.on('uncaughtException', function(err){
 	console.error(err);
     process.exit(1);
 });
+cordova.on('result', console.log);
 if (verbose) {
     cordova.on('log', console.log);
     cordova.on('warn', console.warn);
@@ -31,20 +32,18 @@ if (version) {
     console.log(cordova.help());
 } else if (cordova.hasOwnProperty(cmd)) {
     var opts = Array.prototype.slice.call(tokens, 0);
-    var r;
     if (cmd == 'create' || cmd == 'docs' || cmd == 'serve') {
-        r = cordova[cmd].apply(this, opts);
+        cordova[cmd].apply(this, opts);
     } else if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
-        r = cordova[cmd].call(this, opts);
+        cordova[cmd].call(this, opts);
     } else {
         // platform or plugin cmds
         if (tokens.length > 2) {
             opts = [tokens.shift()];
             opts.push(tokens);
         }
-        r = cordova[cmd].apply(this, opts);
+        cordova[cmd].apply(this, opts);
     }
-    if (r) console.log(r);
 } else {
     throw new Error('Cordova does not know ' + cmd + '; try help for a list of all the available commands.');
 }
