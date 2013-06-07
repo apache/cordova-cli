@@ -20,7 +20,7 @@ var fs         = require('fs'),
     path       = require('path'),
     shell      = require('shelljs');
 
-var lib_path = path.join(__dirname, '..', 'lib')
+var lib_path = path.join(__dirname, '..', 'mca-lib')
 
 function chmod(path) {
     shell.exec('chmod +x "' + path + '"', {silent:true});
