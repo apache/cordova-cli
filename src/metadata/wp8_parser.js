@@ -40,7 +40,7 @@ module.exports = function wp8_parser(project) {
 };
 
 module.exports.check_requirements = function(callback) {
-    events.emit('log', 'Checking WP8 requirements...');
+    events.emit('log', 'Checking wp8 requirements...');
     var command = '"' + path.join(util.libDirectory, 'cordova-wp8', 'bin', 'check_reqs') + '"';
     events.emit('log', 'Running "' + command + '" (output to follow)');
     shell.exec(command, {silent:true, async:true}, function(code, output) {
@@ -135,7 +135,7 @@ module.exports.prototype = {
     www_dir:function() {
         return path.join(this.wp8_proj_dir, 'www');
     },
-    // copyies the app www folder into the wp8 project's www folder
+    // copies the app www folder into the wp8 project's www folder and updates the csproj file.
     update_www:function() {
         var project_www = util.projectWww(path.join(this.wp8_proj_dir, '..', '..'));
         // remove stock platform assets
@@ -146,8 +146,70 @@ module.exports.prototype = {
         // copy over wp8 lib's cordova.js
         var cordovajs_path = path.join(util.libDirectory, 'cordova-wp8', 'templates', 'standalone', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
+        this.update_csproj();
     },
+    // updates the csproj file to explicitly list all www content.
+    update_csproj:function() {
+        var raw = fs.readFileSync(this.csproj_path, 'utf-8');
+        var cleaned = raw.replace(/^\uFEFF/i, '');
+        var csproj_xml = new et.ElementTree(et.XML(cleaned));
+        // remove any previous references to the www files
+        var item_groups = csproj_xml.findall('ItemGroup');
+        for (var i = 0, l = item_groups.length; i < l; i++) {
+            var group = item_groups[i];
+            var files = group.findall('Content');
+            for (var j = 0, k = files.length; j < k; j++) {
+                var file = files[j];
+                if (file.attrib.Include.substr(0, 3) == 'www') {
+                    // remove file reference
+                    group.remove(0, file);
+                    // remove ItemGroup if empty
+                    var new_group = group.findall('Content');
+                    if(new_group.length < 1) {
+                        csproj_xml.getroot().remove(0, group);
+                    }
+                }
+            }
+        }
 
+        // now add all www references back in
+        var www_files = this.folder_contents('www', this.www_dir());
+        for(file in www_files) {
+            var item = new et.Element('ItemGroup');
+            var content = new et.Element('Content');
+            content.attrib.Include = www_files[file];
+            item.append(content);
+            csproj_xml.getroot().append(item);
+        }
+        // save file
+        fs.writeFileSync(this.csproj_path, csproj_xml.write({indent:4}), 'utf-8');
+    },
+    // Returns an array of all the files in the given directory with reletive paths
+    // - name     : the name of the top level directory (i.e all files will start with this in their path)
+    // - path     : the directory whos contents will be listed under 'name' directory
+    folder_contents:function(name, dir) {
+        var results = [];
+        var folder_dir = fs.readdirSync(dir);
+        for(item in folder_dir)
+        {
+            var stat = fs.statSync(path.join(dir, folder_dir[item]));
+            // means its a folder?
+            if(stat.size == 0)
+            {
+                var sub_dir = this.folder_contents(path.join(name, folder_dir[item]), path.join(dir, folder_dir[item]));
+                //Add all subfolder item paths
+                for(sub_item in sub_dir)
+                {
+                    results.push(sub_dir[sub_item]);
+                }
+            }
+            else
+            {
+                results.push(path.join(name, folder_dir[item]));
+            }
+        }
+        return results;
+    },
     staging_dir: function() {
         return path.join(this.wp8_proj_dir, '.staging', 'www');
     },
