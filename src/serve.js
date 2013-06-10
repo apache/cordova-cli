@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -122,7 +121,7 @@ module.exports.config = function (platform, port, callback) {
     // Top-level www directory.
     result.paths.push(cordova_util.projectWww(projectRoot));
 
-    var parser = platforms[platform].parser(path.join(projectRoot, 'platforms', platform));
+    var parser = new platforms[platform].parser(path.join(projectRoot, 'platforms', platform));
 
     // Update the related platform project from the config
     parser.update_project(cfg, function() {
