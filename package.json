@@ -36,7 +36,7 @@
     "glob":"3.2.x",
     "follow-redirects":"0.0.x",
     "prompt":"0.2.7",
-    "tar.gz":"0.1.x",
+    "tar":"0.1.x",
     "ripple-emulator":">=0.9.15",
     "open": "0.0.3"
   },

@@ -23,7 +23,8 @@ var path          = require('path'),
     events        = require('./events'),
     glob          = require('glob'),
     https         = require('follow-redirects').https,
-    targz         = require('tar.gz'),
+    zlib          = require('zlib'),
+    tar           = require('tar'),
     util          = require('./util');
 
 /**
@@ -61,28 +62,41 @@ module.exports = function lazy_load(platform, callback) {
                 // TODO: hook in end event
                 downloadfile.end();
                 events.emit('log', 'Download complete. Extracting...');
-                
-                new targz().extract(filename, util.libDirectory, function(err) {
-                    if (err) {
-                        if (callback) return callback(err);
-                        else throw err;
-                    } else {
-                        // rename the extracted dir to remove the trailing SHA
-                        glob(path.join(util.libDirectory, 'cordova-' + platform + '-' + util.cordovaTag + '-*'), function(err, entries) {
-                            if (err) {
-                                if (callback) return callback(err);
-                                else throw err;
-                            } else {
-                                var entry = entries[0];
-                                var final_dir = path.join(util.libDirectory, 'cordova-' + platform + '-' + util.cordovaTag);
-                                shell.mkdir(final_dir);
-                                shell.mv('-f', path.join(entry, (platform=='blackberry'?'blackberry10':''), '*'), final_dir);
-                                shell.rm('-rf', entry);
-                                if (callback) callback();
-                            }
-                        });
-                    }
+                var tar_path = path.join(util.libDirectory, 'cordova-' + platform + '-' + util.cordovaTag + '.tar');
+                var tarfile = fs.createWriteStream(tar_path);
+                tarfile.on('error', function(err) {
+                    if (callback) callback(err);
+                    else throw err;
                 });
+                tarfile.on('finish', function() {
+                    shell.rm(filename);
+                    fs.createReadStream(tar_path)
+                        .pipe(tar.Extract({ path: util.libDirectory }))
+                        .on("error", function (err) {
+                            if (callback) callback(err);
+                            else throw err;
+                        })
+                        .on("end", function () {
+                            shell.rm(tar_path);
+                            // rename the extracted dir to remove the trailing SHA
+                            glob(path.join(util.libDirectory, 'cordova-' + platform + '-' + util.cordovaTag + '-*'), function(err, entries) {
+                                if (err) {
+                                    if (callback) return callback(err);
+                                    else throw err;
+                                } else {
+                                    var entry = entries[0];
+                                    var final_dir = path.join(util.libDirectory, 'cordova-' + platform + '-' + util.cordovaTag);
+                                    shell.mkdir(final_dir);
+                                    shell.mv('-f', path.join(entry, (platform=='blackberry'?'blackberry10':''), '*'), final_dir);
+                                    shell.rm('-rf', entry);
+                                    if (callback) callback();
+                                }
+                            });
+                        });
+                });
+                fs.createReadStream(filename)
+                    .pipe(zlib.createUnzip())
+                    .pipe(tarfile);
             });
         });
         req.on('error', function(err) {
