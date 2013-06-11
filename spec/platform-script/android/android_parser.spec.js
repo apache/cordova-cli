@@ -98,6 +98,13 @@ describe('android project parser', function() {
             expect(fs.existsSync(javs)).toBe(true);
             expect(fs.readFileSync(javs, 'utf-8')).toMatch(/package ca.filmaj.dewd/i);
         });
+        it('should update the application version properly', function() {
+            config.version('2.0.1');
+            project.update_from_config(config);
+
+            var manifest = new et.ElementTree(et.XML(fs.readFileSync(android_manifest, 'utf-8')));
+            expect(manifest.getroot().attrib["android:versionName"]).toEqual('2.0.1');
+        });
         it('should handle unsupported "-" in the application package name', function() {
             var javs = path.join(android_path, 'src', 'ca', 'filmaj', 'the_dewd', 'cordovaExample.java');
             var orig_javs = path.join(android_path, 'src', 'org', 'apache', 'cordova', 'cordovaExample', 'cordovaExample.java');

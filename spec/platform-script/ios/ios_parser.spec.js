@@ -90,6 +90,14 @@ describe('ios project parser', function () {
                 done();
             });
         });
+        it('should update the application version (CFBundleVersion) properly', function (done) {
+            config.version('2.0.1');
+            project.update_from_config(config, function () {
+                var plist_contents = fs.readFileSync(ios_plist, 'utf-8');
+                expect(plist_contents).toMatch(/<string>2.0.1/);
+                done();
+            });
+        });
         it('should update the whitelist in the project config.xml', function (done) {
             project.update_from_config(config, function () {
                 var config_contents = fs.readFileSync(ios_config_xml, 'utf-8');

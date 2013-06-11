@@ -63,6 +63,26 @@ describe('config.xml parser', function () {
         });
     });
 
+    describe('version', function() {
+        var cfg;
+
+        beforeEach(function() {
+            cfg = new config_parser(xml);
+        });
+
+        it('should get the version', function() {
+            expect(cfg.version()).toEqual('2.0.0');
+        });
+        it('should allow setting the version', function() {
+            cfg.version('2.0.1');
+            expect(cfg.version()).toEqual('2.0.1');
+        });
+        it('should write to disk after setting the version', function() {
+            cfg.version('2.0.1');
+            expect(fs.readFileSync(xml, 'utf-8')).toMatch(/version="2.0.1"/);
+        });
+    });
+
     describe('app name', function() {
         var cfg;
 

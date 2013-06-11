@@ -89,15 +89,19 @@ module.exports.prototype = {
         }
         var name = config.name();
         var pkg = config.packageName();
+        var version = config.version();
 
         // Update package id (bundle id)
         var plistFile = path.join(this.cordovaproj, this.originalName + '-Info.plist');
         var infoPlist = plist.parseFileSync(plistFile);
         infoPlist['CFBundleIdentifier'] = pkg;
+        // Update version (bundle version)
+        infoPlist['CFBundleVersion'] = version;
         var info_contents = plist.build(infoPlist);
         info_contents = info_contents.replace(/<string>[\s\r\n]*<\/string>/g,'<string></string>');
         fs.writeFileSync(plistFile, info_contents, 'utf-8');
         events.emit('log', 'Wrote out iOS Bundle Identifier to "' + pkg + '"');
+        events.emit('log', 'Wrote out iOS Bundle Version to "' + version + '"');
 
         // Update whitelist
         var self = this;

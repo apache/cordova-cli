@@ -78,6 +78,12 @@ module.exports.prototype = {
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
         events.emit('log', 'Wrote out Android application name to "' + name + '"');
 
+        // Update the version by changing the AndroidManifest android:versionName
+        var manifest = new et.ElementTree(et.XML(fs.readFileSync(this.manifest, 'utf-8')));
+        var version = config.version();
+        manifest.getroot().attrib["android:versionName"] = version;
+        fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');
+
         // Update package name by changing the AndroidManifest id and moving the entry class around to the proper package directory
         var manifest = new et.ElementTree(et.XML(fs.readFileSync(this.manifest, 'utf-8')));
         var pkg = config.packageName();
