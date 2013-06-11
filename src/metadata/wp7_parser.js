@@ -40,8 +40,9 @@ module.exports = function wp7_parser(project) {
 };
 
 module.exports.check_requirements = function(callback) {
+    // TODO: requires the libraries to be available.
     events.emit('log', 'Checking WP7 requirements...');
-    var command = '"' + path.join(util.libDirectory, 'cordova-wp7', 'bin', 'check_reqs') + '"';
+    var command = '"' + path.join(util.libDirectory, 'cordova-wp7-' + util.cordovaTag, 'bin', 'check_reqs') + '"';
     events.emit('log', 'Running "' + command + '" (output to follow)');
     shell.exec(command, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
@@ -144,7 +145,7 @@ module.exports.prototype = {
         shell.cp('-rf', project_www, this.wp7_proj_dir);
 
         // copy over wp7 lib's cordova.js
-        var cordovajs_path = path.join(util.libDirectory, 'cordova-wp7', 'templates', 'standalone', 'www', 'cordova.js');
+        var cordovajs_path = path.join(util.libDirectory, 'cordova-wp7-' + util.cordovaTag, 'templates', 'standalone', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
         this.update_csproj();
     },

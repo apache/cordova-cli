@@ -120,18 +120,18 @@ module.exports.prototype = {
         shell.cp('-rf', www, this.path);
 
         // add cordova.js
-        shell.cp('-f', path.join(util.libDirectory, 'cordova-blackberry', 'javascript', 'cordova.blackberry10.js'), path.join(this.www_dir(), 'cordova.js'));
+        shell.cp('-f', path.join(util.libDirectory, 'cordova-blackberry-' + util.cordovaTag, 'javascript', 'cordova.blackberry10.js'), path.join(this.www_dir(), 'cordova.js'));
 
         // add webworks ext directories
-        shell.cp('-rf', path.join(util.libDirectory, 'cordova-blackberry', 'framework', 'ext*'), this.www_dir());
+        shell.cp('-rf', path.join(util.libDirectory, 'cordova-blackberry-' + util.cordovaTag, 'framework', 'ext*'), this.www_dir());
 
         // add config.xml
         // @TODO should use project www/config.xml but it must use BBWP elements
-        shell.cp('-f', path.join(util.libDirectory, 'cordova-blackberry', 'bin', 'templates', 'project', 'www', 'config.xml'), this.www_dir());
+        shell.cp('-f', path.join(util.libDirectory, 'cordova-blackberry-' + util.cordovaTag, 'bin', 'templates', 'project', 'www', 'config.xml'), this.www_dir());
 
         // add res/
         // @TODO remove this when config.xml is generalized
-        shell.cp('-rf', path.join(util.libDirectory, 'cordova-blackberry', 'bin', 'templates', 'project', 'www', 'res'), this.www_dir());
+        shell.cp('-rf', path.join(util.libDirectory, 'cordova-blackberry-' + util.cordovaTag, 'bin', 'templates', 'project', 'www', 'res'), this.www_dir());
     },
 
     // update the overrides folder into the www folder

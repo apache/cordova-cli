@@ -177,7 +177,7 @@ module.exports.prototype = {
         shell.cp('-rf', www, this.path);
 
         // write out proper cordova.js
-        shell.cp('-f', path.join(util.libDirectory, 'cordova-ios', 'CordovaLib', 'cordova.js'), path.join(project_www, 'cordova.js'));
+        shell.cp('-f', path.join(util.libDirectory, 'cordova-ios-' + util.cordovaTag, 'CordovaLib', 'cordova.js'), path.join(project_www, 'cordova.js'));
 
     },
 

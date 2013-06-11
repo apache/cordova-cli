@@ -20,27 +20,42 @@ var fs         = require('fs'),
     path       = require('path'),
     shell      = require('shelljs');
 
-var lib_path = path.join(__dirname, '..', 'lib')
+// Global configuration paths
+var HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+var global_config_path = path.join(HOME, '.cordova');
+var lib_path = path.join(global_config_path, 'lib');
+shell.mkdir('-p', lib_path);
+// What tag of the cordova libs should be dl'ed
+var TAG = '2.8.0';
 
 function chmod(path) {
     shell.exec('chmod +x "' + path + '"', {silent:true});
 }
 
 module.exports = {
+    cordovaTag:TAG,
+    globalConfig:global_config_path,
     libDirectory:lib_path,
+    has_platform_lib:function has_platform_lib(platform) {
+        return fs.existsSync(path.join(lib_path, 'cordova-' + platform + '-' + TAG, 'bin', 'create'));
+    },
     // Runs up the directory chain looking for a .cordova directory.
     // IF it is found we are in a Cordova project.
-    // If not.. we're not.
+    // If not.. we're not. HOME directory doesnt count.
     isCordova: function isCordova(dir) {
         if (dir) {
-            var contents = fs.readdirSync(dir);
-            if (contents && contents.length && (contents.indexOf('.cordova') > -1)) {
-                return dir;
+            if (dir == HOME) {
+                return false;
             } else {
-                var parent = path.join(dir, '..');
-                if (parent && parent.length > 1) {
-                    return isCordova(parent);
-                } else return false;
+                var contents = fs.readdirSync(dir);
+                if (contents && contents.length && (contents.indexOf('.cordova') > -1)) {
+                    return dir;
+                } else {
+                    var parent = path.join(dir, '..');
+                    if (parent && parent.length > 1) {
+                        return isCordova(parent);
+                    } else return false;
+                }
             }
         } else return false;
     },

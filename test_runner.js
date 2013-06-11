@@ -28,6 +28,8 @@ var end = n(Object.keys(platforms).length, function() {
         }
     });
 });
+/*
+TODO: figure out how the test runner should work w.r.t. platform parsers / platform-specific stuff
 console.log('Determining which platforms to run tests for...');
 Object.keys(platforms).forEach(function(p) {
     platform.supports(p, function(e) {
