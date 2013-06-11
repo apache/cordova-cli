@@ -21,88 +21,133 @@ var path          = require('path'),
     shell         = require('shelljs'),
     platforms     = require('../platforms'),
     events        = require('./events'),
-    glob          = require('glob'),
+    hooker        = require('./hooker'),
     https         = require('follow-redirects').https,
     zlib          = require('zlib'),
     tar           = require('tar'),
+    URL           = require('url'),
     util          = require('./util');
 
-/**
- * Usage:
- **/
-module.exports = function lazy_load(platform, callback) {
-    if (!(platform in platforms)) {
-        var err = new Error('platform "' + platform + '" not recognized.');
-        if (callback) return callback(err);
-        else throw err;
-    }
-
-    if (util.has_platform_lib(platform)) {
-        events.emit('log', 'Platform library for "' + platform + '" already exists. No need to download. Continuing.');
-        return (callback ? callback() : true);
-    } else {
-        // TODO: hook in before_library_dl event
-        var url = platforms[platform].url + ';a=snapshot;h=' + util.cordovaTag + ';sf=tgz';
-        var filename = path.join(util.libDirectory, 'cordova-' + platform + '-' + util.cordovaTag + '.tar.gz');
-        var req_opts = {
-            hostname: 'git-wip-us.apache.org',
-            path: '/repos/asf?p=cordova-' + platform + '.git;a=snapshot;h=' + util.cordovaTag + ';sf=tgz'
-        };
-        events.emit('log', 'Requesting ' + req_opts.hostname + req_opts.path + '...');
-        var req = https.request(req_opts, function(res) {
-            var downloadfile = fs.createWriteStream(filename, {'flags': 'a'});
-
-            res.on('data', function(chunk){
-                // TODO: hook in progress event
-                downloadfile.write(chunk, 'binary');
-                events.emit('log', 'Wrote ' + chunk.length + ' bytes...');
-            });
-
-            res.on('end', function(){
-                // TODO: hook in end event
-                downloadfile.end();
-                events.emit('log', 'Download complete. Extracting...');
-                var tar_path = path.join(util.libDirectory, 'cordova-' + platform + '-' + util.cordovaTag + '.tar');
-                var tarfile = fs.createWriteStream(tar_path);
-                tarfile.on('error', function(err) {
-                    if (callback) callback(err);
-                    else throw err;
-                });
-                tarfile.on('finish', function() {
-                    shell.rm(filename);
-                    fs.createReadStream(tar_path)
-                        .pipe(tar.Extract({ path: util.libDirectory }))
-                        .on("error", function (err) {
-                            if (callback) callback(err);
-                            else throw err;
-                        })
-                        .on("end", function () {
-                            shell.rm(tar_path);
-                            // rename the extracted dir to remove the trailing SHA
-                            glob(path.join(util.libDirectory, 'cordova-' + platform + '-' + util.cordovaTag + '-*'), function(err, entries) {
-                                if (err) {
-                                    if (callback) return callback(err);
-                                    else throw err;
-                                } else {
-                                    var entry = entries[0];
-                                    var final_dir = path.join(util.libDirectory, 'cordova-' + platform + '-' + util.cordovaTag);
-                                    shell.mkdir(final_dir);
-                                    shell.mv('-f', path.join(entry, (platform=='blackberry'?'blackberry10':''), '*'), final_dir);
-                                    shell.rm('-rf', entry);
-                                    if (callback) callback();
-                                }
-                            });
-                        });
-                });
-                fs.createReadStream(filename)
-                    .pipe(zlib.createUnzip())
-                    .pipe(tarfile);
-            });
-        });
-        req.on('error', function(err) {
+module.exports = {
+    cordova:function lazy_load(platform, callback) {
+        if (!(platform in platforms)) {
+            var err = new Error('Cordova library "' + platform + '" not recognized.');
             if (callback) return callback(err);
             else throw err;
+        }
+
+        var url = platforms[platform].url + ';a=snapshot;h=' + util.cordovaTag + ';sf=tgz';
+        module.exports.custom(url, 'cordova', platform, util.cordovaTag, function(err) {
+            if (err) {
+                if (callback) return callback(err);
+                else throw err;
+            } else {
+                if (callback) callback();
+            }
         });
-        req.end();
+    },
+    custom:function(url, id, platform, version, callback) {
+        var download_dir = path.join(util.libDirectory, platform, id, version);
+        shell.mkdir('-p', download_dir);
+        if (fs.existsSync(download_dir)) {
+            events.emit('log', 'Platform library for "' + platform + '" already exists. No need to download. Continuing.');
+            if (callback) callback();
+            return;
+        }
+
+        hooker.fire('before_library_download', {
+            platform:platform,
+            url:url,
+            id:id,
+            version:version
+        }, function() {
+            var uri = URL.parse(url);
+            if (uri.protocol) {
+                // assuming its remote
+                var filename = path.join(download_dir, id+'-'+platform+'-'+version+'.tar.gz');
+                if (fs.existsSync(filename)) {
+                    shell.rm(filename);
+                }
+                var req_opts = {
+                    hostname: uri.hostname,
+                    path: uri.path
+                };
+                events.emit('log', 'Requesting ' + url + '...');
+                // TODO: may not be an https request..
+                var req = https.request(req_opts, function(res) {
+                    var downloadfile = fs.createWriteStream(filename, {'flags': 'a'});
+
+                    res.on('data', function(chunk){
+                        downloadfile.write(chunk, 'binary');
+                        hooker.fire('library_download', {
+                            platform:platform,
+                            url:url,
+                            id:id,
+                            version:version,
+                            chunk:chunk
+                        });
+                    });
+
+                    res.on('end', function(){
+                        downloadfile.end();
+                        var payload_size = fs.statSync(filename).size;
+                        events.emit('log', 'Download complete. Extracting...');
+                        var tar_path = path.join(download_dir, id+'-'+platform+'-'+version+'.tar');
+                        var tarfile = fs.createWriteStream(tar_path);
+                        tarfile.on('error', function(err) {
+                            if (callback) callback(err);
+                            else throw err;
+                        });
+                        tarfile.on('finish', function() {
+                            shell.rm(filename);
+                            fs.createReadStream(tar_path)
+                                .pipe(tar.Extract({ path: download_dir }))
+                                .on("error", function (err) {
+                                    if (callback) callback(err);
+                                    else throw err;
+                                })
+                                .on("end", function () {
+                                    shell.rm(tar_path);
+                                    // move contents out of extracted dir
+                                    var entries = fs.readdirSync(download_dir);
+                                    var entry = path.join(download_dir, entries[0]);
+                                    shell.mv('-f', path.join(entry, (platform=='blackberry'?'blackberry10':''), '*'), download_dir);
+                                    shell.rm('-rf', entry);
+                                    hooker.fire('after_library_download', {
+                                        platform:platform,
+                                        url:url,
+                                        id:id,
+                                        version:version,
+                                        path:download_dir,
+                                        size:payload_size
+                                    }, function() {
+                                        if (callback) callback();
+                                    });
+                                });
+                        });
+                        fs.createReadStream(filename)
+                            .pipe(zlib.createUnzip())
+                            .pipe(tarfile);
+                    });
+                });
+                req.on('error', function(err) {
+                    if (callback) return callback(err);
+                    else throw err;
+                });
+                req.end();
+            } else {
+                // local path
+                shell.cp('-rf', path.join(uri.path, '*'), download_dir);
+                hooker.fire('after_library_download', {
+                    platform:platform,
+                    url:url,
+                    id:id,
+                    version:version,
+                    path:download_dir
+                }, function() {
+                    if (callback) callback();
+                });
+            }
+        });
     }
 };

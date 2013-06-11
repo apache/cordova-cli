@@ -36,6 +36,7 @@ var emit = function() {
 
 module.exports = {
     help:      require('./src/help'),
+    config:    require('./src/config'),
     create:    require('./src/create'),
     platform:  platform,
     platforms: platform,

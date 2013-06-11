@@ -20,22 +20,25 @@
 module.exports = {
     'ios' : {
         parser : require('./src/metadata/ios_parser'),
-        url    : 'https://git-wip-us.apache.org/repos/asf/cordova-ios.git'
+        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-ios.git'
     }, 
     'android' : {
         parser : require('./src/metadata/android_parser'),
-        url    : 'https://git-wip-us.apache.org/repos/asf/cordova-ios.git'
+        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-ios.git'
     }, 
     'wp7' : {
         parser : require('./src/metadata/wp7_parser'),
-        url    : 'https://git-wip-us.apache.org/repos/asf/cordova-wp7.git'
+        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp7.git'
     },
     'wp8' : {
         parser : require('./src/metadata/wp8_parser'),
-        url    : 'https://git-wip-us.apache.org/repos/asf/cordova-wp8.git'
+        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git'
     },
     blackberry : {
         parser : require('./src/metadata/blackberry_parser'),
-        url    : 'https://git-wip-us.apache.org/repos/asf/cordova-blackberry.git'
+        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-blackberry.git'
+    },
+    'www':{
+        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-app-hello-world.git'
     }
 };

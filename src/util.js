@@ -37,7 +37,7 @@ module.exports = {
     globalConfig:global_config_path,
     libDirectory:lib_path,
     has_platform_lib:function has_platform_lib(platform) {
-        return fs.existsSync(path.join(lib_path, 'cordova-' + platform + '-' + TAG, 'bin', 'create'));
+        return fs.existsSync(path.join(lib_path, platform, 'cordova', TAG, 'bin', 'create'));
     },
     // Runs up the directory chain looking for a .cordova directory.
     // IF it is found we are in a Cordova project.

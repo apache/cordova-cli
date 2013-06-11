@@ -28,6 +28,15 @@ module.exports = function hooker(root) {
     else this.root = r;
 }
 
+module.exports.fire = function global_fire(hook, opts, callback) {
+    if (arguments.length == 2) {
+        callback = opts;
+        opts = {};
+    }
+    var handlers = events.listeners(hook);
+    execute_handlers_serially(handlers, opts, callback);
+};
+
 module.exports.prototype = {
     fire:function fire(hook, opts, callback) {
         if (arguments.length == 2) {
