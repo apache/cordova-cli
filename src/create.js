@@ -20,7 +20,6 @@ var path          = require('path'),
     fs            = require('fs'),
     shell         = require('shelljs'),
     help          = require('./help'),
-    config_parser = require('./config_parser'),
     events        = require('./events'),
     config        = require('./config'),
     lazy_load     = require('./lazy_load'),
@@ -62,12 +61,14 @@ module.exports = function create (dir, id, name, callback) {
     events.emit('log', 'Creating a new cordova project with name "' + name + '" and id "' + id + '" at location "' + dir + '"');
 
     var dotCordova = path.join(dir, '.cordova');
+    var www_dir = path.join(dir, 'www');
 
     // Create basic project structure.
     shell.mkdir('-p', dotCordova);
     shell.mkdir('-p', path.join(dir, 'platforms'));
     shell.mkdir('-p', path.join(dir, 'merges'));
     shell.mkdir('-p', path.join(dir, 'plugins'));
+    shell.mkdir('-p', www_dir);
     var hooks = path.join(dotCordova, 'hooks');
     shell.mkdir('-p', hooks);
 
@@ -103,10 +104,8 @@ module.exports = function create (dir, id, name, callback) {
         name:name
     });
 
-    // Copy in base www template
     var config_json = config.read(dir);
-    // Check if www assets to use was overridden.
-    var www_dir = path.join(dir, 'www');
+
     var finalize = function(www_lib) {
         while (!fs.existsSync(path.join(www_lib, 'index.html'))) {
             www_lib = path.join(www_lib, 'www');
@@ -122,12 +121,13 @@ module.exports = function create (dir, id, name, callback) {
         shell.cp(template_config_xml, www_dir);
         // Write out id and name to config.xml
         var configPath = util.projectConfig(dir);
-        var config = new config_parser(configPath);
+        var config = new util.config_parser(configPath);
         config.packageName(id);
         config.name(name);
         if (callback) callback();
     };
 
+    // Check if www assets to use was overridden.
     if (config_json.lib && config_json.lib.www) {
         events.emit('log', 'Using custom www assets ('+config_json.lib.www.id+').');
         lazy_load.custom(config_json.lib.www.uri, config_json.lib.www.id, 'www', config_json.lib.www.version, function(err) {

@@ -8,7 +8,7 @@ var cordova = require('../../cordova'),
     tempDir = path.join(__dirname, '..', '..', 'temp');
 
 describe('create command', function () {
-    var mkdir, cp, config_spy, load_cordova, load_custom, exists, config_read, parser;
+    var mkdir, cp, config_spy, load_cordova, load_custom, exists, config_read, parser, package, name;
     beforeEach(function() {
         shell.rm('-rf', tempDir);
         mkdir = spyOn(shell, 'mkdir');
@@ -22,68 +22,106 @@ describe('create command', function () {
         load_custom = spyOn(lazy_load, 'custom').andCallFake(function(url, id, platform, version, cb) {
             cb();
         });
-    });
-
-    it('should do something', function(done) {
-        cordova.create(tempDir, function() {
-            expect(true).toBe(true);
-            done();
+        package = jasmine.createSpy('config.packageName');
+        name = jasmine.createSpy('config.name');
+        parser = spyOn(util, 'config_parser').andReturn({
+            packageName:package,
+            name:name
         });
     });
 
-    /*
-    it('should print out help txt if no parameters are provided', function() {
-        expect(cordova.create()).toMatch(/synopsis/i);
-    });
-    it('should create a cordova project in the specified directory, and default id and name', function(done) {
-        cordova.create(tempDir, function(err) {
-            expect(err).not.toBeDefined();
-            var dotc = path.join(tempDir, '.cordova', 'config.json');
-            expect(fs.lstatSync(dotc).isFile()).toBe(true);
-            expect(JSON.parse(fs.readFileSync(dotc, 'utf8')).name).toBe("HelloCordova");
-            var hooks = path.join(tempDir, '.cordova', 'hooks');
-            expect(fs.existsSync(hooks)).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_platform_add'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_prepare'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_compile'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_platform_add'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_platform_rm'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_platform_rm'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_platform_ls'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_platform_ls'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_plugin_add'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_plugin_add'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_plugin_rm'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_plugin_rm'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_plugin_ls'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_plugin_ls'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_prepare'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_compile'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_build'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_build'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_emulate'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_emulate'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_docs'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_docs'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'before_run'))).toBe(true);
-            expect(fs.existsSync(path.join(hooks, 'after_run'))).toBe(true);
+    describe('failure', function() {
+        it('should return a help message if incorrect number of parameters is used', function() {
+            expect(cordova.create()).toMatch(/synopsis/gi);
         });
     });
-    it('should create a cordova project in the specified dir with specified name if provided', function() {
-        cordova.create(tempDir, "balls");
 
-        expect(fs.lstatSync(path.join(tempDir, '.cordova', 'config.json')).isFile()).toBe(true);
-
-        expect(fs.readFileSync(util.projectConfig(tempDir)).toString('utf8')).toMatch(/<name>balls<\/name>/);
+    describe('success', function() {
+        it('should create a default project if only directory is specified', function(done) {
+            cordova.create(tempDir, function() {
+                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, '.cordova'));
+                expect(package).toHaveBeenCalledWith('io.cordova.hellocordova');
+                expect(name).toHaveBeenCalledWith('HelloCordova');
+                done();
+            });
+        });
+        it('should create a default project if only directory and id is specified', function(done) {
+            cordova.create(tempDir, 'ca.filmaj.canucks', function() {
+                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, '.cordova'));
+                expect(package).toHaveBeenCalledWith('ca.filmaj.canucks');
+                expect(name).toHaveBeenCalledWith('HelloCordova');
+                done();
+            });
+        });
+        it('should create a project in specified directory with specified name and id', function(done) {
+            cordova.create(tempDir, 'ca.filmaj.canucks', 'IHateTheBruins', function() {
+                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, '.cordova'));
+                expect(package).toHaveBeenCalledWith('ca.filmaj.canucks');
+                expect(name).toHaveBeenCalledWith('IHateTheBruins');
+                done();
+            });
+        });
+        it('should create top-level directory structure appropriate for a cordova-cli project', function(done) {
+            cordova.create(tempDir, function() {
+                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, 'platforms'));
+                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, 'merges'));
+                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, 'plugins'));
+                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, 'www'));
+                done();
+            });
+        });
+        it('should create appropriate directories for hooks', function(done) {
+            var hooks_dir = path.join(tempDir, '.cordova', 'hooks');
+            cordova.create(tempDir, function() {
+                expect(mkdir).toHaveBeenCalledWith('-p', hooks_dir);
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_build')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_compile')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_docs')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_emulate')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_platform_add')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_platform_rm')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_platform_ls')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_plugin_add')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_plugin_ls')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_plugin_rm')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_prepare')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_run')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_build')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_compile')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_docs')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_emulate')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_platform_add')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_platform_rm')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_platform_ls')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_plugin_add')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_plugin_ls')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_plugin_rm')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_prepare')));
+                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_run')));
+                done();
+            });
+        });
+        it('should by default use cordova-app-hello-world as www assets', function(done) {
+            cordova.create(tempDir, function() {
+                expect(load_cordova).toHaveBeenCalledWith('www', jasmine.any(Function));
+                done();
+            });
+        });
+        it('should try to lazy load custom www location if specified', function(done) {
+            var fake_config = {
+                lib:{
+                    www:{
+                        id:'supercordova',
+                        uri:'/supacordoba',
+                        version:'1337'
+                    }
+                }
+            };
+            config_read.andReturn(fake_config);
+            cordova.create(tempDir, function() {
+                expect(load_custom).toHaveBeenCalledWith(fake_config.lib.www.uri, fake_config.lib.www.id, 'www', fake_config.lib.www.version, jasmine.any(Function));
+                done();
+            });
+        });
     });
-    it('should create a cordova project in the specified dir with specified name and id if provided', function() {
-        cordova.create(tempDir, "birdy.nam.nam", "numnum");
-
-        expect(fs.lstatSync(path.join(tempDir, '.cordova', 'config.json')).isFile()).toBe(true);
-
-        var config = fs.readFileSync(util.projectConfig(tempDir)).toString('utf8');
-        expect(config).toMatch(/<name>numnum<\/name>/);
-        expect(config).toMatch(/id="birdy\.nam\.nam"/);
-    });
-    */
 });

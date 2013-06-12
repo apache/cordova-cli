@@ -16,9 +16,10 @@
     specific language governing permissions and limitations
     under the License.
 */
-var fs         = require('fs'),
-    path       = require('path'),
-    shell      = require('shelljs');
+var fs            = require('fs'),
+    path          = require('path'),
+    config_parser = require('./config_parser'),
+    shell         = require('shelljs');
 
 // Global configuration paths
 var HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -52,6 +53,7 @@ module.exports = {
             }
         } else return false;
     },
+    config_parser:config_parser,
     // Recursively deletes .svn folders from a target path
     deleteSvnFolders:function(dir) {
         var contents = fs.readdirSync(dir);
