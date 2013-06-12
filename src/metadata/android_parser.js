@@ -51,7 +51,7 @@ module.exports.check_requirements = function(callback) {
             if (output.indexOf('android-17') == -1) {
                 callback('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.');
             } else {
-                var cmd = 'android update project -p ' + path.join(util.libDirectory, 'cordova-android-' + util.cordovaTag, 'framework') + ' -t android-17';
+                var cmd = 'android update project -p ' + path.join(util.libDirectory, 'android', 'cordova', util.cordovaTag, 'framework') + ' -t android-17';
                 events.emit('log', 'Running "' + cmd + '" (output to follow)...');
                 shell.exec(cmd, {silent:true, async:true}, function(code, output) {
                     events.emit('log', output);
@@ -160,7 +160,7 @@ module.exports.prototype = {
         shell.cp('-rf', www, platformWww);
 
         // write out android lib's cordova.js
-        var jsPath = path.join(util.libDirectory, 'cordova-android-' + util.cordovaTag, 'framework', 'assets', 'www', 'cordova.js');
+        var jsPath = path.join(util.libDirectory, 'android', 'cordova', util.cordovaTag, 'framework', 'assets', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
 
     },

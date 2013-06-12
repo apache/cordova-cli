@@ -42,7 +42,7 @@ module.exports = function wp8_parser(project) {
 module.exports.check_requirements = function(callback) {
     events.emit('log', 'Checking WP8 requirements...');
     // TODO: requires the libraries to be available.
-    var command = '"' + path.join(util.libDirectory, 'cordova-wp8-' + util.cordovaTag, 'bin', 'check_reqs') + '"';
+    var command = '"' + path.join(util.libDirectory, 'wp8', 'cordova', util.cordovaTag, 'bin', 'check_reqs') + '"';
     events.emit('log', 'Running "' + command + '" (output to follow)');
     shell.exec(command, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
@@ -145,7 +145,7 @@ module.exports.prototype = {
         shell.cp('-rf', project_www, this.wp8_proj_dir);
 
         // copy over wp8 lib's cordova.js
-        var cordovajs_path = path.join(util.libDirectory, 'cordova-wp8-' + util.cordovaTag, 'templates', 'standalone', 'www', 'cordova.js');
+        var cordovajs_path = path.join(util.libDirectory, 'wp8', 'cordova', util.cordovaTag, 'templates', 'standalone', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
         this.update_csproj();
     },

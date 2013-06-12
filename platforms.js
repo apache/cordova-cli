@@ -24,7 +24,7 @@ module.exports = {
     }, 
     'android' : {
         parser : require('./src/metadata/android_parser'),
-        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-ios.git'
+        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-android.git'
     }, 
     'wp7' : {
         parser : require('./src/metadata/wp7_parser'),
