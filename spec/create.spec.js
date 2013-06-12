@@ -1,11 +1,11 @@
-var cordova = require('../../cordova'),
+var cordova = require('../cordova'),
     path    = require('path'),
     shell   = require('shelljs'),
     fs      = require('fs'),
-    util    = require('../../src/util'),
-    config    = require('../../src/config'),
-    lazy_load = require('../../src/lazy_load'),
-    tempDir = path.join(__dirname, '..', '..', 'temp');
+    util    = require('../src/util'),
+    config    = require('../src/config'),
+    lazy_load = require('../src/lazy_load'),
+    tempDir = path.join(__dirname, '..', 'temp');
 
 describe('create command', function () {
     var mkdir, cp, config_spy, load_cordova, load_custom, exists, config_read, parser, package, name;

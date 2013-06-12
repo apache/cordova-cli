@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -17,21 +16,21 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../../cordova'),
-    path = require('path'),
+var path = require('path'),
     fs = require('fs'),
     shell = require('shelljs'),
-    config_parser = require('../../src/config_parser'),
-    tempDir = path.join(__dirname, '..', '..', 'temp'),
+    config_parser = require('../src/config_parser'),
     et = require('elementtree'),
-    util = require('../../src/util'),
-    xml = util.projectConfig(tempDir);
+    xml = path.join(__dirname, '..', 'templates', 'config.xml'),
+    util = require('../src/util');
 
+var xml_contents = fs.readFileSync(xml, 'utf-8');
 
 describe('config.xml parser', function () {
+    var readFile, update;
     beforeEach(function() {
-        shell.rm('-rf', tempDir);
-        cordova.create(tempDir);
+        readFile = spyOn(fs, 'readFileSync').andReturn(xml_contents);
+        update = spyOn(config_parser.prototype, 'update');
     });
 
     it('should create an instance based on an xml file', function() {
@@ -59,7 +58,7 @@ describe('config.xml parser', function () {
         });
         it('should write to disk after setting the packagename', function() {
             cfg.packageName('this.is.bat.country');
-            expect(fs.readFileSync(xml, 'utf-8')).toMatch(/id="this\.is\.bat\.country"/);
+            expect(update).toHaveBeenCalled();
         });
     });
 
@@ -71,7 +70,7 @@ describe('config.xml parser', function () {
         });
 
         it('should get the version', function() {
-            expect(cfg.version()).toEqual('2.0.0');
+            expect(cfg.version()).toEqual('0.0.1');
         });
         it('should allow setting the version', function() {
             cfg.version('2.0.1');
@@ -79,7 +78,7 @@ describe('config.xml parser', function () {
         });
         it('should write to disk after setting the version', function() {
             cfg.version('2.0.1');
-            expect(fs.readFileSync(xml, 'utf-8')).toMatch(/version="2.0.1"/);
+            expect(update).toHaveBeenCalled();
         });
     });
 
@@ -91,7 +90,7 @@ describe('config.xml parser', function () {
         });
 
         it('should get the (default) app name', function() {
-            expect(cfg.name()).toEqual('HelloCordova');
+            expect(cfg.name()).toEqual('Hello Cordova');
         });
         it('should allow setting the app name', function() {
             cfg.name('this.is.bat.country');
@@ -99,7 +98,7 @@ describe('config.xml parser', function () {
         });
         it('should write to disk after setting the name', function() {
             cfg.name('one toke over the line');
-            expect(fs.readFileSync(xml, 'utf-8')).toMatch(/<name>one toke over the line<\/name>/);
+            expect(update).toHaveBeenCalled();
         });
     });
 
@@ -125,7 +124,7 @@ describe('config.xml parser', function () {
             });
             it('should write to disk after removing a uri', function() {
                 cfg.access.remove('*');
-                expect(fs.readFileSync(xml, 'utf-8')).not.toMatch(/<access.*\/>/);
+                expect(update).toHaveBeenCalled();
             });
             it('should allow adding a new uri to the access list', function() {
                 cfg.access.add('http://canucks.com');
@@ -134,13 +133,12 @@ describe('config.xml parser', function () {
             });
             it('should write to disk after adding a uri', function() {
                 cfg.access.add('http://cordova.io');
-                expect(fs.readFileSync(xml, 'utf-8')).toMatch(/<access origin="http:\/\/cordova\.io/);
+                expect(update).toHaveBeenCalled();
             });
             it('should allow removing all access elements when no parameter is specified', function() {
                 cfg.access.add('http://cordova.io');
                 cfg.access.remove();
-
-                expect(fs.readFileSync(xml, 'utf-8')).not.toMatch(/<access.*\/>/);
+                expect(cfg.access.get().length).toEqual(0);
             });
         });
     });
