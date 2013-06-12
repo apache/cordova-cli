@@ -98,7 +98,7 @@ module.exports = function create (dir, id, name, callback) {
     shell.mkdir(path.join(hooks, 'before_run'));
 
     // Write out .cordova/config.json file with a simple json manifest
-    config(dir, {
+    require('../cordova').config(dir, {
         id:id,
         name:name
     });

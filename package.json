@@ -11,7 +11,7 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "jasmine-node --color spec/cordova-cli"
+    "test": "jasmine-node --color spec"
   },
   "repository": {
     "type": "git",

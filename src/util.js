@@ -28,17 +28,10 @@ shell.mkdir('-p', lib_path);
 // What tag of the cordova libs should be dl'ed
 var TAG = '2.8.0';
 
-function chmod(path) {
-    shell.exec('chmod +x "' + path + '"', {silent:true});
-}
-
 module.exports = {
     cordovaTag:TAG,
     globalConfig:global_config_path,
     libDirectory:lib_path,
-    has_platform_lib:function has_platform_lib(platform) {
-        return fs.existsSync(path.join(lib_path, platform, 'cordova', TAG, 'bin', 'create'));
-    },
     // Runs up the directory chain looking for a .cordova directory.
     // IF it is found we are in a Cordova project.
     // If not.. we're not. HOME directory doesnt count.
