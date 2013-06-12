@@ -16,50 +16,68 @@
     specific language governing permissions and limitations
     under the License.
 */
-var hooker = require('../../src/hooker'),
+var hooker = require('../src/hooker'),
+    util   = require('../src/util'),
     shell  = require('shelljs'),
     path   = require('path'),
     fs     = require('fs'),
     os     = require('os'),
-    tempDir= path.join(__dirname, '..', '..', 'temp'),
-    hooks  = path.join(__dirname, '..', 'fixtures', 'hooks'),
-    cordova= require('../../cordova');
+    tempDir= path.join(__dirname, '..', 'temp'),
+    hooks  = path.join(__dirname, 'fixtures', 'hooks'),
+    cordova= require('../cordova');
 
 var platform = os.platform();
 var cwd = process.cwd();
 
 describe('hooker', function() {
     it('should throw if provided directory is not a cordova project', function() {
-        shell.rm('-rf', tempDir);
-        shell.mkdir('-p', tempDir); 
-        this.after(function() {
-            shell.rm('-rf', tempDir);
-        });
-
+        spyOn(util, 'isCordova').andReturn(false);
         expect(function() {
-            var h = new hooker(tempDir);
-        }).toThrow();
+            new hooker(tempDir);
+        }).toThrow('Not a Cordova project, can\'t use hooks.');
     });
     it('should not throw if provided directory is a cordova project', function() {
-        cordova.create(tempDir);
-        this.after(function() {
-            shell.rm('-rf', tempDir);
-        });
-
+        var root = '/some/root';
+        spyOn(util, 'isCordova').andReturn(root);
         expect(function() {
             var h = new hooker(tempDir);
+            expect(h.root).toEqual(root);
         }).not.toThrow();
     });
 
-    describe('fire method', function() {
-        var h;
-
-        beforeEach(function() {
-            cordova.create(tempDir);
-            h = new hooker(tempDir);
+    describe('global (static) fire method', function() {
+        it('should execute listeners serially', function(done) {
+            var timeout = 20;
+            var test_event = 'poop';
+            var h1_fired = false;
+            var h1 = function(root, cb) {
+                h1_fired = true;
+                setTimeout(cb, timeout);
+            };
+            var h2_fired = false;
+            var h2 = function() {
+                h2_fired = true;
+            };
+            runs(function() {
+                cordova.on(test_event, h1);
+                cordova.on(test_event, h2);
+                hooker.fire(test_event, function(err) {
+                    done();
+                });
+                expect(h1_fired).toBe(true);
+                expect(h2_fired).toBe(false);
+            });
+            waits(timeout);
+            runs(function() {
+                expect(h2_fired).toBe(true);
+            });
         });
-        afterEach(function() {
-            shell.rm('-rf', tempDir);
+    });
+    describe('project-level fire method', function() {
+        var h;
+        beforeEach(function() {
+            spyOn(util, 'isCordova').andReturn(tempDir);
+            h = new hooker(tempDir);
         });
 
         describe('failure', function() {
@@ -70,12 +88,14 @@ describe('hooker', function() {
                 });
             });
             it('should error if any script exits with non-zero code', function(done) {
-                var script;
+                var script = path.join(tempDir, '.cordova', 'hooks', 'before_build');
+                shell.mkdir('-p', script);
+                this.after(function() { shell.rm('-rf', tempDir); });
                 if (platform.match(/(win32|win64)/)) {
-                    script = path.join(tempDir, '.cordova', 'hooks', 'before_build', 'fail.bat');
+                    script = path.join(script, 'fail.bat');
                     shell.cp(path.join(hooks, 'fail', 'fail.bat'), script);
                 } else {
-                    script = path.join(tempDir, '.cordova', 'hooks', 'before_build', 'fail.sh');
+                    script = path.join(script, 'fail.sh');
                     shell.cp(path.join(hooks, 'fail', 'fail.sh'), script);
                 }
                 fs.chmodSync(script, '754');
@@ -89,6 +109,8 @@ describe('hooker', function() {
         describe('success', function() {
             it('should execute all scripts in order and fire callback', function(done) {
                 var hook = path.join(tempDir, '.cordova', 'hooks', 'before_build');
+                shell.mkdir('-p', hook);
+                this.after(function() { shell.rm('-rf', tempDir); });
                 if (platform.match(/(win32|win64)/)) {
                     shell.cp(path.join(hooks, 'test', '0.bat'), hook);
                     shell.cp(path.join(hooks, 'test', '1.bat'), hook);
@@ -117,6 +139,8 @@ describe('hooker', function() {
             });
             it('should pass the project root folder as parameter into the project-level hooks', function(done) {
                 var hook = path.join(tempDir, '.cordova', 'hooks', 'before_build');
+                shell.mkdir('-p', hook);
+                this.after(function() { shell.rm('-rf', tempDir); });
                 if (platform.match(/(win32|win64)/)) {
                     shell.cp(path.join(hooks, 'test', '0.bat'), hook);
                 } else {
@@ -174,9 +198,10 @@ describe('hooker', function() {
                 });
                 it('should allow for hook to opt into asynchronous execution and block further hooks from firing using the done callback', function(done) {
                     var h1_fired = false;
+                    var timeout = 19;
                     var h1 = function(root, cb) {
                         h1_fired = true;
-                        setTimeout(cb, 100);
+                        setTimeout(cb, timeout);
                     };
                     var h2_fired = false;
                     var h2 = function() {
@@ -191,7 +216,7 @@ describe('hooker', function() {
                         expect(h1_fired).toBe(true);
                         expect(h2_fired).toBe(false);
                     });
-                    waits(100);
+                    waits(timeout);
                     runs(function() {
                         expect(h2_fired).toBe(true);
                     });
