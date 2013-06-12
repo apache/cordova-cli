@@ -108,15 +108,18 @@ module.exports = function create (dir, id, name, callback) {
     // Check if www assets to use was overridden.
     var www_dir = path.join(dir, 'www');
     var finalize = function(www_lib) {
-        while (!fs.existsSync(path.join(www_lib, 'config.xml'))) {
+        while (!fs.existsSync(path.join(www_lib, 'index.html'))) {
             www_lib = path.join(www_lib, 'www');
             if (!fs.existsSync(www_lib)) {
-                var err = new Error('downloaded www assets in ' + www_lib + ' does not contain config.xml, or www subdir with config.xml');
+                var err = new Error('downloaded www assets in ' + www_lib + ' does not contain index.html, or www subdir with index.html');
                 if (callback) return callback(err);
                 else throw err;
             }
         }
         shell.cp('-rf', path.join(www_lib, '*'), www_dir);
+        // Copy over template config.xml (TODO: CB-3771 will remove the need for this)
+        var template_config_xml = path.join(__dirname, '..', 'templates', 'config.xml');
+        shell.cp(template_config_xml, www_dir);
         // Write out id and name to config.xml
         var configPath = util.projectConfig(dir);
         var config = new config_parser(configPath);

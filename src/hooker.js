@@ -29,12 +29,14 @@ module.exports = function hooker(root) {
 }
 
 module.exports.fire = function global_fire(hook, opts, callback) {
-    if (arguments.length == 2) {
+    if (arguments.length == 2 && typeof opts == 'function') {
         callback = opts;
         opts = {};
     }
     var handlers = events.listeners(hook);
-    execute_handlers_serially(handlers, opts, callback);
+    execute_handlers_serially(handlers, opts, function() {
+        if (callback) callback();
+    });
 };
 
 module.exports.prototype = {

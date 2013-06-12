@@ -48,13 +48,12 @@ module.exports = {
     },
     custom:function(url, id, platform, version, callback) {
         var download_dir = path.join(util.libDirectory, platform, id, version);
-        shell.mkdir('-p', download_dir);
         if (fs.existsSync(download_dir)) {
             events.emit('log', 'Platform library for "' + platform + '" already exists. No need to download. Continuing.');
             if (callback) callback();
             return;
         }
-
+        shell.mkdir('-p', download_dir);
         hooker.fire('before_library_download', {
             platform:platform,
             url:url,

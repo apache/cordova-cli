@@ -7,8 +7,6 @@ var cordova = require('../../cordova'),
     lazy_load = require('../../src/lazy_load'),
     tempDir = path.join(__dirname, '..', '..', 'temp');
 
-config_parser    = require('../../src/config_parser');
-
 describe('create command', function () {
     var mkdir, cp, config_spy, load_cordova, load_custom, exists, config_read, parser;
     beforeEach(function() {
@@ -24,7 +22,6 @@ describe('create command', function () {
         load_custom = spyOn(lazy_load, 'custom').andCallFake(function(url, id, platform, version, cb) {
             cb();
         });
-        parser = spyOnConstructor(global, 'config_parser', ['packageName', 'name']);
     });
 
     it('should do something', function(done) {
