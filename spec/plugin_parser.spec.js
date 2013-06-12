@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -17,14 +16,21 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../../cordova'),
+var cordova = require('../cordova'),
     path = require('path'),
     fs = require('fs'),
-    plugin_parser = require('../../src/plugin_parser'),
+    plugin_parser = require('../src/plugin_parser'),
     et = require('elementtree'),
-    xml = path.join(__dirname, '..', 'fixtures', 'plugins', 'test', 'plugin.xml');
+    xml = path.join(__dirname, 'fixtures', 'plugins', 'test', 'plugin.xml');
+
+var xml_contents = fs.readFileSync(xml, 'utf-8');
 
 describe('plugin.xml parser', function () {
+    var readfile;
+    beforeEach(function() {
+        readfile = spyOn(fs, 'readFileSync').andReturn(xml_contents);
+    });
+
     it('should read a proper plugin.xml file', function() {
         var cfg;
         expect(function () {
