@@ -18,7 +18,6 @@
 */
 var cordova_util      = require('./util'),
     path              = require('path'),
-    config_parser     = require('./config_parser'),
     fs                = require('fs'),
     shell             = require('shelljs'),
     et                = require('elementtree'),
@@ -49,9 +48,6 @@ module.exports = function compile(platformList, callback) {
         else throw err;
         return;
     }
-
-    var xml = cordova_util.projectConfig(projectRoot);
-    var cfg = new config_parser(xml);
 
     if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
         platformList = cordova_util.listPlatforms(projectRoot);
