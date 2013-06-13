@@ -51,6 +51,8 @@ module.exports.prototype = {
         events.emit('log', 'Wrote out BlackBerry application name to "' + config.name() + '"');
         this.xml.packageName(config.packageName());
         events.emit('log', 'Wrote out BlackBerry package name to "' + config.packageName() + '"');
+        this.xml.version(config.version());
+        events.emit('log', 'Wrote out BlackBerry version to "' + config.version() + '"');
         this.xml.access.remove();
         var self = this;
         this.xml.doc.findall('access').forEach(function(a) {
