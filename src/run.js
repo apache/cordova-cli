@@ -18,16 +18,14 @@
 */
 var cordova_util      = require('./util'),
     path              = require('path'),
-    config_parser     = require('./config_parser'),
     fs                = require('fs'),
     shell             = require('shelljs'),
-    et                = require('elementtree'),
     hooker            = require('./hooker'),
     platforms         = require('./../platforms'),
     events            = require('./events'),
     n                 = require('ncallbacks');
 
-function shell_out_to_run(projectRoot, platform, callback) {
+function shell_out_to_run(projectRoot, platform, error_callback, done) {
     var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" --device';
     // TODO: inconsistent API for BB10 run command
     if (platform == 'blackberry') {
@@ -38,7 +36,9 @@ function shell_out_to_run(projectRoot, platform, callback) {
             var device = project.get_device_targets()[0].name;
             cmd = '"' + path.join(bb_project, 'cordova', 'run') + '" --target=' + device + ' -k ' + bb_config.signing_password;
         } else {
-            throw new Error('No BlackBerry device targets defined. If you want to run `run` with BB10, please add a device target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
+            var err = new Error('No BlackBerry device targets defined. If you want to run `run` with BB10, please add a device target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
+            if (error_callback) error_callback(err);
+            else throw err;
         }
     }
 
@@ -46,10 +46,12 @@ function shell_out_to_run(projectRoot, platform, callback) {
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
         if (code > 0) {
-            throw new Error('An error occurred while running the ' + platform + ' project. ' + output);
+            var err = new Error('An error occurred while running the ' + platform + ' project. ' + output);
+            if (error_callback) error_callback(err);
+            else throw err;
         } else {
             events.emit('log', 'Platform "' + platform + '" ran successfully.');
-            if (callback) callback();
+            if (done) done();
         }
     });
 }
@@ -63,9 +65,6 @@ module.exports = function run(platformList, callback) {
         else throw err;
         return;
     }
-
-    var xml = cordova_util.projectConfig(projectRoot);
-    var cfg = new config_parser(xml);
 
     if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
         platformList = cordova_util.listPlatforms(projectRoot);
@@ -110,7 +109,7 @@ module.exports = function run(platformList, callback) {
                 } else {
                     platformList.forEach(function(platform) {
                         try {
-                            shell_out_to_run(projectRoot, platform, end);
+                            shell_out_to_run(projectRoot, platform, callback, end);
                         } catch(e) {
                             if (callback) callback(e);
                             else throw e;
