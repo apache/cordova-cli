@@ -25,16 +25,18 @@ var cordova_util      = require('./util'),
     events            = require('./events'),
     n                 = require('ncallbacks');
 
-function shell_out_to_build(projectRoot, platform, callback) {
+function shell_out_to_build(projectRoot, platform, error_callback, done) {
     var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'build') + '"';
     events.emit('log', 'Compiling platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
         if (code > 0) {
-            throw new Error('An error occurred while building the ' + platform + ' project. ' + output);
+            var err = new Error('An error occurred while building the ' + platform + ' project. ' + output);
+            if (error_callback) error_callback(err);
+            else throw err;
         } else {
             events.emit('log', 'Platform "' + platform + '" compiled successfully.');
-            if (callback) callback();
+            if (done) done();
         }
     });
 }
@@ -87,7 +89,7 @@ module.exports = function compile(platformList, callback) {
             // Iterate over each added platform
             platformList.forEach(function(platform) {
                 try {
-                    shell_out_to_build(projectRoot, platform, end);
+                    shell_out_to_build(projectRoot, platform, callback, end);
                 } catch(e) {
                     if (callback) callback(e);
                     else throw e;

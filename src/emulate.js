@@ -19,16 +19,15 @@
 var cordova_util      = require('./util'),
     path              = require('path'),
     shell             = require('shelljs'),
-    config_parser     = require('./config_parser'),
     platforms         = require('../platforms'),
     platform          = require('./platform'),
     events            = require('./events'),
     fs                = require('fs'),
     n                 = require('ncallbacks'),
-    hooker            = require('../src/hooker'),
+    hooker            = require('./hooker'),
     util              = require('util');
 
-function shell_out_to_emulate(root, platform, done) {
+function shell_out_to_emulate(root, platform, error_callback, done) {
     var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '" --emulator';
     // TODO: inconsistent API for BB10 run command
     if (platform == 'blackberry') {
@@ -39,14 +38,18 @@ function shell_out_to_emulate(root, platform, done) {
             var sim = project.get_simulator_targets()[0].name;
             cmd = '"' + path.join(bb_project, 'cordova', 'run') + '" --target=' + sim + ' -k ' + bb_config.signing_password;
         } else {
-            throw new Error('No BlackBerry simulator targets defined. If you want to run emulate with BB10, please add a simulator target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
+            var err = new Error('No BlackBerry simulator targets defined. If you want to run emulate with BB10, please add a simulator target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
+            if (error_callback) return error_callback(err);
+            else throw err;
         }
     }
     events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
         if (code > 0) {
-            throw new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + output);
+            var err = new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + output);
+            if (error_callback) return error_callback(err);
+            else throw err;
         } else {
             events.emit('log', 'Platform "' + platform + '" deployed to emulator.');
             done();
@@ -63,9 +66,6 @@ module.exports = function emulate (platformList, callback) {
         else throw err;
         return;
     }
-
-    var xml = cordova_util.projectConfig(projectRoot);
-    var cfg = new config_parser(xml);
 
     if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
         platformList = cordova_util.listPlatforms(projectRoot);
@@ -110,7 +110,7 @@ module.exports = function emulate (platformList, callback) {
                 } else {
                     platformList.forEach(function(platform) {
                         try {
-                            shell_out_to_emulate(projectRoot, platform, end);
+                            shell_out_to_emulate(projectRoot, platform, callback, end);
                         } catch(e) {
                             if (callback) callback(e);
                             else throw e;
