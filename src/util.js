@@ -19,6 +19,7 @@
 var fs            = require('fs'),
     path          = require('path'),
     config_parser = require('./config_parser'),
+    plugin_parser = require('./plugin_parser'),
     shell         = require('shelljs');
 
 // Global configuration paths
@@ -54,6 +55,7 @@ module.exports = {
         } else return false;
     },
     config_parser:config_parser,
+    plugin_parser:plugin_parser,
     // Recursively deletes .svn folders from a target path
     deleteSvnFolders:function(dir) {
         var contents = fs.readdirSync(dir);

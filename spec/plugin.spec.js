@@ -16,131 +16,164 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../../cordova'),
+var cordova = require('../cordova'),
     path = require('path'),
     shell = require('shelljs'),
+    plugman = require('plugman'),
     fs = require('fs'),
-    hooker = require('../../src/hooker'),
-    tempDir = path.join(__dirname, '..', '..', 'temp'),
-    fixturesDir = path.join(__dirname, '..', 'fixtures'),
-    testPlugin = path.join(fixturesDir, 'plugins', 'test'),
-    cordova_project = path.join(fixturesDir, 'projects', 'cordova'),
-    androidPlugin = path.join(fixturesDir, 'plugins', 'android');
+    util = require('../src/util'),
+    config = require('../src/config'),
+    hooker = require('../src/hooker'),
+    platforms = require('../platforms');
 
 var cwd = process.cwd();
+var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
+var sample_plugins = ['one','two'];
+var project_dir = path.join('some','path');
+var plugins_dir = path.join(project_dir, 'plugins');
 
 describe('plugin command', function() {
+    var is_cordova, list_platforms, fire, find_plugins, rm, mkdir, existsSync, exec, prep_spy, plugman_install, plugman_fetch, parsers = {}, uninstall;
     beforeEach(function() {
-        // Make a temp directory
-        shell.rm('-rf', tempDir);
-        shell.mkdir('-p', tempDir);
-    });
-
-    it('should run inside a Cordova-based project', function() {
-        this.after(function() {
-            process.chdir(cwd);
+        is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
+        fire = spyOn(hooker.prototype, 'fire').andCallFake(function(e, opts, cb) {
+            if (cb === undefined) cb = opts;
+            cb(false);
         });
-
-        cordova.create(tempDir);
-
-        process.chdir(tempDir);
-
-        expect(function() {
-            cordova.plugin();
-        }).not.toThrow();
-    });
-    it('should not run outside of a Cordova-based project', function() {
-        this.after(function() {
-            process.chdir(cwd);
-        });
-
-        process.chdir(tempDir);
-
-        expect(function() {
-            cordova.plugin();
-        }).toThrow();
-    });
-
-    describe('edge cases', function() {
-       beforeEach(function() {
-           cordova.create(tempDir);
-           process.chdir(tempDir);
-       });
-
-       afterEach(function() {
-           process.chdir(cwd);
-           cordova.removeAllListeners('results');
-       });
-
-       it('should not fail when the plugins directory is missing', function() {
-           fs.rmdirSync('plugins');
-
-           expect(function() {
-               cordova.plugin();
-           }).not.toThrow();
-       });
-
-       it('should ignore files, like .gitignore, in the plugins directory', function(done) {
-           var someFile = path.join(tempDir, 'plugins', '.gitignore');
-           fs.writeFileSync(someFile, 'not a plugin');
-           cordova.on('results', function(res) {
-               expect(res).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
-               done();
-           });
-
-           cordova.plugin('list');
-       });
-    });
-
-    describe('`ls`', function() {
-        beforeEach(function() {
-            cordova.create(tempDir);
-            process.chdir(tempDir);
-        });
-
-        afterEach(function() {
-            process.chdir(cwd);
-            cordova.removeAllListeners('results');
-        });
-
-        it('should list out no plugins for a fresh project', function(done) {
-            cordova.on('results', function(res) {
-                expect(res).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
-                done();
+        supported_platforms.forEach(function(p) {
+            parsers[p] = jasmine.createSpy(p + ' update_project').andCallFake(function(cfg, cb) {
+                cb();
             });
-            cordova.plugin('list');
-        });
-        it('should list out any added plugins in a project', function(done) {
-            var random_plug = 'randomplug';
-            shell.mkdir('-p', path.join(tempDir, 'plugins', random_plug));
-            cordova.on('results', function(res) {
-                expect(res).toEqual([random_plug]);
-                done();
+            spyOn(platforms[p], 'parser').andReturn({
+                staging_dir:function(){return ''}
             });
-            cordova.plugin('list');
+        });
+        list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
+        find_plugins = spyOn(util, 'findPlugins').andReturn(sample_plugins);
+        rm = spyOn(shell, 'rm');
+        mkdir = spyOn(shell, 'mkdir');
+        existsSync = spyOn(fs, 'existsSync').andReturn(false);
+        exec = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
+            cb(0, '');
+        });
+        prep_spy = spyOn(cordova, 'prepare').andCallFake(function(t, cb) {
+            cb();
+        });
+        plugman_install = spyOn(plugman, 'install');
+        plugman_fetch = spyOn(plugman, 'fetch').andCallFake(function(target, plugins_dir, opts, cb) { cb(false, path.join(plugins_dir, target)); });
+        uninstall = spyOn(plugman, 'uninstall');
+    });
+
+    describe('failure', function() {
+        it('should not run outside of a Cordova-based project by calling util.isCordova', function() {
+            is_cordova.andReturn(false);
+            expect(function() {
+                cordova.plugin();
+                expect(is_cordova).toHaveBeenCalled();
+            }).toThrow('Current working directory is not a Cordova-based project.');
         });
     });
 
-    describe('`add`', function() {
-        beforeEach(function() {
-            cordova.create(tempDir);
-            process.chdir(tempDir);
+    describe('success', function() {
+        it('should run inside a Cordova-based project by calling util.isCordova', function() {
+            cordova.plugin();
+            expect(is_cordova).toHaveBeenCalled();
         });
 
-        afterEach(function() {
-            process.chdir(cwd);
-        });
-        describe('failure', function() {
-            it('should throw if plugin does not have a plugin.xml', function() {
-                process.chdir(cordova_project);
-                this.after(function() {
-                    process.chdir(cwd);
+        describe('`ls`', function() { 
+            afterEach(function() {
+                cordova.removeAllListeners('results');
+            });
+            it('should list out no plugins for a fresh project', function(done) {
+                find_plugins.andReturn([]);
+                cordova.on('results', function(res) {
+                    expect(res).toEqual('No plugins added. Use `cordova plugin add <plugin>`.');
+                    done();
                 });
+                cordova.plugin('list');
+            });
+
+            it('should list out added plugins in a project', function(done) {
+                cordova.on('results', function(res) {
+                    expect(res).toEqual(sample_plugins);
+                    done();
+                });
+                cordova.plugin('list');
+            });
+        });
+        describe('`add`', function() {
+            it('should call plugman.fetch for each plugin', function() {
+                cordova.plugin('add', sample_plugins);
+                sample_plugins.forEach(function(p) {
+                    expect(plugman_fetch).toHaveBeenCalledWith(p, plugins_dir, {}, jasmine.any(Function)); 
+                });
+            });
+            it('should call plugman.install, for each plugin, for every platform', function() {
+                cordova.plugin('add', sample_plugins);
+                sample_plugins.forEach(function(plug) {
+                    supported_platforms.forEach(function(plat) {
+                        expect(plugman_install).toHaveBeenCalledWith((plat=='blackberry'?'blackberry10':plat), path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object)); 
+                    });
+                });
+            });
+        });
+        describe('`remove`',function() {
+            var plugin_parser;
+            var subset = ['android', 'wp7'];
+            beforeEach(function() {
+                plugin_parser = spyOn(util, 'plugin_parser').andReturn({
+                    platforms:subset
+                });
+            });
+            it('should throw if plugin is not installed', function() {
                 expect(function() {
-                    cordova.plugin('add', fixturesDir);
-                }).toThrow();
+                    cordova.plugin('rm', 'somethingrandom');
+                }).toThrow('Plugin "somethingrandom" not added to project.');
+            });
+
+            it('should call plugman.uninstall for every matching installedplugin-supportedplatform pair', function() {
+                cordova.plugin('rm', sample_plugins);
+                sample_plugins.forEach(function(plug) {
+                    subset.forEach(function(plat) {
+                        expect(uninstall).toHaveBeenCalledWith(plat, path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object));
+                    });
+                });
+            });
+        });
+    });
+    describe('hooks', function() {
+        var plugin_parser;
+        beforeEach(function() {
+            plugin_parser = spyOn(util, 'plugin_parser').andReturn({
+                platforms:supported_platforms
+            });
+        });
+        describe('list (ls) hooks', function() {
+            it('should fire before hooks through the hooker module', function() {
+                cordova.plugin();
+                expect(fire).toHaveBeenCalledWith('before_plugin_ls', jasmine.any(Function));
+            });
+            it('should fire after hooks through the hooker module', function() {
+                cordova.plugin();
+                expect(fire).toHaveBeenCalledWith('after_plugin_ls', jasmine.any(Function));
+            });
+        });
+        describe('remove (rm) hooks', function() {
+            it('should fire before hooks through the hooker module', function() {
+                cordova.plugin('rm', 'two');
+                expect(fire).toHaveBeenCalledWith('before_plugin_rm', {plugins:['two']}, jasmine.any(Function));
+            });
+            it('should fire after hooks through the hooker module', function() {
+                cordova.plugin('rm', 'one');
+                expect(fire).toHaveBeenCalledWith('after_plugin_rm', {plugins:['one']}, jasmine.any(Function));
+            });
+        });
+        describe('add hooks', function() {
+            it('should fire before and after hooks through the hooker module', function() {
+                cordova.plugin('add', 'android');
+                expect(fire).toHaveBeenCalledWith('before_plugin_add', {plugins:['android']}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('after_plugin_add', {plugins:['android']}, jasmine.any(Function));
             });
         });
     });
 });
-

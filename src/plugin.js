@@ -19,16 +19,12 @@
 var cordova_util  = require('./util'),
     util          = require('util'),
     fs            = require('fs'),
-    shell         = require('shelljs'),
     path          = require('path'),
     shell         = require('shelljs'),
     platforms     = require('../platforms'),
-    config_parser = require('./config_parser'),
     n             = require('ncallbacks'),
     hooker        = require('./hooker'),
     events        = require('./events'),
-    plugin_parser = require('./plugin_parser'),
-    ls            = fs.readdirSync,
     plugman       = require('plugman');
 
 module.exports = function plugin(command, targets, callback) {
@@ -43,10 +39,6 @@ module.exports = function plugin(command, targets, callback) {
     if (arguments.length === 0) command = 'ls';
 
     var hooks = new hooker(projectRoot);
-
-    // Grab config info for the project
-    var xml = cordova_util.projectConfig(projectRoot);
-    var cfg = new config_parser(xml);
     var platformList = cordova_util.listPlatforms(projectRoot);
 
     // Massage plugin name(s) / path(s)
@@ -148,7 +140,7 @@ module.exports = function plugin(command, targets, callback) {
                             var targetPath = path.join(pluginPath, target);
                             // Check if there is at least one match between plugin
                             // supported platforms and app platforms
-                            var pluginXml = new plugin_parser(path.join(targetPath, 'plugin.xml'));
+                            var pluginXml = new cordova_util.plugin_parser(path.join(targetPath, 'plugin.xml'));
                             var intersection = pluginXml.platforms.filter(function(e) {
                                 if (platformList.indexOf(e) == -1) return false;
                                 else return true;
@@ -162,7 +154,7 @@ module.exports = function plugin(command, targets, callback) {
                                 var platformRoot = path.join(projectRoot, 'platforms', platform);
                                 var parser = new platforms[platform].parser(platformRoot);
                                 events.emit('log', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
-                                plugman.uninstall(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
+                                plugman.uninstall((platform=='blackberry'?'blackberry10':platform), platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
                             });
                             end();
                         } else {
