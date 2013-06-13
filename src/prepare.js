@@ -18,7 +18,6 @@
 */
 var cordova_util      = require('./util'),
     path              = require('path'),
-    config_parser     = require('./config_parser'),
     platforms         = require('../platforms'),
     platform          = require('./platform'),
     fs                = require('fs'),
@@ -41,9 +40,6 @@ module.exports = function prepare(platformList, callback) {
         return;
     }
 
-    var xml = cordova_util.projectConfig(projectRoot);
-    var cfg = new config_parser(xml);
-
     if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
         platformList = cordova_util.listPlatforms(projectRoot);
     } else if (typeof platformList == 'string') platformList = [platformList];
@@ -59,14 +55,20 @@ module.exports = function prepare(platformList, callback) {
         return;
     }
 
+    var xml = cordova_util.projectConfig(projectRoot);
+    var cfg = new cordova_util.config_parser(xml);
+    var opts = {
+        platforms:platformList
+    };
+
     var hooks = new hooker(projectRoot);
-    hooks.fire('before_prepare', function(err) {
+    hooks.fire('before_prepare', opts, function(err) {
         if (err) {
             if (callback) callback(err);
             else throw err;
         } else {
             var end = n(platformList.length, function() {
-                hooks.fire('after_prepare', function(err) {
+                hooks.fire('after_prepare', opts, function(err) {
                     if (err) {
                         if (callback) callback(err);
                         else throw err;

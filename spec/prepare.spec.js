@@ -16,137 +16,127 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova = require('../../cordova'),
-    et = require('elementtree'),
+var cordova = require('../cordova'),
     shell = require('shelljs'),
     plugman = require('plugman'),
     path = require('path'),
     fs = require('fs'),
-    config_parser = require('../../src/config_parser'),
-    android_parser = require('../../src/metadata/android_parser'),
-    hooker = require('../../src/hooker'),
-    fixtures = path.join(__dirname, '..', 'fixtures'),
-    test_plugin = path.join(fixtures, 'plugins', 'android'),
-    hooks = path.join(fixtures, 'hooks'),
-    tempDir = path.join(__dirname, '..', '..', 'temp'),
-    cordova_project = path.join(fixtures, 'projects', 'cordova');
+    util = require('../src/util'),
+    platforms = require('../platforms'),
+    hooker = require('../src/hooker'),
+    fixtures = path.join(__dirname, 'fixtures'),
+    hooks = path.join(fixtures, 'hooks');
 
 var cwd = process.cwd();
 
+var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
+
 describe('prepare command', function() {
+    var is_cordova, list_platforms, fire, config_parser, parsers = {}, plugman_prepare, find_plugins, plugman_get_json;
+    var project_dir = '/some/path';
     beforeEach(function() {
-        shell.rm('-rf', tempDir);
-        cordova.create(tempDir);
+        is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
+        list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
+        fire = spyOn(hooker.prototype, 'fire').andCallFake(function(e, opts, cb) {
+            cb(false);
+        });
+        config_parser = spyOn(util, 'config_parser');
+        supported_platforms.forEach(function(p) {
+            parsers[p] = jasmine.createSpy(p + ' update_project').andCallFake(function(cfg, cb) {
+                cb();
+            });
+            spyOn(platforms[p], 'parser').andReturn({
+                update_project:parsers[p]
+            });
+        });
+        plugman_prepare = spyOn(plugman, 'prepare');
+        find_plugins = spyOn(util, 'findPlugins').andReturn([]);
+        plugman_get_json = spyOn(plugman.config_changes, 'get_platform_json').andReturn({});
     });
 
-    it('should not run inside a Cordova-based project with no added platforms', function() {
-        this.after(function() {
-            process.chdir(cwd);
+    describe('failure', function() {
+        it('should not run outside of a cordova-based project by calling util.isCordova', function() {
+            is_cordova.andReturn(false);
+            expect(function() {
+                cordova.prepare();
+                expect(is_cordova).toHaveBeenCalled();
+            }).toThrow('Current working directory is not a Cordova-based project.');
         });
-
-        process.chdir(tempDir);
-        expect(function() {
-            cordova.prepare();
-        }).toThrow();
+        it('should not run inside a cordova-based project with no platforms', function() {
+            list_platforms.andReturn([]);
+            expect(function() {
+                cordova.prepare();
+            }).toThrow('No platforms added to this project. Please use `cordova platform add <platform>`.');
+        });
     });
     
-    it('should run inside a Cordova-based project with at least one added platform', function(done) {
-        process.chdir(tempDir);
-        var android_path = path.join(tempDir, 'platforms', 'android');
-        shell.mkdir(android_path);
-        fs.writeFileSync(path.join(android_path, 'AndroidManifest.xml'), 'hi', 'utf-8');
-        spyOn(plugman, 'prepare');
-        cordova.prepare(['android'], function(err) {
-            done();
+    describe('success', function() {
+        it('should run inside a Cordova-based project by calling util.isCordova', function() {
+            cordova.prepare();
+            expect(is_cordova).toHaveBeenCalled();
+        });
+        it('should parse user\'s config.xml by calling instantiating a config_parser', function() {
+            cordova.prepare();
+            expect(config_parser).toHaveBeenCalledWith(path.join(project_dir, 'www', 'config.xml'));
+        });
+        it('should invoke each platform\'s parser\'s update_project method', function() {
+            cordova.prepare();
+            supported_platforms.forEach(function(p) {
+                expect(parsers[p]).toHaveBeenCalled();
+            });
+        });
+        describe('plugman integration', function() {
+            it('should invoke plugman.prepare after update_project', function() {
+                cordova.prepare();
+                var plugins_dir = path.join(project_dir, 'plugins');
+                supported_platforms.forEach(function(p) {
+                    var platform_path = path.join(project_dir, 'platforms', p);
+                    expect(plugman_prepare).toHaveBeenCalledWith(platform_path, (p=='blackberry'?'blackberry10':p), plugins_dir);
+                });
+            });
+            it('should invoke add_plugin_changes for any added plugins to verify configuration changes for plugins are in place', function() {
+                var plugins_dir = path.join(project_dir, 'plugins');
+                find_plugins.andReturn(['testPlugin']);
+                plugman_get_json.andReturn({
+                    installed_plugins:{
+                        'testPlugin':'plugin vars'
+                    }
+                });
+                var add_plugin_changes = spyOn(plugman.config_changes, 'add_plugin_changes');
+                cordova.prepare();
+                supported_platforms.forEach(function(p) {
+                    var platform_path = path.join(project_dir, 'platforms', p);
+                    expect(add_plugin_changes).toHaveBeenCalledWith((p=='blackberry'?'blackberry10':p), platform_path, plugins_dir, 'testPlugin', 'plugin vars', true, false);
+                });
+            });
         });
     });
-    it('should not run outside of a Cordova-based project', function() {
-        this.after(function() {
-            process.chdir(cwd);
-        });
 
-        shell.mkdir('-p', tempDir);
-        process.chdir(tempDir);
-
-        expect(function() {
-            cordova.prepare();
-        }).toThrow();
-    });
-
-    describe('plugman integration', function() {
-        beforeEach(function() {
-            shell.cp('-Rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
-            process.chdir(tempDir);
-        });
-        afterEach(function() {
-            process.chdir(cwd);
-        });
-
-        it('should invoke plugman.prepare after update_project', function() {
-            var a_parser_spy = spyOn(android_parser.prototype, 'update_project');
-            var prep_spy = spyOn(plugman, 'prepare');
-            cordova.prepare();
-            a_parser_spy.mostRecentCall.args[1](); // fake out android_parser
-            var android_path = path.join(tempDir, 'platforms', 'android');
-            var plugins_dir = path.join(tempDir, 'plugins');
-            expect(prep_spy).toHaveBeenCalledWith(android_path, 'android', plugins_dir);
-        });
-        it('should invoke add_plugin_changes for any added plugins to verify configuration changes for plugins are in place', function() {
-            var platform_path  = path.join(tempDir, 'platforms', 'android');
-            var plugins_dir = path.join(tempDir, 'plugins');
-            plugman.install('android', platform_path, test_plugin, plugins_dir, {});
-            var a_parser_spy = spyOn(android_parser.prototype, 'update_project');
-            var prep_spy = spyOn(plugman, 'prepare');
-            var plugin_changes_spy = spyOn(plugman.config_changes, 'add_plugin_changes');
-            cordova.prepare();
-            a_parser_spy.mostRecentCall.args[1](); // fake out android_parser
-            expect(plugin_changes_spy).toHaveBeenCalledWith('android', platform_path, plugins_dir, 'ca.filmaj.AndroidPlugin', {PACKAGE_NAME:"org.apache.cordova.cordovaExample"}, true, false); 
-        });
-    });
 
     describe('hooks', function() {
-        var s;
-        beforeEach(function() {
-            s = spyOn(hooker.prototype, 'fire').andReturn(true);
-        });
-
         describe('when platforms are added', function() {
-            beforeEach(function() {
-                shell.cp('-rf', path.join(cordova_project, 'platforms', 'android'), path.join(tempDir, 'platforms'));
-                process.chdir(tempDir);
-            });
-            afterEach(function() {
-                shell.rm('-rf', path.join(tempDir, 'platforms', 'android'));
-                process.chdir(cwd);
-            });
-
             it('should fire before hooks through the hooker module', function() {
                 cordova.prepare();
-                expect(s).toHaveBeenCalledWith('before_prepare', jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('before_prepare', {platforms:supported_platforms}, jasmine.any(Function));
             });
-            it('should fire after hooks through the hooker module', function() {
-                spyOn(shell, 'exec');
+            it('should fire after hooks through the hooker module', function(done) {
                 cordova.prepare('android', function() {
-                     expect(hooker.prototype.fire).toHaveBeenCalledWith('after_prepare');
+                     expect(fire).toHaveBeenCalledWith('after_prepare', {platforms:['android']}, jasmine.any(Function));
+                     done();
                 });
             });
         });
 
         describe('with no platforms added', function() {
             beforeEach(function() {
-                shell.rm('-rf', tempDir);
-                cordova.create(tempDir);
-                process.chdir(tempDir);
-            });
-            afterEach(function() {
-                process.chdir(cwd);
+                list_platforms.andReturn([]);
             });
             it('should not fire the hooker', function() {
                 expect(function() {
                     cordova.prepare();
                 }).toThrow();
-                expect(s).not.toHaveBeenCalledWith('before_prepare');
-                expect(s).not.toHaveBeenCalledWith('after_prepare');
+                expect(fire).not.toHaveBeenCalledWith('before_prepare');
+                expect(fire).not.toHaveBeenCalledWith('after_prepare');
             });
         });
     });
