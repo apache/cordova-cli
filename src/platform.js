@@ -240,7 +240,7 @@ function call_into_create(target, projectRoot, cfg, id, version, callback, end) 
                                 createOverrides(projectRoot, target);
                                 end(); //platform add is done by now.
                                 // Install all currently installed plugins into this new platform.
-                                var plugins = cordova_util.findPlugins(projectRoot);
+                                var plugins = cordova_util.findPlugins(path.join(projectRoot, 'plugins'));
                                 plugins && plugins.forEach(function(plugin) {
                                     events.emit('log', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
                                     plugman.install(target, output, path.basename(plugin), pluginsDir, { www_dir: parser.staging_dir() });

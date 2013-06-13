@@ -177,7 +177,6 @@ module.exports.prototype = {
 
     // update the overrides folder into the www folder
     update_staging:function() {
-        var projectRoot = util.isCordova(this.path);
         if (fs.existsSync(this.staging_dir())) {
             var staging = path.join(this.staging_dir(), '*');
             shell.cp('-rf', staging, this.www_dir());
