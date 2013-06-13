@@ -18,10 +18,8 @@
 */
 var util              = require('./util'),
     path              = require('path'),
-    config_parser     = require('./config_parser'),
     fs                = require('fs'),
     shell             = require('shelljs'),
-    et                = require('elementtree'),
     hooker            = require('./hooker'),
     events            = require('./events'),
     n                 = require('ncallbacks');

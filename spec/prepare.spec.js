@@ -27,8 +27,6 @@ var cordova = require('../cordova'),
     fixtures = path.join(__dirname, 'fixtures'),
     hooks = path.join(fixtures, 'hooks');
 
-var cwd = process.cwd();
-
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
 
 describe('prepare command', function() {
