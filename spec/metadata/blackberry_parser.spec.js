@@ -16,23 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-var blackberry_parser = require('../../../src/metadata/blackberry_parser'),
-    config_parser = require('../../../src/config_parser'),
-    path = require('path'),
-    util = require('../../../src/util'),
-    et = require('elementtree'),
-    shell = require('shelljs'),
-    cordova = require('../../../cordova'),
-    fs = require('fs'),
-    projects_path = path.join(__dirname, '..', '..', 'fixtures', 'projects'),
-    blackberry_path = path.join(projects_path, 'native', 'blackberry_fixture'),
-    project_path = path.join(projects_path, 'cordova'),
-    blackberry_project_path = path.join(project_path, 'platforms', 'blackberry');
-
-var www_config = util.projectConfig(project_path);
-var original_www_config = fs.readFileSync(www_config, 'utf-8');
-
-describe('blackberry project parser', function() {
+xdescribe('blackberry project parser', function() {
     beforeEach(function() {
         spyOn(process.stdout, 'write'); // silence console output
     });

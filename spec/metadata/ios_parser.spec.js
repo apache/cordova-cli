@@ -17,24 +17,7 @@
  under the License.
  */
 
-var ios_parser = require('../../../src/metadata/ios_parser'),
-    config_parser = require('../../../src/config_parser'),
-    cordova = require('../../../cordova'),
-    util = require('../../../src/util'),
-    path = require('path'),
-    shell = require('shelljs'),
-    fs = require('fs'),
-    os = require('os'),
-    et = require('elementtree'),
-    projects_path = path.join(__dirname, '..', '..', 'fixtures', 'projects')
-    ios_path = path.join(projects_path, 'native', 'ios_fixture'),
-    project_path = path.join(projects_path, 'cordova'),
-    ios_project_path = path.join(project_path, 'platforms', 'ios');
-
-var www_config = util.projectConfig(project_path);
-var original_www_config = fs.readFileSync(www_config, 'utf-8');
-
-describe('ios project parser', function () {
+xdescribe('ios project parser', function () {
     it('should throw an exception with a path that is not a native ios project', function () {
         expect(function () {
             var project = new ios_parser(process.cwd());

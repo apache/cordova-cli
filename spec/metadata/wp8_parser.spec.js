@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -17,24 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-var wp8_parser = require('../../../src/metadata/wp8_parser'),
-    config_parser = require('../../../src/config_parser'),
-    util = require('../../../src/util'),
-    path = require('path'),
-    shell = require('shelljs'),
-    fs = require('fs'),
-    os = require('os'),
-    et = require('elementtree'),
-    cordova = require('../../../cordova'),
-    projects_path = path.join(__dirname, '..', '..', 'fixtures', 'projects'),
-    wp8_path = path.join(projects_path, 'native', 'wp8_fixture'),
-    project_path = path.join(projects_path, 'cordova'),
-    wp8_project_path = path.join(project_path, 'platforms', 'wp8');
-
-var www_config = util.projectConfig(project_path);
-var original_www_config = fs.readFileSync(www_config, 'utf-8');
-
-describe('wp8 project parser', function() {
+xdescribe('wp8 project parser', function() {
     it('should throw an exception with a path that is not a native wp8 project', function() {
         expect(function() {
             var project = new wp8_parser(process.cwd());
