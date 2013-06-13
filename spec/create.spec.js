@@ -31,8 +31,15 @@ describe('create command', function () {
     });
 
     describe('failure', function() {
-        it('should return a help message if incorrect number of parameters is used', function() {
-            expect(cordova.create()).toMatch(/synopsis/gi);
+        it('should return a help message if incorrect number of parameters is used', function(done) {
+            this.after(function() {
+                cordova.removeAllListeners('results');
+            });
+            cordova.on('results', function(h) {
+                expect(h).toMatch(/synopsis/gi);
+                done();
+            });
+            cordova.create();
         });
     });
 

@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -17,24 +16,8 @@
     specific language governing permissions and limitations
     under the License.
 */
-var wp7_parser = require('../../../src/metadata/wp7_parser'),
-    config_parser = require('../../../src/config_parser'),
-    util = require('../../../src/util'),
-    path = require('path'),
-    shell = require('shelljs'),
-    fs = require('fs'),
-    os = require('os'),
-    et = require('elementtree'),
-    cordova = require('../../../cordova'),
-    projects_path = path.join(__dirname, '..', '..', 'fixtures', 'projects'),
-    wp7_path = path.join(projects_path, 'native', 'wp7_fixture'),
-    project_path = path.join(projects_path, 'cordova'),
-    wp7_project_path = path.join(project_path, 'platforms', 'wp7');
 
-var www_config = util.projectConfig(project_path);
-var original_www_config = fs.readFileSync(www_config, 'utf-8');
-
-describe('wp7 project parser', function() {
+xdescribe('wp7 project parser', function() {
     it('should throw an exception with a path that is not a native wp7 project', function() {
         expect(function() {
             var project = new wp7_parser(process.cwd());
