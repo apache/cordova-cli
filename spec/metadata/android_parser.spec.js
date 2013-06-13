@@ -88,27 +88,58 @@ describe('android project parser', function() {
     });
 
     describe('instance', function() {
-        var p, cp, is_cordova;
+        var p, cp, rm, is_cordova, write;
+        var android_proj = path.join(proj, 'platforms', 'android');
         beforeEach(function() {
-            p = new platforms.android.parser(proj);
+            p = new platforms.android.parser(android_proj);
             cp = spyOn(shell, 'cp');
+            rm = spyOn(shell, 'rm');
             is_cordova = spyOn(util, 'isCordova').andReturn(proj);
+            write = spyOn(fs, 'writeFileSync');
         });
 
         describe('update_from_config method', function() {
+            it('should write out the app name to strings.xml');
+            it('should write out the app id to androidmanifest.xml and update the cordova-android entry Java class');
+            it('should write out the app version to androidmanifest.xml');
+            it('should update the whitelist');
+            it('should update preferences');
         });
         describe('www_dir method', function() {
+            it('should return assets/www', function() {
+                expect(p.www_dir()).toEqual(path.join(android_proj, 'assets', 'www'));
+            });
         });
         describe('staging_dir method', function() {
+            it('should return .staging/www', function() {
+                expect(p.staging_dir()).toEqual(path.join(android_proj, '.staging', 'www'));
+            });
         });
         describe('config_xml method', function() {
+            it('should return the location of the config.xml', function() {
+                expect(p.config_xml()).toEqual(p.android_config);
+            });
         });
         describe('update_www method', function() {
+            it('should rm project-level www and cp in platform agnostic www', function() {
+                p.update_www();
+                expect(rm).toHaveBeenCalled();
+                expect(cp).toHaveBeenCalled();
+            });
+            it('should copy in a fresh cordova.js', function() {
+                p.update_www();
+                expect(write).toHaveBeenCalled();
+            });
         });
         describe('update_overrides method', function() {
             it('should do nothing if merges directory does not exist', function() {
+                exists.andReturn(false);
+                p.update_overrides();
+                expect(cp).not.toHaveBeenCalled();
             });
             it('should copy merges path into www', function() {
+                p.update_overrides();
+                expect(cp).toHaveBeenCalled();
             });
         });
         describe('update_staging method', function() {
