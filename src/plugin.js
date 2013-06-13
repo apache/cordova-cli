@@ -45,9 +45,18 @@ module.exports = function plugin(command, targets, callback) {
     var pluginPath, plugins;
     pluginPath = path.join(projectRoot, 'plugins');
     plugins = cordova_util.findPlugins(pluginPath);
-    if (targets && !(targets instanceof Array)) {
-        targets = [targets];
+    if (targets) {
+        if (!(targets instanceof Array)) {
+            targets = [targets];
+        }
+    } else {
+        if (command == 'add' || command == 'rm') {
+            var err = new Error('You need to qualify `add` or `remove` with one or more plugins!');
+            if (callback) return callback(err);
+            else throw err;
+        }
     }
+
     var opts = {
         plugins:targets
     };

@@ -52,6 +52,12 @@ module.exports = function platform(command, targets, callback) {
                 else throw err;
             }
         });
+    } else {
+        if (command == 'add' || command == 'rm') {
+            var err = new Error('You need to qualify `add` or `remove` with one or more platforms!');
+            if (callback) return callback(err);
+            else throw err;
+        }
     }
 
     var xml = cordova_util.projectConfig(projectRoot);

@@ -72,6 +72,16 @@ describe('plugin command', function() {
                 expect(is_cordova).toHaveBeenCalled();
             }).toThrow('Current working directory is not a Cordova-based project.');
         });
+        it('should report back an error if used with `add` and no plugin is specified', function() {
+            expect(function() {
+               cordova.plugin('add');
+            }).toThrow('You need to qualify `add` or `remove` with one or more plugins!');
+        });
+        it('should report back an error if used with `rm` and no plugin is specified', function() {
+            expect(function() {
+               cordova.plugin('rm');
+            }).toThrow('You need to qualify `add` or `remove` with one or more plugins!');
+        });
     });
 
     describe('success', function() {
