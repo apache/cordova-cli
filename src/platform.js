@@ -16,8 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-var config_parser     = require('./config_parser'),
-    config            = require('./config'),
+var config            = require('./config'),
     cordova_util      = require('./util'),
     util              = require('util'),
     fs                = require('fs'),
@@ -56,7 +55,7 @@ module.exports = function platform(command, targets, callback) {
     }
 
     var xml = cordova_util.projectConfig(projectRoot);
-    var cfg = new config_parser(xml);
+    var cfg = new cordova_util.config_parser(xml);
     var opts = {
         platforms:targets
     };
@@ -64,7 +63,7 @@ module.exports = function platform(command, targets, callback) {
     switch(command) {
         case 'ls':
         case 'list':
-            var platforms_on_fs = fs.readdirSync(path.join(projectRoot, 'platforms'));
+            var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
             hooks.fire('before_platform_ls', function(err) {
                 if (err) {
                     if (callback) callback(err);
@@ -105,7 +104,7 @@ module.exports = function platform(command, targets, callback) {
                                     if (callback) callback(err);
                                     else throw err;
                                 } else {
-                                    call_into_create(t, projectRoot, true /* is_custom */, cfg, config_json.lib[t].id, config_json.lib[t].version, callback, end);
+                                    call_into_create(t, projectRoot, cfg, config_json.lib[t].id, config_json.lib[t].version, callback, end);
                                 }
                             });
                         } else {
@@ -115,7 +114,7 @@ module.exports = function platform(command, targets, callback) {
                                     if (callback) callback(err);
                                     else throw err;
                                 } else {
-                                    call_into_create(t, projectRoot, false /* is_custom */, cfg, 'cordova', cordova_util.cordovaTag, callback, end);
+                                    call_into_create(t, projectRoot, cfg, 'cordova', cordova_util.cordovaTag, callback, end);
                                 }
                             });
                         }
@@ -201,7 +200,7 @@ function createOverrides(projectRoot, target) {
     shell.mkdir('-p', path.join(cordova_util.appDir(projectRoot), 'merges', target));
 };
 
-function call_into_create(target, projectRoot, is_custom, cfg, id, version, callback, end) {
+function call_into_create(target, projectRoot, cfg, id, version, callback, end) {
     var output = path.join(projectRoot, 'platforms', target);
 
     // Check if output directory already exists.
@@ -233,20 +232,20 @@ function call_into_create(target, projectRoot, is_custom, cfg, id, version, call
                         if (callback) callback(err);
                         else throw err;
                     } else {
-                        var parser = new platforms[target].parser(output);
-                        events.emit('log', 'Updating ' + target + ' project from config.xml...');
-                        parser.update_project(cfg, function() {
-                            createOverrides(projectRoot, target);
-                            end(); //platform add is done by now.
-                            // Install all currently installed plugins into this new platform.
-                            var pluginsDir = path.join(projectRoot, 'plugins');
-                            var plugins = fs.readdirSync(pluginsDir);
-                            plugins && plugins.forEach(function(plugin) {
-                                if (fs.statSync(path.join(projectRoot, 'plugins', plugin)).isDirectory()) {
+                        require('../cordova').prepare(target, function(err) {
+                            if (err) {
+                                if (callback) callback(err);
+                                else throw err;
+                            } else {
+                                createOverrides(projectRoot, target);
+                                end(); //platform add is done by now.
+                                // Install all currently installed plugins into this new platform.
+                                var plugins = cordova_util.findPlugins(projectRoot);
+                                plugins && plugins.forEach(function(plugin) {
                                     events.emit('log', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
                                     plugman.install(target, output, path.basename(plugin), pluginsDir, { www_dir: parser.staging_dir() });
-                                }
-                            });
+                                });
+                            }
                         });
                     }
                 });
