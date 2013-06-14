@@ -2,7 +2,9 @@
 
 > The command line tool to build, deploy and manage [Cordova](http://cordova.io)-based applications.
 
-[Apache Cordova](http://cordova.io) allows for building native mobile applications using HTML, CSS and JavaScript. Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/guide_getting-started_index.md.html#Getting%20Started%20Guides) for more details on how to work with Cordova sub-projects.
+[Apache Cordova](http://cordova.io) allows for building native mobile applications using HTML, CSS and JavaScript. This tool helps with management of multi-platform Cordova applications as well as Cordova plugin integration.
+
+Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/guide_getting-started_index.md.html#Getting%20Started%20Guides) for more details on how to work with Cordova sub-projects.
 
 # Requirements
 
@@ -19,10 +21,6 @@ cordova-cli has been tested on Mas OS X, Linux, Windows 7 and Windows 8.
 # Install
 
     npm install -g cordova
-
-**NOTE**: on Unix-based machines, you may want to change the owner of the cordova directory that npm installs to. This will allow you to run cordova as local user without requiring root permissions. Assuming your node_modules directory is in `/usr/local/lib/`, you can do this by running: 
-
-    sudo chown -R <username> /usr/local/lib/node_modules/cordova
 
 # Getting Started
 
@@ -50,18 +48,18 @@ cordova-cli has a single global `create` command that creates new cordova projec
 ### Optional Flags
 
 - `-d` or `--verbose` will pipe out more verbose output to your shell. You can also subscribe to `log` and `warn` events if you are consuming cordova-cli as a node module by calling `cordova.on('log', function() {})` or `cordova.on('warn', function() {})`.
+- `-v` or `--version` will print out the version of your cordova-cli install.
 
 # Project Directory Structure
 A Cordova application built with cordova-cli will have the following directory structure:
 
     myApp/
     |--.cordova/
-    |-- app/
-    | |-- merges/
+    |-- merges/
     | | |-- android/
     | | |-- blackberry/
     | | `-- ios/
-    | |-- www/
+    |-- www/
     | `-- config.xml
     |-- platforms/
     | |-- android/
@@ -74,34 +72,30 @@ This directory identifies a tree as a cordova project. Simple configuration info
 
 Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find the project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a cordova project directory (same as git).
 
-## app/
+## merges/
+Platform-specific web assets (HTML, CSS and JavaScript files) are contained within appropriate subfolders in this directory. These are deployed during a `prepare` to the appropriate native directory.  Files placed under `merges/` will override matching files in the `www/` folder for the relevant platform. A quick example, assuming a project structure of:
 
-Contains your app-specific content: its `www/` files, any `merges/`, and the `config.xml`. If you want to keep your app in source control, this directory should be the top of the repository.
+    merges/
+    |-- ios/
+    | `-- app.js
+    |-- android/
+    | `-- android.js
+    www/
+    `-- app.js
 
+After building the Android and iOS projects, the Android application will contain both `app.js` and `android.js`. However, the iOS application will only contain an `app.js`, and it will be the one from `merges/ios/app.js`, overriding the "common" `app.js` located inside `www/`.
 
-### app/merges/
-Platform-specific web assets (HTML, CSS and JavaScript files) are contained within appropriate subfolders in this directory. These are deployed during a `prepare` to the appropriate native directory.  Files placed under `app/merges/` will override matching files in the `app/www/` folder for the relevant platform. A quick example, assuming a project structure of:
+## www/
 
-    app/
-    |-- merges/
-    | |-- ios/
-    | | `-- app.js
-    | `-- android/
-    |   `-- android.js
-    `--www/
-      `-- app.js
-
-After building the Android and iOS projects, the Android application will contain both `app.js` and `android.js`. However, the iOS application will only contain an `app.js`, and it will be the one from `app/merges/ios/app.js`, overriding the "common" `app.js` located inside `app/www/`.
-
-### app/www/
 Contains the project's web artifacts, such as .html, .css and .js files. These are your main application assets. They will be copied on a `cordova prepare` to each platform's www directory.
 
-### Your Blanket: app/config.xml
+### Your Blanket: config.xml
 
 This file is what you should be editing to modify your application's metadata. Any time you run any cordova-cli commands, the tool will look at the contents of `config.xml` and use all relevant info from this file to define native application information. cordova-cli supports changing your application's data via the following elements inside the `config.xml` file:
 
 - The user-facing name can be modified via the contents of the `<name>` element.
 - The package name (AKA bundle identifier or application id) can be modified via the `id` attribute from the top-level `<widget>` element.
+- The version can be modified via the `version` attribute from the top-level `<widget>` element.
 - The whitelist can be modified using the `<access>` elements. Make sure the `origin` attribute of your `<access>` element points to a valid URL (you can use `*` as wildcard). For more information on the whitelisting syntax, see the [docs.phonegap.com](http://docs.phonegap.com/en/2.2.0/guide_whitelist_index.md.html#Domain%20Whitelist%20Guide). You can use either attribute `uri` ([BlackBerry-proprietary](https://developer.blackberry.com/html5/documentation/access_element_834677_11.html)) or `origin` ([standards-compliant](http://www.w3.org/TR/widgets-access/#attributes)) to denote the domain.
 - Platform-specific preferences can be customized via `<preference>` tags. See [docs.phonegap.com](http://docs.phonegap.com/en/2.3.0/guide_project-settings_index.md.html#Project%20Settings) for a list of preferences you can use.
 
@@ -127,9 +121,9 @@ These are located under the `.cordova/hooks` directory in the root of your cordo
 
 ## Module-level Hooks
 
-If you are using cordova-cli as a module within a larger node application, you can also use the standard `EventEmitter` methods to attach to the events. The events include `before_build`, `before_compile`, `before_docs`, `before_emulate`, `before_platform_add`, `before_platform_ls`, `before_platform_rm`, `before_plugin_add`, `before_plugin_ls`, `before_plugin_rm` and `before_prepare`. Additionally, there are `after_` flavours of all the above events.
+If you are using cordova-cli as a module within a larger node application, you can also use the standard `EventEmitter` methods to attach to the events. The events include `before_build`, `before_compile`, `before_docs`, `before_emulate`, `before_run`, `before_platform_add`, `before_library_download`, `before_platform_ls`, `before_platform_rm`, `before_plugin_add`, `before_plugin_ls`, `before_plugin_rm` and `before_prepare`. There is also a `library_download` progress event. Additionally, there are `after_` flavours of all the above events.
 
-Once you `require('cordova')` in your node project, you will have the usual `EventEmitter` methods available (`on`, `off` or `removeListener`, and `emit` or `trigger`).
+Once you `require('cordova')` in your node project, you will have the usual `EventEmitter` methods available (`on`, `off` or `removeListener`, `removeAllListeners`, and `emit` or `trigger`).
 
 # Examples
 
@@ -146,12 +140,11 @@ The directory structure of KewlApp now looks like this:
 
     KewlApp/
     |-- .cordova/
-    |-- app/
-    | |-- merges/
-    | | |-- android/
-    | | `-- ios/
-    | `- www/
-    |    `-- index.html
+    |-- merges/
+    | |-- android/
+    | `-- ios/
+    |-- www/
+    | `-- index.html
     |-- platforms/
     | |-- android/
     | | `-- …
