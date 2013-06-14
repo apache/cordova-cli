@@ -123,7 +123,7 @@ module.exports.prototype = {
         shell.cp('-rf', www, this.path);
 
         var custom_path = config.has_custom_path(projectRoot, 'blackberry');
-        var lib_path = path.join(util.libDirectory, 'blackberry', 'cordova', util.cordovaTag);
+        var lib_path = path.join(util.libDirectory, 'blackberry', 'cordova', require('../../platforms').blackberry.version);
         if (custom_path) lib_path = custom_path;
         // add cordova.js
         shell.cp('-f', path.join(lib_path, 'javascript', 'cordova.blackberry10.js'), path.join(this.www_dir(), 'cordova.js'));

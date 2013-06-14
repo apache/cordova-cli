@@ -36,8 +36,8 @@ module.exports = {
             else throw err;
         }
 
-        var url = platforms[platform].url + ';a=snapshot;h=' + util.cordovaTag + ';sf=tgz';
-        module.exports.custom(url, 'cordova', platform, util.cordovaTag, function(err) {
+        var url = platforms[platform].url + ';a=snapshot;h=' + platforms[platform].version + ';sf=tgz';
+        module.exports.custom(url, 'cordova', platform, platforms[platform].version, function(err) {
             if (err) {
                 if (callback) return callback(err);
                 else throw err;

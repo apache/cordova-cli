@@ -27,11 +27,8 @@ var HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 var global_config_path = path.join(HOME, '.cordova');
 var lib_path = path.join(global_config_path, 'lib');
 shell.mkdir('-p', lib_path);
-// What tag of the cordova libs should be dl'ed
-var TAG = '2.8.0';
 
 module.exports = {
-    cordovaTag:TAG,
     globalConfig:global_config_path,
     libDirectory:lib_path,
     // Runs up the directory chain looking for a .cordova directory.

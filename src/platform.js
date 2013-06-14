@@ -120,7 +120,7 @@ module.exports = function platform(command, targets, callback) {
                                     if (callback) callback(err);
                                     else throw err;
                                 } else {
-                                    call_into_create(t, projectRoot, cfg, 'cordova', cordova_util.cordovaTag, callback, end);
+                                    call_into_create(t, projectRoot, cfg, 'cordova', platforms[t].version, callback, end);
                                 }
                             });
                         }

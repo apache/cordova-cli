@@ -81,7 +81,7 @@ describe('android project parser', function() {
                 done();
             });
         });
-        it('should check that we can update an android project by calling `android update project`', function(done) {
+        it('should check that we can update an android project by calling `android update project` on stock android path', function(done) {
             platforms.android.parser.check_requirements(proj, function(err) {
                 expect(err).toEqual(false);
                 expect(exec.mostRecentCall.args[0]).toMatch(/^android update project -p .* -t android-17$/gi);

@@ -42,7 +42,7 @@ module.exports = function wp7_parser(project) {
 
 module.exports.check_requirements = function(project_root, callback) {
     events.emit('log', 'Checking WP7 requirements...');
-    var lib_path = path.join(util.libDirectory, 'wp7', 'cordova', util.cordovaTag);
+    var lib_path = path.join(util.libDirectory, 'wp7', 'cordova', require('../../platforms').wp7.version);
     var custom_path = config.has_custom_path(project_root, 'wp7');
     if (custom_path) lib_path = custom_path;
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
@@ -148,7 +148,7 @@ module.exports.prototype = {
         shell.cp('-rf', project_www, this.wp7_proj_dir);
 
         // copy over wp7 lib's cordova.js
-        var lib_path = path.join(util.libDirectory, 'wp7', 'cordova', util.cordovaTag);
+        var lib_path = path.join(util.libDirectory, 'wp7', 'cordova', require('../../platforms').wp7.version);
         var custom_path = config.has_custom_path(project_root, 'wp7');
         if (custom_path) lib_path = custom_path;
         var cordovajs_path = path.join(lib_path, 'templates', 'standalone', 'www', 'cordova.js');

@@ -118,9 +118,12 @@ describe('platform command', function() {
             });
         });
         describe('`add`', function() {
-            it('should shell out to specified platform\'s bin/create', function() {
+            it('should shell out to specified platform\'s bin/create, using the version that is specified in platforms manifest', function() {
                 cordova.platform('add', 'android');
-                expect(exec.mostRecentCall.args[0]).toMatch(/lib.android.cordova.......bin.create/gi);
+                expect(exec.mostRecentCall.args[0]).toMatch(/lib.android.cordova.2.8.1.bin.create/gi);
+                expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+                cordova.platform('add', 'wp8');
+                expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp8.cordova.2.8.0.bin.create/gi);
                 expect(exec.mostRecentCall.args[0]).toContain(project_dir);
             });
             it('should support using custom versions of libraries by calling into lazy_load.custom', function() {

@@ -19,6 +19,7 @@
 var path          = require('path'),
     fs            = require('fs'),
     shell         = require('shelljs'),
+    platforms     = require('../platforms'),
     help          = require('./help'),
     events        = require('./events'),
     config        = require('./config'),
@@ -148,7 +149,7 @@ module.exports = function create (dir, id, name, callback) {
                 else throw err;
             } else {
                 events.emit('log', 'Copying stock Cordova www assets into "' + www_dir + '"');
-                finalize(path.join(util.libDirectory, 'www', 'cordova', util.cordovaTag));
+                finalize(path.join(util.libDirectory, 'www', 'cordova', platforms.www.version));
             }
         });
     }

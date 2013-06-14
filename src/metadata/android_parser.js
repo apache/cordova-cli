@@ -57,7 +57,7 @@ module.exports.check_requirements = function(project_root, callback) {
                 if (custom_path) {
                     framework_path = path.resolve(path.join(custom_path, 'framework'));
                 } else {
-                    framework_path = path.join(util.libDirectory, 'android', 'cordova', util.cordovaTag, 'framework');
+                    framework_path = path.join(util.libDirectory, 'android', 'cordova', require('../../platforms').android.version, 'framework');
                 }
                 var cmd = 'android update project -p "' + framework_path  + '" -t android-17';
                 events.emit('log', 'Running "' + cmd + '" (output to follow)...');
@@ -174,7 +174,7 @@ module.exports.prototype = {
         if (custom_path) {
             jsPath = path.resolve(path.join(custom_path, 'framework', 'assets', 'www', 'cordova.js'));
         } else {
-            jsPath = path.join(util.libDirectory, 'android', 'cordova', util.cordovaTag, 'framework', 'assets', 'www', 'cordova.js');
+            jsPath = path.join(util.libDirectory, 'android', 'cordova', require('../../platforms').android.version, 'framework', 'assets', 'www', 'cordova.js');
         }
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
     },

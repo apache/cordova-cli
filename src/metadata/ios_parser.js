@@ -179,7 +179,7 @@ module.exports.prototype = {
 
         // write out proper cordova.js
         var custom_path = config.has_custom_path(projectRoot, 'ios');
-        var lib_path = path.join(util.libDirectory, 'ios', 'cordova', util.cordovaTag);
+        var lib_path = path.join(util.libDirectory, 'ios', 'cordova', require('../../platforms').ios.version);
         if (custom_path) lib_path = custom_path;
         shell.cp('-f', path.join(lib_path, 'CordovaLib', 'cordova.js'), path.join(project_www, 'cordova.js'));
 
