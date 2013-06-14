@@ -21,17 +21,20 @@ var platforms = require('../../platforms'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
-    et = require('elementtree'),
+    ET = require('elementtree'),
+    config = require('../../src/config'),
+    config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
 
 describe('android project parser', function() {
     var proj = '/some/path';
-    var exists, exec;
+    var exists, exec, custom;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
         exec = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
             cb(0, 'android-17');
         });
+        custom = spyOn(config, 'has_custom_path').andReturn(false);
     });
 
     describe('constructions', function() {
@@ -57,7 +60,7 @@ describe('android project parser', function() {
             exec.andCallFake(function(cmd, opts, cb) {
                 cb(50, 'there was an errorz!');
             });
-            platforms.android.parser.check_requirements(function(err) {
+            platforms.android.parser.check_requirements(proj, function(err) {
                 expect(err).toContain('there was an errorz!');
                 done();
             });
@@ -66,29 +69,40 @@ describe('android project parser', function() {
             exec.andCallFake(function(cmd, opts, cb) {
                 cb(0, 'android-15');
             });
-            platforms.android.parser.check_requirements(function(err) {
+            platforms.android.parser.check_requirements(proj, function(err) {
                 expect(err).toEqual('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.');
                 done();
             });
         });
         it('should check that `android` is on the path by calling `android list target`', function(done) {
-            platforms.android.parser.check_requirements(function(err) {
+            platforms.android.parser.check_requirements(proj, function(err) {
                 expect(err).toEqual(false);
                 expect(exec).toHaveBeenCalledWith('android list target', jasmine.any(Object), jasmine.any(Function));
                 done();
             });
         });
         it('should check that we can update an android project by calling `android update project`', function(done) {
-            platforms.android.parser.check_requirements(function(err) {
+            platforms.android.parser.check_requirements(proj, function(err) {
                 expect(err).toEqual(false);
-                expect(exec.mostRecentCall.args[0]).toMatch(/^android update project -p .*framework -t android-17$/gi);
+                expect(exec.mostRecentCall.args[0]).toMatch(/^android update project -p .* -t android-17$/gi);
+                expect(exec.mostRecentCall.args[0]).toContain(util.libDirectory);
+                done();
+            });
+        });
+        it('should check that we can update an android project by calling `android update project` on a custom path if it is so defined', function(done) {
+            var custom_path = '/some/custom/path/to/android/lib'
+            custom.andReturn(custom_path);
+            platforms.android.parser.check_requirements(proj, function(err) {
+                expect(err).toEqual(false);
+                expect(exec.mostRecentCall.args[0]).toMatch(/^android update project -p .* -t android-17$/gi);
+                expect(exec.mostRecentCall.args[0]).toContain(custom_path);
                 done();
             });
         });
     });
 
     describe('instance', function() {
-        var p, cp, rm, is_cordova, write;
+        var p, cp, rm, is_cordova, write, read;
         var android_proj = path.join(proj, 'platforms', 'android');
         beforeEach(function() {
             p = new platforms.android.parser(android_proj);
@@ -96,14 +110,93 @@ describe('android project parser', function() {
             rm = spyOn(shell, 'rm');
             is_cordova = spyOn(util, 'isCordova').andReturn(proj);
             write = spyOn(fs, 'writeFileSync');
+            read = spyOn(fs, 'readFileSync');
         });
 
         describe('update_from_config method', function() {
-            it('should write out the app name to strings.xml');
-            it('should write out the app id to androidmanifest.xml and update the cordova-android entry Java class');
-            it('should write out the app version to androidmanifest.xml');
-            it('should update the whitelist');
-            it('should update preferences');
+            var et, xml, find, write_xml, root, cfg, readdir, cfg_parser, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm;
+            beforeEach(function() {
+                find_obj = {
+                    text:'hi'
+                };
+                root_obj = {
+                    attrib:{
+                        package:'android_pkg'
+                    }
+                };
+                find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
+                write_xml = jasmine.createSpy('ElementTree write');
+                root = jasmine.createSpy('ElementTree getroot').andReturn(root_obj);
+                et = spyOn(ET, 'ElementTree').andReturn({
+                    find:find,
+                    write:write_xml,
+                    getroot:root
+                });
+                xml = spyOn(ET, 'XML');
+                readdir = spyOn(fs, 'readdirSync').andReturn([path.join(proj, 'src', 'android_pkg')]);
+                cfg = new config_parser();
+                cfg.name = function() { return 'testname' };
+                cfg.packageName = function() { return 'testpkg' };
+                cfg.version = function() { return 'one point oh' };
+                cfg.access.get = function() { return [] };
+                cfg.preference.get = function() { return [] };
+                read.andReturn('some java package');
+                cfg_access_add = jasmine.createSpy('config_parser access add');
+                cfg_access_rm = jasmine.createSpy('config_parser access rm');
+                cfg_pref_rm = jasmine.createSpy('config_parser pref rm');
+                cfg_pref_add = jasmine.createSpy('config_parser pref add');
+                cfg_parser = spyOn(util, 'config_parser').andReturn({
+                    access:{
+                        remove:cfg_access_rm,
+                        get:function(){},
+                        add:cfg_access_add
+                    },
+                    preference:{
+                        remove:cfg_pref_rm,
+                        get:function(){},
+                        add:cfg_pref_add
+                    }
+                });
+            });
+
+            it('should write out the app name to strings.xml', function() {
+                p.update_from_config(cfg);
+                expect(find_obj.text).toEqual('testname');
+            });
+            it('should write out the app id to androidmanifest.xml and update the cordova-android entry Java class', function() {
+                p.update_from_config(cfg);
+                expect(root_obj.attrib.package).toEqual('testpkg');
+            });
+            it('should write out the app version to androidmanifest.xml', function() {
+                p.update_from_config(cfg);
+                expect(root_obj.attrib['android:versionName']).toEqual('one point oh');
+            });
+            it('should wipe out the android whitelist every time', function() {
+                p.update_from_config(cfg);
+                expect(cfg_access_rm).toHaveBeenCalled();
+            });
+            it('should update the whitelist', function() {
+                cfg.access.get = function() { return ['one'] };
+                p.update_from_config(cfg);
+                expect(cfg_access_add).toHaveBeenCalledWith('one');
+            });
+            it('should update preferences', function() {
+                var sample_pref = {name:'pref',value:'yes'};
+                cfg.preference.get = function() { return [sample_pref] };
+                p.update_from_config(cfg);
+                expect(cfg_pref_add).toHaveBeenCalledWith(sample_pref);
+            });
+            it('should wipe out the android preferences every time', function() {
+                p.update_from_config(cfg);
+                expect(cfg_pref_rm).toHaveBeenCalled();
+            });
+            it('should write out default preferences every time', function() {
+                var sample_pref = {name:'preftwo',value:'false'};
+                cfg.preference.get = function() { return [sample_pref] };
+                p.update_from_config(cfg);
+                expect(cfg_pref_add).toHaveBeenCalledWith({name:"useBrowserHistory",value:"true"});
+                expect(cfg_pref_add).toHaveBeenCalledWith({name:"exit-on-suspend",value:"false"});
+            });
         });
         describe('www_dir method', function() {
             it('should return assets/www', function() {
@@ -126,9 +219,17 @@ describe('android project parser', function() {
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
             });
-            it('should copy in a fresh cordova.js', function() {
+            it('should copy in a fresh cordova.js from stock cordova lib if no custom lib is specified', function() {
                 p.update_www();
                 expect(write).toHaveBeenCalled();
+                expect(read.mostRecentCall.args[0]).toContain(util.libDirectory);
+            });
+            it('should copy in a fresh cordova.js from custom cordova lib if custom lib is specified', function() {
+                var custom_path = '/custom/path';
+                custom.andReturn(custom_path);
+                p.update_www();
+                expect(write).toHaveBeenCalled();
+                expect(read.mostRecentCall.args[0]).toContain(custom_path);
             });
         });
         describe('update_overrides method', function() {

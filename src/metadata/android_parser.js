@@ -86,19 +86,20 @@ module.exports.prototype = {
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
         events.emit('log', 'Wrote out Android application name to "' + name + '"');
 
-        // Update the version by changing the AndroidManifest android:versionName
         var manifest = new et.ElementTree(et.XML(fs.readFileSync(this.manifest, 'utf-8')));
+        // Update the version by changing the AndroidManifest android:versionName
         var version = config.version();
         manifest.getroot().attrib["android:versionName"] = version;
-        fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');
 
         // Update package name by changing the AndroidManifest id and moving the entry class around to the proper package directory
-        var manifest = new et.ElementTree(et.XML(fs.readFileSync(this.manifest, 'utf-8')));
         var pkg = config.packageName();
         pkg = pkg.replace(/-/g, '_'); // Java packages cannot support dashes
         var orig_pkg = manifest.getroot().attrib.package;
         manifest.getroot().attrib.package = pkg;
+
+        // Write out AndroidManifest.xml
         fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');
+        
         var orig_pkgDir = path.join(this.path, 'src', path.join.apply(null, orig_pkg.split('.')));
         var orig_java_class = fs.readdirSync(orig_pkgDir).filter(function(f) {return f.indexOf('.svn') == -1;})[0];
         var pkgDir = path.join(this.path, 'src', path.join.apply(null, pkg.split('.')));
@@ -111,7 +112,7 @@ module.exports.prototype = {
         fs.writeFileSync(new_javs, javs_contents, 'utf-8');
 
         // Update whitelist by changing res/xml/config.xml
-        var android_cfg_xml = new config_parser(this.android_config);
+        var android_cfg_xml = new util.config_parser(this.android_config);
         // clean out all existing access elements first
         android_cfg_xml.access.remove();
         // add only the ones specified in the app/config.xml file
