@@ -22,6 +22,7 @@ var fs            = require('fs'),
     util          = require('../util'),
     events        = require('../events'),
     shell         = require('shelljs'),
+    project_config= require('../config'),
     config_parser = require('../config_parser');
 
 var default_prefs = {
@@ -39,7 +40,7 @@ module.exports = function android_parser(project) {
     this.android_config = path.join(this.path, 'res', 'xml', 'config.xml');
 };
 
-module.exports.check_requirements = function(callback) {
+module.exports.check_requirements = function(project_root, callback) {
     events.emit('log', 'Checking Android requirements...');
     var command = 'android list target';
     events.emit('log', 'Running "' + command + '" (output to follow)');
@@ -51,7 +52,14 @@ module.exports.check_requirements = function(callback) {
             if (output.indexOf('android-17') == -1) {
                 callback('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.');
             } else {
-                var cmd = 'android update project -p ' + path.join(util.libDirectory, 'android', 'cordova', util.cordovaTag, 'framework') + ' -t android-17';
+                var custom_path = project_config.has_custom_path(project_root, 'android');
+                var framework_path;
+                if (custom_path) {
+                    framework_path = path.resolve(path.join(custom_path, 'framework'));
+                } else {
+                    framework_path = path.join(util.libDirectory, 'android', 'cordova', util.cordovaTag, 'framework');
+                }
+                var cmd = 'android update project -p "' + framework_path  + '" -t android-17';
                 events.emit('log', 'Running "' + cmd + '" (output to follow)...');
                 shell.exec(cmd, {silent:true, async:true}, function(code, output) {
                     events.emit('log', output);
@@ -160,9 +168,14 @@ module.exports.prototype = {
         shell.cp('-rf', www, platformWww);
 
         // write out android lib's cordova.js
-        var jsPath = path.join(util.libDirectory, 'android', 'cordova', util.cordovaTag, 'framework', 'assets', 'www', 'cordova.js');
+        var custom_path = project_config.has_custom_path(projectRoot, 'android');
+        var jsPath;
+        if (custom_path) {
+            jsPath = path.resolve(path.join(custom_path, 'framework', 'assets', 'www', 'cordova.js'));
+        } else {
+            jsPath = path.join(util.libDirectory, 'android', 'cordova', util.cordovaTag, 'framework', 'assets', 'www', 'cordova.js');
+        }
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
-
     },
 
     // update the overrides folder into the www folder

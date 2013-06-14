@@ -19,6 +19,7 @@
 
 var path          = require('path'),
     fs            = require('fs'),
+    url           = require('url'),
     shell         = require('shelljs'),
     events        = require('./events'),
     util          = require('./util');
@@ -51,4 +52,13 @@ module.exports.write = function set_config(project_root, json) {
     var config_json = path.join(dotCordova, 'config.json');
     fs.writeFileSync(config_json, JSON.stringify(json), 'utf-8');
     return json;
+};
+
+module.exports.has_custom_path = function(project_root, platform) {
+    var json = module.exports.read(project_root);
+    if (json.lib && json.lib[platform]) {
+        var uri = url.parse(json.lib[platform].uri);
+        if (!(uri.protocol)) return uri.path;
+    }
+    return false;
 };

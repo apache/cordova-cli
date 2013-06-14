@@ -30,10 +30,10 @@ var cordova = require('../cordova'),
 
 var cwd = process.cwd();
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
+var project_dir = '/some/path';
 
 describe('platform command', function() {
     var is_cordova, list_platforms, fire, config_parser, find_plugins, config_read, load_custom, load_cordova, rm, mkdir, existsSync, supports, pkg, name, exec, prep_spy, plugman_install;
-    var project_dir = '/some/path';
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
         fire = spyOn(hooker.prototype, 'fire').andCallFake(function(e, opts, cb) {
@@ -58,7 +58,7 @@ describe('platform command', function() {
         rm = spyOn(shell, 'rm');
         mkdir = spyOn(shell, 'mkdir');
         existsSync = spyOn(fs, 'existsSync').andReturn(false);
-        supports = spyOn(platform, 'supports').andCallFake(function(name, cb) {
+        supports = spyOn(platform, 'supports').andCallFake(function(project_root, name, cb) {
             cb();
         });
         exec = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
@@ -190,24 +190,24 @@ describe('platform.supports(name, callback)', function() {
     var supports = {};
     beforeEach(function() {
         supported_platforms.forEach(function(p) {
-            supports[p] = spyOn(platforms[p].parser, 'check_requirements').andCallFake(function(cb) { cb(); });
+            supports[p] = spyOn(platforms[p].parser, 'check_requirements').andCallFake(function(project, cb) { cb(); });
         });
     });
     it('should require a platform name', function() {
         expect(function() {
-            cordova.platform.supports(undefined, function(e){});
+            cordova.platform.supports(project_dir, undefined, function(e){});
         }).toThrow();
     });
 
     it('should require a callback function', function() {
         expect(function() {
-            cordova.platform.supports('android', undefined);
+            cordova.platform.supports(project_dir, 'android', undefined);
         }).toThrow();
     });
 
     describe('when platform is unknown', function() {
         it('should trigger callback with false', function(done) {
-            cordova.platform.supports('windows-3.1', function(e) {
+            cordova.platform.supports(project_dir, 'windows-3.1', function(e) {
                 expect(e).toEqual(jasmine.any(Error));
                 done();
             });
@@ -216,7 +216,7 @@ describe('platform.supports(name, callback)', function() {
 
     describe('when platform is supported', function() {
         it('should trigger callback without error', function(done) {
-            cordova.platform.supports('android', function(e) {
+            cordova.platform.supports(project_dir, 'android', function(e) {
                 expect(e).toBeNull();
                 done();
             });
@@ -226,9 +226,9 @@ describe('platform.supports(name, callback)', function() {
     describe('when platform is unsupported', function() {
         it('should trigger callback with error', function(done) {
             supported_platforms.forEach(function(p) {
-                supports[p].andCallFake(function(cb) { cb(new Error('no sdk')); });
+                supports[p].andCallFake(function(project, cb) { cb(new Error('no sdk')); });
             });
-            cordova.platform.supports('android', function(e) {
+            cordova.platform.supports(project_dir, 'android', function(e) {
                 expect(e).toEqual(jasmine.any(Error));
                 done();
             });

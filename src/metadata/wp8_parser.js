@@ -39,10 +39,13 @@ module.exports = function wp8_parser(project) {
     this.manifest_path  = path.join(this.wp8_proj_dir, 'Properties', 'WMAppManifest.xml');
 };
 
-module.exports.check_requirements = function(callback) {
+module.exports.check_requirements = function(project_root, callback) {
     events.emit('log', 'Checking WP8 requirements...');
-    // TODO: requires the libraries to be available.
-    var command = '"' + path.join(util.libDirectory, 'wp8', 'cordova', util.cordovaTag, 'bin', 'check_reqs') + '"';
+    var custom_path = config.has_custom_path(project_root, 'wp8');
+    var lib_path = path.join(util.libDirectory, 'wp8', 'cordova', util.cordovaTag);
+    if (custom_path) lib_path = custom_path;
+
+    var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
     events.emit('log', 'Running "' + command + '" (output to follow)');
     shell.exec(command, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
@@ -101,8 +104,7 @@ module.exports.prototype = {
          var cleanedPage = raw.replace(/^\uFEFF/i, '');
          var csproj = new et.ElementTree(et.XML(cleanedPage));
          prev_name = csproj.find('.//RootNamespace').text;
-         if(prev_name != pkg)
-         {
+         if (prev_name != pkg) {
             //console.log("Updating package name from " + prev_name + " to " + pkg);
             //CordovaAppProj.csproj
             csproj.find('.//RootNamespace').text = pkg;
@@ -138,14 +140,18 @@ module.exports.prototype = {
     },
     // copies the app www folder into the wp8 project's www folder and updates the csproj file.
     update_www:function() {
-        var project_www = util.projectWww(path.join(this.wp8_proj_dir, '..', '..'));
+        var projectRoot = util.isCordova(this.wp8_proj_dir);
+        var project_www = util.projectWww(projectRoot);
         // remove stock platform assets
         shell.rm('-rf', this.www_dir());
         // copy over all app www assets
         shell.cp('-rf', project_www, this.wp8_proj_dir);
 
+        var custom_path = config.has_custom_path(projectRoot, 'wp8');
+        var lib_path = path.join(util.libDirectory, 'wp8', 'cordova', util.cordovaTag);
+        if (custom_path) lib_path = custom_path;
         // copy over wp8 lib's cordova.js
-        var cordovajs_path = path.join(util.libDirectory, 'wp8', 'cordova', util.cordovaTag, 'templates', 'standalone', 'www', 'cordova.js');
+        var cordovajs_path = path.join(lib_path, 'templates', 'standalone', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
         this.update_csproj();
     },

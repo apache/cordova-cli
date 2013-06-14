@@ -168,7 +168,7 @@ module.exports = function platform(command, targets, callback) {
  *     - {Error} `e` null when a platform is supported otherwise describes error.
  */
 
-module.exports.supports = function(name, callback) {
+module.exports.supports = function(project_root, name, callback) {
     // required parameters
     if (!name) throw new Error('requires a platform name parameter');
     if (!callback) throw new Error('requires a callback parameter');
@@ -188,7 +188,7 @@ module.exports.supports = function(name, callback) {
     }
 
     // check for platform support
-    platformParser.check_requirements(function(e) {
+    platformParser.check_requirements(project_root, function(e) {
         // typecast String to Error
         e = (e instanceof String) ? new Error(e) : e;
         // typecast false Boolean to null
@@ -217,7 +217,7 @@ function call_into_create(target, projectRoot, cfg, id, version, callback, end) 
     } else {
         // Make sure we have minimum requirements to work with specified platform
         events.emit('log', 'Checking if platform "' + target + '" passes minimum requirements...');
-        module.exports.supports(target, function(err) {
+        module.exports.supports(projectRoot, target, function(err) {
             if (err) {
                 if (callback) callback(err);
                 else throw err;

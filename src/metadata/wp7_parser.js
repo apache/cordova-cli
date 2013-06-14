@@ -23,7 +23,8 @@ var fs            = require('fs'),
     events        = require('../events'),
     shell         = require('shelljs'),
     events        = require('../events'),
-    config_parser = require('../config_parser');
+    config_parser = require('../config_parser'),
+    config        = require('../config');
 
 module.exports = function wp7_parser(project) {
     try {
@@ -39,10 +40,12 @@ module.exports = function wp7_parser(project) {
     this.manifest_path  = path.join(this.wp7_proj_dir, 'Properties', 'WMAppManifest.xml');
 };
 
-module.exports.check_requirements = function(callback) {
-    // TODO: requires the libraries to be available.
+module.exports.check_requirements = function(project_root, callback) {
     events.emit('log', 'Checking WP7 requirements...');
-    var command = '"' + path.join(util.libDirectory, 'wp7', 'cordova', util.cordovaTag, 'bin', 'check_reqs') + '"';
+    var lib_path = path.join(util.libDirectory, 'wp7', 'cordova', util.cordovaTag);
+    var custom_path = config.has_custom_path(project_root, 'wp7');
+    if (custom_path) lib_path = custom_path;
+    var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
     events.emit('log', 'Running "' + command + '" (output to follow)');
     shell.exec(command, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
@@ -145,7 +148,10 @@ module.exports.prototype = {
         shell.cp('-rf', project_www, this.wp7_proj_dir);
 
         // copy over wp7 lib's cordova.js
-        var cordovajs_path = path.join(util.libDirectory, 'wp7', 'cordova', util.cordovaTag, 'templates', 'standalone', 'www', 'cordova.js');
+        var lib_path = path.join(util.libDirectory, 'wp7', 'cordova', util.cordovaTag);
+        var custom_path = config.has_custom_path(project_root, 'wp7');
+        if (custom_path) lib_path = custom_path;
+        var cordovajs_path = path.join(lib_path, 'templates', 'standalone', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
         this.update_csproj();
     },

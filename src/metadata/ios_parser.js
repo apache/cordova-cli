@@ -25,7 +25,8 @@ var fs            = require('fs'),
     plist         = require('plist'),
     semver        = require('semver'),
     et            = require('elementtree'),
-    config_parser = require('../config_parser');
+    config_parser = require('../config_parser'),
+    config        = require('../config');
 
 var MIN_XCODE_VERSION = '4.5.x';
 
@@ -60,7 +61,7 @@ module.exports = function ios_parser(project) {
     this.config = new config_parser(this.config_path);
 };
 
-module.exports.check_requirements = function(callback) {
+module.exports.check_requirements = function(project_root, callback) {
     events.emit('log', 'Checking iOS requirements...');
     // Check xcode + version.
     var command = 'xcodebuild -version';
@@ -177,7 +178,10 @@ module.exports.prototype = {
         shell.cp('-rf', www, this.path);
 
         // write out proper cordova.js
-        shell.cp('-f', path.join(util.libDirectory, 'ios', 'cordova', util.cordovaTag, 'CordovaLib', 'cordova.js'), path.join(project_www, 'cordova.js'));
+        var custom_path = config.has_custom_path(projectRoot, 'ios');
+        var lib_path = path.join(util.libDirectory, 'ios', 'cordova', util.cordovaTag);
+        if (custom_path) lib_path = custom_path;
+        shell.cp('-f', path.join(lib_path, 'CordovaLib', 'cordova.js'), path.join(project_www, 'cordova.js'));
 
     },
 
