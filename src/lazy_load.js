@@ -47,13 +47,14 @@ module.exports = {
         });
     },
     custom:function(url, id, platform, version, callback) {
-        var download_dir = path.join(util.libDirectory, platform, id, version);
+        var id_dir = path.join(util.libDirectory, platform, id);
+        shell.mkdir('-p', id_dir);
+        var download_dir = path.join(id_dir, version);
         if (fs.existsSync(download_dir)) {
             events.emit('log', 'Platform library for "' + platform + '" already exists. No need to download. Continuing.');
             if (callback) callback();
             return;
         }
-        shell.mkdir('-p', download_dir);
         hooker.fire('before_library_download', {
             platform:platform,
             url:url,
@@ -62,6 +63,7 @@ module.exports = {
         }, function() {
             var uri = URL.parse(url);
             if (uri.protocol) {
+                shell.mkdir(download_dir);
                 // assuming its remote
                 var filename = path.join(download_dir, id+'-'+platform+'-'+version+'.tar.gz');
                 if (fs.existsSync(filename)) {
@@ -136,7 +138,8 @@ module.exports = {
                 req.end();
             } else {
                 // local path
-                shell.cp('-rf', path.join(uri.path, '*'), download_dir);
+                // symlink instead of copying
+                fs.symlinkSync(uri.path, download_dir, 'dir');
                 hooker.fire('after_library_download', {
                     platform:platform,
                     url:url,
