@@ -250,7 +250,7 @@ function call_into_create(target, projectRoot, cfg, id, version, callback, end) 
                                 var plugins = cordova_util.findPlugins(plugins_dir);
                                 plugins && plugins.forEach(function(plugin) {
                                     events.emit('log', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
-                                    plugman.install(target, output, path.basename(plugin), pluginsDir, { www_dir: parser.staging_dir() });
+                                    plugman.install(target, output, path.basename(plugin), plugins_dir, { www_dir: parser.staging_dir() });
                                 });
                             }
                         });
