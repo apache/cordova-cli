@@ -41,7 +41,7 @@ module.exports = function wp7_parser(project) {
 };
 
 module.exports.check_requirements = function(project_root, callback) {
-    events.emit('log', 'Checking WP7 requirements...');
+    events.emit('log', 'Checking wp7 requirements...');
     var lib_path = path.join(util.libDirectory, 'wp7', 'cordova', require('../../platforms').wp7.version);
     var custom_path = config.has_custom_path(project_root, 'wp7');
     if (custom_path) lib_path = custom_path;
@@ -63,20 +63,24 @@ module.exports.prototype = {
         if (config instanceof config_parser) {
         } else throw new Error('update_from_config requires a config_parser object');
 
+        //Get manifest file
+        var man = fs.readFileSync(this.manifest_path, 'utf-8');
+        var cleanedMan = man.replace('\ufeff', ''); //Windows is the BOM
+        var manifest = new et.ElementTree(et.XML(cleanedMan));
+
+        //Update app version
+        var version = config.version();
+        manifest.find('.//App').attrib.Version = version;
+
         // Update app name by editing app title in Properties\WMAppManifest.xml
         var name = config.name();
-        var man = fs.readFileSync(this.manifest_path, 'utf-8');
-        //Strip three bytes that windows adds (http://www.multiasking.com/2012/11/851/)
-        var cleanedMan = man.replace('\ufeff', '');
-        var manifest = new et.ElementTree(et.XML(cleanedMan));
         var prev_name = manifest.find('.//App[@Title]')['attrib']['Title'];
-        if(prev_name != name)
-        {
+        if(prev_name != name) {
             //console.log("Updating app name from " + prev_name + " to " + name);
             manifest.find('.//App').attrib.Title = name;
-            manifest.find('.//Title').text = name;
-            fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
-
+            manifest.find('.//App').attrib.Publisher = name + " Publisher";
+            manifest.find('.//App').attrib.Author = name + " Author";
+            manifest.find('.//PrimaryToken').attrib.TokenID = name;
             //update name of sln and csproj.
             name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a ligitamate name
             prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); 
@@ -104,8 +108,7 @@ module.exports.prototype = {
          var cleanedPage = raw.replace(/^\uFEFF/i, '');
          var csproj = new et.ElementTree(et.XML(cleanedPage));
          prev_name = csproj.find('.//RootNamespace').text;
-         if(prev_name != pkg)
-         {
+         if(prev_name != pkg) {
             //console.log("Updating package name from " + prev_name + " to " + pkg);
             //CordovaAppProj.csproj
             csproj.find('.//RootNamespace').text = pkg;
@@ -134,6 +137,9 @@ module.exports.prototype = {
             var appCS = fs.readFileSync(path.join(this.wp7_proj_dir, 'App.xaml.cs'), 'utf-8');
             fs.writeFileSync(path.join(this.wp7_proj_dir, 'App.xaml.cs'), appCS.replace(namespaceRegEx, 'namespace ' + pkg), 'utf-8');
          }
+
+         //Write out manifest
+         fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
     },
     // Returns the platform-specific www directory.
     www_dir:function() {
@@ -141,7 +147,8 @@ module.exports.prototype = {
     },
     // copies the app www folder into the wp7 project's www folder and updates the csproj file.
     update_www:function() {
-        var project_www = util.projectWww(path.join(this.wp7_proj_dir, '..', '..'));
+        var project_root = util.isCordova(this.wp7_proj_dir);
+        var project_www = util.projectWww(project_root);
         // remove stock platform assets
         shell.rm('-rf', this.www_dir());
         // copy over all app www assets
@@ -197,21 +204,17 @@ module.exports.prototype = {
     folder_contents:function(name, dir) {
         var results = [];
         var folder_dir = fs.readdirSync(dir);
-        for(item in folder_dir)
-        {
+        for(item in folder_dir) {
             var stat = fs.statSync(path.join(dir, folder_dir[item]));
             // means its a folder?
-            if(stat.size == 0)
-            {
+            if(stat.size == 0) {
                 var sub_dir = this.folder_contents(path.join(name, folder_dir[item]), path.join(dir, folder_dir[item]));
                 //Add all subfolder item paths
-                for(sub_item in sub_dir)
-                {
+                for(sub_item in sub_dir) {
                     results.push(sub_dir[sub_item]);
                 }
             }
-            else
-            {
+            else {
                 results.push(path.join(name, folder_dir[item]));
             }
         }
