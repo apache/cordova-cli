@@ -148,6 +148,8 @@ module.exports = function platform(command, targets, callback) {
                     targets.forEach(function(target) {
                         shell.rm('-rf', path.join(projectRoot, 'platforms', target));
                         shell.rm('-rf', path.join(cordova_util.appDir(projectRoot), 'merges', target));
+                        var plugins_json = path.join(projectRoot, 'plugins', target + '.json');
+                        if (fs.existsSync(plugins_json)) shell.rm(plugins_json);
                         end();
                     });
                 }
@@ -248,6 +250,7 @@ function call_into_create(target, projectRoot, cfg, id, version, callback, end) 
                                 // Install all currently installed plugins into this new platform.
                                 var plugins_dir = path.join(projectRoot, 'plugins');
                                 var plugins = cordova_util.findPlugins(plugins_dir);
+                                var parser = new platforms[target].parser(output);
                                 plugins && plugins.forEach(function(plugin) {
                                     events.emit('log', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
                                     plugman.install(target, output, path.basename(plugin), plugins_dir, { www_dir: parser.staging_dir() });
