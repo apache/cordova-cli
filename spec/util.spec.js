@@ -86,5 +86,17 @@ describe('util module', function() {
             var res = util.findPlugins(plugins);
             expect(res.length).toEqual(4);
         });
+        it('should not return ".svn" directories', function() {
+            var plugins = path.join(temp, 'plugins');
+            var android = path.join(plugins, 'android');
+            var ios = path.join(plugins, 'ios');
+            var svn = path.join(plugins, '.svn');
+            shell.mkdir('-p', android);
+            shell.mkdir('-p', ios);
+            shell.mkdir('-p', svn);
+            var res = util.findPlugins(plugins);
+            expect(res.length).toEqual(2);
+            expect(res.indexOf('.svn')).toEqual(-1);
+        });
     });
 });
