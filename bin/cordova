@@ -32,7 +32,7 @@ if (verbose) {
 if (version) {
     console.log(require('../package').version);
 } else if (cmd === undefined) {
-    console.log(cordova.help());
+    cordova.help();
 } else if (cordova.hasOwnProperty(cmd)) {
     var opts = Array.prototype.slice.call(tokens, 0);
     if (cmd == 'create' || cmd == 'docs' || cmd == 'serve') {
