@@ -16,217 +16,281 @@
     specific language governing permissions and limitations
     under the License.
 */
-xdescribe('blackberry project parser', function() {
+
+var platforms = require('../../platforms'),
+    util = require('../../src/util'),
+    path = require('path'),
+    shell = require('shelljs'),
+    fs = require('fs'),
+    ET = require('elementtree'),
+    config = require('../../src/config'),
+    prompt = require('prompt'),
+    config_parser = require('../../src/config_parser'),
+    cordova = require('../../cordova');
+
+describe('blackberry project parser', function() {
+    var proj = '/some/path';
+    var exists, custom, config_p;
+    var proc = process.env.QNX_HOST;
     beforeEach(function() {
-        spyOn(process.stdout, 'write'); // silence console output
+        exists = spyOn(fs, 'existsSync').andReturn(true);
+        custom = spyOn(config, 'has_custom_path').andReturn(false);
+        process.env.QNX_HOST = 'something';
+        config_p = spyOn(util, 'config_parser');
+    });
+    afterEach(function() {
+        process.env.QNX_HOST = proc;
     });
 
-    it('should throw an exception with a path that is not a native blackberry project', function() {
-        expect(function() {
-            var project = new blackberry_parser(process.cwd());
-        }).toThrow();
-    });
-    it('should accept a proper native blackberry project path as construction parameter', function() {
-        var project;
-        expect(function() {
-            project = new blackberry_parser(blackberry_path);
-        }).not.toThrow();
-        expect(project).toBeDefined();
-    });
-
-    describe('update_from_config method', function() {
-        var project, config;
-
-        var blackberry_config = path.join(blackberry_path, 'www', 'config.xml');
-        var original_blackberry_config = fs.readFileSync(blackberry_config, 'utf-8');
-
-        beforeEach(function() {
-            project = new blackberry_parser(blackberry_path);
-            config = new config_parser(www_config);
-        });
-        afterEach(function() {
-            fs.writeFileSync(blackberry_config, original_blackberry_config, 'utf-8');
-            fs.writeFileSync(www_config, original_www_config, 'utf-8');
-        });
-        it('should throw an exception if a non config_parser object is passed into it', function() {
+    describe('constructions', function() {
+        it('should throw an exception with a path that is not a native blackberry project', function() {
+            exists.andReturn(false);
             expect(function() {
-                project.update_from_config({});
-            }).toThrow();
+                new platforms.blackberry.parser(proj);
+            }).toThrow('The provided path "/some/path" is not a Cordova BlackBerry10 project.');
         });
-        it('should update the application name properly', function() {
-            config.name('bond. james bond.');
-            project.update_from_config(config);
-
-            var bb_cfg = new config_parser(blackberry_config);
-
-            expect(bb_cfg.name()).toBe('bond. james bond.');
-        });
-        it('should update the application package name properly', function() {
-            config.packageName('sofa.king.awesome');
-            project.update_from_config(config);
-
-            var bb_cfg = new config_parser(blackberry_config);
-            expect(bb_cfg.packageName()).toBe('sofa.king.awesome');
-        });
-        describe('whitelist', function() {
-            it('should update the whitelist when using access elements with origin attribute', function() {
-                config.access.remove('*');
-                config.access.add('http://blackberry.com');
-                config.access.add('http://rim.com');
-                project.update_from_config(config);
-
-                var bb_cfg = new et.ElementTree(et.XML(fs.readFileSync(blackberry_config, 'utf-8')));
-                var as = bb_cfg.getroot().findall('access');
-                expect(as.length).toEqual(2);
-                expect(as[0].attrib.uri).toEqual('http://blackberry.com');
-                expect(as[1].attrib.uri).toEqual('http://rim.com');
-            });
-            it('should update the whitelist when using access elements with uri attributes', function() {
-                fs.writeFileSync(www_config, fs.readFileSync(www_config, 'utf-8').replace(/origin="\*/,'uri="http://rim.com'), 'utf-8');
-                config = new config_parser(www_config);
-                project.update_from_config(config);
-
-                var bb_cfg = new et.ElementTree(et.XML(fs.readFileSync(blackberry_config, 'utf-8')));
-                var as = bb_cfg.getroot().findall('access');
-                expect(as.length).toEqual(1);
-                expect(as[0].attrib.uri).toEqual('http://rim.com');
-            });
+        it('should accept a proper native blackberry project path as construction parameter', function() {
+            var project;
+            expect(function() {
+                project = new platforms.blackberry.parser(proj);
+            }).not.toThrow();
+            expect(project).toBeDefined();
         });
     });
 
-    describe('cross-platform project level methods', function() {
-        var parser, config;
-
-        var blackberry_config = path.join(blackberry_project_path, 'www', 'config.xml');
-        var original_blackberry_config = fs.readFileSync(blackberry_config, 'utf-8');
-
+    describe('check_requirements', function() {
+        it('should fire a callback if the QNX_HOST environment variable is not deinfed', function(done) {
+            process.env.QNX_HOST = '';
+            platforms.blackberry.parser.check_requirements(proj, function(err) {
+                expect(err).toContain('QNX_HOST is missing');
+                done();
+            });
+        });
+        it('should fire a callback with no error if QNX_HOST variable exists', function(done) {
+            platforms.blackberry.parser.check_requirements(proj, function(err) {
+                expect(err).toEqual(false);
+                done();
+            });
+        });
+    });
+    describe('instance', function() {
+        var p, cp, rm, is_cordova, write, read;
+        var bb_proj = path.join(proj, 'platforms', 'blackberry');
         beforeEach(function() {
-            parser = new blackberry_parser(blackberry_project_path);
-            config = new config_parser(www_config);
-        });
-        afterEach(function() {
-            fs.writeFileSync(blackberry_config, original_blackberry_config, 'utf-8');
-            fs.writeFileSync(www_config, original_www_config, 'utf-8');
-        });
-
-        describe('update_www method', function() {
-            it('should update all www assets', function() {
-                var newFile = path.join(util.projectWww(project_path), 'somescript.js');
-                this.after(function() {
-                    shell.rm('-f', newFile);
-                });
-                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
-                parser.update_www();
-                expect(fs.existsSync(path.join(blackberry_project_path, 'www', 'somescript.js'))).toBe(true);
-            });
-            it('should not overwrite the blackberry-specific config.xml', function() {
-                var www_cfg = fs.readFileSync(util.projectConfig(project_path), 'utf-8');
-                parser.update_www();
-                var bb_cfg = fs.readFileSync(blackberry_config, 'utf-8');
-                expect(bb_cfg).not.toBe(www_cfg);
-            });
+            p = new platforms.blackberry.parser(bb_proj);
+            cp = spyOn(shell, 'cp');
+            rm = spyOn(shell, 'rm');
+            is_cordova = spyOn(util, 'isCordova').andReturn(proj);
+            write = spyOn(fs, 'writeFileSync');
+            read = spyOn(fs, 'readFileSync');
         });
 
-        describe('update_overrides method',function() {
-            var mergesPath = path.join(util.appDir(project_path), 'merges', 'blackberry');
-            var newFile = path.join(mergesPath, 'merge.js');
+        describe('update_from_config method', function() {
+            var et, xml, find, write_xml, root, cfg, find_obj, root_obj;
+            var xml_name, xml_pkg, xml_version, xml_access_rm, xml_update, xml_append;
             beforeEach(function() {
-                shell.mkdir('-p', mergesPath);
-                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
-            });
-            afterEach(function() {
-                shell.rm('-rf', mergesPath);
-            });
-
-            it('should copy a new file from merges into www', function() {
-                parser.update_overrides();
-                expect(fs.existsSync(path.join(blackberry_project_path, 'www', 'merge.js'))).toBe(true);
-            });
-
-            it('should copy a file from merges over a file in www', function() {
-                var newFileWWW = path.join(util.projectWww(project_path), 'merge.js');
-                fs.writeFileSync(newFileWWW, 'var foo=1;', 'utf-8');
-                this.after(function() {
-                    shell.rm('-rf', newFileWWW);
+                xml_name = jasmine.createSpy('xml name');
+                xml_pkg = jasmine.createSpy('xml pkg');
+                xml_version = jasmine.createSpy('xml version');
+                xml_access_rm = jasmine.createSpy('xml access rm');
+                xml_update = jasmine.createSpy('xml update');
+                xml_append = jasmine.createSpy('xml append');
+                p.xml.name = xml_name;
+                p.xml.packageName = xml_pkg;
+                p.xml.version = xml_version;
+                p.xml.access = {
+                    remove:xml_access_rm
+                };
+                p.xml.update = xml_update;
+                p.xml.doc = {
+                    getroot:function() { return { append:xml_append}; }
+                };
+                find_obj = {
+                    text:'hi'
+                };
+                root_obj = {
+                    attrib:{
+                        package:'bb_pkg'
+                    }
+                };
+                find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
+                write_xml = jasmine.createSpy('ElementTree write');
+                root = jasmine.createSpy('ElementTree getroot').andReturn(root_obj);
+                et = spyOn(ET, 'ElementTree').andReturn({
+                    find:find,
+                    write:write_xml,
+                    getroot:root
                 });
-                parser.update_overrides();
-                expect(fs.existsSync(path.join(blackberry_project_path, 'www', 'merge.js'))).toBe(true);
-                expect(fs.readFileSync(path.join(blackberry_project_path, 'www', 'merge.js'),'utf-8')).toEqual('alert("sup");');
+                xml = spyOn(ET, 'XML');
+                cfg = new config_parser();
+                cfg.name = function() { return 'testname' };
+                cfg.packageName = function() { return 'testpkg' };
+                cfg.version = function() { return 'one point oh' };
+                cfg.access.get = function() { return [] };
+                cfg.preference.get = function() { return [] };
+            });
+
+            it('should write out the app name to config.xml', function() {
+                p.update_from_config(cfg);
+                expect(xml_name).toHaveBeenCalledWith('testname');
+            });
+            it('should write out the app id to bb\'s config.xml', function() {
+                p.update_from_config(cfg);
+                expect(xml_pkg).toHaveBeenCalledWith('testpkg');
+            });
+            it('should write out the app version to bb\'s config.xml', function() {
+                p.update_from_config(cfg);
+                expect(xml_version).toHaveBeenCalledWith('one point oh');
+            });
+            it('should wipe out the bb config.xml whitelist every time', function() {
+                p.update_from_config(cfg);
+                expect(xml_access_rm).toHaveBeenCalled();
+            });
+            it('should update the whitelist', function() {
+                cfg.access.get = function() { return ['one'] };
+                p.update_from_config(cfg);
+                expect(xml_append.mostRecentCall.args[0].attrib.uri).toEqual('one');
             });
         });
-
+        describe('www_dir method', function() {
+            it('should return /www', function() {
+                expect(p.www_dir()).toEqual(path.join(bb_proj, 'www'));
+            });
+        });
+        describe('staging_dir method', function() {
+            it('should return .staging/www', function() {
+                expect(p.staging_dir()).toEqual(path.join(bb_proj, '.staging', 'www'));
+            });
+        });
+        describe('config_xml method', function() {
+            it('should return the location of the config.xml', function() {
+                expect(p.config_xml()).toEqual(path.join(proj, 'platforms', 'blackberry', 'www', 'config.xml'));
+            });
+        });
+        describe('update_www method', function() {
+            it('should rm project-level www and cp in platform agnostic www', function() {
+                p.update_www();
+                expect(rm).toHaveBeenCalled();
+                expect(cp).toHaveBeenCalled();
+            });
+            it('should copy in a fresh cordova.js from stock cordova lib if no custom lib is specified', function() {
+                p.update_www();
+                expect(cp).toHaveBeenCalledWith('-f', path.join(util.libDirectory, 'blackberry', 'cordova', platforms.blackberry.version, 'javascript', 'cordova.blackberry10.js'), path.join(proj, 'platforms', 'blackberry', 'www', 'cordova.js'));
+            });
+            it('should copy in a fresh cordova.js from custom cordova lib if custom lib is specified', function() {
+                var custom_path = '/custom/path';
+                custom.andReturn(custom_path);
+                p.update_www();
+                expect(cp).toHaveBeenCalledWith('-f', path.join(custom_path, 'javascript', 'cordova.blackberry10.js'), path.join(proj, 'platforms', 'blackberry', 'www', 'cordova.js'));
+            });
+        });
+        describe('update_overrides method', function() {
+            it('should do nothing if merges directory does not exist', function() {
+                exists.andReturn(false);
+                p.update_overrides();
+                expect(cp).not.toHaveBeenCalled();
+            });
+            it('should copy merges path into www', function() {
+                p.update_overrides();
+                expect(cp).toHaveBeenCalledWith('-rf', path.join(proj, 'merges', 'blackberry', '*'), path.join(proj, 'platforms', 'blackberry', 'www'));
+            });
+        });
+        describe('update_staging method', function() {
+            it('should do nothing if staging dir does not exist', function() {
+                exists.andReturn(false);
+                p.update_staging();
+                expect(cp).not.toHaveBeenCalled();
+            });
+            it('should copy the staging dir into www if staging dir exists', function() {
+                p.update_staging();
+                expect(cp).toHaveBeenCalledWith('-rf', path.join(proj, 'platforms', 'blackberry', '.staging', 'www', '*'), path.join(proj, 'platforms', 'blackberry', 'www'));
+            });
+        });
         describe('update_project method', function() {
-            var cordova_config_path = path.join(project_path, '.cordova', 'config.json');
-            var original_config_json = fs.readFileSync(cordova_config_path, 'utf-8');
-
-            describe('with stubbed out config for BlackBerry SDKs', function() {
-                beforeEach(function() {
-                    fs.writeFileSync(cordova_config_path, JSON.stringify({
-                        blackberry:{
-                            qnx:{
-                            }
-                        }
-                    }), 'utf-8');
-                });
-                afterEach(function() {
-                    fs.writeFileSync(cordova_config_path, original_config_json, 'utf-8');
-                });
-                it('should invoke update_www', function() {
-                    var spyWww = spyOn(parser, 'update_www');
-                    parser.update_project(config);
-                    expect(spyWww).toHaveBeenCalled();
-                });
-                it('should invoke update_from_config', function() {
-                    var spyConfig = spyOn(parser, 'update_from_config');
-                    parser.update_project(config);
-                    expect(spyConfig).toHaveBeenCalled();
-                });
-                it('should not invoke get_blackberry_environment', function() {
-                    var spyEnv = spyOn(parser, 'get_blackberry_environment');
-                    parser.update_project(config);
-                    expect(spyEnv).not.toHaveBeenCalled();
-                });
-                it('should write out project properties', function(done) {
-                    var spyProps = spyOn(parser, 'write_blackberry_environment');
-                    parser.update_project(config, function() { 
-                        expect(spyProps).toHaveBeenCalled();
-                        done();
-                    });
-                });
-                it('should call out to util.deleteSvnFolders', function(done) {
-                    var spy = spyOn(util, 'deleteSvnFolders');
-                    parser.update_project(config, function() {
-                        expect(spy).toHaveBeenCalled();
-                        done();
-                    });
+            var config, www, overrides, staging, svn, parse, get_env, write_env;
+            beforeEach(function() {
+                config = spyOn(p, 'update_from_config');
+                www = spyOn(p, 'update_www');
+                overrides = spyOn(p, 'update_overrides');
+                staging = spyOn(p, 'update_staging');
+                svn = spyOn(util, 'deleteSvnFolders');
+                parse = spyOn(JSON, 'parse').andReturn({blackberry:{qnx:{}}});
+                get_env = spyOn(p, 'get_blackberry_environment');
+                set_env = spyOn(p, 'write_blackberry_environment');
+            });
+            it('should call update_from_config', function() {
+                p.update_project();
+                expect(config).toHaveBeenCalled();
+            });
+            it('should throw if update_from_config throws', function(done) {
+                var err = new Error('uh oh!');
+                config.andCallFake(function() { throw err; });
+                p.update_project({}, function(err) {
+                    expect(err).toEqual(err);
+                    done();
                 });
             });
-            describe('with empty BlackBerry SDKs in config', function() {
-                afterEach(function() {
-                    fs.writeFileSync(cordova_config_path, original_config_json, 'utf-8');
+            it('should call update_www', function() {
+                p.update_project();
+                expect(www).toHaveBeenCalled();
+            });
+            it('should call update_overrides', function() {
+                p.update_project();
+                expect(overrides).toHaveBeenCalled();
+            });
+            it('should call update_staging', function() {
+                p.update_project();
+                expect(staging).toHaveBeenCalled();
+            });
+            it('should call deleteSvnFolders', function() {
+                p.update_project();
+                expect(svn).toHaveBeenCalled();
+            });
+            it('should always write out the bb env', function() {
+                p.update_project();
+                expect(set_env).toHaveBeenCalled();
+            });
+            it('should retrieve then write out the bb env if it is empty', function() {
+                parse.andReturn({});
+                get_env.andCallFake(function(cb) { cb(); });
+                p.update_project();
+                expect(get_env).toHaveBeenCalled();
+                expect(set_env).toHaveBeenCalled();
+            });
+        });
+        describe('get_blackberry_environment method', function() {
+            var parse, promptspy;
+            var random_info = {
+                signing_password:'poop',
+                device_ip:'1.1.1.1',
+                device_name:'black shadow',
+                device_password:'giddyup',
+                device_pin:'dont have one',
+                sim_ip:'1.2.3.4',
+                sim_name:'data',
+                sim_password:'modem'
+            };
+            beforeEach(function() {
+                parse = spyOn(JSON, 'parse').andReturn({blackberry:{qnx:{
+                }}});
+                spyOn(prompt, 'start');
+                promptspy = spyOn(prompt, 'get').andCallFake(function(ps, cb) {
+                    cb(false, random_info);
                 });
-                it('should invoke get_blackberry_environment', function() {
-                    var spyEnv = spyOn(parser, 'get_blackberry_environment');
-                    var promptSpy = spyOn(require('prompt'), 'get');
-                    parser.update_project(config);
-                    expect(spyEnv).toHaveBeenCalled();
+            });
+            it('should call into prompt to retrieve info about BB env', function(done) {
+                p.get_blackberry_environment(function(err) {
+                    expect(promptspy).toHaveBeenCalled();
+                    done();
                 });
-                it('should write out project properties', function(done) {
-                    var spyProps = spyOn(parser, 'write_blackberry_environment');
-                    var promptSpy = spyOn(require('prompt'), 'get');
-                    parser.update_project(config, function() {
-                        expect(spyProps).toHaveBeenCalled();
-                        done();
-                    });
-                    promptSpy.mostRecentCall.args[1](null, {});
+            });
+            it('should write out info gathered from prompt to dot file', function(done) {
+                var expected_json = {blackberry:{qnx:random_info}};
+                p.get_blackberry_environment(function(err, results) {
+                    expect(write).toHaveBeenCalledWith(path.join(proj, '.cordova', 'config.json'), JSON.stringify(expected_json), 'utf-8');
+                    done();
                 });
             });
         });
-    });
-
-    describe('write_project_properties method', function() {
-    });
-
-    describe('get_blackberry_environment method', function() {
     });
 });

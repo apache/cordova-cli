@@ -22,17 +22,17 @@ var fs            = require('fs'),
     prompt        = require('prompt'),
     shell         = require('shelljs'),
     util          = require('../util'),
-    events        = require('../events'),
     config_parser = require('../config_parser'),
+    events        = require('../events'),
     config        = require('../config');
 
 module.exports = function blackberry_parser(project) {
     if (!fs.existsSync(path.join(project, 'project.json')) || !fs.existsSync(path.join(project, 'www'))) {
-        throw new Error('The provided path "' + project + '" is not a Cordova BlackBerry10 WebWorks project.');
+        throw new Error('The provided path "' + project + '" is not a Cordova BlackBerry10 project.');
     }
     this.path = project;
     this.config_path = path.join(this.path, 'www', 'config.xml');
-    this.xml = new config_parser(this.config_path);
+    this.xml = new util.config_parser(this.config_path);
 };
 
 module.exports.check_requirements = function(project_root, callback) {
@@ -56,9 +56,6 @@ module.exports.prototype = {
         events.emit('log', 'Wrote out BlackBerry version to "' + config.version() + '"');
         this.xml.access.remove();
         var self = this;
-        this.xml.doc.findall('access').forEach(function(a) {
-            self.xml.doc.getroot().remove(0, a);
-        });
         config.access.get().forEach(function(uri) {
             var el = new et.Element('access');
             el.attrib.uri = uri;
@@ -115,7 +112,6 @@ module.exports.prototype = {
         var projectRoot = util.isCordova(this.path);
         var www = util.projectWww(projectRoot);
         var platformWww = this.www_dir();
-
         // remove the stock www folder
         shell.rm('-rf', this.www_dir());
 
