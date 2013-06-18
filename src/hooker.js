@@ -97,7 +97,7 @@ function execute_handlers_serially(handlers, opts, callback) {
     if (handlers.length) {
         var h = handlers.shift();
         if (h.length > 1) {
-            h(root, function() {
+            h(opts, function() {
                 execute_handlers_serially(handlers, opts, callback);
             });
         } else {

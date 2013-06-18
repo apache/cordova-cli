@@ -168,7 +168,7 @@ describe('hooker', function() {
                 var handler = jasmine.createSpy();
                 var test_event = 'before_build';
                 afterEach(function() {
-                    cordova.off(test_event, handler);
+                    cordova.removeAllListeners(test_event);
                     handler.reset();
                 });
 
@@ -219,6 +219,35 @@ describe('hooker', function() {
                     waits(timeout);
                     runs(function() {
                         expect(h2_fired).toBe(true);
+                    });
+                });
+                it('should pass data object that fire calls into async handlers', function(done) {
+                    var data = {
+                        "hi":"ho",
+                        "offtowork":"wego"
+                    };
+                    var async = function(opts, cb) {
+                        data.root = tempDir;
+                        expect(opts).toEqual(data);
+                        cb();
+                    };
+                    cordova.on(test_event, async);
+                    h.fire(test_event, data, function() {
+                        done();
+                    });
+                });
+                it('should pass data object that fire calls into sync handlers', function(done) {
+                    var data = {
+                        "hi":"ho",
+                        "offtowork":"wego"
+                    };
+                    var async = function(opts) {
+                        data.root = tempDir;
+                        expect(opts).toEqual(data);
+                    };
+                    cordova.on(test_event, async);
+                    h.fire(test_event, data, function() {
+                        done();
                     });
                 });
             });

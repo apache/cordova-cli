@@ -60,6 +60,12 @@ module.exports = function prepare(platformList, callback) {
     var opts = {
         platforms:platformList
     };
+    var paths = platformList.map(function(p) {
+        var platform_path = path.join(projectRoot, 'platforms', p);
+        var parser = (new platforms[p].parser(platform_path));
+        return parser.www_dir();
+    });
+    opts.paths = paths;
 
     var hooks = new hooker(projectRoot);
     hooks.fire('before_prepare', opts, function(err) {

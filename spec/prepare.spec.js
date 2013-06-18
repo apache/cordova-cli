@@ -27,11 +27,12 @@ var cordova = require('../cordova'),
     fixtures = path.join(__dirname, 'fixtures'),
     hooks = path.join(fixtures, 'hooks');
 
+var project_dir = '/some/path';
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
+var supported_platforms_paths = supported_platforms.map(function(p) { return path.join(project_dir, 'platforms', p, 'www'); }); 
 
 describe('prepare command', function() {
     var is_cordova, list_platforms, fire, config_parser, parsers = {}, plugman_prepare, find_plugins, plugman_get_json;
-    var project_dir = '/some/path';
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
@@ -44,7 +45,8 @@ describe('prepare command', function() {
                 cb();
             });
             spyOn(platforms[p], 'parser').andReturn({
-                update_project:parsers[p]
+                update_project:parsers[p],
+                www_dir:function() { return path.join(project_dir, 'platforms', p, 'www'); }
             });
         });
         plugman_prepare = spyOn(plugman, 'prepare');
@@ -113,13 +115,13 @@ describe('prepare command', function() {
 
     describe('hooks', function() {
         describe('when platforms are added', function() {
-            it('should fire before hooks through the hooker module', function() {
+            it('should fire before hooks through the hooker module, and pass in platforms and paths as data object', function() {
                 cordova.prepare();
-                expect(fire).toHaveBeenCalledWith('before_prepare', {platforms:supported_platforms}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('before_prepare', {platforms:supported_platforms, paths:supported_platforms_paths}, jasmine.any(Function));
             });
-            it('should fire after hooks through the hooker module', function(done) {
+            it('should fire after hooks through the hooker module, and pass in platforms and paths as data object', function(done) {
                 cordova.prepare('android', function() {
-                     expect(fire).toHaveBeenCalledWith('after_prepare', {platforms:['android']}, jasmine.any(Function));
+                     expect(fire).toHaveBeenCalledWith('after_prepare', {platforms:['android'], paths:[path.join(project_dir, 'platforms', 'android', 'www')]}, jasmine.any(Function));
                      done();
                 });
             });
