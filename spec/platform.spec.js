@@ -33,8 +33,13 @@ var supported_platforms = Object.keys(platforms).filter(function(p) { return p !
 var project_dir = '/some/path';
 
 describe('platform command', function() {
-    var is_cordova, list_platforms, fire, config_parser, find_plugins, config_read, load_custom, load_cordova, rm, mkdir, existsSync, supports, pkg, name, exec, prep_spy, plugman_install;
+    var is_cordova, list_platforms, fire, config_parser, find_plugins, config_read, load_custom, load_cordova, rm, mkdir, existsSync, supports, pkg, name, exec, prep_spy, plugman_install, parsers = {};
     beforeEach(function() {
+        supported_platforms.forEach(function(p) {
+            parsers[p] = spyOn(platforms[p], 'parser').andReturn({
+                staging_dir:function(){}
+            });
+        });
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
         fire = spyOn(hooker.prototype, 'fire').andCallFake(function(e, opts, cb) {
             if (cb === undefined) cb = opts;
