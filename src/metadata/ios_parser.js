@@ -28,7 +28,7 @@ var fs            = require('fs'),
     config_parser = require('../config_parser'),
     config        = require('../config');
 
-var MIN_XCODE_VERSION = '4.5.x';
+var MIN_XCODE_VERSION = '>=4.5.x';
 
 var default_prefs = {
     "KeyboardDisplayRequiresUserAction":"true",
@@ -58,7 +58,7 @@ module.exports = function ios_parser(project) {
     this.path = project;
     this.pbxproj = path.join(this.xcodeproj, 'project.pbxproj');
     this.config_path = path.join(this.cordovaproj, 'config.xml');
-    this.config = new config_parser(this.config_path);
+    this.config = new util.config_parser(this.config_path);
 };
 
 module.exports.check_requirements = function(project_root, callback) {
@@ -72,7 +72,7 @@ module.exports.check_requirements = function(project_root, callback) {
             callback('Xcode is (probably) not installed, specifically the command `xcodebuild` is unavailable or erroring out. Output of `'+command+'` is: ' + output);
         } else {
             var xc_version = output.split('\n')[0].split(' ')[1];
-            if (semver.lt(xc_version, MIN_XCODE_VERSION)) {
+            if (!semver.satisfies(xc_version, MIN_XCODE_VERSION)) {
                 callback('Xcode version installed is too old. Minimum: ' + MIN_XCODE_VERSION + ', yours: ' + xc_version);
             } else callback(false);
         }

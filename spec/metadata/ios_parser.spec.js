@@ -16,194 +16,302 @@
  specific language governing permissions and limitations
  under the License.
  */
+var platforms = require('../../platforms'),
+    util = require('../../src/util'),
+    path = require('path'),
+    shell = require('shelljs'),
+    plist = require('plist'),
+    xcode = require('xcode'),
+    ET = require('elementtree'),
+    fs = require('fs'),
+    config = require('../../src/config'),
+    config_parser = require('../../src/config_parser'),
+    cordova = require('../../cordova');
 
-xdescribe('ios project parser', function () {
-    it('should throw an exception with a path that is not a native ios project', function () {
-        expect(function () {
-            var project = new ios_parser(process.cwd());
-        }).toThrow();
+describe('ios project parser', function () {
+    var proj = '/some/path';
+    var exec, custom, readdir, cfg_parser;
+    beforeEach(function() {
+        exec = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
+            cb(0, '');
+        });
+        custom = spyOn(config, 'has_custom_path').andReturn(false);
+        readdir = spyOn(fs, 'readdirSync').andReturn(['test.xcodeproj']);
+        cfg_parser = spyOn(util, 'config_parser');
     });
-    it('should accept a proper native ios project path as construction parameter', function () {
-        var project;
-        expect(function () {
-            project = new ios_parser(ios_path);
-        }).not.toThrow();
-        expect(project).toBeDefined();
+    describe('constructions', function() {
+        it('should throw if provided directory does not contain an xcodeproj file', function() {
+            readdir.andReturn(['noxcodehere']);
+            expect(function() {
+                new platforms.ios.parser(proj);
+            }).toThrow('The provided path is not a Cordova iOS project.');
+        });
+        it('should create an instance with path, pbxproj, xcodeproj, originalName and cordovaproj properties', function() {
+            expect(function() {
+                var p = new platforms.ios.parser(proj);
+                expect(p.path).toEqual(proj);
+                expect(p.pbxproj).toEqual(path.join(proj, 'test.xcodeproj', 'project.pbxproj'));
+                expect(p.xcodeproj).toEqual(path.join(proj, 'test.xcodeproj'));
+                expect(p.originalName).toEqual('/test');
+            }).not.toThrow();
+        });
     });
-
-    describe('update_from_config method', function () {
-        var project, config;
-
-        var ios_plist = path.join(ios_path, 'cordovaExample', 'cordovaExample-Info.plist'),
-            ios_pbx = path.join(ios_path, 'cordovaExample.xcodeproj', 'project.pbxproj'),
-            ios_config_xml = path.join(ios_path, 'cordovaExample', 'config.xml');
-
-        var original_pbx = fs.readFileSync(ios_pbx, 'utf-8');
-        var original_plist = fs.readFileSync(ios_plist, 'utf-8');
-        var original_ios_config = fs.readFileSync(ios_config_xml, 'utf-8');
-
-        beforeEach(function () {
-            project = new ios_parser(ios_path);
-            config = new config_parser(www_config);
-        });
-        afterEach(function () {
-            fs.writeFileSync(ios_pbx, original_pbx, 'utf-8');
-            fs.writeFileSync(ios_config_xml, original_ios_config, 'utf-8');
-            fs.writeFileSync(ios_plist, original_plist, 'utf-8');
-            fs.writeFileSync(www_config, original_www_config, 'utf-8');
-        });
-        it('should throw an exception if a non config_parser object is passed into it', function () {
-            expect(function () {
-                project.update_from_config({});
-            }).toThrow();
-        });
-        it('should update the application name properly', function (done) {
-            config.name('bond. james bond.');
-            project.update_from_config(config, function () {
-                var pbx_contents = fs.readFileSync(ios_pbx, 'utf-8');
-                expect(pbx_contents.match(/PRODUCT_NAME\s*=\s*"bond. james bond."/)[0]).toBe('PRODUCT_NAME = "bond. james bond."');
+    describe('check_requirements', function() {
+        it('should fire a callback if there is an error during shelling out', function(done) {
+            exec.andCallFake(function(cmd, opts, cb) {
+                cb(50, 'there was an errorz!');
+            });
+            platforms.ios.parser.check_requirements(proj, function(err) {
+                expect(err).toContain('there was an errorz!');
                 done();
             });
         });
-        it('should update the application package name (bundle identifier) properly', function (done) {
-            config.packageName('ca.filmaj.dewd');
-            project.update_from_config(config, function () {
-                var plist_contents = fs.readFileSync(ios_plist, 'utf-8');
-                expect(plist_contents).toMatch(/<string>ca.filmaj.dewd/);
+        it('should fire a callback if the xcodebuild version is less than 4.5.x', function(done) {
+            exec.andCallFake(function(cmd, opts, cb) {
+                cb(0, 'version 4.4.9');
+            });
+            platforms.ios.parser.check_requirements(proj, function(err) {
+                expect(err).toEqual('Xcode version installed is too old. Minimum: >=4.5.x, yours: 4.4.9');
                 done();
-            });
-        });
-        it('should update the application version (CFBundleVersion) properly', function (done) {
-            config.version('2.0.1');
-            project.update_from_config(config, function () {
-                var plist_contents = fs.readFileSync(ios_plist, 'utf-8');
-                expect(plist_contents).toMatch(/<string>2.0.1/);
-                done();
-            });
-        });
-        it('should update the whitelist in the project config.xml', function (done) {
-            project.update_from_config(config, function () {
-                var config_contents = fs.readFileSync(ios_config_xml, 'utf-8');
-                expect(config_contents).toMatch(/<access origin="\*" \/>/);
-                done();
-            });
-        });
-        describe('preferences', function () {
-            it('should not change default project preferences and copy over additional project preferences to platform-level config.xml', function (done) {
-                config.preference.add({name:'henrik', value:'sedin'});
-                project.update_from_config(config, function () {
-                    var native_config = new et.ElementTree(et.XML(fs.readFileSync(ios_config_xml, 'utf-8')));
-                    var ps = native_config.findall('preference');
-                    expect(ps.length).toEqual(17);
-                    expect(ps[0].attrib.name).toEqual('KeyboardDisplayRequiresUserAction');
-                    expect(ps[0].attrib.value).toEqual('true');
-                    expect(ps[16].attrib.name).toEqual('henrik');
-                    expect(ps[16].attrib.value).toEqual('sedin');
-                    done();
-                });
-            });
-            it('should override a default project preference if applicable', function (done) {
-                config.preference.add({name:'UIWebViewBounce', value:'false'});
-                project.update_from_config(config, function () {
-                    var native_config = new et.ElementTree(et.XML(fs.readFileSync(ios_config_xml, 'utf-8')));
-                    var ps = native_config.findall('preference');
-                    expect(ps.length).toEqual(16);
-                    expect(ps[2].attrib.name).toEqual('UIWebViewBounce');
-                    expect(ps[2].attrib.value).toEqual('false');
-                    done();
-                });
             });
         });
     });
 
-    describe('cross-platform project level methods', function () {
-        var parser, config;
-        var ios_plist = path.join(ios_project_path, 'cordovaExample', 'cordovaExample-Info.plist'),
-            ios_pbx = path.join(ios_project_path, 'cordovaExample.xcodeproj', 'project.pbxproj'),
-            ios_config_xml = path.join(ios_project_path, 'cordovaExample', 'config.xml');
-
-        var original_pbx = fs.readFileSync(ios_pbx, 'utf-8');
-        var original_plist = fs.readFileSync(ios_plist, 'utf-8');
-        var original_ios_config = fs.readFileSync(ios_config_xml, 'utf-8');
-
-        beforeEach(function () {
-            parser = new ios_parser(ios_project_path);
-            config = new config_parser(www_config);
-        });
-        afterEach(function () {
-            fs.writeFileSync(ios_pbx, original_pbx, 'utf-8');
-            fs.writeFileSync(ios_config_xml, original_ios_config, 'utf-8');
-            fs.writeFileSync(ios_plist, original_plist, 'utf-8');
-            fs.writeFileSync(www_config, original_www_config, 'utf-8');
+    describe('instance', function() {
+        var p, cp, rm, is_cordova, write, read;
+        var ios_proj = path.join(proj, 'platforms', 'ios');
+        beforeEach(function() {
+            p = new platforms.ios.parser(ios_proj);
+            cp = spyOn(shell, 'cp');
+            rm = spyOn(shell, 'rm');
+            is_cordova = spyOn(util, 'isCordova').andReturn(proj);
+            write = spyOn(fs, 'writeFileSync');
+            read = spyOn(fs, 'readFileSync');
         });
 
-        describe('update_www method', function () {
-            it('should update all www assets', function () {
-                var newFile = path.join(util.projectWww(project_path), 'somescript.js');
-                this.after(function () {
-                    shell.rm('-f', newFile);
-                });
-                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
-                parser.update_www();
-                expect(fs.existsSync(path.join(ios_project_path, 'www', 'somescript.js'))).toBe(true);
-            });
-            it('should write out ios js to cordova.js', function () {
-                parser.update_www();
-                expect(fs.readFileSync(path.join(ios_project_path, 'www', 'cordova.js'), 'utf-8')).toBe(fs.readFileSync(path.join(util.libDirectory, 'cordova-ios', 'CordovaLib', 'cordova.js'), 'utf-8'));
-            });
-        });
-
-        describe('update_overrides method', function () {
-            var mergesPath = path.join(util.appDir(project_path), 'merges', 'ios');
-            var newFile = path.join(mergesPath, 'merge.js');
+        describe('update_from_config method', function() {
+            var et, xml, find, write_xml, root;
+            var cfg, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm;
+            var plist_parse, plist_build, xc;
+            var update_name, xc_write;
             beforeEach(function() {
-                shell.mkdir('-p', mergesPath);
-                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
-            });
-            afterEach(function() {
-                shell.rm('-rf', mergesPath);
-            });
-
-            it('should copy a new file from merges into www', function () {
-                parser.update_overrides();
-                expect(fs.existsSync(path.join(ios_project_path, 'www', 'merge.js'))).toBe(true);
-            });
-
-            it('should copy a file from merges over a file in www', function () {
-                var newFileWWW = path.join(util.projectWww(project_path), 'merge.js');
-                fs.writeFileSync(newFileWWW, 'var foo=1;', 'utf-8');
-                this.after(function () {
-                    shell.rm('-rf', newFileWWW);
+                find_obj = {
+                    text:'hi'
+                };
+                root_obj = {
+                    attrib:{
+                        package:'android_pkg'
+                    }
+                };
+                find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
+                write_xml = jasmine.createSpy('ElementTree write');
+                root = jasmine.createSpy('ElementTree getroot').andReturn(root_obj);
+                et = spyOn(ET, 'ElementTree').andReturn({
+                    find:find,
+                    write:write_xml,
+                    getroot:root
                 });
+                xml = spyOn(ET, 'XML');
+                plist_parse = spyOn(plist, 'parseFileSync').andReturn({
+                });
+                plist_build = spyOn(plist, 'build').andReturn('');
+                update_name = jasmine.createSpy('update_name');
+                xc_write = jasmine.createSpy('xcode writeSync');
+                xc = spyOn(xcode, 'project').andReturn({
+                    parse:function(cb) {cb();},
+                    updateProductName:update_name,
+                    writeSync:xc_write
+                });
+                cfg = new config_parser();
+                cfg.name = function() { return 'testname' };
+                cfg.packageName = function() { return 'testpkg' };
+                cfg.version = function() { return 'one point oh' };
+                cfg.access.get = function() { return [] };
+                cfg.preference.get = function() { return [] };
+                cfg_access_add = jasmine.createSpy('config_parser access add');
+                cfg_access_rm = jasmine.createSpy('config_parser access rm');
+                cfg_pref_rm = jasmine.createSpy('config_parser pref rm');
+                cfg_pref_add = jasmine.createSpy('config_parser pref add');
+                cfg_parser.andReturn({
+                    access:{
+                        remove:cfg_access_rm,
+                        get:function(){},
+                        add:cfg_access_add
+                    },
+                    preference:{
+                        remove:cfg_pref_rm,
+                        get:function(){},
+                        add:cfg_pref_add
+                    }
+                });
+                p = new platforms.ios.parser(ios_proj);
+            });
 
-                parser.update_overrides();
-                expect(fs.existsSync(path.join(ios_project_path, 'www', 'merge.js'))).toBe(true);
-                expect(fs.readFileSync(path.join(ios_project_path, 'www', 'merge.js'), 'utf-8')).toEqual('alert("sup");');
+            it('should write out the app name to pbxproj by calling xcode.updateProductName', function(done) {
+                p.update_from_config(cfg, function() {
+                    expect(update_name).toHaveBeenCalledWith('testname');
+                    done();
+                });
+            });
+            it('should write out the app id to info plist as CFBundleIdentifier', function(done) {
+                p.update_from_config(cfg, function() {
+                    expect(plist_build.mostRecentCall.args[0].CFBundleIdentifier).toEqual('testpkg');
+                    done();
+                });
+            });
+            it('should write out the app version to info plist as CFBundleVersion', function(done) {
+                p.update_from_config(cfg, function() {
+                    expect(plist_build.mostRecentCall.args[0].CFBundleVersion).toEqual('one point oh');
+                    done();
+                });
+            });
+            it('should wipe out the ios whitelist every time', function(done) {
+                p.update_from_config(cfg, function() {
+                    expect(cfg_access_rm).toHaveBeenCalled();
+                    done();
+                });
+            });
+            it('should update the whitelist', function(done) {
+                cfg.access.get = function() { return ['one'] };
+                p.update_from_config(cfg, function() {
+                    expect(cfg_access_add).toHaveBeenCalledWith('one');
+                    done();
+                });
+            });
+            it('should update preferences', function(done) {
+                var sample_pref = {name:'pref',value:'yes'};
+                cfg.preference.get = function() { return [sample_pref] };
+                p.update_from_config(cfg, function() {
+                    expect(cfg_pref_add).toHaveBeenCalledWith(sample_pref);
+                    done();
+                });
+            });
+            it('should wipe out the ios preferences every time', function(done) {
+                p.update_from_config(cfg, function() {
+                    expect(cfg_pref_rm).toHaveBeenCalled();
+                    done();
+                });
+            });
+            it('should write out default preferences every time', function(done) {
+                var sample_pref = {name:'preftwo',value:'false'};
+                cfg.preference.get = function() { return [sample_pref] };
+                p.update_from_config(cfg, function() {
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"KeyboardDisplayRequiresUserAction",value:"true"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"SuppressesIncrementalRendering",value:"false"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"UIWebViewBounce",value:"true"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"TopActivityIndicator",value:"gray"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"EnableLocation",value:"false"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"EnableViewportScale",value:"false"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"AutoHideSplashScreen",value:"true"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"ShowSplashScreenSpinner",value:"true"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"MediaPlaybackRequiresUserAction",value:"false"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"AllowInlineMediaPlayback",value:"false"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"OpenAllWhitelistURLsInWebView",value:"false"});
+                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"BackupWebStorage",value:"cloud"});
+                    done();
+                });
             });
         });
-
-        describe('update_project method', function () {
-            it('should invoke update_www', function (done) {
-                var spyWww = spyOn(parser, 'update_www');
-                parser.update_project(config, function () {
-                    expect(spyWww).toHaveBeenCalled();
+        describe('www_dir method', function() {
+            it('should return /www', function() {
+                expect(p.www_dir()).toEqual(path.join(ios_proj, 'www'));
+            });
+        });
+        describe('staging_dir method', function() {
+            it('should return .staging/www', function() {
+                expect(p.staging_dir()).toEqual(path.join(ios_proj, '.staging', 'www'));
+            });
+        });
+        describe('config_xml method', function() {
+            it('should return the location of the config.xml', function() {
+                expect(p.config_xml()).toEqual(path.join(ios_proj, 'test', 'config.xml'));
+            });
+        });
+        describe('update_www method', function() {
+            it('should rm project-level www and cp in platform agnostic www', function() {
+                p.update_www();
+                expect(rm).toHaveBeenCalled();
+                expect(cp).toHaveBeenCalled();
+            });
+            it('should copy in a fresh cordova.js from stock cordova lib if no custom lib is specified', function() {
+                p.update_www();
+                expect(cp.mostRecentCall.args[1]).toMatch(util.libDirectory);
+            });
+            it('should copy in a fresh cordova.js from custom cordova lib if custom lib is specified', function() {
+                var custom_path = '/custom/path';
+                custom.andReturn(custom_path);
+                p.update_www();
+                expect(cp.mostRecentCall.args[1]).toMatch(custom_path);
+            });
+        });
+        describe('update_overrides method', function() {
+            var exists;
+            beforeEach(function() {
+                exists = spyOn(fs, 'existsSync').andReturn(true);
+            });
+            it('should do nothing if merges directory does not exist', function() {
+                exists.andReturn(false);
+                p.update_overrides();
+                expect(cp).not.toHaveBeenCalled();
+            });
+            it('should copy merges path into www', function() {
+                p.update_overrides();
+                expect(cp).toHaveBeenCalled();
+            });
+        });
+        describe('update_staging method', function() {
+            var exists;
+            beforeEach(function() {
+                exists = spyOn(fs, 'existsSync').andReturn(true);
+            });
+            it('should do nothing if staging dir does not exist', function() {
+                exists.andReturn(false);
+                p.update_staging();
+                expect(cp).not.toHaveBeenCalled();
+            });
+            it('should copy the staging dir into www if staging dir exists', function() {
+                p.update_staging();
+                expect(cp).toHaveBeenCalled();
+            });
+        });
+        describe('update_project method', function() {
+            var config, www, overrides, staging, svn;
+            beforeEach(function() {
+                config = spyOn(p, 'update_from_config').andCallFake(function(cfg, cb) { cb() });
+                www = spyOn(p, 'update_www');
+                overrides = spyOn(p, 'update_overrides');
+                staging = spyOn(p, 'update_staging');
+                svn = spyOn(util, 'deleteSvnFolders');
+            });
+            it('should call update_from_config', function() {
+                p.update_project();
+                expect(config).toHaveBeenCalled();
+            });
+            it('should throw if update_from_config errors', function(done) {
+                var err = new Error('uh oh!');
+                config.andCallFake(function(cfg, cb) { cb(err); });
+                p.update_project({}, function(err) {
+                    expect(err).toEqual(err);
                     done();
                 });
             });
-            it('should invoke update_from_config', function (done) {
-                var spyConfig = spyOn(parser, 'update_from_config').andCallThrough();
-                parser.update_project(config, function () {
-                    expect(spyConfig).toHaveBeenCalled();
+            it('should call update_www', function(done) {
+                p.update_project({}, function() {
+                    expect(www).toHaveBeenCalled();
                     done();
                 });
             });
-            it('should call out to util.deleteSvnFolders', function(done) {
-                var spy = spyOn(util, 'deleteSvnFolders');
-                var spyConfig = spyOn(parser, 'update_from_config').andCallThrough();
-                parser.update_project(config, function () {
-                    expect(spy).toHaveBeenCalled();
-                    done();
-                });
+            it('should call update_overrides', function() {
+                p.update_project();
+                expect(overrides).toHaveBeenCalled();
+            });
+            it('should call update_staging', function() {
+                p.update_project();
+                expect(staging).toHaveBeenCalled();
+            });
+            it('should call deleteSvnFolders', function() {
+                p.update_project();
+                expect(svn).toHaveBeenCalled();
             });
         });
     });
