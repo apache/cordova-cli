@@ -30,12 +30,12 @@ module.exports = function wp7_parser(project) {
     try {
         // TODO : Check that it's not a wp7 project?
         var csproj_file   = fs.readdirSync(project).filter(function(e) { return e.match(/\.csproj$/i); })[0];
-        if (!csproj_file) throw new Error('The provided path "' + project + '" is not a Windows Phone 8 project.');
+        if (!csproj_file) throw new Error('No .csproj file.');
         this.wp7_proj_dir = project;
         this.csproj_path  = path.join(this.wp7_proj_dir, csproj_file);
         this.sln_path     = path.join(this.wp7_proj_dir, csproj_file.replace(/\.csproj/, '.sln'));
     } catch(e) {
-        throw new Error('The provided path "' + project + '" is not a Windows Phone 8 project.' + e);
+        throw new Error('The provided path "' + project + '" is not a Windows Phone 7 project. ' + e);
     }
     this.manifest_path  = path.join(this.wp7_proj_dir, 'Properties', 'WMAppManifest.xml');
 };
@@ -76,7 +76,7 @@ module.exports.prototype = {
         var name = config.name();
         var prev_name = manifest.find('.//App[@Title]')['attrib']['Title'];
         if(prev_name != name) {
-            //console.log("Updating app name from " + prev_name + " to " + name);
+            events.emit('log', "Updating app name from " + prev_name + " to " + name);
             manifest.find('.//App').attrib.Title = name;
             manifest.find('.//App').attrib.Publisher = name + " Publisher";
             manifest.find('.//App').attrib.Author = name + " Author";
@@ -84,7 +84,6 @@ module.exports.prototype = {
             //update name of sln and csproj.
             name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a ligitamate name
             prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); 
-            // TODO: might return .sln.user? (generated file)
             var sln_name = fs.readdirSync(this.wp7_proj_dir).filter(function(e) { return e.match(/\.sln$/i); })[0];
             var sln_path = path.join(this.wp7_proj_dir, sln_name);
             var sln_file = fs.readFileSync(sln_path, 'utf-8');
@@ -109,7 +108,7 @@ module.exports.prototype = {
          var csproj = new et.ElementTree(et.XML(cleanedPage));
          prev_name = csproj.find('.//RootNamespace').text;
          if(prev_name != pkg) {
-            //console.log("Updating package name from " + prev_name + " to " + pkg);
+            events.emit('log', "Updating package name from " + prev_name + " to " + pkg);
             //CordovaAppProj.csproj
             csproj.find('.//RootNamespace').text = pkg;
             csproj.find('.//AssemblyName').text = pkg;
@@ -121,7 +120,7 @@ module.exports.prototype = {
             // Remove potential UTF Byte Order Mark
             cleanedPage = raw.replace(/^\uFEFF/i, '');
             var mainPageXAML = new et.ElementTree(et.XML(cleanedPage));
-            mainPageXAML._root.attrib['x:Class'] = pkg + '.MainPage';
+            mainPageXAML.getroot().attrib['x:Class'] = pkg + '.MainPage';
             fs.writeFileSync(path.join(this.wp7_proj_dir, 'MainPage.xaml'), mainPageXAML.write({indent: 4}), 'utf-8');
             //MainPage.xaml.cs
             var mainPageCS = fs.readFileSync(path.join(this.wp7_proj_dir, 'MainPage.xaml.cs'), 'utf-8');
@@ -131,7 +130,7 @@ module.exports.prototype = {
             raw = fs.readFileSync(path.join(this.wp7_proj_dir, 'App.xaml'), 'utf-8');
             cleanedPage = raw.replace(/^\uFEFF/i, '');
             var appXAML = new et.ElementTree(et.XML(cleanedPage));
-            appXAML._root.attrib['x:Class'] = pkg + '.App';
+            appXAML.getroot().attrib['x:Class'] = pkg + '.App';
             fs.writeFileSync(path.join(this.wp7_proj_dir, 'App.xaml'), appXAML.write({indent: 4}), 'utf-8');
             //App.xaml.cs
             var appCS = fs.readFileSync(path.join(this.wp7_proj_dir, 'App.xaml.cs'), 'utf-8');
@@ -236,7 +235,12 @@ module.exports.prototype = {
     update_project:function(cfg, callback) {
         //console.log("Updating wp7 project...");
 
-        this.update_from_config(cfg);
+        try {
+            this.update_from_config(cfg);
+        } catch(e) {
+            if (callback) return callback(e);
+            else throw e;
+        }
         this.update_www();
         // TODO: Add overrides support? Why is this missing?
         this.update_staging();

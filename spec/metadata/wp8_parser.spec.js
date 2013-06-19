@@ -16,213 +16,222 @@
     specific language governing permissions and limitations
     under the License.
 */
-xdescribe('wp8 project parser', function() {
-    it('should throw an exception with a path that is not a native wp8 project', function() {
-        expect(function() {
-            var project = new wp8_parser(process.cwd());
-        }).toThrow();
-    });
-    it('should accept a proper native wp8 project path as construction parameter', function() {
-        expect(function() {
-            var project = new wp8_parser(wp8_path);
-            expect(project).toBeDefined();
-        }).not.toThrow();
-    });
 
-    describe('update_from_config method', function() {
-        var config;
-        var project = new wp8_parser(wp8_path);
+var platforms = require('../../platforms'),
+    util = require('../../src/util'),
+    path = require('path'),
+    shell = require('shelljs'),
+    fs = require('fs'),
+    ET = require('elementtree'),
+    config = require('../../src/config'),
+    config_parser = require('../../src/config_parser'),
+    cordova = require('../../cordova');
 
-        var manifest_path  = path.join(wp8_path, 'Properties', 'WMAppManifest.xml');
-        var csproj_path    = project.csproj_path;
-        var sln_path       = project.sln_path;
-        var app_xaml_path  = path.join(wp8_path, 'App.xaml');
-        var app_cs_path    = path.join(wp8_path, 'App.xaml.cs');
-        var main_xaml_path = path.join(wp8_path, 'MainPage.xaml');
-        var main_cs_path   = path.join(wp8_path, 'MainPage.xaml.cs');
-
-
-        var original_manifest  = fs.readFileSync(manifest_path, 'utf-8');
-        var original_csproj    = fs.readFileSync(csproj_path, 'utf-8');
-        var original_sln       = fs.readFileSync(sln_path, 'utf-8');
-        var original_app_xaml  = fs.readFileSync(app_xaml_path, 'utf-8');
-        var original_app_cs    = fs.readFileSync(app_cs_path, 'utf-8');
-        var original_main_xaml = fs.readFileSync(main_xaml_path, 'utf-8');
-        var original_main_cs   = fs.readFileSync(main_cs_path, 'utf-8');
-
-        beforeEach(function() {
-            project = new wp8_parser(wp8_path);
-            config = new config_parser(www_config);
+describe('wp8 project parser', function() {
+    var proj = '/some/path';
+    var exists, exec, custom, readdir;
+    beforeEach(function() {
+        exists = spyOn(fs, 'existsSync').andReturn(true);
+        exec = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
+            cb(0, '');
         });
-        afterEach(function() {
-            fs.writeFileSync(manifest_path, original_manifest, 'utf-8');
-            // csproj file changes name if app changes name
-            fs.unlinkSync(project.csproj_path);
-            fs.unlinkSync(project.sln_path);
-            fs.writeFileSync(csproj_path, original_csproj, 'utf-8');
-            fs.writeFileSync(sln_path, original_sln, 'utf-8');
-            fs.writeFileSync(app_xaml_path, original_app_xaml, 'utf-8');
-            fs.writeFileSync(app_cs_path, original_app_cs, 'utf-8');
-            fs.writeFileSync(main_xaml_path, original_main_xaml, 'utf-8');
-            fs.writeFileSync(main_cs_path, original_main_cs, 'utf-8');
-        });
-        it('should throw an exception if a non config_parser object is passed into it', function() {
+        custom = spyOn(config, 'has_custom_path').andReturn(false);
+        readdir = spyOn(fs, 'readdirSync').andReturn(['test.csproj']);
+    });
+
+    describe('constructions', function() {
+        it('should throw if provided directory does not contain a csproj file', function() {
+            readdir.andReturn([]);
             expect(function() {
-                project.update_from_config({});
-            }).toThrow();
+                new platforms.wp8.parser(proj);
+            }).toThrow('The provided path "' + proj + '" is not a Windows Phone 8 project. Error: No .csproj file.');
         });
-        it('should update the application name properly', function() {
-            var test_name = 'bond. james bond.';
-            config.name(test_name);
-            project.update_from_config(config);
-            var raw_manifest = fs.readFileSync(manifest_path, 'utf-8');
-            //Strip three bytes that windows adds (http://www.multiasking.com/2012/11/851)
-            var cleaned_manifest = raw_manifest.replace('\ufeff', '');
-            var manifest = new et.ElementTree(et.XML(cleaned_manifest));
-            var app_name = manifest.find('.//App[@Title]')['attrib']['Title'];
-            expect(app_name).toBe(test_name);
-
-            //check for the proper name of csproj and solution files
-            test_name = test_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a ligitamate name
-            expect(project.csproj_path).toContain(test_name);
-            expect(project.sln_path).toContain(test_name);
+        it('should create an instance with path, manifest properties', function() {
+            expect(function() {
+                var p = new platforms.wp8.parser(proj);
+                expect(p.wp8_proj_dir).toEqual(proj);
+                expect(p.manifest_path).toEqual(path.join(proj, 'Properties', 'WMAppManifest.xml'));
+            }).not.toThrow();
         });
-        it('should update the application package name properly', function() {
-            var test_package = 'ca.filmaj.dewd'
-            config.packageName(test_package);
-            project.update_from_config(config);
+    });
 
-            // check csproj file (use regex instead of elementtree?)
-            var raw_csproj = fs.readFileSync(project.csproj_path, 'utf-8');
-            var cleaned_csproj = raw_csproj.replace(/^\uFEFF/i, '');
-            var csproj = new et.ElementTree(et.XML(cleaned_csproj));
-            expect(csproj.find('.//RootNamespace').text).toEqual(test_package);
-            expect(csproj.find('.//AssemblyName').text).toEqual(test_package);
-            expect(csproj.find('.//XapFilename').text).toEqual(test_package + '.xap');
-            expect(csproj.find('.//SilverlightAppEntry').text).toEqual(test_package + '.App');
-
-            // check app.xaml (use regex instead of elementtree?)
-            var new_app_xaml = fs.readFileSync(app_xaml_path, 'utf-8');
-            var cleaned_app_xaml = new_app_xaml.replace(/^\uFEFF/i, '');
-            var app_xaml = new et.ElementTree(et.XML(cleaned_app_xaml));
-            expect(app_xaml._root.attrib['x:Class']).toEqual(test_package + '.App');
-
-            // check app.xaml.cs
-            var new_app_cs = fs.readFileSync(app_cs_path, 'utf-8');
-            expect(new_app_cs).toContain('namespace ' + test_package);
-
-            // check MainPage.xaml (use regex instead of elementtree?)
-            var new_main_xaml = fs.readFileSync(main_xaml_path, 'utf-8');
-            var cleaned_main_xaml = new_main_xaml.replace(/^\uFEFF/i, '');
-            var main_xaml = new et.ElementTree(et.XML(cleaned_main_xaml));
-            expect(main_xaml._root.attrib['x:Class']).toEqual(test_package + '.MainPage');
-
-            //check MainPage.xaml.cs
-            var new_main_cs = fs.readFileSync(main_cs_path, 'utf-8');
-            expect(new_main_cs).toContain('namespace ' + test_package);
-        });
-        xdescribe('preferences', function() {
-            it('should not change default project preferences and copy over additional project preferences to platform-level config.xml', function() {
-                /*config.preference.add({name:'henrik',value:'sedin'});
-                project.update_from_config(config);
-
-                var native_config = new et.ElementTree(et.XML(fs.readFileSync(android_config, 'utf-8')));
-                var ps = native_config.findall('preference');
-                expect(ps.length).toEqual(7);
-                expect(ps[0].attrib.name).toEqual('useBrowserHistory');
-                expect(ps[0].attrib.value).toEqual('true');
-                expect(ps[6].attrib.name).toEqual('henrik');
-                expect(ps[6].attrib.value).toEqual('sedin');*/
-
-                // TODO : figure out if this is supported
-                //expect(true).toBe(false);
+    describe('check_requirements', function() {
+        it('should fire a callback if there is an error during shelling out', function(done) {
+            exec.andCallFake(function(cmd, opts, cb) {
+                cb(50, 'there was an errorz!');
             });
-            it('should override a default project preference if applicable', function() {
-                /*config.preference.add({name:'useBrowserHistory',value:'false'});
-                project.update_from_config(config);
-
-                var native_config = new et.ElementTree(et.XML(fs.readFileSync(android_config, 'utf-8')));
-                var ps = native_config.findall('preference');
-                expect(ps.length).toEqual(6);
-                expect(ps[0].attrib.name).toEqual('useBrowserHistory');
-                expect(ps[0].attrib.value).toEqual('false');*/
-
-                // TODO : figure out if this is supported
-                //expect(true).toBe(false);
+            platforms.wp8.parser.check_requirements(proj, function(err) {
+                expect(err).toContain('there was an errorz!');
+                done();
+            });
+        });
+        it('should check by calling check_reqs on the stock lib path if no custom path is defined', function(done) {
+            platforms.wp8.parser.check_requirements(proj, function(err) {
+                expect(err).toEqual(false);
+                expect(exec.mostRecentCall.args[0]).toContain(util.libDirectory);
+                expect(exec.mostRecentCall.args[0]).toMatch(/check_reqs"$/);
+                done();
+            });
+        });
+        it('should check by calling check_reqs on a custom path if it is so defined', function(done) {
+            var custom_path = '/some/custom/path/to/wp8/lib'
+            custom.andReturn(custom_path);
+            platforms.wp8.parser.check_requirements(proj, function(err) {
+                expect(err).toEqual(false);
+                expect(exec.mostRecentCall.args[0]).toContain(custom_path);
+                expect(exec.mostRecentCall.args[0]).toMatch(/check_reqs"$/);
+                done();
             });
         });
     });
 
-    describe('cross-platform project level methods', function() {
-        var parser, config;
-
+    describe('instance', function() {
+        var p, cp, rm, is_cordova, write, read, mv;
+        var wp8_proj = path.join(proj, 'platforms', 'wp8');
         beforeEach(function() {
-            parser = new wp8_parser(wp8_project_path);
-            config = new config_parser(www_config);
+            p = new platforms.wp8.parser(wp8_proj);
+            cp = spyOn(shell, 'cp');
+            rm = spyOn(shell, 'rm');
+            mv = spyOn(shell, 'mv');
+            is_cordova = spyOn(util, 'isCordova').andReturn(proj);
+            write = spyOn(fs, 'writeFileSync');
+            read = spyOn(fs, 'readFileSync').andReturn('');
         });
-        afterEach(function() {
+
+        describe('update_from_config method', function() {
+            var et, xml, find, write_xml, root, cfg, cfg_parser, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm;
+            beforeEach(function() {
+                find_obj = {
+                    text:'hi',
+                    attrib:{Title:'old'}
+                };
+                root_obj = {
+                    attrib:{
+                        package:'android_pkg'
+                    }
+                };
+                find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
+                write_xml = jasmine.createSpy('ElementTree write');
+                root = jasmine.createSpy('ElementTree getroot').andReturn(root_obj);
+                et = spyOn(ET, 'ElementTree').andReturn({
+                    find:find,
+                    write:write_xml,
+                    getroot:root
+                });
+                xml = spyOn(ET, 'XML');
+                cfg = new config_parser();
+                cfg.name = function() { return 'testname' };
+                cfg.packageName = function() { return 'testpkg' };
+                cfg.version = function() { return 'one point oh' };
+                cfg.access.get = function() { return [] };
+                cfg.preference.get = function() { return [] };
+                cfg_access_add = jasmine.createSpy('config_parser access add');
+                cfg_access_rm = jasmine.createSpy('config_parser access rm');
+                cfg_pref_rm = jasmine.createSpy('config_parser pref rm');
+                cfg_pref_add = jasmine.createSpy('config_parser pref add');
+                cfg_parser = spyOn(util, 'config_parser').andReturn({
+                    access:{
+                        remove:cfg_access_rm,
+                        get:function(){},
+                        add:cfg_access_add
+                    },
+                    preference:{
+                        remove:cfg_pref_rm,
+                        get:function(){},
+                        add:cfg_pref_add
+                    }
+                });
+                readdir.andReturn(['test.sln']);
+            });
+
+            it('should write out the app name to wmappmanifest.xml', function() {
+                p.update_from_config(cfg);
+                expect(find_obj.attrib.Title).toEqual('testname');
+            });
+            it('should write out the app id to csproj file', function() {
+                p.update_from_config(cfg);
+                expect(find_obj.text).toContain('testpkg');
+            });
+            it('should write out the app version to wmappmanifest.xml', function() {
+                p.update_from_config(cfg);
+                expect(find_obj.attrib.Version).toEqual('one point oh');
+            });
+        });
+        describe('www_dir method', function() {
+            it('should return www', function() {
+                expect(p.www_dir()).toEqual(path.join(wp8_proj, 'www'));
+            });
+        });
+        describe('staging_dir method', function() {
+            it('should return .staging/www', function() {
+                expect(p.staging_dir()).toEqual(path.join(wp8_proj, '.staging', 'www'));
+            });
         });
         describe('update_www method', function() {
-            it('should update all www assets', function() {
-                var newFile = path.join(util.projectWww(project_path), 'somescript.js');
-                this.after(function() {
-                    shell.rm('-f', newFile);
-                });
-                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
-                parser.update_www();
-                expect(fs.existsSync(path.join(wp8_project_path, 'www', 'somescript.js'))).toBe(true);
-            });
-            it('should write out windows-phone js to cordova.js', function() {
-                parser.update_www();
-                expect(fs.readFileSync(path.join(wp8_project_path, 'www', 'cordova.js'),'utf-8')).toEqual(fs.readFileSync(path.join(util.libDirectory, 'cordova-wp8', 'templates', 'standalone', 'www', 'cordova.js'), 'utf-8'));
-            });
-        });
-
-        xdescribe('update_overrides method',function() {
-            /*var mergesPath = path.join(util.appDir(project_path), 'merges', 'android');
-            var newFile = path.join(mergesPath, 'merge.js');
+            var update_csproj;
             beforeEach(function() {
-                shell.mkdir('-p', mergesPath);
-                fs.writeFileSync(newFile, 'alert("sup");', 'utf-8');
+                update_csproj = spyOn(p, 'update_csproj');
             });
-            afterEach(function() {
-                shell.rm('-rf', mergesPath);
+            it('should rm project-level www and cp in platform agnostic www', function() {
+                p.update_www();
+                expect(rm).toHaveBeenCalled();
+                expect(cp).toHaveBeenCalled();
             });
-            it('should copy a new file from merges into www', function() {
-                parser.update_overrides();
-                expect(fs.existsSync(path.join(wp8_project_path, 'assets', 'www', 'merge.js'))).toBe(true);
+            it('should copy in a fresh cordova.js from stock cordova lib if no custom lib is specified', function() {
+                p.update_www();
+                expect(write).toHaveBeenCalled();
+                expect(read.mostRecentCall.args[0]).toContain(util.libDirectory);
             });
-
-            it('should copy a file from merges over a file in www', function() {
-                var newFileWWW = path.join(util.projectWww(project_path), 'merge.js');
-                fs.writeFileSync(newFileWWW, 'var foo=1;', 'utf-8');
-                this.after(function() {
-                    shell.rm('-rf', newFileWWW);
-                });
-                parser.update_overrides();
-                expect(fs.existsSync(path.join(wp8_project_path, 'assets', 'www', 'merge.js'))).toBe(true);
-                expect(fs.readFileSync(path.join(wp8_project_path, 'assets', 'www', 'merge.js'),'utf-8')).toEqual('alert("sup");');
-            });*/
-
-            // TODO : figure out if this is supported
-            //expect(true).toBe(false);
+            it('should copy in a fresh cordova.js from custom cordova lib if custom lib is specified', function() {
+                var custom_path = '/custom/path';
+                custom.andReturn(custom_path);
+                p.update_www();
+                expect(write).toHaveBeenCalled();
+                expect(read.mostRecentCall.args[0]).toContain(custom_path);
+            });
         });
-
+        describe('update_staging method', function() {
+            it('should do nothing if staging dir does not exist', function() {
+                exists.andReturn(false);
+                p.update_staging();
+                expect(cp).not.toHaveBeenCalled();
+            });
+            it('should copy the staging dir into www if staging dir exists', function() {
+                p.update_staging();
+                expect(cp).toHaveBeenCalled();
+            });
+        });
         describe('update_project method', function() {
-            it('should invoke update_www', function() {
-                var spyWww = spyOn(parser, 'update_www');
-                parser.update_project(config);
-                expect(spyWww).toHaveBeenCalled();
+            var config, www, overrides, staging, svn;
+            beforeEach(function() {
+                config = spyOn(p, 'update_from_config');
+                www = spyOn(p, 'update_www');
+                staging = spyOn(p, 'update_staging');
+                svn = spyOn(util, 'deleteSvnFolders');
             });
-            it('should invoke update_from_config', function() {
-                var spyConfig = spyOn(parser, 'update_from_config');
-                parser.update_project(config);
-                expect(spyConfig).toHaveBeenCalled();
+            it('should call update_from_config', function() {
+                p.update_project();
+                expect(config).toHaveBeenCalled();
             });
-            it('should call out to util.deleteSvnFolders', function() {
-                var spy = spyOn(util, 'deleteSvnFolders');
-                parser.update_project(config);
-                expect(spy).toHaveBeenCalled();
+            it('should throw if update_from_config throws', function(done) {
+                var err = new Error('uh oh!');
+                config.andCallFake(function() { throw err; });
+                p.update_project({}, function(err) {
+                    expect(err).toEqual(err);
+                    done();
+                });
+            });
+            it('should call update_www', function() {
+                p.update_project();
+                expect(www).toHaveBeenCalled();
+            });
+            it('should call update_staging', function() {
+                p.update_project();
+                expect(staging).toHaveBeenCalled();
+            });
+            it('should call deleteSvnFolders', function() {
+                p.update_project();
+                expect(svn).toHaveBeenCalled();
             });
         });
     });
