@@ -21,6 +21,7 @@ var path          = require('path'),
     shell         = require('shelljs'),
     platforms     = require('../platforms'),
     events        = require('./events'),
+    config        = require('./config'),
     hooker        = require('./hooker'),
     https         = require('follow-redirects').https,
     zlib          = require('zlib'),
@@ -51,9 +52,8 @@ module.exports = {
         shell.mkdir('-p', id_dir);
         var download_dir = path.join(id_dir, version);
         if (fs.existsSync(download_dir)) {
-            events.emit('log', 'Platform library for "' + platform + '" already exists. No need to download. Continuing.');
-            if (callback) callback();
-            return;
+            events.emit('log', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
+            if (callback) return callback();
         }
         hooker.fire('before_library_download', {
             platform:platform,
@@ -151,5 +151,14 @@ module.exports = {
                 });
             }
         });
+    },
+    based_on_config:function(project_root, platform, callback) {
+        var custom_path = config.has_custom_path(project_root, platform);
+        if (custom_path) {
+            var dot_file = config.read(project_root);
+            module.exports.custom(dot_file.lib[platform].uri, dot_file.lib[platform].id, platform, dot_file.lib[platform].version, callback);
+        } else {
+            module.exports.cordova(platform, callback);
+        }
     }
 };

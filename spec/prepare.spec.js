@@ -22,6 +22,7 @@ var cordova = require('../cordova'),
     path = require('path'),
     fs = require('fs'),
     util = require('../src/util'),
+    lazy_load = require('../src/lazy_load'),
     platforms = require('../platforms'),
     hooker = require('../src/hooker'),
     fixtures = path.join(__dirname, 'fixtures'),
@@ -32,7 +33,7 @@ var supported_platforms = Object.keys(platforms).filter(function(p) { return p !
 var supported_platforms_paths = supported_platforms.map(function(p) { return path.join(project_dir, 'platforms', p, 'www'); }); 
 
 describe('prepare command', function() {
-    var is_cordova, list_platforms, fire, config_parser, parsers = {}, plugman_prepare, find_plugins, plugman_get_json;
+    var is_cordova, list_platforms, fire, config_parser, parsers = {}, plugman_prepare, find_plugins, plugman_get_json, load;
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
@@ -52,6 +53,7 @@ describe('prepare command', function() {
         plugman_prepare = spyOn(plugman, 'prepare');
         find_plugins = spyOn(util, 'findPlugins').andReturn([]);
         plugman_get_json = spyOn(plugman.config_changes, 'get_platform_json').andReturn({});
+        load = spyOn(lazy_load, 'based_on_config').andCallFake(function(root, platform, cb) { cb(); });
     });
 
     describe('failure', function() {
@@ -83,6 +85,12 @@ describe('prepare command', function() {
             cordova.prepare();
             supported_platforms.forEach(function(p) {
                 expect(parsers[p]).toHaveBeenCalled();
+            });
+        });
+        it('should invoke lazy_load for each platform to make sure platform libraries are loaded', function() {
+            cordova.prepare();
+            supported_platforms.forEach(function(p) {
+                expect(load).toHaveBeenCalledWith(project_dir, p, jasmine.any(Function));
             });
         });
         describe('plugman integration', function() {
