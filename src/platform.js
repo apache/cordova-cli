@@ -96,34 +96,25 @@ module.exports = function platform(command, targets, callback) {
                     }
                 });
             });
-            var config_json = config.read(projectRoot);
             hooks.fire('before_platform_add', opts, function(err) {
                 if (err) {
                     if (callback) callback(err);
                     else throw err;
                 } else {
+                    var config_json = config.read(projectRoot);
                     targets.forEach(function(t) {
-                        if (config_json.lib && config_json.lib[t]) {
-                            events.emit('log', 'Using custom cordova platform library for "' + t + '".');
-                            lazy_load.custom(config_json.lib[t].uri, config_json.lib[t].id, t, config_json.lib[t].version, function(err) {
-                                if (err) {
-                                    if (callback) callback(err);
-                                    else throw err;
-                                } else {
+                        lazy_load.based_on_config(projectRoot, t, function(err) {
+                            if (err) {
+                                if (callback) callback(err);
+                                else throw err;
+                            } else {
+                                if (config_json.lib && config_json.lib[t]) {
                                     call_into_create(t, projectRoot, cfg, config_json.lib[t].id, config_json.lib[t].version, callback, end);
-                                }
-                            });
-                        } else {
-                            events.emit('log', 'Using stock cordova platform library for "' + t + '".');
-                            lazy_load.cordova(t, function(err) {
-                                if (err) {
-                                    if (callback) callback(err);
-                                    else throw err;
                                 } else {
                                     call_into_create(t, projectRoot, cfg, 'cordova', platforms[t].version, callback, end);
                                 }
-                            });
-                        }
+                            }
+                        });
                     });
                 }
             });

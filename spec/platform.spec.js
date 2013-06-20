@@ -33,7 +33,7 @@ var supported_platforms = Object.keys(platforms).filter(function(p) { return p !
 var project_dir = '/some/path';
 
 describe('platform command', function() {
-    var is_cordova, list_platforms, fire, config_parser, find_plugins, config_read, load_custom, load_cordova, rm, mkdir, existsSync, supports, pkg, name, exec, prep_spy, plugman_install, parsers = {};
+    var is_cordova, list_platforms, fire, config_parser, find_plugins, config_read, load, load_custom, rm, mkdir, existsSync, supports, pkg, name, exec, prep_spy, plugman_install, parsers = {};
     beforeEach(function() {
         supported_platforms.forEach(function(p) {
             parsers[p] = spyOn(platforms[p], 'parser').andReturn({
@@ -54,10 +54,10 @@ describe('platform command', function() {
         find_plugins = spyOn(util, 'findPlugins').andReturn([]);
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
         config_read = spyOn(config, 'read').andReturn({});
-        load_custom = spyOn(lazy_load, 'custom').andCallFake(function(uri, id, platform, version, cb) {
+        load = spyOn(lazy_load, 'based_on_config').andCallFake(function(root, platform, cb) {
             cb();
         });
-        load_cordova = spyOn(lazy_load, 'cordova').andCallFake(function(platform, cb) {
+        load_custom = spyOn(lazy_load, 'custom').andCallFake(function(url, id, p, v, cb) {
             cb();
         });
         rm = spyOn(shell, 'rm');
@@ -131,7 +131,8 @@ describe('platform command', function() {
                 expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp8.cordova.2.8.0.bin.create/gi);
                 expect(exec.mostRecentCall.args[0]).toContain(project_dir);
             });
-            it('should support using custom versions of libraries by calling into lazy_load.custom', function() {
+            it('should call into lazy_load.custom if there is a user-specified configruation for consuming custom libraries', function() {
+                load.andCallThrough();
                 config_read.andReturn({
                     lib:{
                         'wp7':{
