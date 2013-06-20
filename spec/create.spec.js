@@ -130,5 +130,27 @@ describe('create command', function () {
                 done();
             });
         });
+        it('should add a missing www/config.xml', function(done) {
+            exists.andCallFake(function(path) {
+                // return false for config.xml otherwise return true (default spy action)
+                return !path.match('config.xml');
+            });
+            cordova.create(tempDir, function() {
+                expect(shell.cp).toHaveBeenCalledWith(
+                    path.resolve(__dirname, '..', 'templates', 'config.xml'),
+                    jasmine.any(String)
+                );
+                done();
+            });
+        });
+        it('should not replace an existing www/config.xml', function(done) {
+            cordova.create(tempDir, function() {
+                expect(shell.cp).not.toHaveBeenCalledWith(
+                    path.resolve(__dirname, '..', 'templates', 'config.xml'),
+                    jasmine.any(String)
+                );
+                done();
+            });
+        });
     });
 });

@@ -117,11 +117,13 @@ module.exports = function create (dir, id, name, callback) {
             }
         }
         shell.cp('-rf', path.join(www_lib, '*'), www_dir);
-        // Copy over template config.xml (TODO: CB-3771 will remove the need for this)
-        var template_config_xml = path.join(__dirname, '..', 'templates', 'config.xml');
-        shell.cp(template_config_xml, www_dir);
-        // Write out id and name to config.xml
         var configPath = util.projectConfig(dir);
+        // Add template config.xml for apps that are missing it
+        if (!fs.existsSync(configPath)) {
+            var template_config_xml = path.join(__dirname, '..', 'templates', 'config.xml');
+            shell.cp(template_config_xml, www_dir);
+        }
+        // Write out id and name to config.xml
         var config = new util.config_parser(configPath);
         config.packageName(id);
         config.name(name);
