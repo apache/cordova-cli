@@ -36,11 +36,13 @@ module.exports = function blackberry_parser(project) {
 };
 
 module.exports.check_requirements = function(project_root, callback) {
-    if (process.env && process.env.QNX_HOST) {
-        callback(false);
-    } else {
-        callback('The BB10NDK environment variable QNX_HOST is missing. Make sure you run `source <path to bb10ndk>/bbndk-env.sh`. Even better, add `source`ing that script to your .bash_profile or equivalent so you don\'t have to do it manually every time.');
-    }
+    shell.exec('blackberry-deploy', {silent:true, async:true}, function(code, output) {
+        if (code > 0) {
+            callback('The binary `blackberry-deploy` was not found. Make sure you have the latest BlackBerry 10 WebWorks SDK installed, and have its /dependencies/tools/bin folder added to your PATH! Error output: ' + output);
+        } else {
+            callback(false);
+        }
+    });
 };
 
 module.exports.prototype = {

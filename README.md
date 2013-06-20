@@ -10,7 +10,7 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/gu
 
 * [nodejs](http://nodejs.org/)
 * SDKs for every platform you wish to support
-  - BlackBerry 10: [BlackBerry 10 WebWorks SDK](http://developer.blackberry.com/html5/download/) as well as the [BlackBerry 10 NDK](http://developer.blackberry.com/native/download/). You will also need to have the NDK environment variables on your path by running `bb10ndk/bbndk-env.sh`.
+  - BlackBerry 10: [BlackBerry 10 WebWorks SDK](http://developer.blackberry.com/html5/download/). Make sure you have the `dependencies/tools/bin` folder inside the SDK directory added to your path!
   - iOS: [iOS SDK](http://developer.apple.com) with the latest Xcode and Xcode Command Line Tools
   - [Android SDK](http://developer.android.com) - **NOTE** This tool
     will not work unless you have the absolute latest updates for all
