@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "2.8.22",
+  "version": "2.8.23",
   "preferGlobal": "true",
   "description": "Cordova command line interface tool",
   "main": "cordova",
