@@ -30,16 +30,14 @@ var platforms = require('../../platforms'),
 
 describe('blackberry project parser', function() {
     var proj = '/some/path';
-    var exists, custom, config_p;
-    var proc = process.env.QNX_HOST;
+    var exists, custom, config_p, sh;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
         custom = spyOn(config, 'has_custom_path').andReturn(false);
-        process.env.QNX_HOST = 'something';
         config_p = spyOn(util, 'config_parser');
-    });
-    afterEach(function() {
-        process.env.QNX_HOST = proc;
+        sh = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
+            cb(0, '');
+        });
     });
 
     describe('constructions', function() {
@@ -59,14 +57,16 @@ describe('blackberry project parser', function() {
     });
 
     describe('check_requirements', function() {
-        it('should fire a callback if the QNX_HOST environment variable is not deinfed', function(done) {
-            process.env.QNX_HOST = '';
+        it('should fire a callback if the blackberry-deploy shell-out fails', function(done) {
+            sh.andCallFake(function(cmd, opts, cb) {
+                cb(1, 'no bb-deploy dewd!');
+            });
             platforms.blackberry.parser.check_requirements(proj, function(err) {
-                expect(err).toContain('QNX_HOST is missing');
+                expect(err).toContain('no bb-deploy dewd');
                 done();
             });
         });
-        it('should fire a callback with no error if QNX_HOST variable exists', function(done) {
+        it('should fire a callback with no error if shell out is successful', function(done) {
             platforms.blackberry.parser.check_requirements(proj, function(err) {
                 expect(err).toEqual(false);
                 done();
