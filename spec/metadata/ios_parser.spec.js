@@ -75,6 +75,15 @@ describe('ios project parser', function () {
                 done();
             });
         });
+        it('should not return an error if the xcodebuild version 2 digits and not proper semver (eg: 5.0), but still satisfies the MIN_XCODE_VERSION', function(done) {
+            exec.andCallFake(function(cmd, opts, cb) {
+                cb(0, 'version 5.0');
+            });
+            platforms.ios.parser.check_requirements(proj, function(err) {
+                expect(err).toBe(false);
+                done();
+            });
+        });
     });
 
     describe('instance', function() {
