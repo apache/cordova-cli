@@ -72,6 +72,8 @@ module.exports.check_requirements = function(project_root, callback) {
             callback('Xcode is (probably) not installed, specifically the command `xcodebuild` is unavailable or erroring out. Output of `'+command+'` is: ' + output);
         } else {
             var xc_version = output.split('\n')[0].split(' ')[1];
+            xc_version = xc_version.split(".");
+            xc_version = [xc_version[0]||'0',xc_version[1]||'0',xc_version[2]||'0'].join(".");
             if (!semver.satisfies(xc_version, MIN_XCODE_VERSION)) {
                 callback('Xcode version installed is too old. Minimum: ' + MIN_XCODE_VERSION + ', yours: ' + xc_version);
             } else callback(false);
