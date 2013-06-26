@@ -27,7 +27,7 @@ var platforms = require('../../platforms'),
     cordova = require('../../cordova');
 
 describe('android project parser', function() {
-    var proj = '/some/path';
+    var proj = path.join('some', 'path');
     var exists, exec, custom;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
@@ -42,7 +42,7 @@ describe('android project parser', function() {
             exists.andReturn(false);
             expect(function() {
                 new platforms.android.parser(proj);
-            }).toThrow('The provided path "/some/path" is not an Android project.');
+            }).toThrow('The provided path "' + proj + '" is not an Android project.');
         });
         it('should create an instance with path, strings, manifest and android_config properties', function() {
             expect(function() {
@@ -90,7 +90,7 @@ describe('android project parser', function() {
             });
         });
         it('should check that we can update an android project by calling `android update project` on a custom path if it is so defined', function(done) {
-            var custom_path = '/some/custom/path/to/android/lib'
+            var custom_path = path.join('some', 'custom', 'path', 'to', 'android', 'lib');
             custom.andReturn(custom_path);
             platforms.android.parser.check_requirements(proj, function(err) {
                 expect(err).toEqual(false);
@@ -225,7 +225,7 @@ describe('android project parser', function() {
                 expect(read.mostRecentCall.args[0]).toContain(util.libDirectory);
             });
             it('should copy in a fresh cordova.js from custom cordova lib if custom lib is specified', function() {
-                var custom_path = '/custom/path';
+                var custom_path = path.join('custom', 'path');
                 custom.andReturn(custom_path);
                 p.update_www();
                 expect(write).toHaveBeenCalled();

@@ -74,7 +74,7 @@ describe('wp8 project parser', function() {
             });
         });
         it('should check by calling check_reqs on a custom path if it is so defined', function(done) {
-            var custom_path = '/some/custom/path/to/wp8/lib'
+            var custom_path = path.join('some','custom','path','to','wp8','lib');
             custom.andReturn(custom_path);
             platforms.wp8.parser.check_requirements(proj, function(err) {
                 expect(err).toEqual(false);
@@ -183,7 +183,7 @@ describe('wp8 project parser', function() {
                 expect(read.mostRecentCall.args[0]).toContain(util.libDirectory);
             });
             it('should copy in a fresh cordova.js from custom cordova lib if custom lib is specified', function() {
-                var custom_path = '/custom/path';
+                var custom_path = path.join('custom','path');
                 custom.andReturn(custom_path);
                 p.update_www();
                 expect(write).toHaveBeenCalled();

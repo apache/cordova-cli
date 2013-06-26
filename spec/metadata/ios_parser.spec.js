@@ -29,7 +29,7 @@ var platforms = require('../../platforms'),
     cordova = require('../../cordova');
 
 describe('ios project parser', function () {
-    var proj = '/some/path';
+    var proj = path.join('some', 'path');
     var exec, custom, readdir, cfg_parser;
     beforeEach(function() {
         exec = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
@@ -52,7 +52,7 @@ describe('ios project parser', function () {
                 expect(p.path).toEqual(proj);
                 expect(p.pbxproj).toEqual(path.join(proj, 'test.xcodeproj', 'project.pbxproj'));
                 expect(p.xcodeproj).toEqual(path.join(proj, 'test.xcodeproj'));
-                expect(p.originalName).toEqual('/test');
+                expect(p.originalName).toEqual(path.join(proj, 'test');
             }).not.toThrow();
         });
     });
@@ -247,7 +247,7 @@ describe('ios project parser', function () {
                 expect(cp.mostRecentCall.args[1]).toMatch(util.libDirectory);
             });
             it('should copy in a fresh cordova.js from custom cordova lib if custom lib is specified', function() {
-                var custom_path = '/custom/path';
+                var custom_path = path.join('custom', 'path');
                 custom.andReturn(custom_path);
                 p.update_www();
                 expect(cp.mostRecentCall.args[1]).toMatch(custom_path);

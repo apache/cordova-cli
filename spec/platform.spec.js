@@ -30,7 +30,7 @@ var cordova = require('../cordova'),
 
 var cwd = process.cwd();
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
-var project_dir = '/some/path';
+var project_dir = path.join('some', 'path');
 
 describe('platform command', function() {
     var is_cordova, list_platforms, fire, config_parser, find_plugins, config_read, load, load_custom, rm, mkdir, existsSync, supports, pkg, name, exec, prep_spy, plugman_install, parsers = {};
