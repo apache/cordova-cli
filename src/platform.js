@@ -67,24 +67,6 @@ module.exports = function platform(command, targets, callback) {
     };
 
     switch(command) {
-        case 'ls':
-        case 'list':
-            var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
-            hooks.fire('before_platform_ls', function(err) {
-                if (err) {
-                    if (callback) callback(err);
-                    else throw err;
-                } else {
-                    events.emit('results', (platforms_on_fs.length ? platforms_on_fs : 'No platforms added. Use `cordova platform add <platform>`.'));
-                    hooks.fire('after_platform_ls', function(err) {
-                        if (err) {
-                            if (callback) callback(err);
-                            else throw err;
-                        }
-                    });
-                }
-            });
-            break;
         case 'add':
             var end = n(targets.length, function() {
                 hooks.fire('after_platform_add', opts, function(err) {
@@ -146,8 +128,25 @@ module.exports = function platform(command, targets, callback) {
                 }
             });
             break;
+        case 'ls':
+        case 'list':
         default:
-            throw new Error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.');
+            var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
+            hooks.fire('before_platform_ls', function(err) {
+                if (err) {
+                    if (callback) callback(err);
+                    else throw err;
+                } else {
+                    events.emit('results', (platforms_on_fs.length ? platforms_on_fs : 'No platforms added. Use `cordova platform add <platform>`.'));
+                    hooks.fire('after_platform_ls', function(err) {
+                        if (err) {
+                            if (callback) callback(err);
+                            else throw err;
+                        }
+                    });
+                }
+            });
+            break;
     }
 };
 

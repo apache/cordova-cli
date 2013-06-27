@@ -62,23 +62,6 @@ module.exports = function plugin(command, targets, callback) {
     };
 
     switch(command) {
-        case 'ls':
-        case 'list':
-            hooks.fire('before_plugin_ls', function(err) {
-                if (err) {
-                    if (callback) callback(err);
-                    else throw err;
-                } else {
-                    events.emit('results', (plugins.length ? plugins : 'No plugins added. Use `cordova plugin add <plugin>`.'));
-                    hooks.fire('after_plugin_ls', function(err) {
-                        if (err) {
-                            if (callback) callback(err);
-                            else throw err;
-                        }
-                    });
-                }
-            });
-            break;
         case 'add':
             var end = n(targets.length, function() {
                 hooks.fire('after_plugin_add', opts, function(err) {
@@ -176,9 +159,23 @@ module.exports = function plugin(command, targets, callback) {
                 }
             });
             break;
+        case 'ls':
+        case 'list':
         default:
-            var err = new Error('Unrecognized command "' + command + '". Use either `add`, `remove`, or `list`.');
-            if (callback) callback(err);
-            else throw err;
+            hooks.fire('before_plugin_ls', function(err) {
+                if (err) {
+                    if (callback) callback(err);
+                    else throw err;
+                } else {
+                    events.emit('results', (plugins.length ? plugins : 'No plugins added. Use `cordova plugin add <plugin>`.'));
+                    hooks.fire('after_plugin_ls', function(err) {
+                        if (err) {
+                            if (callback) callback(err);
+                            else throw err;
+                        }
+                    });
+                }
+            });
+            break;
     }
 };
