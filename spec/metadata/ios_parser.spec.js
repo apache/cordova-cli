@@ -52,7 +52,6 @@ describe('ios project parser', function () {
                 expect(p.path).toEqual(proj);
                 expect(p.pbxproj).toEqual(path.join(proj, 'test.xcodeproj', 'project.pbxproj'));
                 expect(p.xcodeproj).toEqual(path.join(proj, 'test.xcodeproj'));
-                expect(p.originalName).toEqual(path.join(proj, 'test');
             }).not.toThrow();
         });
     });
