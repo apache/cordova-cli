@@ -30,7 +30,7 @@ module.exports = {
     }, 
     'wp7' : {
         parser : require('./src/metadata/wp7_parser'),
-        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp7.git',
+        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
         version: '2.9.0'
     },
     'wp8' : {
