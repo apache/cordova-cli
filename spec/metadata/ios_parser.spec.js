@@ -243,13 +243,13 @@ describe('ios project parser', function () {
             });
             it('should copy in a fresh cordova.js from stock cordova lib if no custom lib is specified', function() {
                 p.update_www();
-                expect(cp.mostRecentCall.args[1]).toMatch(util.libDirectory);
+                expect(cp.mostRecentCall.args[1]).toContain(util.libDirectory);
             });
             it('should copy in a fresh cordova.js from custom cordova lib if custom lib is specified', function() {
                 var custom_path = path.join('custom', 'path');
                 custom.andReturn(custom_path);
                 p.update_www();
-                expect(cp.mostRecentCall.args[1]).toMatch(custom_path);
+                expect(cp.mostRecentCall.args[1]).toContain(custom_path);
             });
         });
         describe('update_overrides method', function() {
