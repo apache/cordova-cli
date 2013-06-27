@@ -34,8 +34,9 @@ module.exports = {
     // Runs up the directory chain looking for a .cordova directory.
     // IF it is found we are in a Cordova project.
     // If not.. we're not. HOME directory doesnt count.
+    // HOMEDRIVE is used to catch when we've backed up to the root drive in windows (i.e C:\)
     isCordova: function isCordova(dir) {
-        if (dir) {
+        if (dir && dir != process.env['HOMEDRIVE'] + path.sep) {
             if (dir == HOME) {
                 return false;
             } else {
