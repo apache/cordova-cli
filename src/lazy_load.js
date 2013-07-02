@@ -24,6 +24,7 @@ var path          = require('path'),
     config        = require('./config'),
     hooker        = require('./hooker'),
     https         = require('follow-redirects').https,
+    http          = require('follow-redirects').http,
     zlib          = require('zlib'),
     tar           = require('tar'),
     URL           = require('url'),
@@ -69,13 +70,28 @@ module.exports = {
                 if (fs.existsSync(filename)) {
                     shell.rm(filename);
                 }
-                var req_opts = {
-                    hostname: uri.hostname,
-                    path: uri.path
-                };
+                var https_proxy = process.env.https_proxy || process.env.HTTPS_PROXY;
+                if (https_proxy) {
+                    var proxy = URL.parse(https_proxy);
+                    var req_opts = {
+                        hostname: proxy.hostname,
+                        port: proxy.port,
+                        path: url,
+                        headers: {
+                            Host: uri.hostname
+                        }
+                    };
+                    var client = proxy.protocol === 'http:' ? http: https;
+                } else {
+                    var req_opts = {
+                        hostname: uri.hostname,
+                        path: uri.path
+                    };
+                    var client = https;
+                }
                 events.emit('log', 'Requesting ' + url + '...');
                 // TODO: may not be an https request..
-                var req = https.request(req_opts, function(res) {
+                var req = client.request(req_opts, function(res) {
                     var downloadfile = fs.createWriteStream(filename, {'flags': 'a'});
 
                     res.on('data', function(chunk){
