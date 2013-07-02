@@ -107,61 +107,61 @@ describe('hooker', function() {
         });
 
         describe('success', function() {
-            it('should execute all scripts in order and fire callback', function(done) {
-                var hook = path.join(tempDir, '.cordova', 'hooks', 'before_build');
-                shell.mkdir('-p', hook);
-                this.after(function() { shell.rm('-rf', tempDir); });
-                if (platform.match(/(win32|win64)/)) {
-                    shell.cp(path.join(hooks, 'test', '0.bat'), hook);
-                    shell.cp(path.join(hooks, 'test', '1.bat'), hook);
-                } else {
-                    shell.cp(path.join(hooks, 'test', '0.sh'), hook);
-                    shell.cp(path.join(hooks, 'test', '1.sh'), hook);
-                }
-                fs.readdirSync(hook).forEach(function(script) {
-                    fs.chmodSync(path.join(hook, script), '754');
-                });
-                var returnValue;
-                var s = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
-                    cb(0, '');
-                });
-                h.fire('before_build', function(err) {
-                    expect(err).not.toBeDefined();
+            describe('project-level hooks', function() {
+                var hook = path.join(tempDir, '.cordova', 'hooks', 'before_build'),
+                    s;
+                beforeEach(function() {
+                    shell.mkdir('-p', hook);
                     if (platform.match(/(win32|win64)/)) {
-                        expect(s.calls[0].args[0]).toMatch(/0.bat/);
-                        expect(s.calls[1].args[0]).toMatch(/1.bat/);
+                        shell.cp(path.join(hooks, 'test', '0.bat'), hook);
+                        shell.cp(path.join(hooks, 'test', '1.bat'), hook);
                     } else {
-                        expect(s.calls[0].args[0]).toMatch(/0.sh/);
-                        expect(s.calls[1].args[0]).toMatch(/1.sh/);
+                        shell.cp(path.join(hooks, 'test', '0.sh'), hook);
+                        shell.cp(path.join(hooks, 'test', '1.sh'), hook);
                     }
-                    done();
+                    fs.readdirSync(hook).forEach(function(script) {
+                        fs.chmodSync(path.join(hook, script), '754');
+                    });
+                    s = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
+                        cb(0, '');
+                    });
                 });
-            });
-            it('should pass the project root folder as parameter into the project-level hooks', function(done) {
-                var hook = path.join(tempDir, '.cordova', 'hooks', 'before_build');
-                shell.mkdir('-p', hook);
-                this.after(function() { shell.rm('-rf', tempDir); });
-                if (platform.match(/(win32|win64)/)) {
-                    shell.cp(path.join(hooks, 'test', '0.bat'), hook);
-                } else {
-                    shell.cp(path.join(hooks, 'test', '0.sh'), hook);
-                }
-                fs.readdirSync(hook).forEach(function(script) {
-                    fs.chmodSync(path.join(hook, script), '754');
+                afterEach(function() {
+                    shell.rm('-rf', tempDir);
                 });
-                var s = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
-                    cb(0, '');
+                it('should execute all scripts in order and fire callback', function(done) {
+                    h.fire('before_build', function(err) {
+                        expect(err).not.toBeDefined();
+                        if (platform.match(/(win32|win64)/)) {
+                            expect(s.calls[0].args[0]).toMatch(/0.bat/);
+                            expect(s.calls[1].args[0]).toMatch(/1.bat/);
+                        } else {
+                            expect(s.calls[0].args[0]).toMatch(/0.sh/);
+                            expect(s.calls[1].args[0]).toMatch(/1.sh/);
+                        }
+                        done();
+                    });
                 });
-                h.fire('before_build', function(err) {
-                    expect(err).not.toBeDefined();
-                    var param_str;
-                    if (platform.match(/(win32|win64)/)) {
-                        param_str = '0.bat "'+tempDir+'"';
-                    } else { 
-                        param_str = '0.sh "'+tempDir+'"'; 
-                    }
-                    expect(s.calls[0].args[0].indexOf(param_str)).not.toEqual(-1);
-                    done();
+                it('should pass the project root folder as parameter into the project-level hooks', function(done) {
+                    h.fire('before_build', function(err) {
+                        expect(err).not.toBeDefined();
+                        var param_str;
+                        if (platform.match(/(win32|win64)/)) {
+                            param_str = '0.bat "'+tempDir+'"';
+                        } else { 
+                            param_str = '0.sh "'+tempDir+'"'; 
+                        }
+                        expect(s.calls[0].args[0].indexOf(param_str)).not.toEqual(-1);
+                        done();
+                    });
+                });
+                it('should skip any files starting with a dot on the scripts', function(done) {
+                    shell.cp(path.join(hooks, 'test', '0.bat'), path.join(hook, '.swp.file'));
+                    h.fire('before_build', function(err) {
+                        expect(err).not.toBeDefined();
+                        expect(s).not.toHaveBeenCalledWith(path.join(tempDir, '.cordova', 'hooks', 'before_build', '.swp.file') + ' "' + tempDir + '"', jasmine.any(Object), jasmine.any(Function));
+                        done();
+                    });
                 });
             });
             describe('module-level hooks', function() {

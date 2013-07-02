@@ -57,7 +57,9 @@ module.exports.prototype = {
             if (!(fs.existsSync(dir))) {
                 callback(); // hooks directory got axed post-create; ignore.
             } else {
-                var scripts = fs.readdirSync(dir);
+                var scripts = fs.readdirSync(dir).filter(function(s) {
+                    return s[0] != '.';
+                });
                 execute_scripts_serially(scripts, self.root, dir, function(err) {
                     if (err) {
                         callback(err);
