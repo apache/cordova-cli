@@ -24,8 +24,8 @@ var cordova_util  = require('./util'),
     platforms     = require('../platforms'),
     n             = require('ncallbacks'),
     hooker        = require('./hooker'),
-    events        = require('./events'),
-    plugman       = require('plugman');
+    plugman       = require('plugman'),
+    events        = require('./events');
 
 module.exports = function plugin(command, targets, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());

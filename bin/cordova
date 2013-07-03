@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 var tokens = process.argv.slice(2, process.argv.length),
-    cordova= require('../cordova');
+    cordova= require('../cordova'),
+    plugman= require('plugman');
 
 var cmd, version = false, verbose = false, current;
 
@@ -27,6 +28,8 @@ cordova.on('results', console.log);
 if (verbose) {
     cordova.on('log', console.log);
     cordova.on('warn', console.warn);
+    plugman.on('log', console.log);
+    plugman.on('warn', console.warn);
 }
 
 if (version) {
