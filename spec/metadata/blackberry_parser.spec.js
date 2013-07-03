@@ -215,8 +215,6 @@ describe('blackberry project parser', function() {
                 staging = spyOn(p, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
                 parse = spyOn(JSON, 'parse').andReturn({blackberry:{qnx:{}}});
-                get_env = spyOn(p, 'get_blackberry_environment');
-                set_env = spyOn(p, 'write_blackberry_environment');
             });
             it('should call update_from_config', function() {
                 p.update_project();
@@ -245,51 +243,6 @@ describe('blackberry project parser', function() {
             it('should call deleteSvnFolders', function() {
                 p.update_project();
                 expect(svn).toHaveBeenCalled();
-            });
-            it('should always write out the bb env', function() {
-                p.update_project();
-                expect(set_env).toHaveBeenCalled();
-            });
-            it('should retrieve then write out the bb env if it is empty', function() {
-                parse.andReturn({});
-                get_env.andCallFake(function(cb) { cb(); });
-                p.update_project();
-                expect(get_env).toHaveBeenCalled();
-                expect(set_env).toHaveBeenCalled();
-            });
-        });
-        describe('get_blackberry_environment method', function() {
-            var parse, promptspy;
-            var random_info = {
-                signing_password:'poop',
-                device_ip:'1.1.1.1',
-                device_name:'black shadow',
-                device_password:'giddyup',
-                device_pin:'dont have one',
-                sim_ip:'1.2.3.4',
-                sim_name:'data',
-                sim_password:'modem'
-            };
-            beforeEach(function() {
-                parse = spyOn(JSON, 'parse').andReturn({blackberry:{qnx:{
-                }}});
-                spyOn(prompt, 'start');
-                promptspy = spyOn(prompt, 'get').andCallFake(function(ps, cb) {
-                    cb(false, random_info);
-                });
-            });
-            it('should call into prompt to retrieve info about BB env', function(done) {
-                p.get_blackberry_environment(function(err) {
-                    expect(promptspy).toHaveBeenCalled();
-                    done();
-                });
-            });
-            it('should write out info gathered from prompt to dot file', function(done) {
-                var expected_json = {blackberry:{qnx:random_info}};
-                p.get_blackberry_environment(function(err, results) {
-                    expect(write).toHaveBeenCalledWith(path.join(proj, '.cordova', 'config.json'), JSON.stringify(expected_json), 'utf-8');
-                    done();
-                });
             });
         });
     });
