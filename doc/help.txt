@@ -25,7 +25,6 @@ Project-Level Commands
     serve <PLATFORM> [PORT] ................... runs a local web server for the specified platform's www/
                                                 directory, with optional port number that defaults to 8000.
                                                 (Note: you must edit the native code to reference the server.)
-    ripple <PLATFORM> [PORT] .................. same as serve, but app displays within the ripple device emulator
 
 Command-line Flags/Options
 
