@@ -20,28 +20,43 @@ var cordova_util      = require('./util'),
     path              = require('path'),
     fs                = require('fs'),
     shell             = require('shelljs'),
-    et                = require('elementtree'),
     hooker            = require('./hooker'),
+    platforms         = require('./../platforms'),
     events            = require('./events'),
     n                 = require('ncallbacks');
 
-function shell_out_to_build(projectRoot, platform, error_callback, done) {
-    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'build') + '"';
-    events.emit('log', 'Compiling platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
+function shell_out_to_run(projectRoot, platform, error_callback, done) {
+    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" --device';
+    // TODO: inconsistent API for BB10 run command
+    if (platform == 'blackberry') {
+        var bb_project = path.join(projectRoot, 'platforms', 'blackberry')
+        var project = new platforms.blackberry.parser(bb_project);
+        if (project.has_device_target()) {
+            var bb_config = project.get_cordova_config();
+            var device = project.get_device_targets()[0].name;
+            cmd = '"' + path.join(bb_project, 'cordova', 'run') + '" --target=' + device + ' -k ' + bb_config.signing_password;
+        } else {
+            var err = new Error('No BlackBerry device targets defined. If you want to run `run` with BB10, please add a device target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
+            if (error_callback) error_callback(err);
+            else throw err;
+        }
+    }
+
+    events.emit('log', 'Running app on platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
         if (code > 0) {
-            var err = new Error('An error occurred while building the ' + platform + ' project. ' + output);
+            var err = new Error('An error occurred while running the ' + platform + ' project. ' + output);
             if (error_callback) error_callback(err);
             else throw err;
         } else {
-            events.emit('log', 'Platform "' + platform + '" compiled successfully.');
+            events.emit('log', 'Platform "' + platform + '" ran successfully.');
             if (done) done();
         }
     });
 }
 
-module.exports = function compile(platformList, callback) {
+module.exports = function run(platformList, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
@@ -65,18 +80,18 @@ module.exports = function compile(platformList, callback) {
         else throw err;
         return;
     }
-    var opts = {
-        platforms:platformList
-    };
 
     var hooks = new hooker(projectRoot);
-    hooks.fire('before_compile', opts, function(err) {
+    var opts = {
+        platforms:platformList
+    }
+    hooks.fire('before_run', opts, function(err) {
         if (err) {
             if (callback) callback(err);
             else throw err;
         } else {
             var end = n(platformList.length, function() {
-                hooks.fire('after_compile', opts, function(err) {
+                hooks.fire('after_run', opts, function(err) {
                     if (err) {
                         if (callback) callback(err);
                         else throw err;
@@ -86,13 +101,20 @@ module.exports = function compile(platformList, callback) {
                 });
             });
 
-            // Iterate over each added platform
-            platformList.forEach(function(platform) {
-                try {
-                    shell_out_to_build(projectRoot, platform, callback, end);
-                } catch(e) {
-                    if (callback) callback(e);
-                    else throw e;
+            // Run a prepare first, then shell out to run
+            require('../cordova').prepare(platformList, function(err) {
+                if (err) {
+                    if (callback) callback(err);
+                    else throw err;
+                } else {
+                    platformList.forEach(function(platform) {
+                        try {
+                            shell_out_to_run(projectRoot, platform, callback, end);
+                        } catch(e) {
+                            if (callback) callback(e);
+                            else throw e;
+                        }
+                    });
                 }
             });
         }

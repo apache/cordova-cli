@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -17,35 +16,44 @@
     specific language governing permissions and limitations
     under the License.
 */
-var fs         = require('fs'),
-    path       = require('path'),
-    core_platforms = require('../platforms'),
-    shell      = require('shelljs');
+var fs            = require('fs'),
+    path          = require('path'),
+    config_parser = require('./config_parser'),
+    plugin_parser = require('./plugin_parser'),
+    shell         = require('shelljs');
 
-var lib_path = path.join(__dirname, '..', 'lib')
-
-function chmod(path) {
-    shell.exec('chmod +x "' + path + '"', {silent:true});
-}
+// Global configuration paths
+var HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+var global_config_path = path.join(HOME, '.cordova');
+var lib_path = path.join(global_config_path, 'lib');
+shell.mkdir('-p', lib_path);
 
 module.exports = {
+    globalConfig:global_config_path,
     libDirectory:lib_path,
     // Runs up the directory chain looking for a .cordova directory.
     // IF it is found we are in a Cordova project.
-    // If not.. we're not.
+    // If not.. we're not. HOME directory doesnt count.
+    // HOMEDRIVE is used to catch when we've backed up to the root drive in windows (i.e C:\)
     isCordova: function isCordova(dir) {
-        if (dir) {
-            var contents = fs.readdirSync(dir);
-            if (contents && contents.length && (contents.indexOf('.cordova') > -1)) {
-                return dir;
+        if (dir && dir != process.env['HOMEDRIVE'] + path.sep) {
+            if (dir == HOME) {
+                return false;
             } else {
-                var parent = path.join(dir, '..');
-                if (parent && parent.length > 1) {
-                    return isCordova(parent);
-                } else return false;
+                var contents = fs.readdirSync(dir);
+                if (contents && contents.length && (contents.indexOf('.cordova') > -1)) {
+                    return dir;
+                } else {
+                    var parent = path.join(dir, '..');
+                    if (parent && parent.length > 1) {
+                        return isCordova(parent);
+                    } else return false;
+                }
             }
         } else return false;
     },
+    config_parser:config_parser,
+    plugin_parser:plugin_parser,
     // Recursively deletes .svn folders from a target path
     deleteSvnFolders:function(dir) {
         var contents = fs.readdirSync(dir);
@@ -59,8 +67,9 @@ module.exports = {
         });
     },
     listPlatforms:function(project_dir) {
+        var core_platforms = require('../platforms');
         return fs.readdirSync(path.join(project_dir, 'platforms')).filter(function(p) {
-            return core_platforms.indexOf(p) > -1;
+            return Object.keys(core_platforms).indexOf(p) > -1;
         });
     },
     // list the directories in the path, ignoring any files
@@ -71,11 +80,14 @@ module.exports = {
         if (fs.existsSync(pluginPath)) {
             plugins = fs.readdirSync(pluginPath).filter(function (fileName) {
                stats = fs.statSync(path.join(pluginPath, fileName));
-               return stats.isDirectory();
+               return fileName != '.svn' && stats.isDirectory();
             });
         }
 
         return plugins;
+    },
+    appDir: function(projectDir) {
+        return projectDir;
     },
     projectWww: function(projectDir) {
         return path.join(projectDir, 'www');

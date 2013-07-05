@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -29,23 +28,85 @@ module.exports = function hooker(root) {
     else this.root = r;
 }
 
+module.exports.fire = function global_fire(hook, opts, callback) {
+    if (arguments.length == 2 && typeof opts == 'function') {
+        callback = opts;
+        opts = {};
+    }
+    var handlers = events.listeners(hook);
+    execute_handlers_serially(handlers, opts, function() {
+        if (callback) callback();
+    });
+};
+
 module.exports.prototype = {
-    fire:function fire(hook) {
-        var dir = path.join(this.root, '.cordova', 'hooks', hook);
-        if (!(fs.existsSync(dir))) return true; // hooks directory got axed post-create; ignore.
-
-        // Fire JS hook/event
-        events.emit(hook, this.root);
-
-        // Fire script-based hooks
-        var contents = fs.readdirSync(dir);
+    fire:function fire(hook, opts, callback) {
+        if (arguments.length == 2) {
+            callback = opts;
+            opts = {};
+        }
         var self = this;
-        contents.forEach(function(script) {
-            var fullpath = path.join(dir, script);
-            if (fs.statSync(fullpath).isDirectory()) return; // skip directories if they're in there.
-            var status = shell.exec(fullpath + ' "' + self.root + '"');
-            if (status.code !== 0) throw new Error('Script "' + path.basename(script) + '"' + 'in the ' + hook + ' hook exited with non-zero status code. Aborting.');
+        var dir = path.join(this.root, '.cordova', 'hooks', hook);
+        opts.root = this.root;
+
+        // Fire JS hook for the event
+        // These ones need to "serialize" events, that is, each handler attached to the event needs to finish processing (if it "opted in" to the callback) before the next one will fire.
+        var handlers = events.listeners(hook);
+        execute_handlers_serially(handlers, opts, function() {
+            // Fire script-based hooks
+            if (!(fs.existsSync(dir))) {
+                callback(); // hooks directory got axed post-create; ignore.
+            } else {
+                var scripts = fs.readdirSync(dir).filter(function(s) {
+                    return s[0] != '.';
+                });
+                execute_scripts_serially(scripts, self.root, dir, function(err) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        callback();
+                    }
+                });
+            }
         });
-        return true;
+    }
+}
+
+function execute_scripts_serially(scripts, root, dir, callback) {
+    if (scripts.length) {
+        var s = scripts.shift();
+        var fullpath = path.join(dir, s);
+        if (fs.statSync(fullpath).isDirectory()) {
+            execute_scripts_serially(scripts, root, dir, callback); // skip directories if they're in there.
+        } else {
+            var command = fullpath + ' "' + root + '"';
+            events.emit('log', 'Executing hook "' + command + '" (output to follow)...');
+            shell.exec(command, {silent:true, async:true}, function(code, output) {
+                events.emit('log', output);
+                if (code !== 0) {
+                    callback(new Error('Script "' + fullpath + '" exited with non-zero status code. Aborting. Output: ' + output));
+                } else {
+                    execute_scripts_serially(scripts, root, dir, callback);
+                }
+            });
+        }
+    } else {
+        callback();
+    }
+}
+
+function execute_handlers_serially(handlers, opts, callback) {
+    if (handlers.length) {
+        var h = handlers.shift();
+        if (h.length > 1) {
+            h(opts, function() {
+                execute_handlers_serially(handlers, opts, callback);
+            });
+        } else {
+            h(opts);
+            execute_handlers_serially(handlers, opts, callback);
+        }
+    } else {
+        callback();
     }
 }

@@ -18,65 +18,106 @@
 */
 var cordova_util      = require('./util'),
     path              = require('path'),
-    config_parser     = require('./config_parser'),
+    platforms         = require('../platforms'),
     platform          = require('./platform'),
     fs                = require('fs'),
     shell             = require('shelljs'),
     et                = require('elementtree'),
-    android_parser    = require('./metadata/android_parser'),
-    blackberry_parser = require('./metadata/blackberry_parser'),
-    ios_parser        = require('./metadata/ios_parser'),
     hooker            = require('./hooker'),
+    lazy_load         = require('./lazy_load'),
+    config            = require('./config'),
+    events            = require('./events'),
     n                 = require('ncallbacks'),
     prompt            = require('prompt'),
-    plugin_loader = require('./plugin_loader'),
+    plugman           = require('plugman'),
     util              = require('util');
 
-var parsers = {
-    "android":android_parser,
-    "ios":ios_parser,
-    "blackberry":blackberry_parser
-};
-
-module.exports = function prepare(platforms, callback) {
+module.exports = function prepare(platformList, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw new Error('Current working directory is not a Cordova-based project.');
+        var err = new Error('Current working directory is not a Cordova-based project.');
+        if (callback) callback(err);
+        else throw err;
+        return;
     }
 
-    var xml = path.join(projectRoot, 'www', 'config.xml');
-    var cfg = new config_parser(xml);
-
-    if (arguments.length === 0 || (platforms instanceof Array && platforms.length === 0)) {
-        platforms = cordova_util.listPlatforms(projectRoot);
-    } else if (typeof platforms == 'string') platforms = [platforms];
-    else if (platforms instanceof Function && callback === undefined) {
-        callback = platforms;
-        platforms = cordova_util.listPlatforms(projectRoot);
+    if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
+        platformList = cordova_util.listPlatforms(projectRoot);
+    } else if (typeof platformList == 'string') platformList = [platformList];
+    else if (platformList instanceof Function && callback === undefined) {
+        callback = platformList;
+        platformList = cordova_util.listPlatforms(projectRoot);
     }
 
-    if (platforms.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+    if (platformList.length === 0) {
+        var err = new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+        if (callback) callback(err);
+        else throw err;
+        return;
+    }
+
+    var xml = cordova_util.projectConfig(projectRoot);
+    var cfg = new cordova_util.config_parser(xml);
+    var opts = {
+        platforms:platformList
+    };
+    var paths = platformList.map(function(p) {
+        var platform_path = path.join(projectRoot, 'platforms', p);
+        var parser = (new platforms[p].parser(platform_path));
+        return parser.www_dir();
+    });
+    opts.paths = paths;
 
     var hooks = new hooker(projectRoot);
-    if (!(hooks.fire('before_prepare'))) {
-        throw new Error('before_prepare hooks exited with non-zero code. Aborting.');
-    }
+    hooks.fire('before_prepare', opts, function(err) {
+        if (err) {
+            if (callback) callback(err);
+            else throw err;
+        } else {
+            var end = n(platformList.length, function() {
+                hooks.fire('after_prepare', opts, function(err) {
+                    if (err) {
+                        if (callback) callback(err);
+                        else throw err;
+                    } else {
+                        if (callback) callback();
+                    }
+                });
+            });
 
-    var end = n(platforms.length, function() {
-        if (!(hooks.fire('after_prepare'))) {
-            throw new Error('after_prepare hooks exited with non-zero code. Aborting.');
+            // Iterate over each added platform
+            platformList.forEach(function(platform) {
+                lazy_load.based_on_config(projectRoot, platform, function(err) {
+                    if (err) {
+                        if (callback) callback(err);
+                        else throw err;
+                    } else {
+                        var platformPath = path.join(projectRoot, 'platforms', platform);
+                        var parser = new platforms[platform].parser(platformPath);
+                        parser.update_project(cfg, function() {
+                            // Call plugman --prepare for this platform. sets up js-modules appropriately.
+                            var plugins_dir = path.join(projectRoot, 'plugins');
+                            events.emit('log', 'Calling plugman.prepare for platform "' + platform + '"');
+                            plugman.prepare(platformPath, (platform=='blackberry'?'blackberry10':platform), plugins_dir);
+                            // Make sure that config changes for each existing plugin is in place
+                            var plugins = cordova_util.findPlugins(plugins_dir);
+                            var platform_json = plugman.config_changes.get_platform_json(plugins_dir, (platform=='blackberry'?'blackberry10':platform));
+                            plugins && plugins.forEach(function(plugin_id) {
+                                if (platform_json.installed_plugins[plugin_id]) {
+                                    events.emit('log', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
+                                    plugman.config_changes.add_plugin_changes((platform=='blackberry'?'blackberry10':platform), platformPath, plugins_dir, plugin_id, /* variables for plugin */ platform_json.installed_plugins[plugin_id], /* top level plugin? */ true, /* should increment config munge? cordova-cli never should, only plugman */ false);
+                                } else if (platform_json.dependent_plugins[plugin_id]) {
+                                    events.emit('log', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
+                                    plugman.config_changes.add_plugin_changes((platform=='blackberry'?'blackberry10':platform), platformPath, plugins_dir, plugin_id, /* variables for plugin */ platform_json.dependent_plugins[plugin_id], /* top level plugin? */ false, /* should increment config munge? cordova-cli never should, only plugman */ false);
+                                }
+                                events.emit('log', 'Plugin "' + plugin_id + '" is good to go.');
+                            });
+                            end();
+                        });
+                    }
+                });
+            });
         }
-        if (callback) callback();
-    });
-
-    // Iterate over each added platform
-    platforms.forEach(function(platform) {
-        var platformPath = path.join(projectRoot, 'platforms', platform);
-        var parser = new parsers[platform](platformPath);
-        parser.update_project(cfg, function() {
-            plugin_loader(platform);
-            end();
-        });
     });
 };

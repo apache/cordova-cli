@@ -20,7 +20,9 @@ var fs            = require('fs'),
     path          = require('path'),
     et            = require('elementtree'),
     util          = require('../util'),
+    events        = require('../events'),
     shell         = require('shelljs'),
+    project_config= require('../config'),
     config_parser = require('../config_parser');
 
 var default_prefs = {
@@ -38,16 +40,29 @@ module.exports = function android_parser(project) {
     this.android_config = path.join(this.path, 'res', 'xml', 'config.xml');
 };
 
-module.exports.check_requirements = function(callback) {
-    shell.exec('android list target', {silent:true, async:true}, function(code, output) {
+module.exports.check_requirements = function(project_root, callback) {
+    events.emit('log', 'Checking Android requirements...');
+    var command = 'android list target';
+    events.emit('log', 'Running "' + command + '" (output to follow)');
+    shell.exec(command, {silent:true, async:true}, function(code, output) {
+        events.emit('log', output);
         if (code != 0) {
             callback('The command `android` failed. Make sure you have the latest Android SDK installed, and the `android` command (inside the tools/ folder) added to your path. Output: ' + output);
         } else {
             if (output.indexOf('android-17') == -1) {
                 callback('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.');
             } else {
-                var cmd = 'android update project -p ' + path.join(__dirname, '..', '..', 'lib', 'cordova-android', 'framework') + ' -t android-17';
+                var custom_path = project_config.has_custom_path(project_root, 'android');
+                var framework_path;
+                if (custom_path) {
+                    framework_path = path.resolve(path.join(custom_path, 'framework'));
+                } else {
+                    framework_path = path.join(util.libDirectory, 'android', 'cordova', require('../../platforms').android.version, 'framework');
+                }
+                var cmd = 'android update project -p "' + framework_path  + '" -t android-17';
+                events.emit('log', 'Running "' + cmd + '" (output to follow)...');
                 shell.exec(cmd, {silent:true, async:true}, function(code, output) {
+                    events.emit('log', output);
                     if (code != 0) {
                         callback('Error updating the Cordova library to work with your Android environment. Command run: "' + cmd + '", output: ' + output);
                     } else {
@@ -69,14 +84,22 @@ module.exports.prototype = {
         var strings = new et.ElementTree(et.XML(fs.readFileSync(this.strings, 'utf-8')));
         strings.find('string[@name="app_name"]').text = name;
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
+        events.emit('log', 'Wrote out Android application name to "' + name + '"');
+
+        var manifest = new et.ElementTree(et.XML(fs.readFileSync(this.manifest, 'utf-8')));
+        // Update the version by changing the AndroidManifest android:versionName
+        var version = config.version();
+        manifest.getroot().attrib["android:versionName"] = version;
 
         // Update package name by changing the AndroidManifest id and moving the entry class around to the proper package directory
-        var manifest = new et.ElementTree(et.XML(fs.readFileSync(this.manifest, 'utf-8')));
         var pkg = config.packageName();
         pkg = pkg.replace(/-/g, '_'); // Java packages cannot support dashes
         var orig_pkg = manifest.getroot().attrib.package;
         manifest.getroot().attrib.package = pkg;
+
+        // Write out AndroidManifest.xml
         fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');
+        
         var orig_pkgDir = path.join(this.path, 'src', path.join.apply(null, orig_pkg.split('.')));
         var orig_java_class = fs.readdirSync(orig_pkgDir).filter(function(f) {return f.indexOf('.svn') == -1;})[0];
         var pkgDir = path.join(this.path, 'src', path.join.apply(null, pkg.split('.')));
@@ -85,13 +108,14 @@ module.exports.prototype = {
         var new_javs = path.join(pkgDir, orig_java_class);
         var javs_contents = fs.readFileSync(orig_javs, 'utf-8');
         javs_contents = javs_contents.replace(/package [\w\.]*;/, 'package ' + pkg + ';');
+        events.emit('log', 'Wrote out Android package name to "' + pkg + '"');
         fs.writeFileSync(new_javs, javs_contents, 'utf-8');
 
         // Update whitelist by changing res/xml/config.xml
-        var android_cfg_xml = new config_parser(this.android_config);
+        var android_cfg_xml = new util.config_parser(this.android_config);
         // clean out all existing access elements first
         android_cfg_xml.access.remove();
-        // add only the ones specified in the www/config.xml file
+        // add only the ones specified in the app/config.xml file
         config.access.get().forEach(function(uri) {
             android_cfg_xml.access.add(uri);
         });
@@ -127,9 +151,17 @@ module.exports.prototype = {
         return path.join(this.path, 'assets', 'www');
     },
 
+    staging_dir: function() {
+        return path.join(this.path, '.staging', 'www');
+    },
+
+    config_xml:function(){
+        return this.android_config;
+    },
+
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
-        var www = path.join(projectRoot, 'www');
+        var www = util.projectWww(projectRoot);
         var platformWww = path.join(this.path, 'assets');
         // remove stock platform assets
         shell.rm('-rf', this.www_dir());
@@ -137,26 +169,46 @@ module.exports.prototype = {
         shell.cp('-rf', www, platformWww);
 
         // write out android lib's cordova.js
-        var jsPath = path.join(util.libDirectory, 'cordova-android', 'framework', 'assets', 'www', 'cordova.js');
+        var custom_path = project_config.has_custom_path(projectRoot, 'android');
+        var jsPath;
+        if (custom_path) {
+            jsPath = path.resolve(path.join(custom_path, 'framework', 'assets', 'www', 'cordova.js'));
+        } else {
+            jsPath = path.join(util.libDirectory, 'android', 'cordova', require('../../platforms').android.version, 'framework', 'assets', 'www', 'cordova.js');
+        }
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
-
     },
 
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var merges_path = path.join(projectRoot, 'merges', 'android');
+        var merges_path = path.join(util.appDir(projectRoot), 'merges', 'android');
         if (fs.existsSync(merges_path)) {
             var overrides = path.join(merges_path, '*');
             shell.cp('-rf', overrides, this.www_dir());
         }
     },
 
+    // update the overrides folder into the www folder
+    update_staging:function() {
+        if (fs.existsSync(this.staging_dir())) {
+            var staging = path.join(this.staging_dir(), '*');
+            shell.cp('-rf', staging, this.www_dir());
+        }
+    },
+
     update_project:function(cfg, callback) {
         var platformWww = path.join(this.path, 'assets');
-        this.update_from_config(cfg);
+        try {
+            this.update_from_config(cfg);
+        } catch(e) {
+            if (callback) callback(e);
+            else throw e;
+            return;
+        }
         this.update_www();
         this.update_overrides();
+        this.update_staging();
         // delete any .svn folders copied over
         util.deleteSvnFolders(platformWww);
         if (callback) callback();

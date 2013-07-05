@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -20,8 +19,12 @@
 var path          = require('path'),
     fs            = require('fs'),
     shell         = require('shelljs'),
+    platforms     = require('../platforms'),
     help          = require('./help'),
-    config_parser = require('./config_parser');
+    events        = require('./events'),
+    config        = require('./config'),
+    lazy_load     = require('./lazy_load'),
+    util          = require('./util');
 
 var DEFAULT_NAME = "HelloCordova",
     DEFAULT_ID   = "io.cordova.hellocordova";
@@ -32,35 +35,41 @@ var DEFAULT_NAME = "HelloCordova",
  * create(dir, name) - as above, but with specified name
  * create(dir, id, name) - you get the gist
  **/
-module.exports = function create (dir, id, name) {
-    if (dir === undefined) {
+module.exports = function create (dir, id, name, callback) {
+    if (arguments.length === 0) {
         return help();
     }
 
-    // Massage parameters a bit.
-    if (id && name === undefined) {
-        name = id;
-        id = undefined;
+    // Massage parameters
+    var args = Array.prototype.slice.call(arguments, 0);
+    if (typeof args[args.length-1] == 'function') {
+        callback = args.pop();
     }
-    id = id || DEFAULT_ID;
-    name = name || DEFAULT_NAME;
+    if (args.length === 0) {
+        dir = process.cwd();
+        id = DEFAULT_ID;
+        name = DEFAULT_NAME;
+    } else if (args.length == 1) {
+        id = DEFAULT_ID;
+        name = DEFAULT_NAME;
+    } else if (args.length == 2) {
+        name = DEFAULT_NAME;
+    }
 
-    if (!(dir && (dir[0] == '~' || dir[0] == '/' || dir[0] + dir[1] == 'C:'))) {
-        dir = dir ? path.join(process.cwd(), dir) : process.cwd();
-    }
+    // Make absolute.
+    dir = path.resolve(dir);
+
+    events.emit('log', 'Creating a new cordova project with name "' + name + '" and id "' + id + '" at location "' + dir + '"');
 
     var dotCordova = path.join(dir, '.cordova');
-
-    // Check for existing cordova project
-    if (fs.existsSync(dotCordova)) {
-        throw new Error('Cordova project already exists at ' + dir + ', aborting.');
-    }
+    var www_dir = path.join(dir, 'www');
 
     // Create basic project structure.
     shell.mkdir('-p', dotCordova);
     shell.mkdir('-p', path.join(dir, 'platforms'));
     shell.mkdir('-p', path.join(dir, 'merges'));
     shell.mkdir('-p', path.join(dir, 'plugins'));
+    shell.mkdir('-p', www_dir);
     var hooks = path.join(dotCordova, 'hooks');
     shell.mkdir('-p', hooks);
 
@@ -76,6 +85,7 @@ module.exports = function create (dir, id, name) {
     shell.mkdir(path.join(hooks, 'after_plugin_ls'));
     shell.mkdir(path.join(hooks, 'after_plugin_rm'));
     shell.mkdir(path.join(hooks, 'after_prepare'));
+    shell.mkdir(path.join(hooks, 'after_run'));
     shell.mkdir(path.join(hooks, 'before_build'));
     shell.mkdir(path.join(hooks, 'before_compile'));
     shell.mkdir(path.join(hooks, 'before_docs'));
@@ -87,19 +97,62 @@ module.exports = function create (dir, id, name) {
     shell.mkdir(path.join(hooks, 'before_plugin_ls'));
     shell.mkdir(path.join(hooks, 'before_plugin_rm'));
     shell.mkdir(path.join(hooks, 'before_prepare'));
+    shell.mkdir(path.join(hooks, 'before_run'));
 
     // Write out .cordova/config.json file with a simple json manifest
-    fs.writeFileSync(path.join(dotCordova, 'config.json'), JSON.stringify({
+    require('../cordova').config(dir, {
         id:id,
         name:name
-    }));
+    });
 
-    // Copy in base template
-    shell.cp('-r', path.join(__dirname, '..', 'templates', 'www'), dir);
+    var config_json = config.read(dir);
 
-    // Write out id and name to config.xml
-    var configPath = path.join(dir, 'www', 'config.xml');
-    var config = new config_parser(configPath);
-    config.packageName(id);
-    config.name(name);
+    var finalize = function(www_lib) {
+        while (!fs.existsSync(path.join(www_lib, 'index.html'))) {
+            www_lib = path.join(www_lib, 'www');
+            if (!fs.existsSync(www_lib)) {
+                var err = new Error('downloaded www assets in ' + www_lib + ' does not contain index.html, or www subdir with index.html');
+                if (callback) return callback(err);
+                else throw err;
+            }
+        }
+        shell.cp('-rf', path.join(www_lib, '*'), www_dir);
+        var configPath = util.projectConfig(dir);
+        // Add template config.xml for apps that are missing it
+        if (!fs.existsSync(configPath)) {
+            var template_config_xml = path.join(__dirname, '..', 'templates', 'config.xml');
+            shell.cp(template_config_xml, www_dir);
+        }
+        // Write out id and name to config.xml
+        var config = new util.config_parser(configPath);
+        config.packageName(id);
+        config.name(name);
+        if (callback) callback();
+    };
+
+    // Check if www assets to use was overridden.
+    if (config_json.lib && config_json.lib.www) {
+        events.emit('log', 'Using custom www assets ('+config_json.lib.www.id+').');
+        lazy_load.custom(config_json.lib.www.uri, config_json.lib.www.id, 'www', config_json.lib.www.version, function(err) {
+            if (err) {
+                if (callback) callback(err);
+                else throw err;
+            } else {
+                events.emit('log', 'Copying custom www assets into "' + www_dir + '"');
+                finalize(path.join(util.libDirectory, 'www', config_json.lib.www.id, config_json.lib.www.version));
+            }
+        });
+    } else {
+        // Nope, so use stock cordova-hello-world-app one.
+        events.emit('log', 'Using stock cordova hello-world application.');
+        lazy_load.cordova('www', function(err) {
+            if (err) {
+                if (callback) callback(err);
+                else throw err;
+            } else {
+                events.emit('log', 'Copying stock Cordova www assets into "' + www_dir + '"');
+                finalize(path.join(util.libDirectory, 'www', 'cordova', platforms.www.version));
+            }
+        });
+    }
 };

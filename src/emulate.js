@@ -19,81 +19,105 @@
 var cordova_util      = require('./util'),
     path              = require('path'),
     shell             = require('shelljs'),
-    config_parser     = require('./config_parser'),
-    android_parser    = require('./metadata/android_parser'),
-    ios_parser        = require('./metadata/ios_parser'),
-    blackberry_parser = require('./metadata/blackberry_parser'),
-    wp7_parser      = require('./metadata/wp7_parser'),
-    wp8_parser      = require('./metadata/wp8_parser'),
+    platforms         = require('../platforms'),
     platform          = require('./platform'),
+    events            = require('./events'),
     fs                = require('fs'),
-    ls                = fs.readdirSync,
     n                 = require('ncallbacks'),
-    hooker            = require('../src/hooker'),
+    hooker            = require('./hooker'),
     util              = require('util');
 
-var parsers = {
-    "android":android_parser,
-    "ios":ios_parser,
-    "blackberry":blackberry_parser,
-    "wp7":wp7_parser,
-    "wp8":wp8_parser
-};
-
-function shell_out_to_emulate(root, platform, callback) {
-    var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '"';
-    // TODO: PLATFORM LIBRARY INCONSISTENCY 
+function shell_out_to_emulate(root, platform, error_callback, done) {
+    var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '" --emulator';
+    // TODO: inconsistent API for BB10 run command
     if (platform == 'blackberry') {
-        cmd = 'ant -f "' + path.join(root, 'platforms', platform, 'build.xml') + '" qnx load-simulator';
-    }
-    shell.exec(cmd, {silent:true, async:true}, function(code, output) {
-        if (code > 0) {
-            throw new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + output);
+        var bb_project = path.join(root, 'platforms', 'blackberry')
+        var project = new platforms.blackberry.parser(bb_project);
+        if (project.has_simulator_target()) {
+            var bb_config = project.get_cordova_config();
+            var sim = project.get_simulator_targets()[0].name;
+            cmd = '"' + path.join(bb_project, 'cordova', 'run') + '" --target=' + sim + ' -k ' + bb_config.signing_password;
         } else {
-            callback();
+            var err = new Error('No BlackBerry simulator targets defined. If you want to run emulate with BB10, please add a simulator target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
+            if (error_callback) return error_callback(err);
+            else throw err;
+        }
+    }
+    events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '" (output to follow)...');
+    shell.exec(cmd, {silent:true, async:true}, function(code, output) {
+        events.emit('log', output);
+        if (code > 0) {
+            var err = new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + output);
+            if (error_callback) return error_callback(err);
+            else throw err;
+        } else {
+            events.emit('log', 'Platform "' + platform + '" deployed to emulator.');
+            done();
         }
     });
 }
 
-module.exports = function emulate (platforms, callback) {
+module.exports = function emulate (platformList, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        throw new Error('Current working directory is not a Cordova-based project.');
+        var err = new Error('Current working directory is not a Cordova-based project.');
+        if (callback) callback(err);
+        else throw err;
+        return;
     }
 
-    var xml = path.join(projectRoot, 'www', 'config.xml');
-    var cfg = new config_parser(xml);
-
-    if (arguments.length === 0 || (platforms instanceof Array && platforms.length === 0)) {
-        platforms = cordova_util.listPlatforms(projectRoot);
-    } else if (typeof platforms == 'string') platforms = [platforms];
-    else if (platforms instanceof Function && callback === undefined) {
-        callback = platforms;
-        platforms = cordova_util.listPlatforms(projectRoot);
+    if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
+        platformList = cordova_util.listPlatforms(projectRoot);
+    } else if (typeof platformList == 'string') platformList = [platformList];
+    else if (platformList instanceof Function && callback === undefined) {
+        callback = platformList;
+        platformList = cordova_util.listPlatforms(projectRoot);
     }
 
-    if (platforms.length === 0) throw new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+    if (platformList.length === 0) {
+        var err = new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+        if (callback) callback(err);
+        else throw err;
+        return;
+    }
+    var opts = {
+        platforms:platformList
+    };
 
     var hooks = new hooker(projectRoot);
-    if (!(hooks.fire('before_emulate'))) {
-        throw new Error('before_emulate hooks exited with non-zero code. Aborting build.');
-    }
+    hooks.fire('before_emulate', opts, function(err) {
+        if (err) {
+            if (callback) callback(err);
+            else throw err;
+        } else {
+            var end = n(platformList.length, function() {
+                hooks.fire('after_emulate', opts, function(err) {
+                    if (err) {
+                        if (callback) callback(err);
+                        else throw err;
+                    } else {
+                        if (callback) callback();
+                    }
+                });
+            });
 
-    var end = n(platforms.length, function() {
-        if (!(hooks.fire('after_emulate'))) {
-            throw new Error('after_emulate hooks exited with non-zero code. Aborting.');
+            // Run a prepare first!
+            require('../cordova').prepare(platformList, function(err) {
+                if (err) {
+                    if (callback) callback(err);
+                    else throw err;
+                } else {
+                    platformList.forEach(function(platform) {
+                        try {
+                            shell_out_to_emulate(projectRoot, platform, callback, end);
+                        } catch(e) {
+                            if (callback) callback(e);
+                            else throw e;
+                        }
+                    });
+                }
+            });
         }
-        if (callback) callback();
-    });
-
-    // Iterate over each added platform and shell out to debug command
-    platforms.forEach(function(platform) {
-        var platformPath = path.join(projectRoot, 'platforms', platform);
-        var parser = new parsers[platform](platformPath);
-        parser.update_project(cfg, function() {
-            shell_out_to_emulate(projectRoot, platform, end);
-        });
     });
 };
-

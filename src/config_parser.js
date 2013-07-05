@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -39,6 +38,12 @@ config_parser.prototype = {
             this.doc.find('name').text = name;
             this.update();
         } else return this.doc.find('name').text;
+    },
+    version:function(version) {
+        if (version) {
+            this.doc.getroot().attrib.version = version;
+            this.update();
+        } else return this.doc.getroot().attrib.version;
     },
     update:function() {
         fs.writeFileSync(this.path, this.doc.write({indent: 4}), 'utf-8');

@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -21,29 +20,39 @@ var fs            = require('fs'),
     path          = require('path'),
     et            = require('elementtree'),
     util          = require('../util'),
+    events        = require('../events'),
     shell         = require('shelljs'),
-    config_parser = require('../config_parser');
+    events        = require('../events'),
+    config_parser = require('../config_parser'),
+    config        = require('../config');
 
 module.exports = function wp7_parser(project) {
     try {
         // TODO : Check that it's not a wp7 project?
         var csproj_file   = fs.readdirSync(project).filter(function(e) { return e.match(/\.csproj$/i); })[0];
-        if (!csproj_file) throw new Error('The provided path "' + project + '" is not a Windows Phone 8 project.');
+        if (!csproj_file) throw new Error('No .csproj file.');
         this.wp7_proj_dir = project;
         this.csproj_path  = path.join(this.wp7_proj_dir, csproj_file);
         this.sln_path     = path.join(this.wp7_proj_dir, csproj_file.replace(/\.csproj/, '.sln'));
     } catch(e) {
-        throw new Error('The provided path "' + project + '" is not a Windows Phone 8 project.' + e);
+        throw new Error('The provided path "' + project + '" is not a Windows Phone 7 project. ' + e);
     }
     this.manifest_path  = path.join(this.wp7_proj_dir, 'Properties', 'WMAppManifest.xml');
 };
 
-module.exports.check_requirements = function(callback) {
-    shell.exec(path.join(util.libDirectory, 'cordova-wp7', 'bin', 'check_reqs'), {silent:true, async:true}, function(code, output) {
+module.exports.check_requirements = function(project_root, callback) {
+    events.emit('log', 'Checking wp7 requirements...');
+    var lib_path = path.join(util.libDirectory, 'wp8', 'cordova', require('../../platforms').wp7.version, 'wp7');
+    var custom_path = config.has_custom_path(project_root, 'wp7');
+    if (custom_path) lib_path = custom_path;
+    var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
+    events.emit('log', 'Running "' + command + '" (output to follow)');
+    shell.exec(command, {silent:true, async:true}, function(code, output) {
+        events.emit('log', output);
         if (code != 0) {
             callback(output);
         } else {
-                callback(false);
+            callback(false);
         }
     });
 };
@@ -54,24 +63,27 @@ module.exports.prototype = {
         if (config instanceof config_parser) {
         } else throw new Error('update_from_config requires a config_parser object');
 
+        //Get manifest file
+        var man = fs.readFileSync(this.manifest_path, 'utf-8');
+        var cleanedMan = man.replace('\ufeff', ''); //Windows is the BOM
+        var manifest = new et.ElementTree(et.XML(cleanedMan));
+
+        //Update app version
+        var version = config.version();
+        manifest.find('.//App').attrib.Version = version;
+
         // Update app name by editing app title in Properties\WMAppManifest.xml
         var name = config.name();
-        var man = fs.readFileSync(this.manifest_path, 'utf-8');
-        //Strip three bytes that windows adds (http://www.multiasking.com/2012/11/851/)
-        var cleanedMan = man.replace('\ufeff', '');
-        var manifest = new et.ElementTree(et.XML(cleanedMan));
         var prev_name = manifest.find('.//App[@Title]')['attrib']['Title'];
-        if(prev_name != name)
-        {
-            //console.log("Updating app name from " + prev_name + " to " + name);
+        if(prev_name != name) {
+            events.emit('log', "Updating app name from " + prev_name + " to " + name);
             manifest.find('.//App').attrib.Title = name;
-            manifest.find('.//Title').text = name;
-            fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
-
+            manifest.find('.//App').attrib.Publisher = name + " Publisher";
+            manifest.find('.//App').attrib.Author = name + " Author";
+            manifest.find('.//PrimaryToken').attrib.TokenID = name;
             //update name of sln and csproj.
             name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a ligitamate name
             prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); 
-            // TODO: might return .sln.user? (generated file)
             var sln_name = fs.readdirSync(this.wp7_proj_dir).filter(function(e) { return e.match(/\.sln$/i); })[0];
             var sln_path = path.join(this.wp7_proj_dir, sln_name);
             var sln_file = fs.readFileSync(sln_path, 'utf-8');
@@ -95,9 +107,8 @@ module.exports.prototype = {
          var cleanedPage = raw.replace(/^\uFEFF/i, '');
          var csproj = new et.ElementTree(et.XML(cleanedPage));
          prev_name = csproj.find('.//RootNamespace').text;
-         if(prev_name != pkg)
-         {
-            //console.log("Updating package name from " + prev_name + " to " + pkg);
+         if(prev_name != pkg) {
+            events.emit('log', "Updating package name from " + prev_name + " to " + pkg);
             //CordovaAppProj.csproj
             csproj.find('.//RootNamespace').text = pkg;
             csproj.find('.//AssemblyName').text = pkg;
@@ -109,7 +120,7 @@ module.exports.prototype = {
             // Remove potential UTF Byte Order Mark
             cleanedPage = raw.replace(/^\uFEFF/i, '');
             var mainPageXAML = new et.ElementTree(et.XML(cleanedPage));
-            mainPageXAML._root.attrib['x:Class'] = pkg + '.MainPage';
+            mainPageXAML.getroot().attrib['x:Class'] = pkg + '.MainPage';
             fs.writeFileSync(path.join(this.wp7_proj_dir, 'MainPage.xaml'), mainPageXAML.write({indent: 4}), 'utf-8');
             //MainPage.xaml.cs
             var mainPageCS = fs.readFileSync(path.join(this.wp7_proj_dir, 'MainPage.xaml.cs'), 'utf-8');
@@ -119,37 +130,120 @@ module.exports.prototype = {
             raw = fs.readFileSync(path.join(this.wp7_proj_dir, 'App.xaml'), 'utf-8');
             cleanedPage = raw.replace(/^\uFEFF/i, '');
             var appXAML = new et.ElementTree(et.XML(cleanedPage));
-            appXAML._root.attrib['x:Class'] = pkg + '.App';
+            appXAML.getroot().attrib['x:Class'] = pkg + '.App';
             fs.writeFileSync(path.join(this.wp7_proj_dir, 'App.xaml'), appXAML.write({indent: 4}), 'utf-8');
             //App.xaml.cs
             var appCS = fs.readFileSync(path.join(this.wp7_proj_dir, 'App.xaml.cs'), 'utf-8');
             fs.writeFileSync(path.join(this.wp7_proj_dir, 'App.xaml.cs'), appCS.replace(namespaceRegEx, 'namespace ' + pkg), 'utf-8');
          }
+
+         //Write out manifest
+         fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
     },
     // Returns the platform-specific www directory.
     www_dir:function() {
         return path.join(this.wp7_proj_dir, 'www');
     },
-    // copyies the app www folder into the wp7 project's www folder
+    // copies the app www folder into the wp7 project's www folder and updates the csproj file.
     update_www:function() {
-        var project_www = path.join(this.wp7_proj_dir, '..', '..', util.projectWww());
+        var project_root = util.isCordova(this.wp7_proj_dir);
+        var project_www = util.projectWww(project_root);
         // remove stock platform assets
         shell.rm('-rf', this.www_dir());
         // copy over all app www assets
         shell.cp('-rf', project_www, this.wp7_proj_dir);
 
         // copy over wp7 lib's cordova.js
-        var raw_version = fs.readFileSync(path.join(util.libDirectory, 'cordova-wp7', 'VERSION'), 'utf-8')
-        var VERSION = raw_version.replace(/\r\n/,'').replace(/\n/,'');
-        var cordovajs_path = path.join(util.libDirectory, 'cordova-wp7', 'templates', 'standalone', 'www', 'cordova-' + VERSION + '.js');
+        var lib_path = path.join(util.libDirectory, 'wp8', 'cordova', require('../../platforms').wp7.version);
+        var custom_path = config.has_custom_path(project_root, 'wp7');
+        if (custom_path) lib_path = custom_path;
+        var cordovajs_path = path.join(lib_path, 'common', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
+        this.update_csproj();
     },
+    // updates the csproj file to explicitly list all www content.
+    update_csproj:function() {
+        var raw = fs.readFileSync(this.csproj_path, 'utf-8');
+        var cleaned = raw.replace(/^\uFEFF/i, '');
+        var csproj_xml = new et.ElementTree(et.XML(cleaned));
+        // remove any previous references to the www files
+        var item_groups = csproj_xml.findall('ItemGroup');
+        for (var i = 0, l = item_groups.length; i < l; i++) {
+            var group = item_groups[i];
+            var files = group.findall('Content');
+            for (var j = 0, k = files.length; j < k; j++) {
+                var file = files[j];
+                if (file.attrib.Include.substr(0, 3) == 'www') {
+                    // remove file reference
+                    group.remove(0, file);
+                    // remove ItemGroup if empty
+                    var new_group = group.findall('Content');
+                    if(new_group.length < 1) {
+                        csproj_xml.getroot().remove(0, group);
+                    }
+                }
+            }
+        }
+
+        // now add all www references back in
+        var www_files = this.folder_contents('www', this.www_dir());
+        for(file in www_files) {
+            var item = new et.Element('ItemGroup');
+            var content = new et.Element('Content');
+            content.attrib.Include = www_files[file];
+            item.append(content);
+            csproj_xml.getroot().append(item);
+        }
+        // save file
+        fs.writeFileSync(this.csproj_path, csproj_xml.write({indent:4}), 'utf-8');
+    },
+    // Returns an array of all the files in the given directory with reletive paths
+    // - name     : the name of the top level directory (i.e all files will start with this in their path)
+    // - path     : the directory whos contents will be listed under 'name' directory
+    folder_contents:function(name, dir) {
+        var results = [];
+        var folder_dir = fs.readdirSync(dir);
+        for(item in folder_dir) {
+            var stat = fs.statSync(path.join(dir, folder_dir[item]));
+            // means its a folder?
+            if(stat.size == 0) {
+                var sub_dir = this.folder_contents(path.join(name, folder_dir[item]), path.join(dir, folder_dir[item]));
+                //Add all subfolder item paths
+                for(sub_item in sub_dir) {
+                    results.push(sub_dir[sub_item]);
+                }
+            }
+            else {
+                results.push(path.join(name, folder_dir[item]));
+            }
+        }
+        return results;
+    },
+    staging_dir: function() {
+        return path.join(this.wp7_proj_dir, '.staging', 'www');
+    },
+
+    update_staging: function() {
+        var projectRoot = util.isCordova(this.wp7_proj_dir);
+        if (fs.existsSync(this.staging_dir())) {
+            var staging = path.join(this.staging_dir(), '*');
+            shell.cp('-rf', staging, this.www_dir());
+        }
+    },
+
     // calls the nessesary functions to update the wp7 project 
     update_project:function(cfg, callback) {
         //console.log("Updating wp7 project...");
 
-        this.update_from_config(cfg);
+        try {
+            this.update_from_config(cfg);
+        } catch(e) {
+            if (callback) return callback(e);
+            else throw e;
+        }
         this.update_www();
+        // TODO: Add overrides support? Why is this missing?
+        this.update_staging();
         util.deleteSvnFolders(this.www_dir());
 
         //console.log("Done updating.");
@@ -157,4 +251,3 @@ module.exports.prototype = {
         if (callback) callback();
     }
 };
-

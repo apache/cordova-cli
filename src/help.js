@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -19,11 +18,12 @@
 */
 var fs = require('fs'),
     colors = require('colors'),
+    events = require('./events'),
     path = require('path');
 
 module.exports = function help () {
     var raw = fs.readFileSync(path.join(__dirname, '..', 'doc', 'help.txt')).toString('utf8').split("\n");
-    return raw.map(function(line) {
+    events.emit('results', raw.map(function(line) {
         if (line.match('    ')) {
             var prompt = '    $ ',
                 isPromptLine = !(!(line.indexOf(prompt) != -1));
@@ -44,5 +44,5 @@ module.exports = function help () {
         else {
             return line.magenta;
         }
-    }).join("\n");
+    }).join("\n"));
 };

@@ -13,6 +13,6 @@ lib/cordova-wp8/example
 spec/fixtures/*
 .gitcore
 *.jar
-
+spec_tmp
 # avoid npm pack issues
 .gitignore

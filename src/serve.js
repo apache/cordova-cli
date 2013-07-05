@@ -1,4 +1,3 @@
-
 /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
@@ -20,21 +19,18 @@
 var cordova_util = require('./util'),
     path = require('path'),
     shell = require('shelljs'),
+    platforms     = require('../platforms'),
     config_parser = require('./config_parser'),
-    android_parser = require('./metadata/android_parser'),
-    ios_parser = require('./metadata/ios_parser'),
-    blackberry_parser = require('./metadata/blackberry_parser'),
     fs = require('fs'),
     util = require('util'),
     http = require("http"),
     url = require("url");
 
-
-function launch_server(www, platform_www, port) {
+function launch_server(www, platform_www, config_xml_path, port) {
     port = port || 8000;
 
     // Searches these directories in order looking for the requested file.
-    var searchPath = [www, platform_www];
+    var searchPath = [platform_www];
 
     var server = http.createServer(function(request, response) {
         var uri = url.parse(request.url).pathname;
@@ -48,6 +44,9 @@ function launch_server(www, platform_www, port) {
             }
 
             var filename = path.join(searchPath[pathIndex], uri);
+            if(uri === "/config.xml"){
+                filename = config_xml_path;
+            }
 
             fs.exists(filename, function(exists) {
                 if(!exists) {
@@ -82,7 +81,7 @@ module.exports = function serve (platform, port) {
     var returnValue = {};
 
     module.exports.config(platform, port, function (config) {
-        returnValue.server = launch_server(config.paths[0], config.paths[1], port);
+        returnValue.server = launch_server(config.paths[0], config.paths[1], config.config_xml_path, port);
     });
 
     // Hack for testing despite its async nature.
@@ -96,16 +95,16 @@ module.exports.config = function (platform, port, callback) {
         throw new Error('Current working directory is not a Cordova-based project.');
     }
 
-    var xml = path.join(projectRoot, 'www', 'config.xml');
+    var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new config_parser(xml);
 
     // Retrieve the platforms.
-    var platforms = cordova_util.listPlatforms(projectRoot);
+    var platformList = cordova_util.listPlatforms(projectRoot);
     if (!platform) {
         throw new Error('You need to specify a platform.');
-    } else if (platforms.length == 0) {
+    } else if (platformList.length == 0) {
         throw new Error('No platforms to serve.');
-    } else if (platforms.filter(function(x) { return x == platform }).length == 0) {
+    } else if (platformList.filter(function(x) { return x == platform }).length == 0) {
         throw new Error(platform + ' is not an installed platform.');
     }
 
@@ -113,30 +112,21 @@ module.exports.config = function (platform, port, callback) {
 
     var result = {
         paths: [],
+        // Config file path
+        config_xml_path : "",
         // Default port is 8000 if not given. This is also the default of the Python module.
         port: port || 8000
     };
 
     // Top-level www directory.
-    result.paths.push(projectRoot + path.sep + 'www');
+    result.paths.push(cordova_util.projectWww(projectRoot));
 
-    var parser;
-
-    switch (platform) {
-        case 'android':
-            parser = new android_parser(path.join(projectRoot, 'platforms', platform));
-            break;
-        case 'blackberry-10':
-            parser = new blackberry_parser(path.join(projectRoot, 'platforms', platform));
-            break;
-        case 'ios':
-            parser = new ios_parser(path.join(projectRoot, 'platforms', platform));
-            break;
-    }
+    var parser = new platforms[platform].parser(path.join(projectRoot, 'platforms', platform));
 
     // Update the related platform project from the config
     parser.update_project(cfg, function() {
         result.paths.push(parser.www_dir());
+        result.config_xml_path = parser.config_xml();
         callback(result);
     });
 }

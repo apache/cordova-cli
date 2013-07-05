@@ -16,15 +16,4 @@
     specific language governing permissions and limitations
     under the License.
 */
-var et = require('elementtree'),
-    fs = require('fs');
-
-function plugin_parser(xmlPath) {
-    this.path = xmlPath;
-    this.doc = new et.ElementTree(et.XML(fs.readFileSync(xmlPath, 'utf-8')));
-    this.platforms = this.doc.findall('platform').map(function(p) {
-        return p.attrib.name;
-    });
-}
-
-module.exports = plugin_parser;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
