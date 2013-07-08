@@ -101,7 +101,7 @@ describe('platform command', function() {
             expect(is_cordova).toHaveBeenCalled();
         });
 
-        describe('`ls`', function() { 
+        describe('`ls`', function() {
             afterEach(function() {
                 cordova.removeAllListeners('results');
             });

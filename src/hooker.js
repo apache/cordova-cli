@@ -26,7 +26,7 @@ module.exports = function hooker(root) {
     var r = util.isCordova(root);
     if (!r) throw new Error('Not a Cordova project, can\'t use hooks.');
     else this.root = r;
-}
+};
 
 module.exports.fire = function global_fire(hook, opts, callback) {
     if (arguments.length == 2 && typeof opts == 'function') {
@@ -68,7 +68,7 @@ module.exports.prototype = {
             }
         });
     }
-}
+};
 
 function execute_scripts_serially(scripts, root, dir, callback) {
     if (scripts.length) {
