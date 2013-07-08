@@ -20,7 +20,8 @@ var fs            = require('fs'),
     path          = require('path'),
     config_parser = require('./config_parser'),
     plugin_parser = require('./plugin_parser'),
-    shell         = require('shelljs');
+    shell         = require('shelljs'),
+    config        = require('./config');
 
 // Global configuration paths
 var HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -41,7 +42,8 @@ module.exports = {
             } else {
                 var contents = fs.readdirSync(dir);
                 if (contents && contents.length && (contents.indexOf('.cordova') > -1)) {
-                    return dir;
+                    var cfg = config.read(dir);
+                    return cfg.project_path ? path.resolve(dir, cfg.project_path) : dir;
                 } else {
                     var parent = path.join(dir, '..');
                     if (parent && parent.length > 1) {
