@@ -80,7 +80,7 @@ module.exports = {
         if (fs.existsSync(pluginPath)) {
             plugins = fs.readdirSync(pluginPath).filter(function (fileName) {
                stats = fs.statSync(path.join(pluginPath, fileName));
-               return fileName != '.svn' && stats.isDirectory();
+               return fileName != '.svn' && fileName != 'CVS' && stats.isDirectory();
             });
         }
 

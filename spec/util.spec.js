@@ -98,5 +98,17 @@ describe('util module', function() {
             expect(res.length).toEqual(2);
             expect(res.indexOf('.svn')).toEqual(-1);
         });
+        it('should not return "CVS" directories', function() {
+            var plugins = path.join(temp, 'plugins');
+            var android = path.join(plugins, 'android');
+            var ios = path.join(plugins, 'ios');
+            var cvs = path.join(plugins, 'CVS');
+            shell.mkdir('-p', android);
+            shell.mkdir('-p', ios);
+            shell.mkdir('-p', cvs);
+            var res = util.findPlugins(plugins);
+            expect(res.length).toEqual(2);
+            expect(res.indexOf('CVS')).toEqual(-1);
+        });
     });
 });
