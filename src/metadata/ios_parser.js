@@ -50,7 +50,7 @@ module.exports = function ios_parser(project) {
         var xcodeproj_dir = fs.readdirSync(project).filter(function(e) { return e.match(/\.xcodeproj$/i); })[0];
         if (!xcodeproj_dir) throw new Error('The provided path "' + project + '" is not a Cordova iOS project.');
         this.xcodeproj = path.join(project, xcodeproj_dir);
-        this.originalName = this.xcodeproj.substring(this.xcodeproj.lastIndexOf(path.sep), this.xcodeproj.indexOf('.xcodeproj'));
+        this.originalName = this.xcodeproj.substring(this.xcodeproj.lastIndexOf(path.sep)+1, this.xcodeproj.indexOf('.xcodeproj'));
         this.cordovaproj = path.join(project, this.originalName);
     } catch(e) {
         throw new Error('The provided path is not a Cordova iOS project.');
@@ -139,21 +139,38 @@ module.exports.prototype = {
             });
         });
         
-        // Update product name
-        var proj = new xcode.project(this.pbxproj);
-        var parser = this;
-        proj.parse(function(err,hash) {
-            if (err) {
-                var err = new Error('An error occured during parsing of project.pbxproj. Start weeping. Output: ' + err);
-                if (callback) callback(err);
-                else throw err;
-            } else {
-                proj.updateProductName(name);
-                fs.writeFileSync(parser.pbxproj, proj.writeSync(), 'utf-8');
-                events.emit('log', 'Wrote out iOS Product Name to "' + name + '"');
-                if (callback) callback();
-            }
-        });
+        if (name != this.originalName) {
+            // Update product name inside pbxproj file
+            var proj = new xcode.project(this.pbxproj);
+            var parser = this;
+            proj.parse(function(err,hash) {
+                if (err) {
+                    var err = new Error('An error occured during parsing of project.pbxproj. Start weeping. Output: ' + err);
+                    if (callback) callback(err);
+                    else throw err;
+                } else {
+                    proj.updateProductName(name);
+                    fs.writeFileSync(parser.pbxproj, proj.writeSync(), 'utf-8');
+                    // Move the xcodeproj and other name-based dirs over.
+                    shell.mv(path.join(parser.cordovaproj, parser.originalName + '-Info.plist'), path.join(parser.cordovaproj, name + '-Info.plist'));
+                    shell.mv(path.join(parser.cordovaproj, parser.originalName + '-Prefix.pch'), path.join(parser.cordovaproj, name + '-Prefix.pch'));
+                    shell.mv(parser.xcodeproj, path.join(parser.path, name + '.xcodeproj'));
+                    shell.mv(parser.cordovaproj, path.join(parser.path, name));
+                    // Update self object with new paths
+                    var old_name = parser.originalName;
+                    parser = new module.exports(parser.path);
+                    // Hack this shi*t
+                    var pbx_contents = fs.readFileSync(parser.pbxproj, 'utf-8');
+                    pbx_contents = pbx_contents.split(old_name).join(name);
+                    fs.writeFileSync(parser.pbxproj, pbx_contents, 'utf-8');
+                    events.emit('log', 'Wrote out iOS Product Name and updated XCode project file names from "'+old_name+'" to "' + name + '".');
+                    if (callback) callback();
+                }
+            });
+        } else {
+            events.emit('log', 'iOS Product Name has not changed (still "' + this.originalName + '")');
+            if (callback) callback();
+        }
     },
 
     // Returns the platform-specific www directory.

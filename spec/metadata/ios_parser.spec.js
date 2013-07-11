@@ -94,15 +94,16 @@ describe('ios project parser', function () {
             rm = spyOn(shell, 'rm');
             is_cordova = spyOn(util, 'isCordova').andReturn(proj);
             write = spyOn(fs, 'writeFileSync');
-            read = spyOn(fs, 'readFileSync');
+            read = spyOn(fs, 'readFileSync').andReturn('');
         });
 
         describe('update_from_config method', function() {
-            var et, xml, find, write_xml, root;
+            var et, xml, find, write_xml, root, mv;
             var cfg, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm;
             var plist_parse, plist_build, xc;
             var update_name, xc_write;
             beforeEach(function() {
+                mv = spyOn(shell, 'mv');
                 find_obj = {
                     text:'hi'
                 };
@@ -155,9 +156,15 @@ describe('ios project parser', function () {
                 p = new platforms.ios.parser(ios_proj);
             });
 
-            it('should write out the app name to pbxproj by calling xcode.updateProductName', function(done) {
+            it('should update the app name in pbxproj by calling xcode.updateProductName, and move the ios native files to match the new name', function(done) {
+                var test_path = path.join(proj, 'platforms', 'ios', 'test');
+                var testname_path = path.join(proj, 'platforms', 'ios', 'testname');
                 p.update_from_config(cfg, function() {
                     expect(update_name).toHaveBeenCalledWith('testname');
+                    expect(mv).toHaveBeenCalledWith(path.join(test_path, 'test-Info.plist'), path.join(test_path, 'testname-Info.plist'));
+                    expect(mv).toHaveBeenCalledWith(path.join(test_path, 'test-Prefix.pch'), path.join(test_path, 'testname-Prefix.pch'));
+                    expect(mv).toHaveBeenCalledWith(test_path + '.xcodeproj', testname_path + '.xcodeproj');
+                    expect(mv).toHaveBeenCalledWith(test_path, testname_path);
                     done();
                 });
             });

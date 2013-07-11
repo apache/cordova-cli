@@ -221,7 +221,7 @@ function call_into_create(target, projectRoot, cfg, id, version, callback, end) 
                 if(target == 'wp8') bin = path.join(cordova_util.libDirectory, target, id, version, 'wp8', 'bin', 'create');
                 var args = (target=='ios') ? '--arc' : '';
                 var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
-                var name = cfg.name().replace(/\W/g,'_');
+                var name = cfg.name();
                 var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, pkg, name);
                 events.emit('log', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
 
