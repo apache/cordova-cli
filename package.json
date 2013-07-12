@@ -37,6 +37,7 @@
     "shelljs":"0.1.2",
     "ncallbacks":"1.0.0",
     "request":"2.22.0",
+    "ripple-emulator":"0.9.18",
     "semver":"1.1.0",
     "glob":"3.2.x",
     "follow-redirects":"0.0.x",

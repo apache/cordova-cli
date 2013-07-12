@@ -43,6 +43,7 @@ module.exports = {
     prepare:   prepare,
     compile:   compile,
     run:       run,
+    ripple:    require('./src/ripple'),
     emulate:   require('./src/emulate'),
     plugin:    require('./src/plugin'),
     plugins:   require('./src/plugin'),
