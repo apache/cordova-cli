@@ -144,6 +144,9 @@ module.exports.prototype = {
     www_dir:function() {
         return path.join(this.wp7_proj_dir, 'www');
     },
+    config_xml:function() {
+        return path.join(this.wp7_proj_dir, 'config.xml');
+    },
     // copies the app www folder into the wp7 project's www folder and updates the csproj file.
     update_www:function() {
         var project_root = util.isCordova(this.wp7_proj_dir);
