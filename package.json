@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "2.9.3",
+  "version": "2.9.4",
   "preferGlobal": "true",
   "description": "Cordova command line interface tool",
   "main": "cordova",
@@ -36,7 +36,7 @@
     "express":"3.0.0",
     "shelljs":"0.1.2",
     "ncallbacks":"1.0.0",
-    "request":"2.12.x",
+    "request":"2.22.0",
     "semver":"1.1.0",
     "glob":"3.2.x",
     "follow-redirects":"0.0.x",
