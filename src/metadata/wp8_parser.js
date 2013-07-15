@@ -189,8 +189,9 @@ module.exports.prototype = {
             }
         }
 
-        // now add all www references back in
-        var www_files = this.folder_contents('www', this.www_dir());
+        // now add all www references back in from the root www folder
+        var project_root = util.isCordova(this.wp8_proj_dir);
+        var www_files = this.folder_contents('www', util.projectWww(project_root));
         for(file in www_files) {
             var item = new et.Element('ItemGroup');
             var content = new et.Element('Content');
