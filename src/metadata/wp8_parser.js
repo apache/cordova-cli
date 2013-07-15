@@ -177,7 +177,7 @@ module.exports.prototype = {
             var files = group.findall('Content');
             for (var j = 0, k = files.length; j < k; j++) {
                 var file = files[j];
-                if (file.attrib.Include.substr(0, 3) == 'www') {
+                if (file.attrib.Include.substr(0, 3) == 'www' && file.attrib.Include.indexOf('cordova.js') < 0) {
                     // remove file reference
                     group.remove(0, file);
                     // remove ItemGroup if empty
