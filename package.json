@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "2.9.7",
+  "version": "3.0.0rc1",
   "preferGlobal": "true",
   "description": "Cordova command line interface tool",
   "main": "cordova",
@@ -30,7 +30,7 @@
   "dependencies": {
     "colors":">=0.6.0",
     "elementtree":"0.1.3",
-    "plugman":"0.9.3",
+    "plugman":"0.9.7",
     "plist":"0.4.x",
     "xcode":"0.5.1",
     "express":"3.0.0",
