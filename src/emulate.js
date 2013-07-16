@@ -29,6 +29,20 @@ var cordova_util      = require('./util'),
 
 function shell_out_to_emulate(root, platform, error_callback, done) {
     var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '" --emulator';
+    // TODO: inconsistent API for BB10 run command
+    if (platform == 'blackberry') {
+        var bb_project = path.join(root, 'platforms', 'blackberry')
+        var project = new platforms.blackberry.parser(bb_project);
+        if (project.has_simulator_target()) {
+            var bb_config = project.get_cordova_config();
+            var sim = project.get_simulator_targets()[0].name;
+            cmd = '"' + path.join(bb_project, 'cordova', 'run') + '" --target=' + sim + ' -k ' + bb_config.signing_password;
+        } else {
+            var err = new Error('No BlackBerry simulator targets defined. If you want to run emulate with BB10, please add a simulator target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
+            if (error_callback) return error_callback(err);
+            else throw err;
+        }
+    }
     events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);

@@ -54,6 +54,15 @@ describe('emulate command', function() {
                 cordova.emulate();
             }).toThrow('Current working directory is not a Cordova-based project.');
         });
+        it('should throw if no BlackBerry simulator targets exist and blackberry is to be emulated', function() {
+            var bb_project = path.join(project_dir, 'platforms', 'blackberry');
+            spyOn(platforms.blackberry, 'parser').andReturn({
+                has_simulator_target:function() { return false; }
+            });
+            expect(function() {
+                cordova.emulate('blackberry');
+            }).toThrow('No BlackBerry simulator targets defined. If you want to run emulate with BB10, please add a simulator target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
+        });
     });
 
     describe('success', function() {
@@ -64,6 +73,18 @@ describe('emulate command', function() {
                 expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'ios', 'cordova', 'run') + '" --emulator', jasmine.any(Object), jasmine.any(Function));
                 done();
             });
+        });
+        it('should execute a different BlackBerry-specific command to emulate blackberry', function() {
+            var bb_project = path.join(project_dir, 'platforms', 'blackberry');
+            spyOn(platforms.blackberry, 'parser').andReturn({
+                has_simulator_target:function() { return true; },
+                get_simulator_targets:function() { return [{name:'fifi'}]; },
+                get_cordova_config:function() { return {signing_password:'secret'}; }
+            });
+            expect(function() {
+                cordova.emulate('blackberry');
+                expect(exec.mostRecentCall.args[0]).toMatch(/blackberry.cordova.run" --target=fifi -k secret/gi);
+            }).not.toThrow();
         });
     });
 
