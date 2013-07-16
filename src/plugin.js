@@ -62,7 +62,7 @@ module.exports = function plugin(command, targets, callback) {
     };
 
     switch(command) {
-        case 'add':
+        case 'add': 
             var end = n(targets.length, function() {
                 hooks.fire('after_plugin_add', opts, function(err) {
                     if (err) {
@@ -157,6 +157,30 @@ module.exports = function plugin(command, targets, callback) {
                         }
                     });
                 }
+            });
+            break;
+        case 'search':
+            hooks.fire('before_plugin_search', function(err) {
+                if (err) {
+                    if(callback) callback(err);
+                    else throw err;
+                } else {
+                    plugman.search(targets, function(err, plugins) {
+                        if(err) return console.log(err);
+                        for(var plugin in plugins) {
+                            console.log();
+                            events.emit('results', plugins[plugin].name, '-', plugins[plugin].description || 'no description provided');
+                        }
+                        hooks.fire('after_plugin_search', function(err) {
+                            if(err) {
+                                if(callback) callback(err);
+                                else throw err;
+                            }
+                        });
+                    });
+
+                }
+
             });
             break;
         case 'ls':

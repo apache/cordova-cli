@@ -33,7 +33,7 @@ var project_dir = path.join('some','path');
 var plugins_dir = path.join(project_dir, 'plugins');
 
 describe('plugin command', function() {
-    var is_cordova, list_platforms, fire, find_plugins, rm, mkdir, existsSync, exec, prep_spy, plugman_install, plugman_fetch, parsers = {}, uninstall;
+    var is_cordova, list_platforms, fire, find_plugins, rm, mkdir, existsSync, exec, prep_spy, plugman_install, plugman_fetch, parsers = {}, plugman_uninstall;
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
         fire = spyOn(hooker.prototype, 'fire').andCallFake(function(e, opts, cb) {
@@ -61,7 +61,8 @@ describe('plugin command', function() {
         });
         plugman_install = spyOn(plugman, 'install');
         plugman_fetch = spyOn(plugman, 'fetch').andCallFake(function(target, plugins_dir, opts, cb) { cb(false, path.join(plugins_dir, target)); });
-        uninstall = spyOn(plugman, 'uninstall');
+        plugman_uninstall = spyOn(plugman, 'uninstall');
+        plugman_search = spyOn(plugman, 'search');
     });
 
     describe('failure', function() {
@@ -127,6 +128,12 @@ describe('plugin command', function() {
                 });
             });
         });
+        describe('`search`', function() {
+            it('should call plugman.search', function() {
+                cordova.plugin('search', sample_plugins);
+                expect(plugman_search).toHaveBeenCalledWith(sample_plugins, jasmine.any(Function));
+            });
+        });
         describe('`remove`',function() {
             var plugin_parser;
             var subset = ['android', 'wp7'];
@@ -145,7 +152,7 @@ describe('plugin command', function() {
                 cordova.plugin('rm', sample_plugins);
                 sample_plugins.forEach(function(plug) {
                     subset.forEach(function(plat) {
-                        expect(uninstall).toHaveBeenCalledWith(plat, path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object));
+                        expect(plugman_uninstall).toHaveBeenCalledWith(plat, path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object));
                     });
                 });
             });
