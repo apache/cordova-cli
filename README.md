@@ -57,13 +57,13 @@ A Cordova application built with cordova-cli will have the following directory s
     |--.cordova/
     |-- merges/
     | | |-- android/
-    | | |-- blackberry/
+    | | |-- blackberry10/
     | | `-- ios/
     |-- www/
     | `-- config.xml
     |-- platforms/
     | |-- android/
-    | |-- blackberry/
+    | |-- blackberry10/
     | `-- ios/
     `-- plugins/
 

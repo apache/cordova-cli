@@ -35,7 +35,7 @@ module.exports = function blackberry_parser(project) {
 };
 
 module.exports.check_requirements = function(project_root, callback) {
-    var lib_path = path.join(util.libDirectory, 'blackberry', 'cordova', require('../../platforms').blackberry.version);
+    var lib_path = path.join(util.libDirectory, 'blackberry10', 'cordova', require('../../platforms').blackberry10.version);
     shell.exec(path.join(lib_path, 'bin', 'check_reqs'), {silent:true, async:true}, function(code, output) {
         if (code != 0) {
             callback(output);
@@ -106,8 +106,8 @@ module.exports.prototype = {
         // copy over project www assets
         shell.cp('-rf', www, this.path);
 
-        var custom_path = config.has_custom_path(projectRoot, 'blackberry');
-        var lib_path = path.join(util.libDirectory, 'blackberry', 'cordova', require('../../platforms').blackberry.version);
+        var custom_path = config.has_custom_path(projectRoot, 'blackberry10');
+        var lib_path = path.join(util.libDirectory, 'blackberry10', 'cordova', require('../../platforms').blackberry10.version);
         if (custom_path) lib_path = custom_path;
         // add cordova.js
         shell.cp('-f', path.join(lib_path, 'javascript', 'cordova.blackberry10.js'), path.join(this.www_dir(), 'cordova.js'));
@@ -127,7 +127,7 @@ module.exports.prototype = {
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var merges_path = path.join(util.appDir(projectRoot), 'merges', 'blackberry');
+        var merges_path = path.join(util.appDir(projectRoot), 'merges', 'blackberry10');
         if (fs.existsSync(merges_path)) {
             var overrides = path.join(merges_path, '*');
             shell.cp('-rf', overrides, this.www_dir());

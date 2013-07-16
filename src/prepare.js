@@ -99,17 +99,17 @@ module.exports = function prepare(platformList, callback) {
                             // Call plugman --prepare for this platform. sets up js-modules appropriately.
                             var plugins_dir = path.join(projectRoot, 'plugins');
                             events.emit('log', 'Calling plugman.prepare for platform "' + platform + '"');
-                            plugman.prepare(platformPath, (platform=='blackberry'?'blackberry10':platform), plugins_dir);
+                            plugman.prepare(platformPath, platform, plugins_dir);
                             // Make sure that config changes for each existing plugin is in place
                             var plugins = cordova_util.findPlugins(plugins_dir);
-                            var platform_json = plugman.config_changes.get_platform_json(plugins_dir, (platform=='blackberry'?'blackberry10':platform));
+                            var platform_json = plugman.config_changes.get_platform_json(plugins_dir, platform);
                             plugins && plugins.forEach(function(plugin_id) {
                                 if (platform_json.installed_plugins[plugin_id]) {
                                     events.emit('log', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
-                                    plugman.config_changes.add_plugin_changes((platform=='blackberry'?'blackberry10':platform), platformPath, plugins_dir, plugin_id, /* variables for plugin */ platform_json.installed_plugins[plugin_id], /* top level plugin? */ true, /* should increment config munge? cordova-cli never should, only plugman */ false);
+                                    plugman.config_changes.add_plugin_changes(platform, platformPath, plugins_dir, plugin_id, /* variables for plugin */ platform_json.installed_plugins[plugin_id], /* top level plugin? */ true, /* should increment config munge? cordova-cli never should, only plugman */ false);
                                 } else if (platform_json.dependent_plugins[plugin_id]) {
                                     events.emit('log', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
-                                    plugman.config_changes.add_plugin_changes((platform=='blackberry'?'blackberry10':platform), platformPath, plugins_dir, plugin_id, /* variables for plugin */ platform_json.dependent_plugins[plugin_id], /* top level plugin? */ false, /* should increment config munge? cordova-cli never should, only plugman */ false);
+                                    plugman.config_changes.add_plugin_changes(platform, platformPath, plugins_dir, plugin_id, /* variables for plugin */ platform_json.dependent_plugins[plugin_id], /* top level plugin? */ false, /* should increment config munge? cordova-cli never should, only plugman */ false);
                                 }
                                 events.emit('log', 'Plugin "' + plugin_id + '" is good to go.');
                             });

@@ -32,7 +32,7 @@ module.exports = function (platform, port) {
         var device;
 
         switch (platform) {
-        case "blackberry":
+        case "blackberry10":
             device = "Z10";
             break;
         case "ios":

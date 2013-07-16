@@ -156,11 +156,11 @@ describe('platform command', function() {
             });
 
             it('should be able to remove multiple platforms', function() {
-                cordova.platform('remove', ['android', 'blackberry']);
+                cordova.platform('remove', ['android', 'blackberry10']);
                 expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'platforms', 'android'));
                 expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'merges', 'android'));
-                expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'platforms', 'blackberry'));
-                expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'merges', 'blackberry'));
+                expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'platforms', 'blackberry10'));
+                expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'merges', 'blackberry10'));
             });
         });
     });
