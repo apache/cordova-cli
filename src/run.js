@@ -28,7 +28,7 @@ var cordova_util      = require('./util'),
 function shell_out_to_run(projectRoot, platform, error_callback, done) {
     var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" --device';
     // TODO: inconsistent API for BB10 run command
-    if (platform == 'blackberry') {
+/*    if (platform == 'blackberry') {
         var bb_project = path.join(projectRoot, 'platforms', 'blackberry')
         var project = new platforms.blackberry.parser(bb_project);
         if (project.has_device_target()) {
@@ -41,7 +41,7 @@ function shell_out_to_run(projectRoot, platform, error_callback, done) {
             else throw err;
         }
     }
-
+*/
     events.emit('log', 'Running app on platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
