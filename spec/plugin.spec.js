@@ -33,7 +33,7 @@ var project_dir = path.join('some','path');
 var plugins_dir = path.join(project_dir, 'plugins');
 
 describe('plugin command', function() {
-    var is_cordova, list_platforms, fire, find_plugins, rm, mkdir, existsSync, exec, prep_spy, plugman_install, plugman_fetch, parsers = {}, plugman_uninstall;
+    var is_cordova, list_platforms, fire, find_plugins, rm, mkdir, existsSync, exec, prep_spy, plugman_install, plugman_fetch, parsers = {}, uninstallPlatform, uninstallPlugin;
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
         fire = spyOn(hooker.prototype, 'fire').andCallFake(function(e, opts, cb) {
@@ -61,8 +61,10 @@ describe('plugin command', function() {
         });
         plugman_install = spyOn(plugman, 'install');
         plugman_fetch = spyOn(plugman, 'fetch').andCallFake(function(target, plugins_dir, opts, cb) { cb(false, path.join(plugins_dir, target)); });
-        plugman_uninstall = spyOn(plugman, 'uninstall');
-        plugman_search = spyOn(plugman, 'search');
+        uninstallPlatform = spyOn(plugman.uninstall, 'uninstallPlatform');
+        uninstallPlugin = spyOn(plugman.uninstall, 'uninstallPlugin').andCallFake(function(target, plugins_dir, cb) {
+            cb && cb();
+        });
     });
 
     describe('failure', function() {
@@ -103,13 +105,19 @@ describe('plugin command', function() {
                 });
                 cordova.plugin('list');
             });
-
             it('should list out added plugins in a project', function(done) {
                 cordova.on('results', function(res) {
                     expect(res).toEqual(sample_plugins);
                     done();
                 });
                 cordova.plugin('list');
+            });
+            it('should trigger callback with list of plugins', function(done) {
+                cordova.plugin('list', [], function(e, plugins) {
+                    expect(e).not.toBeDefined();
+                    expect(plugins).toEqual(sample_plugins);
+                    done();
+                });
             });
         });
         describe('`add`', function() {
@@ -125,6 +133,12 @@ describe('plugin command', function() {
                     supported_platforms.forEach(function(plat) {
                         expect(plugman_install).toHaveBeenCalledWith((plat=='blackberry'?'blackberry10':plat), path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object)); 
                     });
+                });
+            });
+            it('should trigger callback without an error', function(done) {
+                cordova.plugin('add', sample_plugins, function(e) {
+                    expect(e).not.toBeDefined();
+                    done();
                 });
             });
         });
@@ -148,12 +162,23 @@ describe('plugin command', function() {
                 }).toThrow('Plugin "somethingrandom" not added to project.');
             });
 
-            it('should call plugman.uninstall for every matching installedplugin-supportedplatform pair', function() {
+            it('should call plugman.uninstall.uninstallPlatform for every matching installedplugin-supportedplatform pair', function() {
                 cordova.plugin('rm', sample_plugins);
                 sample_plugins.forEach(function(plug) {
                     subset.forEach(function(plat) {
-                        expect(plugman_uninstall).toHaveBeenCalledWith(plat, path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object));
+                        expect(uninstallPlatform).toHaveBeenCalledWith(plat, path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object));
                     });
+                });
+            });
+            it('should call plugman.uninstall.uninstallPlugin once for every removed plugin', function() {
+                uninstallPlugin.reset();
+                cordova.plugin('rm', sample_plugins);
+                expect(uninstallPlugin.callCount).toBe(2);
+            });
+            it('should trigger callback without an error', function(done) {
+                cordova.plugin('rm', sample_plugins, function(e) {
+                    expect(e).not.toBeDefined();
+                    done();
                 });
             });
         });

@@ -138,17 +138,17 @@ module.exports = function plugin(command, targets, callback) {
                                 else return true;
                             });
 
-                            // Iterate over all the common platforms between the plugin
-                            // and the app, and uninstall.
-                            // If this is a web-only plugin with no platform tags, this step
-                            // is not needed and we just --remove the plugin below.
-                            intersection.forEach(function(platform) {
+                            // Iterate over all installed platforms and uninstall.
+                            // If this is a web-only or dependency-only plugin, then
+                            // there may be nothing to do here except remove the
+                            // reference from the platform's plugin config JSON.
+                            platformList.forEach(function(platform) {
                                 var platformRoot = path.join(projectRoot, 'platforms', platform);
                                 var parser = new platforms[platform].parser(platformRoot);
                                 events.emit('log', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
-                                plugman.uninstall((platform=='blackberry'?'blackberry10':platform), platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
+                                plugman.uninstall.uninstallPlatform((platform=='blackberry'?'blackberry10':platform), platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
                             });
-                            end();
+                            plugman.uninstall.uninstallPlugin(target, path.join(projectRoot, 'plugins'), end);
                         } else {
                             var err = new Error('Plugin "' + target + '" not added to project.');
                             if (callback) callback(err);
@@ -196,6 +196,8 @@ module.exports = function plugin(command, targets, callback) {
                         if (err) {
                             if (callback) callback(err);
                             else throw err;
+                        } else {
+                            if (callback) callback(undefined, plugins);
                         }
                     });
                 }

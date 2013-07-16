@@ -4,7 +4,7 @@ var lazy_load = require('../src/lazy_load'),
     shell = require('shelljs'),
     path = require('path'),
     hooker = require('../src/hooker'),
-    https = require('follow-redirects').https,
+    request = require('request'),
     fs = require('fs'),
     platforms = require('../platforms');
 
@@ -54,49 +54,28 @@ describe('lazy_load module', function() {
             expect(fire).toHaveBeenCalledWith('before_library_download', {platform:'platform X', url:'some url', id:'some id', version:'three point five'}, jasmine.any(Function));
         });
 
-        describe('remove URLs for libraries', function() {
-            var req, write_stream, http_on;
-            beforeEach(function() {
-                write_spy = jasmine.createSpy('write stream write');
-                write_stream = spyOn(fs, 'createWriteStream').andReturn({
-                    write:write_spy
+        describe('remote URLs for libraries', function() {
+            var req,
+                p1 = jasmine.createSpy().andReturn({
+                    on:function() {
+                        return {
+                            on:function(){}
+                        }
+                    }
                 });
-                http_on = jasmine.createSpy('https result on');
-                // TODO: jasmien does not support chaning both andCallFake + andReturn...
-                req = spyOn(https, 'request').andCallFake(function(opts, cb) {
-                    cb({
-                        on:http_on
-                    });
-                }).andReturn({
-                    on:function(){},
-                   end:function(){}
+            var p2 = jasmine.createSpy().andReturn({pipe:p1});
+            beforeEach(function() {
+                req = spyOn(request, 'get').andReturn({
+                    pipe:p2
                 });
             });
 
-            it('should call into https request with appopriate url params', function() {
-                lazy_load.custom('https://github.com/apache/someplugin', 'random', 'android', '1.0');
+            it('should call request with appopriate url params', function() {
+                var url = 'https://github.com/apache/someplugin';
+                lazy_load.custom(url, 'random', 'android', '1.0');
                 expect(req).toHaveBeenCalledWith({
-                    hostname:'github.com',
-                    path:'/apache/someplugin'
+                    uri:url
                 }, jasmine.any(Function));
-            });
-            // TODO: jasmine does not support chaning andCallFake andReturn. Cannot test the below.
-            xit('should fire download events as the https request receives data events, and write to a file stream', function() {
-                http_on.andCallFake(function(evt, cb) {
-                    console.log(evt);
-                    if (evt == 'data') {
-                        cb('chunk');
-                    }
-                });
-                lazy_load.custom('https://github.com/apache/someplugin', 'random', 'android', '1.0');
-                expect(fire).toHaveBeenCalledWith('library_download', {
-                    platform:'android',
-                    url:'https://github.com/apache/someplugin',
-                    id:'random',
-                    version:'1.0',
-                    chunk:'chunk'
-                });
-                expect(write_spy).toHaveBeenCalledWith('chunk', 'binary');
             });
         });
 
@@ -107,7 +86,7 @@ describe('lazy_load module', function() {
             });
             it('should fire after hook once done', function() {
                 lazy_load.custom('/some/random/lib', 'id', 'X', 'three point five')
-                expect(fire).toHaveBeenCalledWith('after_library_download', {platform:'X',url:'/some/random/lib',id:'id',version:'three point five',path:path.join(util.libDirectory, 'X', 'id', 'three point five')}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('after_library_download', {platform:'X',url:'/some/random/lib',id:'id',version:'three point five',path:path.join(util.libDirectory, 'X', 'id', 'three point five'), symlink:true}, jasmine.any(Function));
             });
         });
     });

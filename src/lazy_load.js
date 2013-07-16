@@ -21,6 +21,7 @@ var path          = require('path'),
     shell         = require('shelljs'),
     platforms     = require('../platforms'),
     events        = require('./events'),
+    request       = require('request'),
     config        = require('./config'),
     hooker        = require('./hooker'),
     https         = require('follow-redirects').https,
@@ -63,79 +64,34 @@ module.exports = {
         }, function() {
             var uri = URL.parse(url);
             if (uri.protocol) {
-                shell.mkdir(download_dir);
-                // assuming its remote
-                var filename = path.join(download_dir, id+'-'+platform+'-'+version+'.tar.gz');
-                if (fs.existsSync(filename)) {
-                    shell.rm(filename);
-                }
-                var req_opts = {
-                    hostname: uri.hostname,
-                    path: uri.path
-                };
+                shell.mkdir('-p', download_dir);
                 events.emit('log', 'Requesting ' + url + '...');
-                // TODO: may not be an https request..
-                var req = https.request(req_opts, function(res) {
-                    var downloadfile = fs.createWriteStream(filename, {'flags': 'a'});
-
-                    res.on('data', function(chunk){
-                        downloadfile.write(chunk, 'binary');
-                        hooker.fire('library_download', {
+                var size = 0;
+                request.get({uri:url}, function(err, req, body) { size = body.length; })
+                    .pipe(zlib.createUnzip())
+                    .pipe(tar.Extract({path:download_dir}))
+                    .on('error', function(err) {
+                        if (callback) callback(err);
+                        else throw err;
+                    })
+                    .on('end', function() {
+                        events.emit('log', 'Downloaded, unzipped and extracted ' + size + ' byte response.');
+                        var entries = fs.readdirSync(download_dir);
+                        var entry = path.join(download_dir, entries[0]);
+                        shell.mv('-f', path.join(entry, (platform=='blackberry'?'blackberry10':''), '*'), download_dir);
+                        shell.rm('-rf', entry);
+                        hooker.fire('after_library_download', {
                             platform:platform,
                             url:url,
                             id:id,
                             version:version,
-                            chunk:chunk
+                            path:download_dir,
+                            size:size,
+                            symlink:false
+                        }, function() {
+                            if (callback) callback();
                         });
-                    });
-
-                    res.on('end', function(){
-                        downloadfile.end();
-                        var payload_size = fs.statSync(filename).size;
-                        events.emit('log', 'Download complete. Extracting...');
-                        var tar_path = path.join(download_dir, id+'-'+platform+'-'+version+'.tar');
-                        var tarfile = fs.createWriteStream(tar_path);
-                        tarfile.on('error', function(err) {
-                            if (callback) callback(err);
-                            else throw err;
-                        });
-                        tarfile.on('finish', function() {
-                            shell.rm(filename);
-                            fs.createReadStream(tar_path)
-                                .pipe(tar.Extract({ path: download_dir }))
-                                .on("error", function (err) {
-                                    if (callback) callback(err);
-                                    else throw err;
-                                })
-                                .on("end", function () {
-                                    shell.rm(tar_path);
-                                    // move contents out of extracted dir
-                                    var entries = fs.readdirSync(download_dir);
-                                    var entry = path.join(download_dir, entries[0]);
-                                    shell.mv('-f', path.join(entry, (platform=='blackberry'?'blackberry10':''), '*'), download_dir);
-                                    shell.rm('-rf', entry);
-                                    hooker.fire('after_library_download', {
-                                        platform:platform,
-                                        url:url,
-                                        id:id,
-                                        version:version,
-                                        path:download_dir,
-                                        size:payload_size
-                                    }, function() {
-                                        if (callback) callback();
-                                    });
-                                });
-                        });
-                        fs.createReadStream(filename)
-                            .pipe(zlib.createUnzip())
-                            .pipe(tarfile);
-                    });
                 });
-                req.on('error', function(err) {
-                    if (callback) return callback(err);
-                    else throw err;
-                });
-                req.end();
             } else {
                 // local path
                 // symlink instead of copying
@@ -145,7 +101,8 @@ module.exports = {
                     url:url,
                     id:id,
                     version:version,
-                    path:download_dir
+                    path:download_dir,
+                    symlink:true
                 }, function() {
                     if (callback) callback();
                 });
