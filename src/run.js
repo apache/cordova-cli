@@ -32,9 +32,8 @@ function shell_out_to_run(projectRoot, platform, error_callback, done) {
         var bb_project = path.join(projectRoot, 'platforms', 'blackberry')
         var project = new platforms.blackberry.parser(bb_project);
         if (project.has_device_target()) {
-            var bb_config = project.get_cordova_config();
-            var device = project.get_device_targets()[0].name;
-            cmd = '"' + path.join(bb_project, 'cordova', 'run') + '" --target=' + device + ' -k ' + bb_config.signing_password;
+            var target = project.get_device_targets()[0];
+            cmd = '"' + path.join(bb_project, 'cordova', 'run') + '" --target=' + target.name + ' -k ' + target.password || "";
         } else {
             var err = new Error('No BlackBerry device targets defined. If you want to run `run` with BB10, please add a device target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
             if (error_callback) error_callback(err);
