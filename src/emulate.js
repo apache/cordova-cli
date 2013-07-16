@@ -34,9 +34,8 @@ function shell_out_to_emulate(root, platform, error_callback, done) {
         var bb_project = path.join(root, 'platforms', 'blackberry')
         var project = new platforms.blackberry.parser(bb_project);
         if (project.has_simulator_target()) {
-            var bb_config = project.get_cordova_config();
-            var sim = project.get_simulator_targets()[0].name;
-            cmd = '"' + path.join(bb_project, 'cordova', 'run') + '" --target=' + sim + ' -k ' + bb_config.signing_password;
+            var target = project.get_simulator_targets()[0];
+            cmd = '"' + path.join(bb_project, 'cordova', 'run') + '" --target=' + target.name + ' -k ' + target.password || "";
         } else {
             var err = new Error('No BlackBerry simulator targets defined. If you want to run emulate with BB10, please add a simulator target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
             if (error_callback) return error_callback(err);

@@ -32,6 +32,11 @@ module.exports = function blackberry_parser(project) {
     this.path = project;
     this.config_path = path.join(this.path, 'www', 'config.xml');
     this.xml = new util.config_parser(this.config_path);
+    if(fs.existsSync(path.join(this.path, "project.json"))) {
+        this.project_json = require(path.join(this.path, "project.json"));
+    } else {
+        this.project_json = {};
+    }
 };
 
 module.exports.check_requirements = function(project_root, callback) {
@@ -80,6 +85,7 @@ module.exports.prototype = {
         self.update_overrides();
         self.update_staging();
         util.deleteSvnFolders(this.www_dir());
+        if(callback) callback();
     },
 
     // Returns the platform-specific www directory.
@@ -121,6 +127,54 @@ module.exports.prototype = {
         // add res/
         // @TODO remove this when config.xml is generalized
         shell.cp('-rf', path.join(lib_path, 'bin', 'templates', 'project', 'www', 'res'), this.www_dir());
+    },
+
+    has_device_target: function() {
+        return this.get_device_targets().length > 0;
+    },
+
+    has_simulator_target: function() {
+        return this.get_simulator_targets().length > 0;
+    },
+
+    get_device_targets: function() {
+        return this.get_targets("device");
+    },
+
+    get_simulator_targets: function() {
+        return this.get_targets("simulator");
+    },
+
+    get_targets: function(type) {
+        var targets = [],
+            targetIndex, target;
+
+        if(this.project_json.targets) {
+            for(targetIndex in this.project_json.targets) {
+                target = this.project_json.targets[targetIndex];
+                if(target.type === type) {
+                    target.name = targetIndex;
+                    targets.push(target);
+                }
+            }
+        }
+        return targets;
+    },
+
+    get_simulator_targets: function() {
+        var device_targets = [],
+            targetIndex, target;
+
+        if(this.project_json.targets) {
+            for(targetIndex in this.project_json.targets) {
+                target = this.project_json.targets[targetIndex];
+                if(target.type === "simulator") {
+                    target.name = targetIndex;
+                    device_targets.push(target);
+                }
+            }
+        }
+        return device_targets;
     },
 
     // update the overrides folder into the www folder
