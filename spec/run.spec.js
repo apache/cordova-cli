@@ -54,6 +54,15 @@ describe('run command', function() {
                 cordova.run();
             }).toThrow('Current working directory is not a Cordova-based project.');
         });
+        it('should throw if no BlackBerry simulator targets exist and blackberry is to be rund', function() {
+            var bb_project = path.join(project_dir, 'platforms', 'blackberry');
+            spyOn(platforms.blackberry, 'parser').andReturn({
+                has_device_target:function() { return false; }
+            });
+            expect(function() {
+                cordova.run('blackberry');
+            }).toThrow('No BlackBerry device targets defined. If you want to run `run` with BB10, please add a device target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
+        });
     });
 
     describe('success', function() {
@@ -64,6 +73,18 @@ describe('run command', function() {
                 expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'ios', 'cordova', 'run') + '" --device', jasmine.any(Object), jasmine.any(Function));
                 done();
             });
+        });
+        it('should execute a different BlackBerry-specific command to run blackberry', function() {
+            var bb_project = path.join(project_dir, 'platforms', 'blackberry');
+            spyOn(platforms.blackberry, 'parser').andReturn({
+                has_device_target:function() { return true; },
+                get_device_targets:function() { return [{name:'fifi'}]; },
+                get_cordova_config:function() { return {signing_password:'secret'}; }
+            });
+            expect(function() {
+                cordova.run('blackberry');
+                expect(exec.mostRecentCall.args[0]).toMatch(/blackberry.cordova.run" --target=fifi -k secret/gi);
+            }).not.toThrow();
         });
     });
 
