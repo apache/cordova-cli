@@ -80,6 +80,7 @@ module.exports.prototype = {
         self.update_overrides();
         self.update_staging();
         util.deleteSvnFolders(this.www_dir());
+        if (callback) callback();
     },
 
     // Returns the platform-specific www directory.
