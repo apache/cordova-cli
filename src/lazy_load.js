@@ -63,7 +63,7 @@ module.exports = {
             version:version
         }, function() {
             var uri = URL.parse(url);
-            if (uri.protocol) {
+            if (uri.protocol && uri.protocol[1] != ':') { // second part of conditional is for awesome windows support. fuuu windows
                 shell.mkdir('-p', download_dir);
                 events.emit('log', 'Requesting ' + url + '...');
                 var size = 0;
@@ -95,7 +95,7 @@ module.exports = {
             } else {
                 // local path
                 // symlink instead of copying
-                fs.symlinkSync(uri.path, download_dir, 'dir');
+                fs.symlinkSync((uri.protocol && uri.protocol[1] == ':' ? uri.href : uri.path), download_dir, 'dir');
                 hooker.fire('after_library_download', {
                     platform:platform,
                     url:url,
