@@ -97,9 +97,8 @@ module.exports = function plugin(command, targets, callback) {
                                 platformList.forEach(function(platform) {
                                     var platformRoot = path.join(projectRoot, 'platforms', platform);
                                     var parser = new platforms[platform].parser(platformRoot);
-                                    // TODO: unify use of blackberry in cli vs blackberry10 in plugman
                                     events.emit('log', 'Calling plugman.install on plugin "' + dir + '" for platform "' + platform + '"');
-                                    plugman.install((platform=='blackberry'?'blackberry10':platform), platformRoot,
+                                    plugman.install(platform, platformRoot,
                                                     path.basename(dir), pluginsDir, { www_dir: parser.staging_dir() });
                                 });
                                 end();
@@ -146,7 +145,7 @@ module.exports = function plugin(command, targets, callback) {
                                 var platformRoot = path.join(projectRoot, 'platforms', platform);
                                 var parser = new platforms[platform].parser(platformRoot);
                                 events.emit('log', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
-                                plugman.uninstall.uninstallPlatform((platform=='blackberry'?'blackberry10':platform), platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
+                                plugman.uninstall.uninstallPlatform(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
                             });
                             plugman.uninstall.uninstallPlugin(target, path.join(projectRoot, 'plugins'), end);
                         } else {

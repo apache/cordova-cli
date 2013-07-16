@@ -78,7 +78,7 @@ module.exports = {
                         events.emit('log', 'Downloaded, unzipped and extracted ' + size + ' byte response.');
                         var entries = fs.readdirSync(download_dir);
                         var entry = path.join(download_dir, entries[0]);
-                        shell.mv('-f', path.join(entry, (platform=='blackberry'?'blackberry10':''), '*'), download_dir);
+                        shell.mv('-f', path.join(entry, (platform=='blackberry10'?'blackberry10':''), '*'), download_dir);
                         shell.rm('-rf', entry);
                         hooker.fire('after_library_download', {
                             platform:platform,

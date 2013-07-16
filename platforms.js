@@ -38,8 +38,8 @@ module.exports = {
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
         version: '3.0.0rc1'
     },
-    blackberry : {
-        parser : require('./src/metadata/blackberry_parser'),
+    blackberry10 : {
+        parser : require('./src/metadata/blackberry10_parser'),
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-blackberry.git',
         version: '3.0.0rc1'
     },

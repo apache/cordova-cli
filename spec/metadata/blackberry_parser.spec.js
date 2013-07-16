@@ -28,7 +28,7 @@ var platforms = require('../../platforms'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
 
-describe('blackberry project parser', function() {
+describe('blackberry10 project parser', function() {
     var proj = '/some/path';
     var exists, custom, config_p, sh;
     beforeEach(function() {
@@ -44,13 +44,13 @@ describe('blackberry project parser', function() {
         it('should throw an exception with a path that is not a native blackberry project', function() {
             exists.andReturn(false);
             expect(function() {
-                new platforms.blackberry.parser(proj);
+                new platforms.blackberry10.parser(proj);
             }).toThrow('The provided path "/some/path" is not a Cordova BlackBerry10 project.');
         });
         it('should accept a proper native blackberry project path as construction parameter', function() {
             var project;
             expect(function() {
-                project = new platforms.blackberry.parser(proj);
+                project = new platforms.blackberry10.parser(proj);
             }).not.toThrow();
             expect(project).toBeDefined();
         });
@@ -61,13 +61,13 @@ describe('blackberry project parser', function() {
             sh.andCallFake(function(cmd, opts, cb) {
                 cb(1, 'no bb-deploy dewd!');
             });
-            platforms.blackberry.parser.check_requirements(proj, function(err) {
+            platforms.blackberry10.parser.check_requirements(proj, function(err) {
                 expect(err).toContain('no bb-deploy dewd');
                 done();
             });
         });
         it('should fire a callback with no error if shell out is successful', function(done) {
-            platforms.blackberry.parser.check_requirements(proj, function(err) {
+            platforms.blackberry10.parser.check_requirements(proj, function(err) {
                 expect(err).toEqual(false);
                 done();
             });
@@ -75,9 +75,9 @@ describe('blackberry project parser', function() {
     });
     describe('instance', function() {
         var p, cp, rm, is_cordova, write, read;
-        var bb_proj = path.join(proj, 'platforms', 'blackberry');
+        var bb_proj = path.join(proj, 'platforms', 'blackberry10');
         beforeEach(function() {
-            p = new platforms.blackberry.parser(bb_proj);
+            p = new platforms.blackberry10.parser(bb_proj);
             cp = spyOn(shell, 'cp');
             rm = spyOn(shell, 'rm');
             is_cordova = spyOn(util, 'isCordova').andReturn(proj);
@@ -164,7 +164,7 @@ describe('blackberry project parser', function() {
         });
         describe('config_xml method', function() {
             it('should return the location of the config.xml', function() {
-                expect(p.config_xml()).toEqual(path.join(proj, 'platforms', 'blackberry', 'www', 'config.xml'));
+                expect(p.config_xml()).toEqual(path.join(proj, 'platforms', 'blackberry10', 'www', 'config.xml'));
             });
         });
         describe('update_www method', function() {
@@ -175,13 +175,13 @@ describe('blackberry project parser', function() {
             });
             it('should copy in a fresh cordova.js from stock cordova lib if no custom lib is specified', function() {
                 p.update_www();
-                expect(cp).toHaveBeenCalledWith('-f', path.join(util.libDirectory, 'blackberry', 'cordova', platforms.blackberry.version, 'javascript', 'cordova.blackberry10.js'), path.join(proj, 'platforms', 'blackberry', 'www', 'cordova.js'));
+                expect(cp).toHaveBeenCalledWith('-f', path.join(util.libDirectory, 'blackberry10', 'cordova', platforms.blackberry10.version, 'javascript', 'cordova.blackberry10.js'), path.join(proj, 'platforms', 'blackberry10', 'www', 'cordova.js'));
             });
             it('should copy in a fresh cordova.js from custom cordova lib if custom lib is specified', function() {
                 var custom_path = '/custom/path';
                 custom.andReturn(custom_path);
                 p.update_www();
-                expect(cp).toHaveBeenCalledWith('-f', path.join(custom_path, 'javascript', 'cordova.blackberry10.js'), path.join(proj, 'platforms', 'blackberry', 'www', 'cordova.js'));
+                expect(cp).toHaveBeenCalledWith('-f', path.join(custom_path, 'javascript', 'cordova.blackberry10.js'), path.join(proj, 'platforms', 'blackberry10', 'www', 'cordova.js'));
             });
         });
         describe('update_overrides method', function() {
@@ -192,7 +192,7 @@ describe('blackberry project parser', function() {
             });
             it('should copy merges path into www', function() {
                 p.update_overrides();
-                expect(cp).toHaveBeenCalledWith('-rf', path.join(proj, 'merges', 'blackberry', '*'), path.join(proj, 'platforms', 'blackberry', 'www'));
+                expect(cp).toHaveBeenCalledWith('-rf', path.join(proj, 'merges', 'blackberry10', '*'), path.join(proj, 'platforms', 'blackberry10', 'www'));
             });
         });
         describe('update_staging method', function() {
@@ -203,7 +203,7 @@ describe('blackberry project parser', function() {
             });
             it('should copy the staging dir into www if staging dir exists', function() {
                 p.update_staging();
-                expect(cp).toHaveBeenCalledWith('-rf', path.join(proj, 'platforms', 'blackberry', '.staging', 'www', '*'), path.join(proj, 'platforms', 'blackberry', 'www'));
+                expect(cp).toHaveBeenCalledWith('-rf', path.join(proj, 'platforms', 'blackberry10', '.staging', 'www', '*'), path.join(proj, 'platforms', 'blackberry10', 'www'));
             });
         });
         describe('update_project method', function() {
