@@ -105,13 +105,19 @@ describe('plugin command', function() {
                 });
                 cordova.plugin('list');
             });
-
             it('should list out added plugins in a project', function(done) {
                 cordova.on('results', function(res) {
                     expect(res).toEqual(sample_plugins);
                     done();
                 });
                 cordova.plugin('list');
+            });
+            it('should trigger callback with list of plugins', function(done) {
+                cordova.plugin('list', [], function(e, plugins) {
+                    expect(e).not.toBeDefined();
+                    expect(plugins).toEqual(sample_plugins);
+                    done();
+                });
             });
         });
         describe('`add`', function() {
@@ -127,6 +133,12 @@ describe('plugin command', function() {
                     supported_platforms.forEach(function(plat) {
                         expect(plugman_install).toHaveBeenCalledWith((plat=='blackberry'?'blackberry10':plat), path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object)); 
                     });
+                });
+            });
+            it('should trigger callback without an error', function(done) {
+                cordova.plugin('add', sample_plugins, function(e) {
+                    expect(e).not.toBeDefined();
+                    done();
                 });
             });
         });
@@ -156,6 +168,12 @@ describe('plugin command', function() {
                 uninstallPlugin.reset();
                 cordova.plugin('rm', sample_plugins);
                 expect(uninstallPlugin.callCount).toBe(2);
+            });
+            it('should trigger callback without an error', function(done) {
+                cordova.plugin('rm', sample_plugins, function(e) {
+                    expect(e).not.toBeDefined();
+                    done();
+                });
             });
         });
     });

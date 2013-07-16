@@ -172,6 +172,8 @@ module.exports = function plugin(command, targets, callback) {
                         if (err) {
                             if (callback) callback(err);
                             else throw err;
+                        } else {
+                            if (callback) callback(undefined, plugins);
                         }
                     });
                 }
