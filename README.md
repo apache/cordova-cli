@@ -6,6 +6,13 @@
 
 Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/guide_getting-started_index.md.html#Getting%20Started%20Guides) for more details on how to work with Cordova sub-projects.
 
+# Supported Platforms
+
+- Android
+- BlackBerry 10
+- iOS
+- Windows Phone 7 &amp; 8
+
 # Requirements
 
 * [nodejs](http://nodejs.org/)
