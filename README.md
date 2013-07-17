@@ -175,9 +175,9 @@ Please check [Cordova issues with the CLI Component](http://issues.cordova.io). 
 - Which mobile SDKs you have installed, and which version. Related to this: which Xcode version if you are submitting issues related to iOS
 - Any error stack traces you received
 
-## Known Issues and Troubleshooting
+# Known Issues and Troubleshooting
 
-#Windows
+##Windows
 When trying to add a platform on a Windows machine if you run into the following error message:
     cordova library for "android" already exists. No need to download. Continuing.
     Checking if platform "android" passes minimum requirements...
