@@ -168,6 +168,11 @@ Please check [Cordova issues with the CLI Component](http://issues.cordova.io). 
 - Which mobile SDKs you have installed, and which version. Related to this: which Xcode version if you are submitting issues related to iOS
 - Any error stack traces you received
 
+## Contributors
+
+Thanks to everyone for contributing! For a list of people involved, please see the `package.json` file.
+
+
 # Known Issues and Troubleshooting
 
 ##Windows
@@ -193,6 +198,3 @@ run the command "android list target".  If you see:
 
 at the beginning of the command output, it means you will need to update your Windows Path variable to include xcopy. This location is typically under C:\Windows\System32. 
 
-## Contributors
-
-Thanks to everyone for contributing! For a list of people involved, please see the `package.json` file.
