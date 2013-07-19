@@ -21,30 +21,30 @@ module.exports = {
     'ios' : {
         parser : require('./src/metadata/ios_parser'),
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-ios.git',
-        version: '3.0.0rc1'
+        version: '3.0.0'
     }, 
     'android' : {
         parser : require('./src/metadata/android_parser'),
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-android.git',
-        version: '3.0.0rc1'
+        version: '3.0.0'
     }, 
     'wp7' : {
         parser : require('./src/metadata/wp7_parser'),
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
-        version: '3.0.0rc1'
+        version: '3.0.0'
     },
     'wp8' : {
         parser : require('./src/metadata/wp8_parser'),
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
-        version: '3.0.0rc1'
+        version: '3.0.0'
     },
     blackberry10 : {
         parser : require('./src/metadata/blackberry10_parser'),
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-blackberry.git',
-        version: '3.0.0rc1'
+        version: '3.0.0'
     },
     'www':{
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-app-hello-world.git',
-        version: '3.0.0rc1'
+        version: '3.0.0'
     }
 };
