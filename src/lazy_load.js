@@ -20,6 +20,7 @@ var path          = require('path'),
     fs            = require('fs'),
     shell         = require('shelljs'),
     platforms     = require('../platforms'),
+    npm           = require('npm'),
     events        = require('./events'),
     request       = require('request'),
     config        = require('./config'),
@@ -63,11 +64,24 @@ module.exports = {
             version:version
         }, function() {
             var uri = URL.parse(url);
-            if (uri.protocol) {
-                shell.mkdir('-p', download_dir);
-                events.emit('log', 'Requesting ' + url + '...');
-                var size = 0;
-                request.get({uri:url}, function(err, req, body) { size = body.length; })
+            if (uri.protocol && uri.protocol[1] != ':') { // second part of conditional is for awesome windows support. fuuu windows
+                npm.load(function() {
+                    // Check if NPM proxy settings are set. If so, include them in the request() call.
+                    var proxy;
+                    if (uri.protocol == 'https:') {
+                        proxy = npm.config.get('https-proxy');
+                    } else if (uri.protocol == 'http:') {
+                        proxy = npm.config.get('proxy');
+                    }
+
+                    shell.mkdir('-p', download_dir);
+                    var size = 0;
+                    var request_options = {uri:url};
+                    if (proxy) {
+                        request_options.proxy = proxy;
+                    }
+                    events.emit('log', 'Requesting ' + JSON.stringify(request_options) + '...');
+                    request.get(request_options, function(err, req, body) { size = body.length; })
                     .pipe(zlib.createUnzip())
                     .pipe(tar.Extract({path:download_dir}))
                     .on('error', function(err) {
@@ -78,7 +92,7 @@ module.exports = {
                         events.emit('log', 'Downloaded, unzipped and extracted ' + size + ' byte response.');
                         var entries = fs.readdirSync(download_dir);
                         var entry = path.join(download_dir, entries[0]);
-                        shell.mv('-f', path.join(entry, (platform=='blackberry'?'blackberry10':''), '*'), download_dir);
+                        shell.mv('-f', path.join(entry, (platform=='blackberry10'?'blackberry10':''), '*'), download_dir);
                         shell.rm('-rf', entry);
                         hooker.fire('after_library_download', {
                             platform:platform,
@@ -91,11 +105,12 @@ module.exports = {
                         }, function() {
                             if (callback) callback();
                         });
+                    });
                 });
             } else {
                 // local path
                 // symlink instead of copying
-                fs.symlinkSync(uri.path, download_dir, 'dir');
+                fs.symlinkSync((uri.protocol && uri.protocol[1] == ':' ? uri.href : uri.path), download_dir, 'dir');
                 hooker.fire('after_library_download', {
                     platform:platform,
                     url:url,

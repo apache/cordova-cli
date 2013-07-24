@@ -182,7 +182,7 @@ module.exports.supports = function(project_root, name, callback) {
     // check for platform support
     platformParser.check_requirements(project_root, function(e) {
         // typecast String to Error
-        e = (e instanceof String) ? new Error(e) : e;
+        e = (typeof e == 'string') ? new Error(e) : e;
         // typecast false Boolean to null
         e = (e) ? e : null;
 

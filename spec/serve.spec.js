@@ -27,7 +27,7 @@ var cordova = require('../cordova'),
     http = require('http'),
     android_parser = require('../src/metadata/android_parser'),
     ios_parser = require('../src/metadata/ios_parser'),
-    blackberry_parser = require('../src/metadata/blackberry_parser'),
+    blackberry_parser = require('../src/metadata/blackberry10_parser'),
     wp7_parser        = require('../src/metadata/wp7_parser'),
     wp8_parser        = require('../src/metadata/wp8_parser');
 

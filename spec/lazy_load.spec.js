@@ -2,6 +2,7 @@ var lazy_load = require('../src/lazy_load'),
     config = require('../src/config'),
     util = require('../src/util'),
     shell = require('shelljs'),
+    npm = require('npm');
     path = require('path'),
     hooker = require('../src/hooker'),
     request = require('request'),
@@ -56,6 +57,7 @@ describe('lazy_load module', function() {
 
         describe('remote URLs for libraries', function() {
             var req,
+                load_spy,
                 p1 = jasmine.createSpy().andReturn({
                     on:function() {
                         return {
@@ -68,6 +70,8 @@ describe('lazy_load module', function() {
                 req = spyOn(request, 'get').andReturn({
                     pipe:p2
                 });
+                load_spy = spyOn(npm, 'load').andCallFake(function(cb) { cb(); });
+                npm.config.get = function() { return null; };
             });
 
             it('should call request with appopriate url params', function() {
@@ -75,6 +79,26 @@ describe('lazy_load module', function() {
                 lazy_load.custom(url, 'random', 'android', '1.0');
                 expect(req).toHaveBeenCalledWith({
                     uri:url
+                }, jasmine.any(Function));
+            });
+            it('should take into account https-proxy npm configuration var if exists for https:// calls', function() {
+                var proxy = 'https://somelocalproxy.com';
+                npm.config.get = function() { return proxy; };
+                var url = 'https://github.com/apache/someplugin';
+                lazy_load.custom(url, 'random', 'android', '1.0');
+                expect(req).toHaveBeenCalledWith({
+                    uri:url,
+                    proxy:proxy
+                }, jasmine.any(Function));
+            });
+            it('should take into account proxy npm config var if exists for http:// calls', function() {
+                var proxy = 'http://somelocalproxy.com';
+                npm.config.get = function() { return proxy; };
+                var url = 'http://github.com/apache/someplugin';
+                lazy_load.custom(url, 'random', 'android', '1.0');
+                expect(req).toHaveBeenCalledWith({
+                    uri:url,
+                    proxy:proxy
                 }, jasmine.any(Function));
             });
         });

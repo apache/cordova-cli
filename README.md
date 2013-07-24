@@ -6,6 +6,13 @@
 
 Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/guide_getting-started_index.md.html#Getting%20Started%20Guides) for more details on how to work with Cordova sub-projects.
 
+# Supported Platforms
+
+- Android
+- BlackBerry 10
+- iOS
+- Windows Phone 7 &amp; 8
+
 # Requirements
 
 * [nodejs](http://nodejs.org/)
@@ -57,13 +64,13 @@ A Cordova application built with cordova-cli will have the following directory s
     |--.cordova/
     |-- merges/
     | | |-- android/
-    | | |-- blackberry/
+    | | |-- blackberry10/
     | | `-- ios/
     |-- www/
     | `-- config.xml
     |-- platforms/
     | |-- android/
-    | |-- blackberry/
+    | |-- blackberry10/
     | `-- ios/
     `-- plugins/
 
@@ -171,3 +178,39 @@ Please check [Cordova issues with the CLI Component](http://issues.cordova.io). 
 ## Contributors
 
 Thanks to everyone for contributing! For a list of people involved, please see the `package.json` file.
+
+
+# Known Issues and Troubleshooting
+
+## Any OS
+
+### Proxy Settings
+
+cordova-cli will use `npm`'s proxy settings. If you downloaded cordova-cli via `npm` and are behind a proxy, chances are cordova-cli should work for you as it will use those settings in the first place. Make sure that the `https-proxy` and `proxy` npm config variables are set properly. See [npm's configuration documentation](https://npmjs.org/doc/config.html) for more information.
+
+## Windows
+
+### Trouble Adding Android as a Platform
+
+When trying to add a platform on a Windows machine if you run into the following error message:
+    cordova library for "android" already exists. No need to download. Continuing.
+    Checking if platform "android" passes minimum requirements...
+    Checking Android requirements...
+    Running "android list target" (output to follow)
+    
+    Error: The command `android` failed. Make sure you have the latest Android SDK installed, and the `android` command (inside the tools/ folder) added t
+    o your path. Output:
+    at C:\Users\me\AppData\Roaming\npm\node_modules\cordova\src\platform.js:185:42
+    at C:\Users\me\AppData\Roaming\npm\node_modules\cordova\src\metadata\android_parser.js:50:13
+    at C:\Users\me\AppData\Roaming\npm\node_modules\cordova\node_modules\shelljs\shell.js:1707:7
+    at exithandler (child_process.js:633:7)
+    at ChildProcess.errorhandler (child_process.js:649:5)
+    at ChildProcess.EventEmitter.emit (events.js:95:17)
+    at Process.ChildProcess._handle.onexit (child_process.js:787:12)
+
+run the command "android list target".  If you see:
+    'xcopy' is not recognized as an internal or external command,
+    operable program or batch file.
+
+at the beginning of the command output, it means you will need to update your Windows Path variable to include xcopy. This location is typically under C:\Windows\System32. 
+
