@@ -58,7 +58,6 @@ module.exports = function prepare(platformList, callback) {
     }
 
     var xml = cordova_util.projectConfig(projectRoot);
-    var cfg = new cordova_util.config_parser(xml);
     var opts = {
         platforms:platformList
     };
@@ -75,6 +74,7 @@ module.exports = function prepare(platformList, callback) {
             if (callback) callback(err);
             else throw err;
         } else {
+            var cfg = new cordova_util.config_parser(xml);
             var end = n(platformList.length, function() {
                 hooks.fire('after_prepare', opts, function(err) {
                     if (err) {
