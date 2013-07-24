@@ -182,7 +182,16 @@ Thanks to everyone for contributing! For a list of people involved, please see t
 
 # Known Issues and Troubleshooting
 
-##Windows
+## Any OS
+
+### Proxy Settings
+
+cordova-cli will use `npm`'s proxy settings. If you downloaded cordova-cli via `npm` and are behind a proxy, chances are cordova-cli should work for you as it will use those settings in the first place. Make sure that the `https-proxy` and `proxy` npm config variables are set properly. See [npm's configuration documentation](https://npmjs.org/doc/config.html) for more information.
+
+## Windows
+
+### Trouble Adding Android as a Platform
+
 When trying to add a platform on a Windows machine if you run into the following error message:
     cordova library for "android" already exists. No need to download. Continuing.
     Checking if platform "android" passes minimum requirements...

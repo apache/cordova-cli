@@ -20,6 +20,7 @@ var path          = require('path'),
     fs            = require('fs'),
     shell         = require('shelljs'),
     platforms     = require('../platforms'),
+    npm           = require('npm'),
     events        = require('./events'),
     request       = require('request'),
     config        = require('./config'),
@@ -64,10 +65,23 @@ module.exports = {
         }, function() {
             var uri = URL.parse(url);
             if (uri.protocol && uri.protocol[1] != ':') { // second part of conditional is for awesome windows support. fuuu windows
-                shell.mkdir('-p', download_dir);
-                events.emit('log', 'Requesting ' + url + '...');
-                var size = 0;
-                request.get({uri:url}, function(err, req, body) { size = body.length; })
+                npm.load(function() {
+                    // Check if NPM proxy settings are set. If so, include them in the request() call.
+                    var proxy;
+                    if (uri.protocol == 'https:') {
+                        proxy = npm.config.get('https-proxy');
+                    } else if (uri.protocol == 'http:') {
+                        proxy = npm.config.get('proxy');
+                    }
+
+                    shell.mkdir('-p', download_dir);
+                    var size = 0;
+                    var request_options = {uri:url};
+                    if (proxy) {
+                        request_options.proxy = proxy;
+                    }
+                    events.emit('log', 'Requesting ' + JSON.stringify(request_options) + '...');
+                    request.get(request_options, function(err, req, body) { size = body.length; })
                     .pipe(zlib.createUnzip())
                     .pipe(tar.Extract({path:download_dir}))
                     .on('error', function(err) {
@@ -91,6 +105,7 @@ module.exports = {
                         }, function() {
                             if (callback) callback();
                         });
+                    });
                 });
             } else {
                 // local path
