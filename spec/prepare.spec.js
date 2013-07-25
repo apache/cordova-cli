@@ -77,9 +77,23 @@ describe('prepare command', function() {
             cordova.prepare();
             expect(is_cordova).toHaveBeenCalled();
         });
-        it('should parse user\'s config.xml by calling instantiating a config_parser', function() {
-            cordova.prepare();
-            expect(config_parser).toHaveBeenCalledWith(path.join(project_dir, 'www', 'config.xml'));
+        it('should parse user\'s config.xml by instantiating a config_parser only _after_ before_prepare is called', function() {
+            var before_prep, after_prep, cont;
+            fire.andCallFake(function(e, opts, cb) {
+                if (e == 'before_prepare') {
+                    before_prep = true;
+                }
+                cont = cb;
+            });
+            runs(function() {
+                cordova.prepare();
+            });
+            waitsFor(function() { return before_prep; });
+            runs(function() {
+                expect(config_parser).not.toHaveBeenCalled();
+                cont();
+                expect(config_parser).toHaveBeenCalledWith(path.join(project_dir, 'www', 'config.xml'));
+            });
         });
         it('should invoke each platform\'s parser\'s update_project method', function() {
             cordova.prepare();
