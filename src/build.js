@@ -16,7 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
-var util              = require('./util'),
+var cordova_util      = require('./util'),
     path              = require('path'),
     fs                = require('fs'),
     shell             = require('shelljs'),
@@ -24,51 +24,42 @@ var util              = require('./util'),
     events            = require('./events'),
     n                 = require('ncallbacks');
 
-module.exports = function build(platformList, callback) {
-    var projectRoot = util.isCordova(process.cwd());
-    if (!projectRoot) {
-        var err = new Error('Current working directory is not a Cordova-based project.');
-        if (callback) callback(err);
-        else throw err;
-        return;
+module.exports = function build(options, callback) {
+    var projectRoot = cordova_util.isCordova(process.cwd());
+
+    if (options instanceof Function && callback === undefined) {
+        callback = options;
+        options = {
+            verbose: false,
+            platforms: [],
+            options: []
+        };
     }
 
-    if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
-        platformList = util.listPlatforms(projectRoot);
-    } else if (typeof platformList == 'string') platformList = [platformList];
-    else if (platformList instanceof Function && callback === undefined) {
-        callback = platformList;
-        platformList = util.listPlatforms(projectRoot);
-    }
-
-    if (platformList.length === 0) {
-        var err = new Error('No platforms added! `cordova platform add <platform>` to add a platform.');
-        if (callback) callback(err);
-        else throw err;
-        return;
+    options = cordova_util.preProcessOptions(options);
+    if (options.constructor.name === "Error") {
+        if (callback) return callback(options);
+        else throw options;
     }
 
     // fire build hooks
     var hooks = new hooker(projectRoot);
-    var opts = {
-        platforms:platformList
-    };
-    hooks.fire('before_build', opts, function(err) {
+    hooks.fire('before_build', options, function(err) {
         if (err) {
             if (callback) callback(err);
             else throw err;
         } else {
-            require('../cordova').prepare(platformList, function(err) {
+            require('../cordova').prepare(options, function(err) {
                 if (err) {
                     if (callback) callback(err);
                     else throw err;
                 } else {
-                    require('../cordova').compile(platformList, function(err) {
+                    require('../cordova').compile(options, function(err) {
                         if (err) {
                             if (callback) callback(err);
                             else throw err;
                         } else {
-                            hooks.fire('after_build', opts, function(err) {
+                            hooks.fire('after_build', options, function(err) {
                                 if (err) {
                                     if (callback) callback(err);
                                     else throw err;
@@ -81,5 +72,5 @@ module.exports = function build(platformList, callback) {
                 }
             });
         }
-    });;
+    });
 };

@@ -27,8 +27,8 @@ var cordova_util      = require('./util'),
     hooker            = require('./hooker'),
     util              = require('util');
 
-function shell_out_to_emulate(root, platform, error_callback, done) {
-    var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '" --emulator';
+function shell_out_to_emulate(root, platform, options, error_callback, done) {
+    var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '" ' + (options.length ? options.join(" ") : '--emulator');
     events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '" (output to follow)...');
     shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
@@ -43,42 +43,32 @@ function shell_out_to_emulate(root, platform, error_callback, done) {
     });
 }
 
-module.exports = function emulate (platformList, callback) {
+module.exports = function emulate (options, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
-    if (!projectRoot) {
-        var err = new Error('Current working directory is not a Cordova-based project.');
-        if (callback) callback(err);
-        else throw err;
-        return;
+    if (options instanceof Function && callback === undefined) {
+        callback = options;
+        options = {
+            verbose: false,
+            platforms: [],
+            options: []
+        };
     }
 
-    if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
-        platformList = cordova_util.listPlatforms(projectRoot);
-    } else if (typeof platformList == 'string') platformList = [platformList];
-    else if (platformList instanceof Function && callback === undefined) {
-        callback = platformList;
-        platformList = cordova_util.listPlatforms(projectRoot);
+    options = cordova_util.preProcessOptions(options);
+    if (options.constructor.name === "Error") {
+        if (callback) return callback(options)
+        else throw options;
     }
-
-    if (platformList.length === 0) {
-        var err = new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
-        if (callback) callback(err);
-        else throw err;
-        return;
-    }
-    var opts = {
-        platforms:platformList
-    };
 
     var hooks = new hooker(projectRoot);
-    hooks.fire('before_emulate', opts, function(err) {
+    hooks.fire('before_emulate', options, function(err) {
         if (err) {
             if (callback) callback(err);
             else throw err;
         } else {
-            var end = n(platformList.length, function() {
-                hooks.fire('after_emulate', opts, function(err) {
+            var end = n(options.platforms.length, function() {
+                hooks.fire('after_emulate', options, function(err) {
                     if (err) {
                         if (callback) callback(err);
                         else throw err;
@@ -89,14 +79,14 @@ module.exports = function emulate (platformList, callback) {
             });
 
             // Run a prepare first!
-            require('../cordova').prepare(platformList, function(err) {
+            require('../cordova').prepare(options.platforms, function(err) {
                 if (err) {
                     if (callback) callback(err);
                     else throw err;
                 } else {
-                    platformList.forEach(function(platform) {
+                    options.platforms.forEach(function(platform) {
                         try {
-                            shell_out_to_emulate(projectRoot, platform, callback, end);
+                            shell_out_to_emulate(projectRoot, platform, options.options, callback, end);
                         } catch(e) {
                             if (callback) callback(e);
                             else throw e;

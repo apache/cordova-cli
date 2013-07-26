@@ -32,51 +32,41 @@ var cordova_util      = require('./util'),
     plugman           = require('plugman'),
     util              = require('util');
 
-module.exports = function prepare(platformList, callback) {
+module.exports = function prepare(options, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
-    if (!projectRoot) {
-        var err = new Error('Current working directory is not a Cordova-based project.');
-        if (callback) callback(err);
-        else throw err;
-        return;
+    if (options instanceof Function && callback === undefined) {
+        callback = options;
+        options = {
+            verbose: false,
+            platforms: [],
+            options: []
+        };
     }
 
-    if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
-        platformList = cordova_util.listPlatforms(projectRoot);
-    } else if (typeof platformList == 'string') platformList = [platformList];
-    else if (platformList instanceof Function && callback === undefined) {
-        callback = platformList;
-        platformList = cordova_util.listPlatforms(projectRoot);
-    }
-
-    if (platformList.length === 0) {
-        var err = new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
-        if (callback) callback(err);
-        else throw err;
-        return;
+    options = cordova_util.preProcessOptions(options);
+    if (options.constructor.name === "Error") {
+        if (callback) return callback(options)
+        else throw options;
     }
 
     var xml = cordova_util.projectConfig(projectRoot);
-    var opts = {
-        platforms:platformList
-    };
-    var paths = platformList.map(function(p) {
+    var paths = options.platforms.map(function(p) {
         var platform_path = path.join(projectRoot, 'platforms', p);
         var parser = (new platforms[p].parser(platform_path));
         return parser.www_dir();
     });
-    opts.paths = paths;
+    options.paths = paths;
 
     var hooks = new hooker(projectRoot);
-    hooks.fire('before_prepare', opts, function(err) {
+    hooks.fire('before_prepare', options, function(err) {
         if (err) {
             if (callback) callback(err);
             else throw err;
         } else {
             var cfg = new cordova_util.config_parser(xml);
-            var end = n(platformList.length, function() {
-                hooks.fire('after_prepare', opts, function(err) {
+            var end = n(options.platforms.length, function() {
+                hooks.fire('after_prepare', options, function(err) {
                     if (err) {
                         if (callback) callback(err);
                         else throw err;
@@ -87,7 +77,7 @@ module.exports = function prepare(platformList, callback) {
             });
 
             // Iterate over each added platform
-            platformList.forEach(function(platform) {
+            options.platforms.forEach(function(platform) {
                 lazy_load.based_on_config(projectRoot, platform, function(err) {
                     if (err) {
                         if (callback) callback(err);
