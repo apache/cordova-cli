@@ -94,7 +94,7 @@ describe('plugin command', function() {
             expect(is_cordova).toHaveBeenCalled();
         });
 
-        describe('`ls`', function() { 
+        describe('`ls`', function() {
             afterEach(function() {
                 cordova.removeAllListeners('results');
             });
@@ -125,15 +125,21 @@ describe('plugin command', function() {
             it('should call plugman.fetch for each plugin', function() {
                 cordova.plugin('add', sample_plugins);
                 sample_plugins.forEach(function(p) {
-                    expect(plugman_fetch).toHaveBeenCalledWith(p, plugins_dir, {}, jasmine.any(Function)); 
+                    expect(plugman_fetch).toHaveBeenCalledWith(p, plugins_dir, {}, jasmine.any(Function));
                 });
             });
             it('should call plugman.install, for each plugin, for every platform', function() {
                 cordova.plugin('add', sample_plugins);
                 sample_plugins.forEach(function(plug) {
                     supported_platforms.forEach(function(plat) {
-                        expect(plugman_install).toHaveBeenCalledWith((plat=='blackberry'?'blackberry10':plat), path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object)); 
+                        expect(plugman_install).toHaveBeenCalledWith((plat=='blackberry'?'blackberry10':plat), path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object));
                     });
+                });
+            });
+            it('should pass down variables into plugman', function() {
+                cordova.plugin('add', "one", "--variable", "foo=bar");
+                supported_platforms.forEach(function(plat) {
+                    expect(plugman_install).toHaveBeenCalledWith((plat=='blackberry'?'blackberry10':plat), path.join(project_dir, 'platforms', plat), "one", plugins_dir, {www_dir: jasmine.any(String), cli_variables: { FOO: "bar"}});
                 });
             });
             it('should trigger callback without an error', function(done) {
@@ -204,18 +210,18 @@ describe('plugin command', function() {
         describe('remove (rm) hooks', function() {
             it('should fire before hooks through the hooker module', function() {
                 cordova.plugin('rm', 'two');
-                expect(fire).toHaveBeenCalledWith('before_plugin_rm', {plugins:['two']}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('before_plugin_rm', {plugins:['two'], options: []}, jasmine.any(Function));
             });
             it('should fire after hooks through the hooker module', function() {
                 cordova.plugin('rm', 'one');
-                expect(fire).toHaveBeenCalledWith('after_plugin_rm', {plugins:['one']}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('after_plugin_rm', {plugins:['one'], options:[]}, jasmine.any(Function));
             });
         });
         describe('add hooks', function() {
             it('should fire before and after hooks through the hooker module', function() {
                 cordova.plugin('add', 'android');
-                expect(fire).toHaveBeenCalledWith('before_plugin_add', {plugins:['android']}, jasmine.any(Function));
-                expect(fire).toHaveBeenCalledWith('after_plugin_add', {plugins:['android']}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('before_plugin_add', {plugins:['android'], options: []}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('after_plugin_add', {plugins:['android'], options: []}, jasmine.any(Function));
             });
         });
     });

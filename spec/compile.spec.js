@@ -61,17 +61,24 @@ describe('compile command', function() {
                 done();
             });
         });
+        it('should pass down optional parameters', function (done) {
+            cordova.compile({platforms:["blackberry10"], options:["--release"]}, function (err) {
+                var buildCommand = path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'build');
+                expect(exec).toHaveBeenCalledWith('"' + buildCommand + '" --release', jasmine.any(Object), jasmine.any(Function));
+                done();
+            });
+        });
     });
 
     describe('hooks', function() {
         describe('when platforms are added', function() {
             it('should fire before hooks through the hooker module', function() {
                 cordova.compile(['android', 'ios']);
-                expect(fire).toHaveBeenCalledWith('before_compile', {platforms:['android', 'ios']}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('before_compile', {verbose: false, platforms:['android', 'ios'], options: []}, jasmine.any(Function));
             });
             it('should fire after hooks through the hooker module', function(done) {
                 cordova.compile('android', function() {
-                     expect(fire).toHaveBeenCalledWith('after_compile', {platforms:['android']}, jasmine.any(Function));
+                     expect(fire).toHaveBeenCalledWith('after_compile', {verbose: false, platforms:['android'], options: []}, jasmine.any(Function));
                      done();
                 });
             });

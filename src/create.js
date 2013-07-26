@@ -36,6 +36,8 @@ var DEFAULT_NAME = "HelloCordova",
  * create(dir, id, name) - you get the gist
  **/
 module.exports = function create (dir, id, name, callback) {
+    var options = [];
+
     if (arguments.length === 0) {
         return help();
     }
@@ -44,7 +46,10 @@ module.exports = function create (dir, id, name, callback) {
     var args = Array.prototype.slice.call(arguments, 0);
     if (typeof args[args.length-1] == 'function') {
         callback = args.pop();
+    } else if (typeof callback !== 'function') {
+        callback = undefined;
     }
+
     if (args.length === 0) {
         dir = process.cwd();
         id = DEFAULT_ID;
@@ -54,6 +59,11 @@ module.exports = function create (dir, id, name, callback) {
         name = DEFAULT_NAME;
     } else if (args.length == 2) {
         name = DEFAULT_NAME;
+    } else {
+        dir = args.shift();
+        id = args.shift();
+        name = args.shift();
+        options = args;
     }
 
     // Make absolute.

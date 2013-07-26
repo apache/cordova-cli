@@ -25,8 +25,8 @@ var cordova_util      = require('./util'),
     events            = require('./events'),
     n                 = require('ncallbacks');
 
-function shell_out_to_run(projectRoot, platform, error_callback, done) {
-    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" --device';
+function shell_out_to_run(projectRoot, platform, options, error_callback, done) {
+    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" ' + ( options.length ? options.join(" ") : '--device');
     // TODO: inconsistent API for BB10 run command
 /*    if (platform == 'blackberry') {
         var bb_project = path.join(projectRoot, 'platforms', 'blackberry')
@@ -56,42 +56,32 @@ function shell_out_to_run(projectRoot, platform, error_callback, done) {
     });
 }
 
-module.exports = function run(platformList, callback) {
+module.exports = function run(options, callback) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
-    if (!projectRoot) {
-        var err = new Error('Current working directory is not a Cordova-based project.');
-        if (callback) callback(err);
-        else throw err;
-        return;
+    if (options instanceof Function && callback === undefined) {
+        callback = options;
+        options = {
+            verbose: false,
+            platforms: [],
+            options: []
+        };
     }
 
-    if (arguments.length === 0 || (platformList instanceof Array && platformList.length === 0)) {
-        platformList = cordova_util.listPlatforms(projectRoot);
-    } else if (typeof platformList == 'string') platformList = [platformList];
-    else if (platformList instanceof Function && callback === undefined) {
-        callback = platformList;
-        platformList = cordova_util.listPlatforms(projectRoot);
-    }
-
-    if (platformList.length === 0) {
-        var err = new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
-        if (callback) callback(err);
-        else throw err;
-        return;
+    options = cordova_util.preProcessOptions(options);
+    if (options.constructor.name === "Error") {
+        if (callback) return callback(options)
+        else throw options;
     }
 
     var hooks = new hooker(projectRoot);
-    var opts = {
-        platforms:platformList
-    }
-    hooks.fire('before_run', opts, function(err) {
+    hooks.fire('before_run', options, function(err) {
         if (err) {
             if (callback) callback(err);
             else throw err;
         } else {
-            var end = n(platformList.length, function() {
-                hooks.fire('after_run', opts, function(err) {
+            var end = n(options.platforms.length, function() {
+                hooks.fire('after_run', options, function(err) {
                     if (err) {
                         if (callback) callback(err);
                         else throw err;
@@ -102,14 +92,14 @@ module.exports = function run(platformList, callback) {
             });
 
             // Run a prepare first, then shell out to run
-            require('../cordova').prepare(platformList, function(err) {
+            require('../cordova').prepare(options.platforms, function(err) {
                 if (err) {
                     if (callback) callback(err);
                     else throw err;
                 } else {
-                    platformList.forEach(function(platform) {
+                    options.platforms.forEach(function(platform) {
                         try {
-                            shell_out_to_run(projectRoot, platform, callback, end);
+                            shell_out_to_run(projectRoot, platform, options.options, callback, end);
                         } catch(e) {
                             if (callback) callback(e);
                             else throw e;

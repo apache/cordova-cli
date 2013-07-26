@@ -65,17 +65,24 @@ describe('run command', function() {
                 done();
             });
         });
+        it('should pass down parameters', function(done) {
+            cordova.run({platforms: ['blackberry10'], options:['--device', '--password', '1q1q']}, function(err) {
+                expect(prepare_spy).toHaveBeenCalledWith(['blackberry10'], jasmine.any(Function));
+                expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'run') + '" --device --password 1q1q', jasmine.any(Object), jasmine.any(Function));
+                done();
+            });
+        });
     });
 
     describe('hooks', function() {
         describe('when platforms are added', function() {
             it('should fire before hooks through the hooker module', function() {
                 cordova.run(['android', 'ios']);
-                expect(fire).toHaveBeenCalledWith('before_run', {platforms:['android', 'ios']}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('before_run', {verbose: false, platforms:['android', 'ios'], options: []}, jasmine.any(Function));
             });
             it('should fire after hooks through the hooker module', function(done) {
                 cordova.run('android', function() {
-                     expect(fire).toHaveBeenCalledWith('after_run', {platforms:['android']}, jasmine.any(Function));
+                     expect(fire).toHaveBeenCalledWith('after_run', {verbose: false, platforms:['android'], options: []}, jasmine.any(Function));
                      done();
                 });
             });
