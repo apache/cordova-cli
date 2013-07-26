@@ -48,7 +48,7 @@ describe('build command', function() {
             list_platforms.andReturn([]);
             expect(function() {
                 cordova.build();
-            }).toThrow('No platforms added! `cordova platform add <platform>` to add a platform.');
+            }).toThrow('No platforms added to this project. Please use `cordova platform add <platform>`.');
         });
         it('should not run outside of a Cordova-based project', function() {
             is_cordova.andReturn(false);
@@ -61,8 +61,15 @@ describe('build command', function() {
     describe('success', function() {
         it('should run inside a Cordova-based project with at least one added platform and call both prepare and compile', function(done) {
             cordova.build(['android','ios'], function(err) {
-                expect(prepare_spy).toHaveBeenCalledWith(['android', 'ios'], jasmine.any(Function));
-                expect(compile_spy).toHaveBeenCalledWith(['android', 'ios'], jasmine.any(Function));
+                expect(prepare_spy).toHaveBeenCalledWith({verbose: false, platforms: ['android', 'ios'], options: []}, jasmine.any(Function));
+                expect(compile_spy).toHaveBeenCalledWith({verbose: false, platforms: ['android', 'ios'], options: []}, jasmine.any(Function));
+                done();
+            });
+        });
+        it('should pass down options', function(done) {
+            cordova.build({platforms: ['android'], options: ['--release']}, function(err) {
+                expect(prepare_spy).toHaveBeenCalledWith({platforms: ['android'], options: ["--release"]}, jasmine.any(Function));
+                expect(compile_spy).toHaveBeenCalledWith({platforms: ['android'], options: ["--release"]}, jasmine.any(Function));
                 done();
             });
         });
@@ -72,11 +79,11 @@ describe('build command', function() {
         describe('when platforms are added', function() {
             it('should fire before hooks through the hooker module', function() {
                 cordova.build(['android', 'ios']);
-                expect(fire).toHaveBeenCalledWith('before_build', {platforms:['android', 'ios']}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('before_build', {verbose: false, platforms:['android', 'ios'], options: []}, jasmine.any(Function));
             });
             it('should fire after hooks through the hooker module', function(done) {
                 cordova.build('android', function() {
-                     expect(fire).toHaveBeenCalledWith('after_build', {platforms:['android']}, jasmine.any(Function));
+                     expect(fire).toHaveBeenCalledWith('after_build', {verbose: false, platforms:['android'], options: []}, jasmine.any(Function));
                      done();
                 });
             });

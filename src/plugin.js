@@ -28,15 +28,28 @@ var cordova_util  = require('./util'),
     events        = require('./events');
 
 module.exports = function plugin(command, targets, callback) {
-    var projectRoot = cordova_util.isCordova(process.cwd());
+    var projectRoot = cordova_util.isCordova(process.cwd()),
+        err;
 
     if (!projectRoot) {
-        var err = new Error('Current working directory is not a Cordova-based project.');
+        err = new Error('Current working directory is not a Cordova-based project.');
         if (callback) callback(err);
         else throw err;
         return;
     }
-    if (arguments.length === 0) command = 'ls';
+
+    if (arguments.length === 0){
+        command = 'ls';
+        targets = [];
+    } else if (arguments.length > 3) {
+        var args = Array.prototype.slice.call(arguments, 0);
+        if (typeof args[args.length - 1] === "function") {
+            callback = args.pop();
+        } else {
+            callback = undefined;
+            targets = args.slice(1);
+        }
+    }
 
     var hooks = new hooker(projectRoot);
     var platformList = cordova_util.listPlatforms(projectRoot);
@@ -51,19 +64,34 @@ module.exports = function plugin(command, targets, callback) {
         }
     } else {
         if (command == 'add' || command == 'rm') {
-            var err = new Error('You need to qualify `add` or `remove` with one or more plugins!');
+            err = new Error('You need to qualify `add` or `remove` with one or more plugins!');
             if (callback) return callback(err);
             else throw err;
+        } else {
+            targets = [];
         }
     }
 
     var opts = {
-        plugins:targets
+        plugins: [],
+        options: []
     };
 
+    //Split targets between plugins and options
+    //Assume everything after a token with a '-' is an option
+    var i;
+    for (i = 0; i < targets.length; i++) {
+        if (targets[i].match(/^-/)) {
+            opts.options = targets.slice(i);
+            break;
+        } else {
+            opts.plugins.push(targets[i]);
+        }
+    }
+
     switch(command) {
-        case 'add': 
-            var end = n(targets.length, function() {
+        case 'add':
+            var end = n(opts.plugins.length, function() {
                 hooks.fire('after_plugin_add', opts, function(err) {
                     if (err) {
                         if (callback) callback(err);
@@ -78,7 +106,7 @@ module.exports = function plugin(command, targets, callback) {
                     if (callback) callback(err);
                     else throw err;
                 } else {
-                    targets.forEach(function(target, index) {
+                    opts.plugins.forEach(function(target, index) {
                         var pluginsDir = path.join(projectRoot, 'plugins');
 
                         if (target[target.length - 1] == path.sep) {
@@ -89,17 +117,34 @@ module.exports = function plugin(command, targets, callback) {
                         events.emit('log', 'Calling plugman.fetch on plugin "' + target + '"');
                         plugman.fetch(target, pluginsDir, {}, function(err, dir) {
                             if (err) {
-                                var err = new Error('Error fetching plugin: ' + err);
+                                err = new Error('Error fetching plugin: ' + err);
                                 if (callback) callback(err);
                                 else throw err;
                             } else {
                                 // Iterate over all platforms in the project and install the plugin.
                                 platformList.forEach(function(platform) {
-                                    var platformRoot = path.join(projectRoot, 'platforms', platform);
-                                    var parser = new platforms[platform].parser(platformRoot);
-                                    events.emit('log', 'Calling plugman.install on plugin "' + dir + '" for platform "' + platform + '"');
-                                    plugman.install(platform, platformRoot,
-                                                    path.basename(dir), pluginsDir, { www_dir: parser.staging_dir() });
+                                    var platformRoot = path.join(projectRoot, 'platforms', platform),
+                                        parser = new platforms[platform].parser(platformRoot),
+                                        options = {
+                                            www_dir: parser.staging_dir(),
+                                            cli_variables: {}
+                                        },
+                                        tokens,
+                                        key,
+                                        i;
+                                    //parse variables into cli_variables
+                                    for (i=0; i< opts.options.length; i++) {
+                                        if (opts.options[i] === "--variable" && typeof opts.options[++i] === "string") {
+                                            tokens = opts.options[i].split('=');
+                                            key = tokens.shift().toUpperCase();
+                                            if (/^[\w-_]+$/.test(key)) {
+                                                options.cli_variables[key] = tokens.join('=');
+                                            }
+                                        }
+                                    }
+
+                                    events.emit('log', 'Calling plugman.install on plugin "' + dir + '" for platform "' + platform + '" with options "' + JSON.stringify(options)  + '"');
+                                    plugman.install(platform, platformRoot, path.basename(dir), pluginsDir, options);
                                 });
                                 end();
                             }
@@ -110,7 +155,7 @@ module.exports = function plugin(command, targets, callback) {
             break;
         case 'rm':
         case 'remove':
-            var end = n(targets.length, function() {
+            var end = n(opts.plugins.length, function() {
                 hooks.fire('after_plugin_rm', opts, function(err) {
                     if (err) {
                         if (callback) callback(err);
@@ -125,7 +170,7 @@ module.exports = function plugin(command, targets, callback) {
                     if (callback) callback(err);
                     else throw err;
                 } else {
-                    targets.forEach(function(target, index) {
+                    opts.plugins.forEach(function(target, index) {
                         // Check if we have the plugin.
                         if (plugins.indexOf(target) > -1) {
                             var targetPath = path.join(pluginPath, target);
@@ -164,7 +209,7 @@ module.exports = function plugin(command, targets, callback) {
                     if(callback) callback(err);
                     else throw err;
                 } else {
-                    plugman.search(targets, function(err, plugins) {
+                    plugman.search(opts.plugins, function(err, plugins) {
                         if(err) return console.log(err);
                         for(var plugin in plugins) {
                             console.log();
