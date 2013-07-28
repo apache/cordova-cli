@@ -22,6 +22,7 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/gu
   - [Android SDK](http://developer.android.com) - **NOTE** This tool
     will not work unless you have the absolute latest updates for all
     Android SDK components. Also you will need the SDK's `tools` and `platform-tools` directories on your __system path__ otherwise Android support will fail.
+  - [Windows Phone SDK](http://dev.windowsphone.com/en-us/downloadsdk) - **NOTE** This tool will not work unless you have `msbuild` on your __system path__ otherwise Windows Phone support will fail (`msbuild.exe` is generally located in `C:\Windows\Microsoft.NET\Framework\v4.0.30319`).
 
 cordova-cli has been tested on Mas OS X, Linux, Windows 7 and Windows 8.
 
