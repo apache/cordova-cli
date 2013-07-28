@@ -61,6 +61,7 @@ describe('plugin command', function() {
         });
         plugman_install = spyOn(plugman, 'install');
         plugman_fetch = spyOn(plugman, 'fetch').andCallFake(function(target, plugins_dir, opts, cb) { cb(false, path.join(plugins_dir, target)); });
+        plugman_search = spyOn(plugman, 'search').andCallFake(function(params, cb) { cb(); });
         uninstallPlatform = spyOn(plugman.uninstall, 'uninstallPlatform');
         uninstallPlugin = spyOn(plugman.uninstall, 'uninstallPlugin').andCallFake(function(target, plugins_dir, cb) {
             cb && cb();
