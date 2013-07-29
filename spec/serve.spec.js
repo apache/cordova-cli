@@ -99,6 +99,7 @@ xdescribe('serve command', function() {
                         });
                         res.on('end', function() {
                             expect(res.statusCode).toEqual(200);
+                            expect(res.headers['content-type']).toEqual('text/html');
                             expect(response).toEqual(expectedContents);
                             done = true;
                         });

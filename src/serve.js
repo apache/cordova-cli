@@ -19,6 +19,7 @@
 var cordova_util = require('./util'),
     path = require('path'),
     shell = require('shelljs'),
+    mime = require('mime'),
     platforms     = require('../platforms'),
     config_parser = require('./config_parser'),
     fs = require('fs'),
@@ -56,16 +57,19 @@ function launch_server(www, platform_www, config_xml_path, port) {
 
                 if (fs.statSync(filename).isDirectory()) filename += path.sep + 'index.html';
 
-                fs.readFile(filename, "binary", function(err, file) {
-                    if(err) {
+                fs.readFile(filename, function(err, file) {
+                    if (err) {
                         response.writeHead(500, {"Content-Type": "text/plain"});
                         response.write(err + "\n");
                         response.end();
                         return;
                     }
 
+                    var type = mime.lookup(filename);
+                    var charset = mime.charsets.lookup(type);
+                    response.setHeader('Content-Type', type + (charset ? '; charset=' + charset : ''));
                     response.writeHead(200);
-                    response.write(file, "binary");
+                    response.write(file);
                     response.end();
                 });
             });
