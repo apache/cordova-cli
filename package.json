@@ -44,7 +44,8 @@
     "prompt":"0.2.7",
     "tar":"0.1.x",
     "open": "0.0.3",
-    "npm":"1.3.x"
+    "npm":"1.3.x",
+    "mime":"1.2.10"
   },
   "devDependencies": {
     "jasmine-node":"1.8.x"
