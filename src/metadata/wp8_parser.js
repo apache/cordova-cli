@@ -42,7 +42,7 @@ module.exports = function wp8_parser(project) {
 
 module.exports.check_requirements = function(project_root, callback) {
     events.emit('log', 'Checking wp8 requirements...');
-    var lib_path = path.join(util.libDirectory, 'wp8', 'cordova', require('../../platforms').wp8.version, 'wp8');
+    var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').wp8.version, 'wp8');
     var custom_path = config.has_custom_path(project_root, 'wp8');
     if (custom_path) lib_path = custom_path;
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
@@ -158,7 +158,7 @@ module.exports.prototype = {
         shell.cp('-rf', project_www, this.wp8_proj_dir);
 
         // copy over wp8 lib's cordova.js
-        var lib_path = path.join(util.libDirectory, 'wp8', 'cordova', require('../../platforms').wp8.version);
+        var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').wp8.version);
         var custom_path = config.has_custom_path(project_root, 'wp8');
         if (custom_path) lib_path = custom_path;
         var cordovajs_path = path.join(lib_path, 'common', 'www', 'cordova.js');

@@ -128,7 +128,7 @@ describe('platform command', function() {
                 expect(exec.mostRecentCall.args[0]).toMatch(/lib.android.cordova.\d.\d.\d[\d\w]*.bin.create/gi);
                 expect(exec.mostRecentCall.args[0]).toContain(project_dir);
                 cordova.platform('add', 'wp8');
-                expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp8.cordova.\d.\d.\d[\d\w]*.wp8.bin.create/gi);
+                expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w]*.wp8.bin.create/gi);
                 expect(exec.mostRecentCall.args[0]).toContain(project_dir);
             });
             it('should call into lazy_load.custom if there is a user-specified configruation for consuming custom libraries', function() {
@@ -144,7 +144,7 @@ describe('platform command', function() {
                 });
                 cordova.platform('add', 'wp8');
                 expect(load_custom).toHaveBeenCalledWith('haha', 'phonegap', 'wp8', 'bleeding edge', jasmine.any(Function));
-                expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp8.phonegap.bleeding edge.wp8.bin.create/gi);
+                expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.phonegap.bleeding edge.wp8.bin.create/gi);
                 expect(exec.mostRecentCall.args[0]).toContain(project_dir);
             });
         });
