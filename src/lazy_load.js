@@ -50,7 +50,7 @@ module.exports = {
         });
     },
     custom:function(url, id, platform, version, callback) {
-        var download_dir = path.join(util.libDirectory, platform, id, version);
+        var download_dir = (platform == 'wp7'? path.join(util.libDirectory, 'wp8', id, version) : path.join(util.libDirectory, platform, id, version));
         if (fs.existsSync(download_dir)) {
             events.emit('log', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
             if (callback) return callback();
