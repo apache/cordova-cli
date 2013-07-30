@@ -65,17 +65,24 @@ describe('emulate command', function() {
                 done();
             });
         });
+        it('should pass down options', function(done) {
+            cordova.emulate({platforms: ['ios'], options:["--optionTastic"]}, function(err) {
+                expect(prepare_spy).toHaveBeenCalledWith(['ios'], jasmine.any(Function));
+                expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'ios', 'cordova', 'run') + '" --optionTastic', jasmine.any(Object), jasmine.any(Function));
+                done();
+            });
+        });
     });
 
     describe('hooks', function() {
         describe('when platforms are added', function() {
             it('should fire before hooks through the hooker module', function() {
                 cordova.emulate(['android', 'ios']);
-                expect(fire).toHaveBeenCalledWith('before_emulate', {platforms:['android', 'ios']}, jasmine.any(Function));
+                expect(fire).toHaveBeenCalledWith('before_emulate', {verbose: false, platforms:['android', 'ios'], options: []}, jasmine.any(Function));
             });
             it('should fire after hooks through the hooker module', function(done) {
                 cordova.emulate('android', function() {
-                     expect(fire).toHaveBeenCalledWith('after_emulate', {platforms:['android']}, jasmine.any(Function));
+                     expect(fire).toHaveBeenCalledWith('after_emulate', {verbose: false, platforms:['android'], options: []}, jasmine.any(Function));
                      done();
                 });
             });
