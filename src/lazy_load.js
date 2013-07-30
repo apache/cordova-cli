@@ -50,9 +50,7 @@ module.exports = {
         });
     },
     custom:function(url, id, platform, version, callback) {
-        var id_dir = path.join(util.libDirectory, platform, id);
-        shell.mkdir('-p', id_dir);
-        var download_dir = path.join(id_dir, version);
+        var download_dir = path.join(util.libDirectory, platform, id, version);
         if (fs.existsSync(download_dir)) {
             events.emit('log', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
             if (callback) return callback();
@@ -85,6 +83,7 @@ module.exports = {
                     .pipe(zlib.createUnzip())
                     .pipe(tar.Extract({path:download_dir}))
                     .on('error', function(err) {
+                        shell.rm('-rf', download_dir);
                         if (callback) callback(err);
                         else throw err;
                     })
