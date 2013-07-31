@@ -149,10 +149,7 @@ module.exports = function plugin(command, targets, callback) {
                             });
                             plugman.uninstall.uninstallPlugin(target, path.join(projectRoot, 'plugins'), end);
                         } else {
-                            var err = new Error('Plugin "' + target + '" not added to project.');
-                            if (callback) callback(err);
-                            else throw err;
-                            return;
+                            events.emit('log', 'Plugin "' + target + '" not added to project.');
                         }
                     });
                 }

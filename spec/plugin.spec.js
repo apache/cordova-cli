@@ -157,10 +157,10 @@ describe('plugin command', function() {
                     platforms:subset
                 });
             });
-            it('should throw if plugin is not installed', function() {
+            it('should ignore exception if plugin is not installed', function() {
                 expect(function() {
                     cordova.plugin('rm', 'somethingrandom');
-                }).toThrow('Plugin "somethingrandom" not added to project.');
+                }).not.toThrow('Plugin "somethingrandom" not added to project.');
             });
 
             it('should call plugman.uninstall.uninstallPlatform for every matching installedplugin-supportedplatform pair', function() {
