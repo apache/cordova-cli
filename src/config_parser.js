@@ -55,9 +55,10 @@ function access(cfg) {
 };
 
 access.prototype = {
-    add:function(uri) {
+    add:function(uri, subdomain) {
         var el = new et.Element('access');
         el.attrib.origin = uri;
+        if (typeof subdomain !== "undefined") el.attrib.subdomains = subdomain;
         this.config.doc.getroot().append(el);
         this.config.update();
     },
@@ -73,6 +74,9 @@ access.prototype = {
     },
     get:function() {
         return this.config.doc.findall('access').map(function(a) { return a.attrib.origin || a.attrib.uri; });
+    },
+    getAttributes:function() {
+        return this.config.doc.findall('access').map(function(a) { return a.attrib; });
     }
 };
 
