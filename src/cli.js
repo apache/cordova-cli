@@ -85,6 +85,10 @@ module.exports = function CLI(inputArgs) {
         return cordova.help();
     }
 
+    if (cmd === "info") {
+        return cordova.info();
+    }
+
     if (cordova.hasOwnProperty(cmd)) {
         if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
             // Filter all non-platforms into options
