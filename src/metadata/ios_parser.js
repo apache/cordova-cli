@@ -26,7 +26,8 @@ var fs            = require('fs'),
     semver        = require('semver'),
     et            = require('elementtree'),
     config_parser = require('../config_parser'),
-    config        = require('../config');
+    config        = require('../config'),
+    imagemagick   = require('imagemagick');
 
 var MIN_XCODE_VERSION = '>=4.5.x';
 
@@ -224,6 +225,158 @@ module.exports.prototype = {
         }
     },
 
+    copy_resources:function(cfg) {
+        this.copy_splashes(cfg);
+        this.copy_icons(cfg);
+    },
+
+    hasImageMagick: function(callback) {
+        var exec = require('child_process').exec,
+            child;
+
+        child = exec('which convert', function(error, stdout, stderr) {
+            callback(error);
+        });
+    },
+
+    generate_assets:function(assets, sizeMapping, skip, cfg) {
+        var self = this;
+        this.hasImageMagick(function(error) {
+            if (error) {
+                return events.emit('log', 'ImageMagick convert utility missing');
+            }
+            self.generate_assets_raw('portrait', assets, sizeMapping, skip, cfg);
+            self.generate_assets_raw('landscape', assets, sizeMapping, skip, cfg);
+        });
+    },
+
+    generate_assets_raw: function(orientation, assets, sizeMapping, skip, cfg) {
+        var www = path.dirname(cfg.path),
+            sourceImage,
+            dest,
+            width,
+            height;
+
+
+        sourceImage = this.get_source_asset(assets, orientation);
+
+        if (!sourceImage)
+            return events.emit('log', ('Could not find iOS source image for ' + orientation).red);
+
+        sourceImage = path.join(www, sourceImage.attrib.src);
+
+        if (!fs.existsSync(sourceImage))
+            return events.emit('log', sourceImage + ' does not exist!');
+
+        for (key in sizeMapping) {
+            dest = path.join(this.cordovaproj, sizeMapping[key].dest);
+            if (skip.indexOf(dest) !== -1) {
+                continue;
+            }
+
+            width = sizeMapping[key].width;
+            height = sizeMapping[key].height;
+
+            if (sizeMapping[key].orientation != orientation) {
+                continue;
+            }
+
+            events.emit('log', 'Generating iOS asset '.yellow + dest + ' from ' + sourceImage + ' [' + width + 'x' + height + ']');
+
+            imagemagick.resize({
+                srcPath: sourceImage,
+                dstPath: dest,
+                width: width,
+                height: height,
+                format: 'png'
+            }, function(err, stdout, stderr) {
+                if (err) {
+                    events.emit('log', 'Error generating image, is imagemagick installed?');
+                    events.emit('log', stderr);
+                }
+            });
+
+        }
+    },
+
+    get_source_asset:function(assets, orientation) {
+        var idx, asset;
+        for (idx in assets) {
+            asset = assets[idx];
+            if (asset.attrib['gap:platform'] == 'source' && asset.attrib['gap:orientation'] == orientation) {
+                return asset;
+            }
+        }
+        return false;
+    },
+
+    copy_splashes:function(cfg) {
+        var projectRoot = util.isCordova(this.path),
+            splashes = cfg.doc.getroot().findall('.//splash'),
+            www = util.projectWww(this.path),
+            splash,
+            dest,
+            copied = [],
+            sizeMapping = {
+                '480': {dest: 'Resources/splash/Default~iphone.png', width: '320', height: '480', orientation: 'portrait'},
+                '960': {dest: 'Resources/splash/Default@2x~iphone.png', width: '640', height: '960', orientation: 'portrait'},
+                '1136': {dest: 'Resources/splash/Default-568h@2x~iphone.png', width: '640', height: '1156', orientation: 'portrait'},
+                '1004': {dest: 'Resources/splash/Default-Portrait~ipad.png', width: '768', height: '1004', orientation: 'portrait'},
+                '2008': {dest: 'Resources/splash/Default-Portrait@2x~ipad.png', width: '1536', height: '2008', orientation: 'portrait'},
+                '748': {dest: 'Resources/splash/Default-Landscape~ipad.png', width: '1024', height: '748', orientation: 'landscape'},
+                '1496': {dest: 'Resources/splash/Default-Landscape@2x~ipad.png', width: '2048', height: '1496', orientation: 'landscape'},
+            };
+
+        for (idx in splashes) {
+            splash = splashes[idx];
+
+            if (splash.attrib['gap:platform'] != 'ios')
+               continue;
+
+            if (!sizeMapping[splash.attrib.height])
+               continue;
+
+            dest = path.join(this.cordovaproj, sizeMapping[splash.attrib.height].dest);
+            events.emit('log', 'Copying iOS splash '.green + path.join(www, splash.attrib.src) + ' to ' + dest);
+            shell.cp('-f', path.join(www, splash.attrib.src), dest);
+            copied.push(dest);
+        }
+
+        this.generate_assets(splashes, sizeMapping, copied, cfg);
+    },
+
+    copy_icons:function(cfg) {
+        var projectRoot = util.isCordova(this.path),
+            icons = cfg.doc.getroot().findall('.//icon'),
+            www = util.projectWww(this.path),
+            icon,
+            dest,
+            copied = [],
+            sizeMapping = {
+                '57': {dest: 'Resources/icons/icon.png', width: '57', height: '57', orientation: 'portrait'},
+                '72': {dest: 'Resources/icons/icon-72.png', width: '72', height: '72', orientation: 'portrait'},
+                '114': {dest: 'Resources/icons/icon@2x.png', width: '114', height: '114', orientation: 'portrait'},
+                '144': {dest: 'Resources/icons/icon-72@2x.png', width: '144', height: '144', orientation: 'portrait'},
+            };
+
+        for (idx in icons) {
+            icon = icons[idx];
+
+            if (icon.attrib['gap:platform'] != 'ios')
+               continue;
+
+            if (!sizeMapping[icon.attrib.width])
+               continue;
+
+            dest = path.join(this.cordovaproj, sizeMapping[icon.attrib.width].dest);
+            events.emit('log', 'Copying iOS icon '.green + path.join(www, icon.attrib.src) + ' to ' + dest);
+            shell.cp('-f', path.join(www, icon.attrib.src), dest);
+            copied.push(dest);
+        }
+
+        this.generate_assets(icons, sizeMapping, copied, cfg);
+    },
+
     update_project:function(cfg, callback) {
         var self = this;
         this.update_from_config(cfg, function(err) {
@@ -234,6 +387,7 @@ module.exports.prototype = {
                 self.update_www();
                 self.update_overrides();
                 self.update_staging();
+                self.copy_resources(cfg);
                 util.deleteSvnFolders(self.www_dir());
                 if (callback) callback();
             }

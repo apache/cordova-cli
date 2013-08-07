@@ -16,4 +16,41 @@
     <access origin="*" />
     <preference name="fullscreen" value="true" />
     <preference name="webviewbounce" value="true" />
+
+    <!-- Source images (used for auto-generation if imagemagick is avail) -->
+    <!-- All images are relative to the www directory -->
+
+    <icon src="res/icon/android/icon-96-xhdpi.png" gap:platform="source" gap:orientation="portrait" />
+    <splash src="res/screen/android/screen-xhdpi-portrait.png" gap:platform="source" gap:orientation="portrait" />
+    <splash src="res/screen/android/screen-xhdpi-landscape.png" gap:platform="source" gap:orientation="landscape" />
+
+
+    <!-- Splash screen customization -->
+
+    <!-- Android -->
+    <!--
+    <icon gap:density="ldpi" gap:platform="android" src="res/icon/android/icon-36-ldpi.png" />
+    <icon gap:density="mdpi" gap:platform="android" src="res/icon/android/icon-48-mdpi.png" />
+    <icon gap:density="hdpi" gap:platform="android" src="res/icon/android/icon-72-hdpi.png" />
+    <icon gap:density="xhdpi" gap:platform="android" src="res/icon/android/icon-96-xhdpi.png" />
+
+    <splash gap:density="ldpi" gap:platform="android" src="res/screen/android/screen-ldpi-portrait.png" />
+    <splash gap:density="mdpi" gap:platform="android" src="res/screen/android/screen-mdpi-portrait.png" />
+    <splash gap:density="hdpi" gap:platform="android" src="res/screen/android/screen-hdpi-portrait.png" />
+    <splash gap:density="xhdpi" gap:platform="android" src="res/screen/android/screen-xhdpi-portrait.png" />
+    -->
+
+    <!-- iOS -->
+    <!--
+    <icon gap:platform="ios" height="57" src="images/icons/icon.png" width="57" />
+    <icon gap:platform="ios" height="72" src="images/icons/icon-72.png" width="72" />
+    <icon gap:platform="ios" height="114" src="images/icons/icon@2x.png" width="114" />
+    <icon gap:platform="ios" height="144" src="images/icons/icon-72@2x.png" width="144" />
+
+    <splash gap:platform="ios" height="480" src="images/splash/splash.png" width="320" />
+    <splash gap:platform="ios" height="960" src="images/splash/splash@2x.png" width="640" />
+    <splash gap:platform="ios" height="1156" src="images/splash/splash-568h.png" width="640" />
+    <splash gap:platform="ios" height="768" src="res/screen/ios/screen-ipad-landscape.png" width="1024" />
+    -->
+
 </widget>
