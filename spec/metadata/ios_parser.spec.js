@@ -290,13 +290,14 @@ describe('ios project parser', function () {
             });
         });
         describe('update_project method', function() {
-            var config, www, overrides, staging, svn;
+            var config, www, overrides, staging, svn, copy;
             beforeEach(function() {
                 config = spyOn(p, 'update_from_config').andCallFake(function(cfg, cb) { cb() });
                 www = spyOn(p, 'update_www');
                 overrides = spyOn(p, 'update_overrides');
                 staging = spyOn(p, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
+                copy = spyOn(p, 'copy_resources');
             });
             it('should call update_from_config', function() {
                 p.update_project();
@@ -324,10 +325,95 @@ describe('ios project parser', function () {
                 p.update_project();
                 expect(staging).toHaveBeenCalled();
             });
+            it('should call copy_resources', function() {
+                p.update_project();
+            });
             it('should call deleteSvnFolders', function() {
                 p.update_project();
                 expect(svn).toHaveBeenCalled();
             });
         });
+    });
+    describe('copy resources', function() {
+        var p, cp;
+        var ios_proj = path.join(proj, 'platforms', 'ios');
+
+        beforeEach(function() {
+            p = new platforms.ios.parser(ios_proj);
+            cp = spyOn(shell, 'cp');
+        });
+
+        var cfg = {
+            doc: {
+                getroot: function() {
+                    return {
+                        findall: function(xpath) {
+                            if (xpath == './/icon') {
+                                return [
+                                    {attrib: {src: 'test.png', width: '57', 'gap:platform': 'ios'}},
+                                    {attrib: {src: 'test-72.png', width: '72', 'gap:platform': 'ios'}},
+                                    {attrib: {src: 'test@2x.png', width: '114', 'gap:platform': 'ios'}},
+                                    {attrib: {src: 'test-72@2x.png', width: '144', 'gap:platform': 'ios'}}
+                                ];
+                            } else if (xpath == './/splash') {
+                                return [
+                                    {attrib: {src: 'test.png', height: '480', 'gap:platform': 'ios'}},
+                                    {attrib: {src: 'test.png', height: '960', 'gap:platform': 'ios'}},
+                                    {attrib: {src: 'test.png', height: '1136', 'gap:platform': 'ios'}},
+                                    {attrib: {src: 'test.png', height: '1004', 'gap:platform': 'ios'}},
+                                    {attrib: {src: 'test.png', height: '2008', 'gap:platform': 'ios'}},
+                                    {attrib: {src: 'test.png', height: '748', 'gap:platform': 'ios'}},
+                                    {attrib: {src: 'test.png', height: '1496', 'gap:platform': 'ios'}},
+                                ];
+                            }
+                        }
+                    };
+                }
+            }
+        };
+
+        it('should copy icons', function() {
+            p.copy_icons(cfg);
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test.png', 'some/path/platforms/ios/test/Resources/icons/icon.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test-72.png', 'some/path/platforms/ios/test/Resources/icons/icon-72.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test@2x.png', 'some/path/platforms/ios/test/Resources/icons/icon@2x.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test-72@2x.png', 'some/path/platforms/ios/test/Resources/icons/icon-72@2x.png'
+            );
+        });
+
+        it('should copy splashes', function() {
+            p.copy_splashes(cfg);
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test.png', 'some/path/platforms/ios/test/Resources/splash/Default~iphone.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test.png', 'some/path/platforms/ios/test/Resources/splash/Default@2x~iphone.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test.png', 'some/path/platforms/ios/test/Resources/splash/Default-568h@2x~iphone.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test.png', 'some/path/platforms/ios/test/Resources/splash/Default-Portrait~ipad.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test.png', 'some/path/platforms/ios/test/Resources/splash/Default-Portrait@2x~ipad.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test.png', 'some/path/platforms/ios/test/Resources/splash/Default-Landscape~ipad.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'some/path/platforms/ios/www/test.png', 'some/path/platforms/ios/test/Resources/splash/Default-Landscape@2x~ipad.png'
+            );
+
+        });
+
+
     });
 });

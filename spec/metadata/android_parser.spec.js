@@ -255,13 +255,14 @@ describe('android project parser', function() {
             });
         });
         describe('update_project method', function() {
-            var config, www, overrides, staging, svn;
+            var config, www, overrides, staging, svn, copy;
             beforeEach(function() {
                 config = spyOn(p, 'update_from_config');
                 www = spyOn(p, 'update_www');
                 overrides = spyOn(p, 'update_overrides');
                 staging = spyOn(p, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
+                copy = spyOn(p, 'copy_resources');
             });
             it('should call update_from_config', function() {
                 p.update_project();
@@ -287,10 +288,85 @@ describe('android project parser', function() {
                 p.update_project();
                 expect(staging).toHaveBeenCalled();
             });
+            it('should call copy_resources', function() {
+                p.update_project();
+                expect(copy).toHaveBeenCalled();
+            })
             it('should call deleteSvnFolders', function() {
                 p.update_project();
                 expect(svn).toHaveBeenCalled();
             });
         });
     });
+    describe('copy resources', function() {
+        var p, cp, is_cordova;
+        var android_proj = path.join(proj, 'platforms', 'android');
+
+        beforeEach(function() {
+            p = new platforms.android.parser(proj);
+            cp = spyOn(shell, 'cp');
+            is_cordova = spyOn(util, 'isCordova').andReturn(proj);
+        });
+
+        var cfg = {
+            doc: {
+                getroot: function() {
+                    return {
+                        findall: function(xpath) {
+                            if (xpath == './/icon') {
+                                return [
+                                    {attrib: {src: 'test-ldpi.png', density: 'ldpi', 'gap:platform': 'android'}},
+                                    {attrib: {src: 'test-mdpi.png', density: 'mdpi', 'gap:platform': 'android'}},
+                                    {attrib: {src: 'test-hdpi.png', density: 'hdpi', 'gap:platform': 'android'}},
+                                    {attrib: {src: 'test-xhdpi.png', density: 'xhdpi', 'gap:platform': 'android'}}
+                                ];
+                            } else if (xpath == './/splash') {
+                                return [
+                                    {attrib: {src: 'test-ldpi.png', density: 'ldpi', 'gap:platform': 'android'}},
+                                    {attrib: {src: 'test-mdpi.png', density: 'mdpi', 'gap:platform': 'android'}},
+                                    {attrib: {src: 'test-hdpi.png', density: 'hdpi', 'gap:platform': 'android'}},
+                                    {attrib: {src: 'test-xhdpi.png', density: 'xhdpi', 'gap:platform': 'android'}},
+                                ];
+                            }
+                        }
+                    };
+                }
+            }
+        };
+
+        it('should copy icons', function() {
+            p.copy_icons(cfg);
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'test-ldpi.png', 'some/path/res/drawable-ldpi/icon.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'test-mdpi.png', 'some/path/res/drawable-mdpi/icon.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'test-hdpi.png', 'some/path/res/drawable-hdpi/icon.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'test-xhdpi.png', 'some/path/res/drawable-xhdpi/icon.png'
+            );
+        });
+
+        it('should copy splashes', function() {
+            p.copy_splashes(cfg);
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'test-ldpi.png', 'some/path/res/drawable-ldpi/ic_launcher.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'test-mdpi.png', 'some/path/res/drawable-mdpi/ic_launcher.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'test-hdpi.png', 'some/path/res/drawable-hdpi/ic_launcher.png'
+            );
+            expect(cp).toHaveBeenCalledWith(
+                '-f', 'test-xhdpi.png', 'some/path/res/drawable-xhdpi/ic_launcher.png'
+            );
+        });
+
+
+    });
+
 });

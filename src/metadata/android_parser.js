@@ -16,14 +16,15 @@
     specific language governing permissions and limitations
     under the License.
 */
-var fs            = require('fs'),
-    path          = require('path'),
-    et            = require('elementtree'),
-    util          = require('../util'),
-    events        = require('../events'),
-    shell         = require('shelljs'),
-    project_config= require('../config'),
-    config_parser = require('../config_parser');
+var fs             = require('fs'),
+    path           = require('path'),
+    et             = require('elementtree'),
+    util           = require('../util'),
+    events         = require('../events'),
+    shell          = require('shelljs'),
+    project_config = require('../config'),
+    config_parser  = require('../config_parser'),
+    imagemagick    = require('imagemagick');
 
 var default_prefs = {
     "useBrowserHistory":"true",
@@ -197,6 +198,187 @@ module.exports.prototype = {
         }
     },
 
+    copy_resources:function(cfg) {
+        this.copy_splashes(cfg);
+        this.copy_icons(cfg);
+    },
+
+    get_source_asset:function(assets, orientation) {
+        var idx, asset;
+        for (idx in assets) {
+            asset = assets[idx];
+            if (asset.attrib['gap:platform'] == 'source' && asset.attrib['gap:orientation'] == orientation) {
+                return asset;
+            }
+        }
+        return false;
+    },
+
+    hasImageMagick: function(callback) {
+        var exec = require('child_process').exec,
+            child;
+
+        child = exec('which convert', function(error, stdout, stderr) {
+            callback(error);
+        });
+    },
+
+    generate_assets:function(assets, sizeMapping, skip, cfg) {
+        var self = this;
+        this.hasImageMagick(function(error) {
+            if (error) {
+                return events.emit('log', 'ImageMagick convert utility missing');
+            }
+            self.generate_assets_raw('portrait', assets, sizeMapping, skip, cfg);
+            self.generate_assets_raw('landscape', assets, sizeMapping, skip, cfg);
+        });
+    },
+
+    generate_assets_raw: function(orientation, assets, sizeMapping, skip, cfg) {
+        var www = path.dirname(cfg.path),
+            sourceImage,
+            dest,
+            width,
+            height;
+
+        sourceImage = this.get_source_asset(assets, orientation);
+
+        if (!sourceImage)
+            return events.emit('log', ('Could not find Android source image for ' + orientation).red);
+
+        sourceImage = path.join(www, sourceImage.attrib.src);
+
+        if (!fs.existsSync(sourceImage))
+            return events.emit('log', sourceImage + ' does not exist!');
+
+        for (key in sizeMapping) {
+            dest = path.join(this.path, sizeMapping[key].dest);
+            if (skip.indexOf(dest) !== -1)
+                continue;
+
+            width = sizeMapping[key].width;
+            height = sizeMapping[key].height;
+
+            if (sizeMapping[key].orientation != orientation)
+                continue;
+
+            events.emit('log', 'Generating Android asset '.yellow + dest + ' from ' + sourceImage + ' [' + width + 'x' + height + ']');
+
+            imagemagick.resize({
+                srcPath: sourceImage,
+                dstPath: dest,
+                width: width,
+                height: height,
+                format: 'png'
+            }, function(err, stdout, stderr) {
+                if (err) {
+                    events.emit('log', 'Error generating image, is imagemagick installed?');
+                    events.emit('log', stderr);
+                }
+            });
+
+        }
+    },
+
+    copy_splashes:function(cfg) {
+        var projectRoot = util.isCordova(this.path),
+            splashes = cfg.doc.getroot().findall('.//splash'),
+            www = path.dirname(cfg.path),
+            splash,
+            dest,
+            copied = [],
+            sizeMapping = {
+                'ldpi': {dest: 'res/drawable-ldpi/ic_launcher.png', width: '200', height: '320', orientation: 'portrait'},
+                'mdpi': {dest: 'res/drawable-mdpi/ic_launcher.png', width: '320', height: '480', orientation: 'portrait'},
+                'hdpi': {dest: 'res/drawable-hdpi/ic_launcher.png', width: '480', height: '800', orientation: 'portrait'},
+                'xhdpi': {dest: 'res/drawable-xhdpi/ic_launcher.png', width: '720' , height: '1280', orientation: 'portrait'},
+            };
+
+        for (idx in splashes) {
+            splash = splashes[idx];
+
+            if (splash.attrib['gap:platform'] != 'android')
+               continue;
+
+            if (!sizeMapping[splash.attrib.density])
+               continue;
+
+            dest = path.join(this.path, sizeMapping[splash.attrib.density].dest);
+
+            events.emit('log', 'Copying Android splash '.green + path.join(www, splash.attrib.src) + ' to ' + dest);
+            shell.cp('-f', path.join(www, splash.attrib.src), dest);
+            copied.push(dest);
+        }
+
+        this.generate_assets(splashes, sizeMapping, copied, cfg);
+    },
+
+    copy_icons:function(cfg) {
+        var projectRoot = util.isCordova(this.path),
+            icons = cfg.doc.getroot().findall('.//icon'),
+            www = path.dirname(cfg.path),
+            icon,
+            dest,
+            copied = [],
+            sizeMapping = {
+                'ldpi': {dest: 'res/drawable-ldpi/icon.png', width: '36', height: '36' , orientation: 'portrait'},
+                'mdpi': {dest: 'res/drawable-mdpi/icon.png', width: '48', height: '48', orientation: 'portrait'},
+                'hdpi': {dest: 'res/drawable-hdpi/icon.png', width: '72', height: '72', orientation: 'portrait'},
+                'xhdpi': {dest: 'res/drawable-xhdpi/icon.png', width: '96', height: '96', orientation: 'portrait'}
+            };
+
+        for (idx in icons) {
+            icon = icons[idx];
+
+            if (icon.attrib['gap:platform'] != 'android')
+               continue;
+
+            if (!sizeMapping[icon.attrib.density])
+               continue;
+
+            dest = path.join(this.path, sizeMapping[icon.attrib.density].dest);
+            events.emit('log', 'Copying Android icon '.green + path.join(www, icon.attrib.src) + ' to ' + dest);
+            shell.cp('-f', path.join(www, icon.attrib.src), dest);
+            copied.push(dest);
+        }
+
+        this.generate_assets(icons, sizeMapping, copied, cfg);
+    },
+
+    fix_android:function(cfg) {
+        var androidJavaPath = cfg.packageName(),
+            source,
+            lines,
+            idx,
+            line,
+            newLines;
+
+        androidJavaPath = androidJavaPath.split('.');
+        androidJavaPath.unshift('src');
+        androidJavaPath.unshift(this.path);
+        androidJavaPath.push(cfg.name() + '.java');
+        androidJavaPath = path.join.apply(path, androidJavaPath);
+
+        source = fs.readFileSync(androidJavaPath, 'utf8');
+
+        if (source.indexOf('splashscreen') !== -1)
+            return;
+
+        lines = source.split(/\r\n|\r|\n/);
+        newLines = [];
+
+        for (idx in lines) {
+            line = lines[idx];
+            if (line.indexOf('.loadUrl') !== -1 && !line.match(/\s*\/\//)) {
+                newLines.push('        super.setIntegerProperty("splashscreen", R.drawable.ic_launcher);')
+            }
+            newLines.push(line);
+        }
+
+        source = newLines.join("\n");
+        fs.writeFileSync(androidJavaPath, source, 'utf8');
+    },
+
     update_project:function(cfg, callback) {
         var platformWww = path.join(this.path, 'assets');
         try {
@@ -209,6 +391,8 @@ module.exports.prototype = {
         this.update_www();
         this.update_overrides();
         this.update_staging();
+        this.copy_resources(cfg);
+        this.fix_android(cfg);
         // delete any .svn folders copied over
         util.deleteSvnFolders(platformWww);
         if (callback) callback();
