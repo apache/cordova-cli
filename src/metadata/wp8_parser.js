@@ -157,6 +157,13 @@ module.exports.prototype = {
         // copy over all app www assets
         shell.cp('-rf', project_www, this.wp8_proj_dir);
 
+        // copy all files from merges directory
+        var merges_path = path.join(util.appDir(project_root), 'merges', 'wp8');
+        if (fs.existsSync(merges_path)) {
+            var overrides = path.join(merges_path, '*');
+            shell.cp('-rf', overrides, this.www_dir());
+        }
+
         // copy over wp8 lib's cordova.js
         var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').wp8.version);
         var custom_path = config.has_custom_path(project_root, 'wp8');
@@ -246,8 +253,8 @@ module.exports.prototype = {
             if (callback) return callback(e);
             else throw e;
         }
+        // overrides (merges) are handled in update_www()
         this.update_www();
-        // TODO: Add overrides support? Why is this missing?
         this.update_staging();
         util.deleteSvnFolders(this.www_dir());
 
