@@ -345,6 +345,40 @@ module.exports.prototype = {
         this.generate_assets(icons, sizeMapping, copied, cfg);
     },
 
+    fix_android:function(cfg) {
+        var androidJavaPath = cfg.packageName(),
+            source,
+            lines,
+            idx,
+            line,
+            newLines;
+
+        androidJavaPath = androidJavaPath.split('.');
+        androidJavaPath.unshift('src');
+        androidJavaPath.unshift(this.path);
+        androidJavaPath.push(cfg.name() + '.java');
+        androidJavaPath = path.join.apply(path, androidJavaPath);
+
+        source = fs.readFileSync(androidJavaPath, 'utf8');
+
+        if (source.indexOf('splashscreen') !== -1)
+            return;
+
+        lines = source.split(/\r\n|\r|\n/);
+        newLines = [];
+
+        for (idx in lines) {
+            line = lines[idx];
+            if (line.indexOf('.loadUrl') !== -1 && !line.match(/\s*\/\//)) {
+                newLines.push('        super.setIntegerProperty("splashscreen", R.drawable.ic_launcher);')
+            }
+            newLines.push(line);
+        }
+
+        source = newLines.join("\n");
+        fs.writeFileSync(androidJavaPath, source, 'utf8');
+    },
+
     update_project:function(cfg, callback) {
         var platformWww = path.join(this.path, 'assets');
         try {
@@ -358,6 +392,7 @@ module.exports.prototype = {
         this.update_overrides();
         this.update_staging();
         this.copy_resources(cfg);
+        this.fix_android(cfg);
         // delete any .svn folders copied over
         util.deleteSvnFolders(platformWww);
         if (callback) callback();
