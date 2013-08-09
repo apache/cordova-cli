@@ -120,7 +120,7 @@ module.exports.prototype = {
             android_cfg_xml.access.add(uri);
         });
 
-        // Update content
+        // Update content (start page)
         android_cfg_xml.content(config.content());
         
         // Update preferences
