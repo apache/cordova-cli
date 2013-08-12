@@ -61,6 +61,8 @@ module.exports.prototype = {
         config.access.getAttributes().forEach(function(attribs) {
             self.xml.access.add(attribs.uri || attribs.origin, attribs.subdomains);
         });
+
+        this.xml.content(config.content());
     },
     update_project:function(cfg, callback) {
         var self = this;
