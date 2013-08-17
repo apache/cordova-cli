@@ -100,7 +100,6 @@ module.exports.prototype = {
 		});
 
         this.xml.update();
-        console.log(xmlDoc.write({indent: 4}));
     },
     update_project:function(cfg, callback) {
         var self = this;
