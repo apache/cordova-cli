@@ -61,6 +61,46 @@ module.exports.prototype = {
         config.access.getAttributes().forEach(function(attribs) {
             self.xml.access.add(attribs.uri || attribs.origin, attribs.subdomains);
         });
+        var xmlDoc = this.xml.doc;
+        var xmlDocRoot = xmlDoc.getroot();
+        xmlDocRoot.attrib['xmlns:rim'] = "http://www.blackberry.com/ns/widgets";
+        if (xmlDoc.findall('content').length == 0) {
+            xmlDocRoot.append(new et.Element ('content', {src: "index.html"}));
+        }
+        xmlDoc.findall ('*').forEach(function (node) {
+            var nodeName = node.tag;
+            if (nodeName == 'preference' && node.attrib.name == 'orientation') {
+                var orientation = node.attrib.value;
+                if (orientation != 'portrait' && orientation != 'landscape')
+                    orientation = 'auto';
+    			// http://developer.blackberry.com/html5/documentation/param_element.html
+				var feature = new et.Element('feature', {id: "blackberry.app"});
+				xmlDocRoot.append(feature);
+				feature.append(new et.Element ('param', {
+					name: 'orientation',
+					value: orientation
+				}));
+				// http://developer.blackberry.com/html5/documentation/rim_orientation_element_1594186_11.html
+				xmlDocRoot.append(new et.Element ('rim:orientation', {mode: orientation}));
+
+				return;
+			}
+			if (nodeName != 'icon' && nodeName != 'gap:splash')
+				return;
+			if (node.attrib['gap:platform'] != 'blackberry') {
+				xmlDocRoot.remove(0, node);
+			} else if (nodeName == 'gap:splash') {
+				var el = new et.Element('rim:splash');
+				for (var attr in node.attrib) {
+					el.attrib[attr] = node.attrib[attr];
+				}
+				xmlDocRoot.append(el);
+                xmlDocRoot.remove(0, node);
+			}
+		});
+
+        this.xml.update();
+        console.log(xmlDoc.write({indent: 4}));
     },
     update_project:function(cfg, callback) {
         var self = this;
@@ -73,6 +113,7 @@ module.exports.prototype = {
             return;
         }
         self.update_www();
+		self.xml.update();
         self.update_overrides();
         self.update_staging();
         util.deleteSvnFolders(this.www_dir());
