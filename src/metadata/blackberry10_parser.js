@@ -31,7 +31,6 @@ module.exports = function blackberry_parser(project) {
     }
     this.path = project;
     this.config_path = path.join(this.path, 'www', 'config.xml');
-    this.xml = new util.config_parser(this.config_path);
 };
 
 module.exports.check_requirements = function(project_root, callback) {
@@ -50,6 +49,7 @@ module.exports.prototype = {
         if (config instanceof config_parser) {
         } else throw new Error('update_from_config requires a config_parser object');
 
+        this.xml = new util.config_parser(this.config_path);
         this.xml.name(config.name());
         events.emit('log', 'Wrote out BlackBerry application name to "' + config.name() + '"');
         this.xml.packageName(config.packageName());
@@ -104,6 +104,8 @@ module.exports.prototype = {
     update_project:function(cfg, callback) {
         var self = this;
 
+        self.update_www();
+
         try {
             self.update_from_config(cfg);
         } catch(e) {
@@ -111,8 +113,7 @@ module.exports.prototype = {
             else throw e;
             return;
         }
-        self.update_www();
-		self.xml.update();
+
         self.update_overrides();
         self.update_staging();
         util.deleteSvnFolders(this.www_dir());
