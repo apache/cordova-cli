@@ -24,7 +24,20 @@ var cordova_util = require('./util'),
     fs = require('fs'),
     util = require('util'),
     http = require("http"),
-    url = require("url");
+    url = require("url"),
+    exec = require('child_process').exec;
+
+// Open the URL with default browser. Just supports Mac and Windows now.
+var openURL = function (url) {
+    switch (process.platform) {
+        case "darwin":
+            exec('open ' + url);
+            break;
+        case "win32":
+            exec('start ' + url);
+            break;
+    }
+};
 
 function launch_server(www, platform_www, config_xml_path, port) {
     port = port || 8000;
@@ -71,9 +84,12 @@ function launch_server(www, platform_www, config_xml_path, port) {
             });
         }
         checkPath(0);
-    }).listen(parseInt(''+port, 10));
+    }).listen(parseInt(''+port, 10), function () {
+        var url = "http://localhost:" + port + "/";
+        openURL(url);
+        console.log("Static file server running at\n  => " + url + "\nCTRL + C to shutdown");
+    });
 
-    console.log("Static file server running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown");
     return server;
 }
 
