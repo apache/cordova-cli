@@ -37,7 +37,10 @@ module.exports.prototype = {
             manifest = JSON.parse(fs.readFileSync(manifestPath));
         }
         else {
-            manifest = {};
+            manifest = {
+                launch_path: "/index.html",
+                installs_allowed_from: ["*"]
+            };
         }
 
         manifest.version = version;
