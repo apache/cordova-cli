@@ -49,7 +49,7 @@ module.exports = {
     },
     'firefoxos':{
         parser: require('./src/metadata/firefoxos_parser'),
-        url    : 'https://github.com/jlongster/cordova-firefoxos/archive/0.0.1.tar.gz',
+        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-firefoxos.git',
         version: '3.0.0'
     }
 };
