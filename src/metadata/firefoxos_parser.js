@@ -83,7 +83,9 @@ module.exports.prototype = {
             shell.cp('-rf', overrides, this.www_dir());
         }
     },
-
+    staging_dir: function() {
+        return path.join(this.path, '.staging', 'www');
+    },
     update_staging: function() {
         var projectRoot = util.isCordova(this.path);
         var stagingDir = path.join(this.path, '.staging', 'www');
