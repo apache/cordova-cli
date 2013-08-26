@@ -87,8 +87,9 @@ describe('blackberry10 project parser', function() {
 
         describe('update_from_config method', function() {
             var et, xml, find, write_xml, root, cfg, find_obj, root_obj;
-            var xml_name, xml_pkg, xml_version, xml_access_rm, xml_update, xml_append;
+            var xml_name, xml_pkg, xml_version, xml_access_rm, xml_update, xml_append, xml_content;
             beforeEach(function() {
+                xml_content = jasmine.createSpy('xml content');
                 xml_name = jasmine.createSpy('xml name');
                 xml_pkg = jasmine.createSpy('xml pkg');
                 xml_version = jasmine.createSpy('xml version');
@@ -99,6 +100,7 @@ describe('blackberry10 project parser', function() {
                 p.xml.name = xml_name;
                 p.xml.packageName = xml_pkg;
                 p.xml.version = xml_version;
+                p.xml.content = xml_content;
                 p.xml.access = {
                     remove:xml_access_rm,
                     add: xml_access_add
@@ -126,6 +128,7 @@ describe('blackberry10 project parser', function() {
                 xml = spyOn(ET, 'XML');
                 cfg = new config_parser();
                 cfg.name = function() { return 'testname'; };
+                cfg.content = function() { return 'index.html'; };
                 cfg.packageName = function() { return 'testpkg'; };
                 cfg.version = function() { return 'one point oh'; };
                 cfg.access.getAttributes = function() { return []; };
@@ -153,6 +156,10 @@ describe('blackberry10 project parser', function() {
                 p.update_from_config(cfg);
                 expect(xml_access_add).toHaveBeenCalledWith('one', undefined);
                 expect(xml_access_add).toHaveBeenCalledWith('two', 'false');
+            });
+            it('should update the start page (content tag)', function() {
+                p.update_from_config(cfg);
+                expect(xml_content).toHaveBeenCalledWith('index.html');
             });
         });
         describe('www_dir method', function() {
