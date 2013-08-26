@@ -38,6 +38,8 @@ module.exports = function wp8_parser(project) {
         throw new Error('The provided path "' + project + '" is not a Windows Phone 8 project. ' + e);
     }
     this.manifest_path  = path.join(this.wp8_proj_dir, 'Properties', 'WMAppManifest.xml');
+    this.config_path = path.join(this.wp8_proj_dir, 'config.xml');
+    this.config = new util.config_parser(this.config_path);
 };
 
 module.exports.check_requirements = function(project_root, callback) {
@@ -138,6 +140,9 @@ module.exports.prototype = {
             fs.writeFileSync(path.join(this.wp8_proj_dir, 'App.xaml.cs'), appCS.replace(namespaceRegEx, 'namespace ' + pkg), 'utf-8');
          }
 
+         // Update content (start page) element
+         this.config.content(config.content());
+
          //Write out manifest
          fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
     },
@@ -146,7 +151,6 @@ module.exports.prototype = {
         return path.join(this.wp8_proj_dir, 'www');
     },
     config_xml:function() {
-        return path.join(this.wp8_proj_dir, 'config.xml');
     },
     // copies the app www folder into the wp8 project's www folder and updates the csproj file.
     update_www:function() {
