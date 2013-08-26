@@ -23,6 +23,7 @@ var fs            = require('fs'),
     events        = require('../events'),
     shell         = require('shelljs'),
     project_config= require('../config'),
+    plugman       = require('plugman'),
     config_parser = require('../config_parser');
 
 var default_prefs = {
@@ -161,12 +162,13 @@ module.exports.prototype = {
 
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
-        var www = util.projectWww(projectRoot);
-        var platformWww = path.join(this.path, 'assets');
+        var appPaths = plugman.app.getPaths(projectRoot);
+        
+        var platformWww = this.www_dir();
         // remove stock platform assets
-        shell.rm('-rf', this.www_dir());
+        shell.rm('-rf', platformWww);
         // copy over all app www assets
-        shell.cp('-rf', www, platformWww);
+        shell.cp('-rf', appPaths['www'], path.join(platformWww, '..'));
 
         // write out android lib's cordova.js
         var custom_path = project_config.has_custom_path(projectRoot, 'android');
@@ -176,7 +178,7 @@ module.exports.prototype = {
         } else {
             jsPath = path.join(util.libDirectory, 'android', 'cordova', require('../../platforms').android.version, 'framework', 'assets', 'www', 'cordova.js');
         }
-        fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
+        fs.writeFileSync(path.join(appPaths['js'], 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
     },
 
     // update the overrides folder into the www folder
