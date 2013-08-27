@@ -74,8 +74,11 @@ describe('blackberry10 project parser', function() {
         });
     });
     describe('instance', function() {
-        var p, cp, rm, is_cordova, write, read;
-        var bb_proj = path.join(proj, 'platforms', 'blackberry10');
+        var p, cp, rm, is_cordova, write, read,
+            bb_proj = path.join(proj, 'platforms', 'blackberry10'),
+            et, xml, find, write_xml, root, cfg, find_obj, root_obj,
+            xml_name, xml_pkg, xml_version, xml_access_rm, xml_update, xml_append, xml_content;
+
         beforeEach(function() {
             p = new platforms.blackberry10.parser(bb_proj);
             cp = spyOn(shell, 'cp');
@@ -83,58 +86,61 @@ describe('blackberry10 project parser', function() {
             is_cordova = spyOn(util, 'isCordova').andReturn(proj);
             write = spyOn(fs, 'writeFileSync');
             read = spyOn(fs, 'readFileSync');
+            xml_content = jasmine.createSpy('xml content');
+            xml_name = jasmine.createSpy('xml name');
+            xml_pkg = jasmine.createSpy('xml pkg');
+            xml_version = jasmine.createSpy('xml version');
+            xml_access_rm = jasmine.createSpy('xml access rm');
+            xml_access_add = jasmine.createSpy('xml access add');
+            xml_preference_rm = jasmine.createSpy('xml preference rm');
+            xml_preference_add = jasmine.createSpy('xml preference add');
+            xml_update = jasmine.createSpy('xml update');
+            xml_append = jasmine.createSpy('xml append');
+            p.xml.name = xml_name;
+            p.xml.packageName = xml_pkg;
+            p.xml.version = xml_version;
+            p.xml.content = xml_content;
+            p.xml.access = {
+                remove:xml_access_rm,
+                add: xml_access_add
+            };
+            p.xml.preference = {
+                remove:xml_preference_rm,
+                add: xml_preference_add
+            };
+            p.xml.update = xml_update;
+            p.xml.doc = {
+                getroot:function() { return { append:xml_append}; }
+            };
+            find_obj = {
+                text:'hi'
+            };
+            root_obj = {
+                attrib:{
+                    package:'bb_pkg'
+                }
+            };
+            find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
+            write_xml = jasmine.createSpy('ElementTree write');
+            root = jasmine.createSpy('ElementTree getroot').andReturn(root_obj);
+            et = spyOn(ET, 'ElementTree').andReturn({
+                find:find,
+                write:write_xml,
+                getroot:root
+            });
+            xml = spyOn(ET, 'XML');
+            cfg = new config_parser();
+            cfg.name = function() { return 'testname'; };
+            cfg.content = function() { return 'index.html'; };
+            cfg.packageName = function() { return 'testpkg'; };
+            cfg.version = function() { return 'one point oh'; };
+            cfg.access.getAttributes = function() { return []; };
+            cfg.access.remove = function(name){};
+            cfg.preference.get = function() { return []; };
+            cfg.preference.remove = function(name){};
         });
 
         describe('update_from_config method', function() {
-            var et, xml, find, write_xml, root, cfg, find_obj, root_obj;
-            var xml_name, xml_pkg, xml_version, xml_access_rm, xml_update, xml_append, xml_content;
-            beforeEach(function() {
-                xml_content = jasmine.createSpy('xml content');
-                xml_name = jasmine.createSpy('xml name');
-                xml_pkg = jasmine.createSpy('xml pkg');
-                xml_version = jasmine.createSpy('xml version');
-                xml_access_rm = jasmine.createSpy('xml access rm');
-                xml_access_add = jasmine.createSpy('xml access add');
-                xml_update = jasmine.createSpy('xml update');
-                xml_append = jasmine.createSpy('xml append');
-                p.xml.name = xml_name;
-                p.xml.packageName = xml_pkg;
-                p.xml.version = xml_version;
-                p.xml.content = xml_content;
-                p.xml.access = {
-                    remove:xml_access_rm,
-                    add: xml_access_add
-                };
-                p.xml.update = xml_update;
-                p.xml.doc = {
-                    getroot:function() { return { append:xml_append}; }
-                };
-                find_obj = {
-                    text:'hi'
-                };
-                root_obj = {
-                    attrib:{
-                        package:'bb_pkg'
-                    }
-                };
-                find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
-                write_xml = jasmine.createSpy('ElementTree write');
-                root = jasmine.createSpy('ElementTree getroot').andReturn(root_obj);
-                et = spyOn(ET, 'ElementTree').andReturn({
-                    find:find,
-                    write:write_xml,
-                    getroot:root
-                });
-                xml = spyOn(ET, 'XML');
-                cfg = new config_parser();
-                cfg.name = function() { return 'testname'; };
-                cfg.content = function() { return 'index.html'; };
-                cfg.packageName = function() { return 'testpkg'; };
-                cfg.version = function() { return 'one point oh'; };
-                cfg.access.getAttributes = function() { return []; };
-                cfg.preference.get = function() { return []; };
-            });
-
             it('should write out the app name to config.xml', function() {
                 p.update_from_config(cfg);
                 expect(xml_name).toHaveBeenCalledWith('testname');
