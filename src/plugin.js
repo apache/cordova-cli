@@ -19,6 +19,7 @@
 var cordova_util  = require('./util'),
     util          = require('util'),
     fs            = require('fs'),
+    url           = require('url'),
     path          = require('path'),
     shell         = require('shelljs'),
     platforms     = require('../platforms'),
@@ -113,9 +114,22 @@ module.exports = function plugin(command, targets, callback) {
                             target = target.substring(0, target.length - 1);
                         }
 
+                        // Allow options in url
+                        // https://github.com/apache/cordova-labs?subdir=cordova-plugin-echo&branch=master
+                        var uri = url.parse(target, true);
+
+                        var fetchOptions = {};
+                        if(uri.query.subdir)
+                            fetchOptions.subdir = uri.query.subdir;
+                        if(uri.query.branch)
+                            fetchOptions.git_ref = uri.query.branch;
+
+                        if(uri.query.subdir || uri.query.branch)
+                            target =  target.replace(/\?.*/, '');
+
                         // Fetch the plugin first.
                         events.emit('log', 'Calling plugman.fetch on plugin "' + target + '"');
-                        plugman.fetch(target, pluginsDir, {}, function(err, dir) {
+                        plugman.fetch(target, pluginsDir, fetchOptions, function(err, dir) {
                             if (err) {
                                 err = new Error('Error fetching plugin: ' + err);
                                 if (callback) callback(err);
