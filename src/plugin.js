@@ -190,7 +190,7 @@ module.exports = function plugin(command, targets, callback) {
                                 var platformRoot = path.join(projectRoot, 'platforms', platform);
                                 var parser = new platforms[platform].parser(platformRoot);
                                 events.emit('log', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
-                                plugman.uninstall.uninstallPlatform(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
+                                plugman.uninstall.uninstallPlatform(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir(), cmd: opts.options });
                             });
                             plugman.uninstall.uninstallPlugin(target, path.join(projectRoot, 'plugins'), end);
                         } else {
