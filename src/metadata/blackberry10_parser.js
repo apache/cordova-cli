@@ -31,7 +31,6 @@ module.exports = function blackberry_parser(project) {
     }
     this.path = project;
     this.config_path = path.join(this.path, 'www', 'config.xml');
-    this.xml = new util.config_parser(this.config_path);
 };
 
 module.exports.check_requirements = function(project_root, callback) {
@@ -52,24 +51,58 @@ module.exports.prototype = {
         if (config instanceof config_parser) {
         } else throw new Error('update_from_config requires a config_parser object');
 
+        this.xml = new util.config_parser(this.config_path);
         this.xml.name(config.name());
         events.emit('log', 'Wrote out BlackBerry application name to "' + config.name() + '"');
         this.xml.packageName(config.packageName());
         events.emit('log', 'Wrote out BlackBerry package name to "' + config.packageName() + '"');
         this.xml.version(config.version());
         events.emit('log', 'Wrote out BlackBerry version to "' + config.version() + '"');
-        this.xml.access.remove();
-        config.access.getAttributes().forEach(function(attribs) {
-            self.xml.access.add(attribs.uri || attribs.origin, attribs.subdomains);
-        });
-        this.xml.preference.remove();
-        config.preference.get().forEach(function (pref) {
-            self.xml.preference.add(pref);
-        });
-        this.xml.content(config.content());
+        var self = this;
+        var xmlDoc = this.xml.doc;
+        var xmlDocRoot = xmlDoc.getroot();
+        xmlDocRoot.attrib['xmlns:rim'] = "http://www.blackberry.com/ns/widgets";
+        if (xmlDoc.findall('content').length == 0) {
+            xmlDocRoot.append(new et.Element ('content', {src: "index.html"}));
+        }
+        xmlDoc.findall ('*').forEach(function (node) {
+            var nodeName = node.tag;
+            if (nodeName == 'preference' && node.attrib.name == 'orientation') {
+                var orientation = node.attrib.value;
+                if (orientation != 'portrait' && orientation != 'landscape')
+                    orientation = 'auto';
+    			// http://developer.blackberry.com/html5/documentation/param_element.html
+				var feature = new et.Element('feature', {id: "blackberry.app"});
+				xmlDocRoot.append(feature);
+				feature.append(new et.Element ('param', {
+					name: 'orientation',
+					value: orientation
+				}));
+				// http://developer.blackberry.com/html5/documentation/rim_orientation_element_1594186_11.html
+				xmlDocRoot.append(new et.Element ('rim:orientation', {mode: orientation}));
+
+				return;
+			}
+			if (nodeName != 'icon' && nodeName != 'gap:splash')
+				return;
+			if (node.attrib['gap:platform'] != 'blackberry') {
+				xmlDocRoot.remove(0, node);
+			} else if (nodeName == 'gap:splash') {
+				var el = new et.Element('rim:splash');
+				for (var attr in node.attrib) {
+					el.attrib[attr] = node.attrib[attr];
+				}
+				xmlDocRoot.append(el);
+                xmlDocRoot.remove(0, node);
+			}
+		});
+
+        this.xml.update();
     },
     update_project:function(cfg, callback) {
         var self = this;
+
+        self.update_www();
 
         try {
             self.update_from_config(cfg);
@@ -77,7 +110,7 @@ module.exports.prototype = {
             if (callback) return callback(e);
             else throw e;
         }
-        self.update_www();
+
         self.update_overrides();
         self.update_staging();
         util.deleteSvnFolders(this.www_dir());
