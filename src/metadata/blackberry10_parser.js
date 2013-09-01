@@ -35,8 +35,8 @@ module.exports = function blackberry_parser(project) {
 
 module.exports.check_requirements = function(project_root, callback) {
     var lib_path = path.join(util.libDirectory, 'blackberry10', 'cordova', require('../../platforms').blackberry10.version);
-    shell.exec(path.join(lib_path, 'bin', 'check_reqs'), {silent:true, async:true}, function(code, output) {
-        if (code != 0) {
+    shell.exec("\"" + path.join(lib_path, 'bin', 'check_reqs') + "\"", {silent:true, async:true}, function(code, output) {
+        if (code !== 0) {
             callback(output);
         } else {
             callback(false);
@@ -46,6 +46,8 @@ module.exports.check_requirements = function(project_root, callback) {
 
 module.exports.prototype = {
     update_from_config:function(config) {
+        var self = this;
+
         if (config instanceof config_parser) {
         } else throw new Error('update_from_config requires a config_parser object');
 
@@ -105,9 +107,8 @@ module.exports.prototype = {
         try {
             self.update_from_config(cfg);
         } catch(e) {
-            if (callback) callback(e);
+            if (callback) return callback(e);
             else throw e;
-            return;
         }
 
         self.update_overrides();
@@ -133,11 +134,13 @@ module.exports.prototype = {
         var projectRoot = util.isCordova(this.path);
         var www = util.projectWww(projectRoot);
         var platformWww = this.www_dir();
+
         // remove the stock www folder
         shell.rm('-rf', this.www_dir());
-
         // copy over project www assets
         shell.cp('-rf', www, this.path);
+        //Re-Write config.xml
+        this.xml.update();
 
         var custom_path = config.has_custom_path(projectRoot, 'blackberry10');
         var lib_path = path.join(util.libDirectory, 'blackberry10', 'cordova', require('../../platforms').blackberry10.version);

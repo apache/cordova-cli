@@ -17,11 +17,12 @@
     under the License.
 */
 var et = require('elementtree'),
+    xml= require('./xml-helpers'),
     fs = require('fs');
 
 function config_parser(path) {
     this.path = path;
-    this.doc = new et.ElementTree(et.XML(fs.readFileSync(path, 'utf-8')));
+    this.doc = xml.parseElementtreeSync(path);
     this.access = new access(this);
     this.preference = new preference(this);
 }
@@ -44,6 +45,22 @@ config_parser.prototype = {
             this.doc.getroot().attrib.version = version;
             this.update();
         } else return this.doc.getroot().attrib.version;
+    },
+    content: function(src) {
+        var content = this.doc.find('content');
+        if (src) {
+            content = content || new et.Element('content');
+            content.attrib.src = src;
+            this.update();
+        } else {
+            if (content === undefined) {
+                content = new et.Element('content');
+                content.attrib.src = 'index.html';
+                this.doc.getroot().append(content);
+                this.update();
+            }
+            return content.attrib.src;
+        }
     },
     update:function() {
         fs.writeFileSync(this.path, this.doc.write({indent: 4}), 'utf-8');
