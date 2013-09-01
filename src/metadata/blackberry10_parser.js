@@ -56,11 +56,7 @@ module.exports.prototype = {
         events.emit('log', 'Wrote out BlackBerry package name to "' + config.packageName() + '"');
         this.xml.version(config.version());
         events.emit('log', 'Wrote out BlackBerry version to "' + config.version() + '"');
-        this.xml.access.remove();
         var self = this;
-        config.access.getAttributes().forEach(function(attribs) {
-            self.xml.access.add(attribs.uri || attribs.origin, attribs.subdomains);
-        });
         var xmlDoc = this.xml.doc;
         var xmlDocRoot = xmlDoc.getroot();
         xmlDocRoot.attrib['xmlns:rim'] = "http://www.blackberry.com/ns/widgets";
