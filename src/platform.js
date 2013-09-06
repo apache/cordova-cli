@@ -69,36 +69,48 @@ module.exports = function platform(command, targets, callback) {
 
     switch(command) {
         case 'add':
-            var end = n(targets.length, function() {
-                hooks.fire('after_platform_add', opts, function(err) {
+            var config_json = config.read(projectRoot);
+
+            var doInstall = function(index) {
+                if (index >= targets.length) {
+                    hooks.fire('after_platform_add', opts, function(err) {
+                        if (err) {
+                            if (callback) callback(err);
+                            else throw err;
+                        } else {
+                            if (callback) callback();
+                        }
+                    });
+                    return;
+                }
+
+                var t = targets[index];
+                lazy_load.based_on_config(projectRoot, t, function(err) {
                     if (err) {
                         if (callback) callback(err);
                         else throw err;
                     } else {
-                        if (callback) callback();
+                        if (config_json.lib && config_json.lib[t]) {
+                            call_into_create(t, projectRoot, cfg, config_json.lib[t].id, config_json.lib[t].version, config_json.lib[t].template, callback, end(index));
+                        } else {
+                            call_into_create(t, projectRoot, cfg, 'cordova', platforms[t].version, null, callback, end(index));
+                        }
                     }
                 });
-            });
+            };
+
+            var end = function(index) {
+                return function() {
+                        doInstall(index+1);
+                    };
+            };
+
             hooks.fire('before_platform_add', opts, function(err) {
                 if (err) {
                     if (callback) callback(err);
                     else throw err;
                 } else {
-                    var config_json = config.read(projectRoot);
-                    targets.forEach(function(t) {
-                        lazy_load.based_on_config(projectRoot, t, function(err) {
-                            if (err) {
-                                if (callback) callback(err);
-                                else throw err;
-                            } else {
-                                if (config_json.lib && config_json.lib[t]) {
-                                    call_into_create(t, projectRoot, cfg, config_json.lib[t].id, config_json.lib[t].version, config_json.lib[t].template, callback, end);
-                                } else {
-                                    call_into_create(t, projectRoot, cfg, 'cordova', platforms[t].version, null, callback, end);
-                                }
-                            }
-                        });
-                    });
+                    doInstall(0);
                 }
             });
             break;
