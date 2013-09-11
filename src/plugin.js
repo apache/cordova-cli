@@ -16,18 +16,14 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova_util  = require('./util'),
-    util          = require('util'),
-    fs            = require('fs'),
-    path          = require('path'),
-    shell         = require('shelljs'),
-    platforms     = require('../platforms'),
-    n             = require('ncallbacks'),
-    hooker        = require('./hooker'),
-    plugman       = require('plugman'),
-    events        = require('./events');
 
 module.exports = function plugin(command, targets, callback) {
+    var cordova_util  = require('./util'),
+        path          = require('path'),
+        n             = require('ncallbacks'),
+        hooker        = require('./hooker'),
+        events        = require('./events');
+
     var projectRoot = cordova_util.isCordova(process.cwd()),
         err;
 
@@ -115,6 +111,7 @@ module.exports = function plugin(command, targets, callback) {
 
                         // Fetch the plugin first.
                         events.emit('log', 'Calling plugman.fetch on plugin "' + target + '"');
+                        var plugman = require('plugman');
                         plugman.fetch(target, pluginsDir, {}, function(err, dir) {
                             if (err) {
                                 err = new Error('Error fetching plugin: ' + err);
@@ -128,6 +125,7 @@ module.exports = function plugin(command, targets, callback) {
                                         return;
                                     }
 
+                                    var platforms = require('../platforms');
                                     var platform = platformList[platformIndex],
                                         platformRoot = path.join(projectRoot, 'platforms', platform),
                                         parser = new platforms[platform].parser(platformRoot),
@@ -194,8 +192,10 @@ module.exports = function plugin(command, targets, callback) {
                             // If this is a web-only or dependency-only plugin, then
                             // there may be nothing to do here except remove the
                             // reference from the platform's plugin config JSON.
+                            var plugman = require('plugman');
                             platformList.forEach(function(platform) {
                                 var platformRoot = path.join(projectRoot, 'platforms', platform);
+                                var platforms = require('../platforms');
                                 var parser = new platforms[platform].parser(platformRoot);
                                 events.emit('log', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
                                 plugman.uninstall.uninstallPlatform(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
@@ -217,6 +217,7 @@ module.exports = function plugin(command, targets, callback) {
                     if(callback) callback(err);
                     else throw err;
                 } else {
+                    var plugman = require('plugman');
                     plugman.search(opts.plugins, function(err, plugins) {
                         if(err) return console.log(err);
                         for(var plugin in plugins) {

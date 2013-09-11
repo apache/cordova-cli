@@ -18,8 +18,6 @@
 */
 var fs            = require('fs'),
     path          = require('path'),
-    config_parser = require('./config_parser'),
-    plugin_parser = require('./plugin_parser'),
     shell         = require('shelljs');
 
 // Global configuration paths
@@ -28,7 +26,7 @@ var global_config_path = path.join(HOME, '.cordova');
 var lib_path = path.join(global_config_path, 'lib');
 shell.mkdir('-p', lib_path);
 
-module.exports = {
+exports = module.exports = {
     globalConfig:global_config_path,
     libDirectory:lib_path,
     // Runs up the directory chain looking for a .cordova directory.
@@ -52,8 +50,6 @@ module.exports = {
             }
         } else return false;
     },
-    config_parser:config_parser,
-    plugin_parser:plugin_parser,
     // Recursively deletes .svn folders from a target path
     deleteSvnFolders:function(dir) {
         var contents = fs.readdirSync(dir);
@@ -137,3 +133,13 @@ module.exports = {
         return result;
     }
 };
+
+function addModuleProperty(module, symbol, modulePath, opt_obj) {
+    Object.defineProperty(opt_obj || module.exports, symbol, {
+        get : function() { return module.require(modulePath); }});
+}
+
+addModuleProperty(module, 'config_parser', './config_parser');
+addModuleProperty(module, 'plugin_parser', './plugin_parser');
+
+exports.addModuleProperty = addModuleProperty;

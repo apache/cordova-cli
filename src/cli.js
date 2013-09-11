@@ -17,12 +17,10 @@
     under the License.
 */
 
-var optimist  = require('optimist'),
-    cordova   = require('../cordova'),
-    plugman   = require('plugman'),
-    platforms = require("../platforms");
-
 module.exports = function CLI(inputArgs) {
+    var optimist  = require('optimist'),
+        cordova   = require('../cordova');
+
     args = optimist(inputArgs)
         .boolean('d')
         .boolean('verbose')
@@ -56,6 +54,7 @@ module.exports = function CLI(inputArgs) {
     if (opts.verbose) {
         cordova.on('log', console.log);
         cordova.on('warn', console.warn);
+        var plugman = require('plugman');
         plugman.on('log', console.log);
         plugman.on('warn', console.warn);
         //Remove the corresponding token
@@ -77,6 +76,7 @@ module.exports = function CLI(inputArgs) {
     if (cordova.hasOwnProperty(cmd)) {
         if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
             // Filter all non-platforms into options
+            var platforms = require("../platforms");
             tokens.forEach(function(option, index) {
                 if (platforms.hasOwnProperty(option)) {
                     opts.platforms.push(option);
