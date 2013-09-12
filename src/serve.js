@@ -56,6 +56,7 @@ function launchServer(projectRoot, port) {
             response.writeHead(404, {"Content-Type": "text/plain"});
             response.write("404 Not Found\n");
             response.end();
+            return;
         }
 
         fs.exists(filePath, function(exists) {
