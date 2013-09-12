@@ -30,15 +30,20 @@ var cordova_util = require('./util'),
 
 function launchServer(projectRoot, port) {
     var server = http.createServer(function(request, response) {
+        function do404() {
+            response.writeHead(404, {"Content-Type": "text/plain"});
+            response.write("404 Not Found\n");
+            response.end();
+        }
         var urlPath = url.parse(request.url).pathname;
         var firstSegment = /\/(.*?)\//.exec(urlPath);
         if (!firstSegment) {
-            response.writeHead(404, {"Content-Type": "text/plain"});
-            response.write("404 Not Found\nPlease use URLs in the form /$platformId/www/...");
-            response.end();
-            return;
+            return do404();
         }
         var platformId = firstSegment[1];
+        if (!platforms[platformId]) {
+            return do404();
+        }
         // Strip the platform out of the path.
         urlPath = urlPath.slice(platformId.length + 1);
 
@@ -53,10 +58,7 @@ function launchServer(projectRoot, port) {
         } else if (/^\/www\//.test(urlPath)) {
             filePath = path.join(parser.www_dir(), urlPath.slice(5));
         } else {
-            response.writeHead(404, {"Content-Type": "text/plain"});
-            response.write("404 Not Found\n");
-            response.end();
-            return;
+            return do404();
         }
 
         fs.exists(filePath, function(exists) {
@@ -84,9 +86,7 @@ function launchServer(projectRoot, port) {
                     readStream.pipe(response);
                 }
             } else {
-                response.writeHead(404, {"Content-Type": "text/plain"});
-                response.write("404 Not Found\n");
-                response.end();
+                return do404();
             }
         });
 
