@@ -183,36 +183,6 @@ describe('android project parser', function() {
                 p.update_from_config(cfg);
                 expect(root_obj.attrib['android:versionName']).toEqual('one point oh');
             });
-            it('should wipe out the android whitelist every time', function() {
-                p.update_from_config(cfg);
-                expect(cfg_access_rm).toHaveBeenCalled();
-            });
-            it('should update the whitelist', function() {
-                cfg.access.get = function() { return ['one'] };
-                p.update_from_config(cfg);
-                expect(cfg_access_add).toHaveBeenCalledWith('one');
-            });
-            it('should update preferences', function() {
-                var sample_pref = {name:'pref',value:'yes'};
-                cfg.preference.get = function() { return [sample_pref] };
-                p.update_from_config(cfg);
-                expect(cfg_pref_add).toHaveBeenCalledWith(sample_pref);
-            });
-            it('should wipe out the android preferences every time', function() {
-                p.update_from_config(cfg);
-                expect(cfg_pref_rm).toHaveBeenCalled();
-            });
-            it('should write out default preferences every time', function() {
-                var sample_pref = {name:'preftwo',value:'false'};
-                cfg.preference.get = function() { return [sample_pref] };
-                p.update_from_config(cfg);
-                expect(cfg_pref_add).toHaveBeenCalledWith({name:"useBrowserHistory",value:"true"});
-                expect(cfg_pref_add).toHaveBeenCalledWith({name:"exit-on-suspend",value:"false"});
-            });
-            it('should update the content tag', function() {
-                p.update_from_config(cfg);
-                expect(cfg_content).toHaveBeenCalledWith('index.html');
-            });
         });
         describe('www_dir method', function() {
             it('should return assets/www', function() {

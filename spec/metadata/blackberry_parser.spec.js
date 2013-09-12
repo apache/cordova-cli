@@ -154,33 +154,6 @@ describe('blackberry10 project parser', function() {
                 cfg.access.remove = function() { };
                 cfg.preference.get = function() { return []; };
             });
-
-            it('should write out the app name to config.xml', function() {
-                p.update_from_config(cfg);
-                expect(xml_name).toHaveBeenCalledWith('testname');
-            });
-            it('should write out the app id to bb\'s config.xml', function() {
-                p.update_from_config(cfg);
-                expect(xml_pkg).toHaveBeenCalledWith('testpkg');
-            });
-            it('should write out the app version to bb\'s config.xml', function() {
-                p.update_from_config(cfg);
-                expect(xml_version).toHaveBeenCalledWith('one point oh');
-            });
-            it('should wipe out the bb config.xml whitelist every time', function() {
-                p.update_from_config(cfg);
-                expect(xml_access_rm).toHaveBeenCalled();
-            });
-            it('should update the whitelist', function() {
-                cfg.access.getAttributes = function() { return [{origin: 'one'},{uri: "two", subdomains: "false"}]; };
-                p.update_from_config(cfg);
-                expect(xml_access_add).toHaveBeenCalledWith('one', undefined);
-                expect(xml_access_add).toHaveBeenCalledWith('two', 'false');
-            });
-            it('should update the start page (content tag)', function() {
-                p.update_from_config(cfg);
-                expect(xml_content).toHaveBeenCalledWith('index.html');
-            });
         });
         describe('www_dir method', function() {
             it('should return /www', function() {
@@ -198,14 +171,19 @@ describe('blackberry10 project parser', function() {
             });
         });
         describe('update_www method', function() {
-            beforeEach(function() {
-                p.xml.update = jasmine.createSpy('xml update');
+            var backup_cfg_parser;
+            beforeEach(function () {
+                backup_cfg_parser = {
+                    update: jasmine.createSpy("backup_cfg_parser update")
+                };
+                config_p.andReturn(backup_cfg_parser);
             });
 
             it('should rm project-level www and cp in platform agnostic www', function() {
                 p.update_www();
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
+                expect(backup_cfg_parser.update).toHaveBeenCalled();
             });
             it('should copy in a fresh cordova.js from stock cordova lib if no custom lib is specified', function() {
                 p.update_www();

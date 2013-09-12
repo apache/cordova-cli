@@ -136,9 +136,6 @@ module.exports.prototype = {
             fs.writeFileSync(path.join(this.wp7_proj_dir, 'App.xaml.cs'), appCS.replace(namespaceRegEx, 'namespace ' + pkg), 'utf-8');
          }
 
-         // Update content (start page) element
-         this.config.content(config.content());
-
          //Write out manifest
          fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
     },

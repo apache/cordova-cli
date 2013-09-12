@@ -196,52 +196,6 @@ describe('ios project parser', function () {
                     expect(plist_build.mostRecentCall.args[0].CFBundleVersion).toEqual('one point oh');
                 });
             });
-            it('should wipe out the ios whitelist every time', function(done) {
-                wrapper(p.update_from_config(cfg), done, function() {
-                    expect(cfg_access_rm).toHaveBeenCalled();
-                });
-            });
-            it('should update the whitelist', function(done) {
-                cfg.access.get = function() { return ['one'] };
-                wrapper(p.update_from_config(cfg), done, function() {
-                    expect(cfg_access_add).toHaveBeenCalledWith('one');
-                });
-            });
-            it('should update preferences', function(done) {
-                var sample_pref = {name:'pref',value:'yes'};
-                cfg.preference.get = function() { return [sample_pref] };
-                wrapper(p.update_from_config(cfg), done, function() {
-                    expect(cfg_pref_add).toHaveBeenCalledWith(sample_pref);
-                });
-            });
-            it('should update the content tag / start page', function(done) {
-                wrapper(p.update_from_config(cfg), done, function() {
-                    expect(cfg_content).toHaveBeenCalledWith('index.html');
-                });
-            });
-            it('should wipe out the ios preferences every time', function(done) {
-                wrapper(p.update_from_config(cfg), done, function() {
-                    expect(cfg_pref_rm).toHaveBeenCalled();
-                });
-            });
-            it('should write out default preferences every time', function(done) {
-                var sample_pref = {name:'preftwo',value:'false'};
-                cfg.preference.get = function() { return [sample_pref] };
-                wrapper(p.update_from_config(cfg), done, function() {
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"KeyboardDisplayRequiresUserAction",value:"true"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"SuppressesIncrementalRendering",value:"false"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"UIWebViewBounce",value:"true"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"TopActivityIndicator",value:"gray"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"EnableLocation",value:"false"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"EnableViewportScale",value:"false"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"AutoHideSplashScreen",value:"true"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"ShowSplashScreenSpinner",value:"true"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"MediaPlaybackRequiresUserAction",value:"false"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"AllowInlineMediaPlayback",value:"false"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"OpenAllWhitelistURLsInWebView",value:"false"});
-                    expect(cfg_pref_add).toHaveBeenCalledWith({name:"BackupWebStorage",value:"cloud"});
-                });
-            });
         });
         describe('www_dir method', function() {
             it('should return /www', function() {

@@ -169,10 +169,6 @@ describe('wp7 project parser', function() {
                 p.update_from_config(cfg);
                 expect(find_obj.attrib.Version).toEqual('one point oh');
             });
-            it('should update the content element (start page)', function() {
-                p.update_from_config(cfg);
-                expect(cfg_content).toHaveBeenCalledWith('index.html');
-            });
         });
         describe('www_dir method', function() {
             it('should return www', function() {
