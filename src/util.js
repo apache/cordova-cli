@@ -135,8 +135,11 @@ exports = module.exports = {
 };
 
 function addModuleProperty(module, symbol, modulePath, opt_obj) {
+    var val = null;
     Object.defineProperty(opt_obj || module.exports, symbol, {
-        get : function() { return module.require(modulePath); }});
+        get : function() { return val = val || module.require(modulePath); },
+        set : function(v) { val = v; }
+    });
 }
 
 addModuleProperty(module, 'config_parser', './config_parser');
