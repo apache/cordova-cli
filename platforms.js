@@ -48,7 +48,7 @@ module.exports = {
         version: '3.0.0'
     },
     'firefoxos':{
-        parser: require('./src/metadata/firefoxos_parser'),
+        parser: './src/metadata/firefoxos_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-firefoxos.git',
         version: '3.0.0'
     }
