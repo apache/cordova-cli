@@ -22,6 +22,8 @@ var platforms = require('../../platforms'),
     shell = require('shelljs'),
     fs = require('fs'),
     ET = require('elementtree'),
+    Q = require('q'),
+    child_process = require('child_process'),
     config = require('../../src/config'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
@@ -31,11 +33,24 @@ describe('android project parser', function() {
     var exists, exec, custom;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
-        exec = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
-            cb(0, 'android-17');
+        exec = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
+            if (!cb) cb = opts;
+            cb(null, 'android-17', '');
         });
         custom = spyOn(config, 'has_custom_path').andReturn(false);
     });
+
+    function wrapper(p, done, post) {
+        p.then(post, function(err) {
+            expect(err).toBeUndefined();
+        }).fin(done);
+    }
+
+    function errorWrapper(p, done, post) {
+        p.then(function() {
+            expect('this call').toBe('fail');
+        }, post).fin(done);
+    }
 
     describe('constructions', function() {
         it('should throw if provided directory does not contain an AndroidManifest.xml', function() {
@@ -58,45 +73,39 @@ describe('android project parser', function() {
     describe('check_requirements', function() {
         it('should fire a callback if there is an error during shelling out', function(done) {
             exec.andCallFake(function(cmd, opts, cb) {
-                cb(50, 'there was an errorz!');
+                if (!cb) cb = opts;
+                cb(50, 'there was an errorz!', '');
             });
-            platforms.android.parser.check_requirements(proj, function(err) {
+            errorWrapper(platforms.android.parser.check_requirements(proj), done, function(err) {
                 expect(err).toContain('there was an errorz!');
-                done();
             });
         });
         it('should fire a callback if `android list target` does not return anything containing "android-17"', function(done) {
             exec.andCallFake(function(cmd, opts, cb) {
-                cb(0, 'android-15');
+                if (!cb) cb = opts;
+                cb(0, 'android-15', '');
             });
-            platforms.android.parser.check_requirements(proj, function(err) {
-                expect(err).toEqual('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.');
-                done();
+            errorWrapper(platforms.android.parser.check_requirements(proj), done, function(err) {
+                expect(err).toEqual(new Error('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.'));
             });
         });
         it('should check that `android` is on the path by calling `android list target`', function(done) {
-            platforms.android.parser.check_requirements(proj, function(err) {
-                expect(err).toEqual(false);
-                expect(exec).toHaveBeenCalledWith('android list target', jasmine.any(Object), jasmine.any(Function));
-                done();
+            wrapper(platforms.android.parser.check_requirements(proj), done, function() {
+                expect(exec).toHaveBeenCalledWith('android list target', jasmine.any(Function));
             });
         });
         it('should check that we can update an android project by calling `android update project` on stock android path', function(done) {
-            platforms.android.parser.check_requirements(proj, function(err) {
-                expect(err).toEqual(false);
+            wrapper(platforms.android.parser.check_requirements(proj), done, function() {
                 expect(exec.mostRecentCall.args[0]).toMatch(/^android update project -p .* -t android-17$/gi);
                 expect(exec.mostRecentCall.args[0]).toContain(util.libDirectory);
-                done();
             });
         });
         it('should check that we can update an android project by calling `android update project` on a custom path if it is so defined', function(done) {
             var custom_path = path.join('some', 'custom', 'path', 'to', 'android', 'lib');
             custom.andReturn(custom_path);
-            platforms.android.parser.check_requirements(proj, function(err) {
-                expect(err).toEqual(false);
+            wrapper(platforms.android.parser.check_requirements(proj), done, function() {
                 expect(exec.mostRecentCall.args[0]).toMatch(/^android update project -p .* -t android-17$/gi);
                 expect(exec.mostRecentCall.args[0]).toContain(custom_path);
-                done();
             });
         });
     });
@@ -277,9 +286,8 @@ describe('android project parser', function() {
             it('should throw if update_from_config throws', function(done) {
                 var err = new Error('uh oh!');
                 config.andCallFake(function() { throw err; });
-                p.update_project({}, function(err) {
+                errorWrapper(p.update_project({}), done, function(err) {
                     expect(err).toEqual(err);
-                    done();
                 });
             });
             it('should call update_www', function() {

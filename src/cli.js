@@ -21,7 +21,7 @@ module.exports = function CLI(inputArgs) {
     var optimist  = require('optimist'),
         cordova   = require('../cordova');
 
-    args = optimist(inputArgs)
+   args = optimist(inputArgs)
         .boolean('d')
         .boolean('verbose')
         .boolean('v')
@@ -84,15 +84,15 @@ module.exports = function CLI(inputArgs) {
                     opts.options.push(option);
                 }
             });
-            cordova[cmd].call(this, opts);
+            cordova.raw[cmd].call(this, opts).done();
         } else if (cmd == 'create' || cmd == 'serve') {
-            cordova[cmd].apply(this, tokens);
+            cordova.raw[cmd].apply(this, tokens).done();
         } else {
             // platform/plugins add/rm [target(s)]
             var invocation = tokens.slice(0,1); // this has the sub-command, i.e. "platform add" or "plugin rm"
             var targets = tokens.slice(1); // this should be an array of targets, be it platforms or plugins
             invocation.push(targets);
-            cordova[cmd].apply(this, invocation);
+            cordova.raw[cmd].apply(this, invocation).done();
         }
     } else {
         throw new Error('Cordova does not know ' + cmd + '; try help for a list of all the available commands.');

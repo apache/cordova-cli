@@ -38,21 +38,22 @@ exports = module.exports = {
     },
     emit:      emit,
     trigger:   emit,
+    raw: {}
 };
 
-addModuleProperty(module, 'prepare', './src/prepare');
-addModuleProperty(module, 'build', './src/build');
+addModuleProperty(module, 'prepare', './src/prepare', true);
+addModuleProperty(module, 'build', './src/build', true);
 addModuleProperty(module, 'help', './src/help');
 addModuleProperty(module, 'config', './src/config');
-addModuleProperty(module, 'create', './src/create');
+addModuleProperty(module, 'create', './src/create', true);
 addModuleProperty(module, 'ripple', './src/ripple');
-addModuleProperty(module, 'emulate', './src/emulate');
-addModuleProperty(module, 'plugin', './src/plugin');
-addModuleProperty(module, 'plugins', './src/plugin');
+addModuleProperty(module, 'emulate', './src/emulate', true);
+addModuleProperty(module, 'plugin', './src/plugin', true);
+addModuleProperty(module, 'plugins', './src/plugin', true);
 addModuleProperty(module, 'serve', './src/serve');
-addModuleProperty(module, 'platform', './src/platform');
-addModuleProperty(module, 'platforms', './src/platform');
-addModuleProperty(module, 'compile', './src/compile');
-addModuleProperty(module, 'run', './src/run');
+addModuleProperty(module, 'platform', './src/platform', true);
+addModuleProperty(module, 'platforms', './src/platform', true);
+addModuleProperty(module, 'compile', './src/compile', true);
+addModuleProperty(module, 'run', './src/run', true);
 
 

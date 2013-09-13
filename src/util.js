@@ -134,12 +134,36 @@ exports = module.exports = {
     }
 };
 
-function addModuleProperty(module, symbol, modulePath, opt_obj) {
+// opt_wrap is a boolean: True means that a callback-based wrapper for the promise-based function
+// should be created.
+function addModuleProperty(module, symbol, modulePath, opt_wrap, opt_obj) {
     var val = null;
-    Object.defineProperty(opt_obj || module.exports, symbol, {
-        get : function() { return val = val || module.require(modulePath); },
-        set : function(v) { val = v; }
-    });
+    if (opt_wrap) {
+        module.exports[symbol] = function() {
+            val = val || module.require(modulePath);
+            if (arguments.length && typeof arguments[arguments.length - 1] === 'function') {
+                // If args exist and the last one is a function, it's the callback.
+                var args = Array.prototype.slice.call(arguments);
+                var cb = args.pop();
+                val.apply(module.exports, args).done(cb, cb);
+            } else {
+                val.apply(module.exports, arguments).done(null, function(err) { throw err; });
+            }
+        };
+    } else {
+        Object.defineProperty(opt_obj || module.exports, symbol, {
+            get : function() { return val = val || module.require(modulePath); },
+            set : function(v) { val = v; }
+        });
+    }
+
+    // Add the module.raw.foo as well.
+    if(module.exports.raw) {
+        Object.defineProperty(module.exports.raw, symbol, {
+            get : function() { return val = val || module.require(modulePath); },
+            set : function(v) { val = v; }
+        });
+    }
 }
 
 addModuleProperty(module, 'config_parser', './config_parser');

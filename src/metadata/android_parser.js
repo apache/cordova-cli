@@ -18,12 +18,13 @@
 */
 var fs            = require('fs'),
     path          = require('path'),
-    et            = require('elementtree'),
     xml           = require('../xml-helpers'),
     util          = require('../util'),
     events        = require('../events'),
     shell         = require('shelljs'),
+    child_process = require('child_process'),
     project_config= require('../config'),
+    Q             = require('q'),
     config_parser = require('../config_parser');
 
 var default_prefs = {
@@ -41,17 +42,19 @@ module.exports = function android_parser(project) {
     this.android_config = path.join(this.path, 'res', 'xml', 'config.xml');
 };
 
-module.exports.check_requirements = function(project_root, callback) {
+// Returns a promise.
+module.exports.check_requirements = function(project_root) {
     events.emit('log', 'Checking Android requirements...');
     var command = 'android list target';
     events.emit('log', 'Running "' + command + '" (output to follow)');
-    shell.exec(command, {silent:true, async:true}, function(code, output) {
+    var d = Q.defer();
+    child_process.exec(command, function(err, output, stderr) {
         events.emit('log', output);
-        if (code != 0) {
-            callback('The command `android` failed. Make sure you have the latest Android SDK installed, and the `android` command (inside the tools/ folder) added to your path. Output: ' + output);
+        if (err) {
+            d.reject(new Error('The command `android` failed. Make sure you have the latest Android SDK installed, and the `android` command (inside the tools/ folder) added to your path. Output: ' + output));
         } else {
             if (output.indexOf('android-17') == -1) {
-                callback('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.');
+                d.reject(new Error('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.'));
             } else {
                 var custom_path = project_config.has_custom_path(project_root, 'android');
                 var framework_path;
@@ -62,17 +65,20 @@ module.exports.check_requirements = function(project_root, callback) {
                 }
                 var cmd = 'android update project -p "' + framework_path  + '" -t android-17';
                 events.emit('log', 'Running "' + cmd + '" (output to follow)...');
-                shell.exec(cmd, {silent:true, async:true}, function(code, output) {
+                var d2 = Q.defer();
+                child_process.exec(cmd, function(err, output, stderr) {
                     events.emit('log', output);
-                    if (code != 0) {
-                        callback('Error updating the Cordova library to work with your Android environment. Command run: "' + cmd + '", output: ' + output);
+                    if (err) {
+                        d2.reject(new Error('Error updating the Cordova library to work with your Android environment. Command run: "' + cmd + '", output: ' + output));
                     } else {
-                        callback(false);
+                        d2.resolve();
                     }
                 });
+                d.resolve(d2.promise);
             }
         }
     });
+    return d.promise;
 };
 
 module.exports.prototype = {
@@ -201,21 +207,20 @@ module.exports.prototype = {
         }
     },
 
-    update_project:function(cfg, callback) {
+    // Returns a promise.
+    update_project:function(cfg) {
         var platformWww = path.join(this.path, 'assets');
         try {
             this.update_from_config(cfg);
         } catch(e) {
-            if (callback) callback(e);
-            else throw e;
-            return;
+            return Q.reject(e);
         }
         this.update_www();
         this.update_overrides();
         this.update_staging();
         // delete any .svn folders copied over
         util.deleteSvnFolders(platformWww);
-        if (callback) callback();
+        return Q();
     }
 };
 

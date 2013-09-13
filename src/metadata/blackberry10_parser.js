@@ -18,9 +18,10 @@
 */
 var fs            = require('fs'),
     path          = require('path'),
-    et            = require('elementtree'),
     shell         = require('shelljs'),
     util          = require('../util'),
+    Q             = require('q'),
+    child_process = require('child_process'),
     config_parser = require('../config_parser'),
     events        = require('../events'),
     config        = require('../config');
@@ -34,15 +35,18 @@ module.exports = function blackberry_parser(project) {
     this.xml = new util.config_parser(this.config_path);
 };
 
-module.exports.check_requirements = function(project_root, callback) {
+// Returns a promise.
+module.exports.check_requirements = function(project_root) {
     var lib_path = path.join(util.libDirectory, 'blackberry10', 'cordova', require('../../platforms').blackberry10.version);
-    shell.exec("\"" + path.join(lib_path, 'bin', 'check_reqs') + "\"", {silent:true, async:true}, function(code, output) {
-        if (code !== 0) {
-            callback(output);
+    var d = Q.defer();
+    child_process.exec("\"" + path.join(lib_path, 'bin', 'check_reqs') + "\"", function(err, output, stderr) {
+        if (err) {
+            d.reject(new Error('Error while checking requirements: ' + output + stderr));
         } else {
-            callback(false);
+            d.resolve();
         }
     });
+    return d.promise;
 };
 
 module.exports.prototype = {
@@ -68,20 +72,21 @@ module.exports.prototype = {
         });
         this.xml.content(config.content());
     },
-    update_project:function(cfg, callback) {
+
+    // Returns a promise.
+    update_project:function(cfg) {
         var self = this;
 
         try {
             self.update_from_config(cfg);
         } catch(e) {
-            if (callback) return callback(e);
-            else throw e;
+            return Q.reject(e);
         }
         self.update_www();
         self.update_overrides();
         self.update_staging();
         util.deleteSvnFolders(this.www_dir());
-        if (callback) callback();
+        return Q();
     },
 
     // Returns the platform-specific www directory.

@@ -18,14 +18,13 @@
 */
 var cordova_util      = require('./util'),
     path              = require('path'),
-    fs                = require('fs'),
-    shell             = require('shelljs'),
     hooker            = require('./hooker'),
-    platforms         = require('./../platforms'),
     events            = require('./events'),
-    n                 = require('ncallbacks');
+    Q                 = require('q'),
+    child_process     = require('child_process');
 
-function shell_out_to_run(projectRoot, platform, options, error_callback, done) {
+// Returns a promise.
+function shell_out_to_run(projectRoot, platform, options) {
     var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" ' + ( options.length ? options.join(" ") : '--device');
     // TODO: inconsistent API for BB10 run command
 /*    if (platform == 'blackberry') {
@@ -43,24 +42,24 @@ function shell_out_to_run(projectRoot, platform, options, error_callback, done) 
     }
 */
     events.emit('log', 'Running app on platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
-    shell.exec(cmd, {silent:true, async:true}, function(code, output) {
+    var d = Q.defer();
+    child_process.exec(cmd, function(err, output, stderr) {
         events.emit('log', output);
-        if (code > 0) {
-            var err = new Error('An error occurred while running the ' + platform + ' project. ' + output);
-            if (error_callback) error_callback(err);
-            else throw err;
+        if (err) {
+            d.reject(new Error('An error occurred while running the ' + platform + ' project. ' + output + stderr));
         } else {
             events.emit('log', 'Platform "' + platform + '" ran successfully.');
-            if (done) done();
+            d.resolve();
         }
     });
+    return d.promise;
 }
 
-module.exports = function run(options, callback) {
+// Returns a promise.
+module.exports = function run(options) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
-    if (options instanceof Function && callback === undefined) {
-        callback = options;
+    if (!options) {
         options = {
             verbose: false,
             platforms: [],
@@ -70,43 +69,20 @@ module.exports = function run(options, callback) {
 
     options = cordova_util.preProcessOptions(options);
     if (options.constructor.name === "Error") {
-        if (callback) return callback(options)
-        else throw options;
+        return Q.reject(options);
     }
 
     var hooks = new hooker(projectRoot);
-    hooks.fire('before_run', options, function(err) {
-        if (err) {
-            if (callback) callback(err);
-            else throw err;
-        } else {
-            var end = n(options.platforms.length, function() {
-                hooks.fire('after_run', options, function(err) {
-                    if (err) {
-                        if (callback) callback(err);
-                        else throw err;
-                    } else {
-                        if (callback) callback();
-                    }
-                });
-            });
-
-            // Run a prepare first, then shell out to run
-            require('../cordova').prepare(options.platforms, function(err) {
-                if (err) {
-                    if (callback) callback(err);
-                    else throw err;
-                } else {
-                    options.platforms.forEach(function(platform) {
-                        try {
-                            shell_out_to_run(projectRoot, platform, options.options, callback, end);
-                        } catch(e) {
-                            if (callback) callback(e);
-                            else throw e;
-                        }
-                    });
-                }
-            });
-        }
+    return hooks.fire('before_run', options)
+    .then(function() {
+        // Run a prepare first, then shell out to run
+        return require('../cordova').raw.prepare(options.platforms)
+        .then(function() {
+            return Q.all(options.platforms.map(function(platform) {
+                return shell_out_to_run(projectRoot, platform, options.options);
+            }));
+        }).then(function() {
+            return hooks.fire('after_run', options);
+        });
     });
 };

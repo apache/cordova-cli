@@ -23,6 +23,8 @@ var platforms = require('../../platforms'),
     shell = require('shelljs'),
     fs = require('fs'),
     ET = require('elementtree'),
+    Q = require('q'),
+    child_process = require('child_process'),
     config = require('../../src/config'),
     prompt = require('prompt'),
     config_parser = require('../../src/config_parser'),
@@ -35,10 +37,22 @@ describe('blackberry10 project parser', function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
         custom = spyOn(config, 'has_custom_path').andReturn(false);
         config_p = spyOn(util, 'config_parser');
-        sh = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
-            cb(0, '');
+        sh = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
+            (cb || opts)(0, '', '');
         });
     });
+
+    function wrapper(p, done, post) {
+        p.then(post, function(err) {
+            expect(err).toBeUndefined();
+        }).fin(done);
+    }
+
+    function errorWrapper(p, done, post) {
+        p.then(function() {
+            expect('this call').toBe('fail');
+        }, post).fin(done);
+    }
 
     describe('constructions', function() {
         it('should throw an exception with a path that is not a native blackberry project', function() {
@@ -59,17 +73,15 @@ describe('blackberry10 project parser', function() {
     describe('check_requirements', function() {
         it('should fire a callback if the blackberry-deploy shell-out fails', function(done) {
             sh.andCallFake(function(cmd, opts, cb) {
-                cb(1, 'no bb-deploy dewd!');
+                (cb || opts)(1, 'no bb-deploy dewd!');
             });
-            platforms.blackberry10.parser.check_requirements(proj, function(err) {
+            errorWrapper(platforms.blackberry10.parser.check_requirements(proj), done, function(err) {
                 expect(err).toContain('no bb-deploy dewd');
-                done();
             });
         });
         it('should fire a callback with no error if shell out is successful', function(done) {
-            platforms.blackberry10.parser.check_requirements(proj, function(err) {
-                expect(err).toEqual(false);
-                done();
+            wrapper(platforms.blackberry10.parser.check_requirements(proj), done, function() {
+                expect(1).toBe(1);
             });
         });
     });
@@ -97,6 +109,8 @@ describe('blackberry10 project parser', function() {
                 xml_access_add = jasmine.createSpy('xml access add');
                 xml_update = jasmine.createSpy('xml update');
                 xml_append = jasmine.createSpy('xml append');
+                xml_preference_remove = jasmine.createSpy('xml preference rm');
+                xml_preference_add = jasmine.createSpy('xml preference add');
                 p.xml.name = xml_name;
                 p.xml.packageName = xml_pkg;
                 p.xml.version = xml_version;
@@ -108,6 +122,10 @@ describe('blackberry10 project parser', function() {
                 p.xml.update = xml_update;
                 p.xml.doc = {
                     getroot:function() { return { append:xml_append}; }
+                };
+                p.xml.preference = {
+                    add: xml_preference_add,
+                    remove: xml_preference_remove
                 };
                 find_obj = {
                     text:'hi'
@@ -131,7 +149,9 @@ describe('blackberry10 project parser', function() {
                 cfg.content = function() { return 'index.html'; };
                 cfg.packageName = function() { return 'testpkg'; };
                 cfg.version = function() { return 'one point oh'; };
+                cfg.access = {};
                 cfg.access.getAttributes = function() { return []; };
+                cfg.access.remove = function() { };
                 cfg.preference.get = function() { return []; };
             });
 
@@ -178,6 +198,10 @@ describe('blackberry10 project parser', function() {
             });
         });
         describe('update_www method', function() {
+            beforeEach(function() {
+                p.xml.update = jasmine.createSpy('xml update');
+            });
+
             it('should rm project-level www and cp in platform agnostic www', function() {
                 p.update_www();
                 expect(rm).toHaveBeenCalled();
@@ -226,33 +250,37 @@ describe('blackberry10 project parser', function() {
                 svn = spyOn(util, 'deleteSvnFolders');
                 parse = spyOn(JSON, 'parse').andReturn({blackberry:{qnx:{}}});
             });
-            it('should call update_from_config', function() {
-                p.update_project();
-                expect(config).toHaveBeenCalled();
+            it('should call update_from_config', function(done) {
+                wrapper(p.update_project(), done, function() {
+                    expect(config).toHaveBeenCalled();
+                });
             });
             it('should throw if update_from_config throws', function(done) {
                 var err = new Error('uh oh!');
                 config.andCallFake(function() { throw err; });
-                p.update_project({}, function(err) {
-                    expect(err).toEqual(err);
-                    done();
+                errorWrapper(p.update_project({}), done, function(e) {
+                    expect(e).toEqual(err);
                 });
             });
-            it('should call update_www', function() {
-                p.update_project();
-                expect(www).toHaveBeenCalled();
+            it('should call update_www', function(done) {
+                wrapper(p.update_project(), done, function() {
+                    expect(www).toHaveBeenCalled();
+                });
             });
-            it('should call update_overrides', function() {
-                p.update_project();
-                expect(overrides).toHaveBeenCalled();
+            it('should call update_overrides', function(done) {
+                wrapper(p.update_project(), done, function() {
+                    expect(overrides).toHaveBeenCalled();
+                });
             });
-            it('should call update_staging', function() {
-                p.update_project();
-                expect(staging).toHaveBeenCalled();
+            it('should call update_staging', function(done) {
+                wrapper(p.update_project(), done, function() {
+                    expect(staging).toHaveBeenCalled();
+                });
             });
-            it('should call deleteSvnFolders', function() {
-                p.update_project();
-                expect(svn).toHaveBeenCalled();
+            it('should call deleteSvnFolders', function(done) {
+                wrapper(p.update_project(), done, function() {
+                    expect(svn).toHaveBeenCalled();
+                });
             });
         });
     });

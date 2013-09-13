@@ -23,6 +23,8 @@ var platforms = require('../../platforms'),
     shell = require('shelljs'),
     fs = require('fs'),
     ET = require('elementtree'),
+    Q = require('q'),
+    child_process = require('child_process'),
     config = require('../../src/config'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
@@ -32,13 +34,25 @@ describe('wp7 project parser', function() {
     var exists, exec, custom, readdir, cfg_parser;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
-        exec = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
-            cb(0, '');
+        exec = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
+            (cb || opts)(0, '', '');
         });
         custom = spyOn(config, 'has_custom_path').andReturn(false);
         readdir = spyOn(fs, 'readdirSync').andReturn(['test.csproj']);
         cfg_parser = spyOn(util, 'config_parser');
     });
+
+    function wrapper(p, done, post) {
+        p.then(post, function(err) {
+            expect(err).toBeUndefined();
+        }).fin(done);
+    }
+
+    function errorWrapper(p, done, post) {
+        p.then(function() {
+            expect('this call').toBe('fail');
+        }, post).fin(done);
+    }
 
     describe('constructions', function() {
         it('should throw if provided directory does not contain a csproj file', function() {
@@ -59,29 +73,24 @@ describe('wp7 project parser', function() {
     describe('check_requirements', function() {
         it('should fire a callback if there is an error during shelling out', function(done) {
             exec.andCallFake(function(cmd, opts, cb) {
-                cb(50, 'there was an errorz!');
+                (cb || opts)(50, 'there was an errorz!');
             });
-            platforms.wp7.parser.check_requirements(proj, function(err) {
+            errorWrapper(platforms.wp7.parser.check_requirements(proj), done, function(err) {
                 expect(err).toContain('there was an errorz!');
-                done();
             });
         });
         it('should check by calling check_reqs on the stock lib path if no custom path is defined', function(done) {
-            platforms.wp7.parser.check_requirements(proj, function(err) {
-                expect(err).toEqual(false);
+            wrapper(platforms.wp7.parser.check_requirements(proj), done, function(err) {
                 expect(exec.mostRecentCall.args[0]).toContain(util.libDirectory);
                 expect(exec.mostRecentCall.args[0]).toMatch(/check_reqs"$/);
-                done();
             });
         });
         it('should check by calling check_reqs on a custom path if it is so defined', function(done) {
             var custom_path = path.join('some','custom','path','to','wp7','lib');
             custom.andReturn(custom_path);
-            platforms.wp7.parser.check_requirements(proj, function(err) {
-                expect(err).toEqual(false);
+            wrapper(platforms.wp7.parser.check_requirements(proj), done, function() {
                 expect(exec.mostRecentCall.args[0]).toContain(custom_path);
                 expect(exec.mostRecentCall.args[0]).toMatch(/check_reqs"$/);
-                done();
             });
         });
     });
@@ -217,29 +226,32 @@ describe('wp7 project parser', function() {
                 staging = spyOn(p, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
             });
-            it('should call update_from_config', function() {
-                p.update_project();
-                expect(config).toHaveBeenCalled();
+            it('should call update_from_config', function(done) {
+                wrapper(p.update_project(), done, function() {
+                    expect(config).toHaveBeenCalled();
+                });
             });
             it('should throw if update_from_config throws', function(done) {
                 var err = new Error('uh oh!');
                 config.andCallFake(function() { throw err; });
-                p.update_project({}, function(err) {
-                    expect(err).toEqual(err);
-                    done();
+                errorWrapper(p.update_project({}), done, function(e) {
+                    expect(e).toEqual(err);
                 });
             });
-            it('should call update_www', function() {
-                p.update_project();
-                expect(www).toHaveBeenCalled();
+            it('should call update_www', function(done) {
+                wrapper(p.update_project(), done, function() {
+                    expect(www).toHaveBeenCalled();
+                });
             });
-            it('should call update_staging', function() {
-                p.update_project();
-                expect(staging).toHaveBeenCalled();
+            it('should call update_staging', function(done) {
+                wrapper(p.update_project(), done, function() {
+                    expect(staging).toHaveBeenCalled();
+                });
             });
-            it('should call deleteSvnFolders', function() {
-                p.update_project();
-                expect(svn).toHaveBeenCalled();
+            it('should call deleteSvnFolders', function(done) {
+                wrapper(p.update_project(), done, function() {
+                    expect(svn).toHaveBeenCalled();
+                });
             });
         });
     });

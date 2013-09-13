@@ -16,7 +16,8 @@
     specific language governing permissions and limitations
     under the License.
 */
-var CLI = require("../src/cli");
+var CLI = require("../src/cli"),
+    Q = require('q'),
     cordova = require("../cordova");
 
 describe("cordova cli", function () {
@@ -47,7 +48,7 @@ describe("cordova cli", function () {
 
     describe("project commands other than plugin and platform", function () {
         beforeEach(function () {
-            spyOn(cordova, "build");
+            spyOn(cordova.raw, "build").andReturn(Q());
         });
 
         afterEach(function () {
@@ -56,33 +57,33 @@ describe("cordova cli", function () {
 
         it("will call command with all arguments passed through", function () {
             new CLI(["node", "cordova", "build", "blackberry10", "-k", "abcd1234"]);
-            expect(cordova.build).toHaveBeenCalledWith({verbose: false, platforms: ["blackberry10"], options: ["-k", "abcd1234"]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: false, platforms: ["blackberry10"], options: ["-k", "abcd1234"]});
         });
 
         it("will consume the first instance of -d", function () {
             new CLI(["node", "cordova", "-d", "build", "blackberry10", "-k", "abcd1234", "-d"]);
-            expect(cordova.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "-d"]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "-d"]});
         });
 
         it("will consume the first instance of --verbose", function () {
             new CLI(["node", "cordova", "--verbose", "build", "blackberry10", "-k", "abcd1234", "--verbose"]);
-            expect(cordova.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--verbose"]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--verbose"]});
         });
 
         it("will consume the first instance of either --verbose of -d", function () {
             new CLI(["node", "cordova", "--verbose", "build", "blackberry10", "-k", "abcd1234", "-d"]);
-            expect(cordova.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "-d"]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "-d"]});
         });
 
         it("will consume the first instance of either --verbose of -d", function () {
             new CLI(["node", "cordova", "-d", "build", "blackberry10", "-k", "abcd1234", "--verbose"]);
-            expect(cordova.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--verbose"]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--verbose"]});
         });
     });
 
     describe("plugin", function () {
         beforeEach(function () {
-            spyOn(cordova, "plugin");
+            spyOn(cordova.raw, "plugin").andReturn(Q());
         });
 
         afterEach(function () {
@@ -91,7 +92,7 @@ describe("cordova cli", function () {
 
         it("will call command with all arguments passed through", function () {
             new CLI(["node", "cordova", "plugin", "add", "facebook", "--variable", "FOO=foo"]);
-            expect(cordova.plugin).toHaveBeenCalledWith("add", ["facebook", "--variable", "FOO=foo"]);
+            expect(cordova.raw.plugin).toHaveBeenCalledWith("add", ["facebook", "--variable", "FOO=foo"]);
         });
     });
 });

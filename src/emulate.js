@@ -18,36 +18,33 @@
 */
 var cordova_util      = require('./util'),
     path              = require('path'),
-    shell             = require('shelljs'),
-    platforms         = require('../platforms'),
-    platform          = require('./platform'),
+    child_process     = require('child_process'),
     events            = require('./events'),
-    fs                = require('fs'),
-    n                 = require('ncallbacks'),
     hooker            = require('./hooker'),
-    util              = require('util');
+    Q                 = require('q');
 
-function shell_out_to_emulate(root, platform, options, error_callback, done) {
+// Returns a promise.
+function shell_out_to_emulate(root, platform, options) {
     var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '" ' + (options.length ? options.join(" ") : '--emulator');
     events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '" (output to follow)...');
-    shell.exec(cmd, {silent:true, async:true}, function(code, output) {
-        events.emit('log', output);
-        if (code > 0) {
-            var err = new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + output);
-            if (error_callback) return error_callback(err);
-            else throw err;
+    var d = Q.defer();
+    child_process.exec(cmd, function(err, stdout, stderr) {
+        events.emit('log', stdout);
+        if (err) {
+            d.reject(new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + stdout + stderr));
         } else {
             events.emit('log', 'Platform "' + platform + '" deployed to emulator.');
-            done();
+            d.resolve();
         }
     });
+    return d.promise;
 }
 
-module.exports = function emulate (options, callback) {
+// Returns a promise.
+module.exports = function emulate (options) {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
-    if (options instanceof Function && callback === undefined) {
-        callback = options;
+    if (!options) {
         options = {
             verbose: false,
             platforms: [],
@@ -57,43 +54,19 @@ module.exports = function emulate (options, callback) {
 
     options = cordova_util.preProcessOptions(options);
     if (options.constructor.name === "Error") {
-        if (callback) return callback(options)
-        else throw options;
+        return Q.reject(options);
     }
 
     var hooks = new hooker(projectRoot);
-    hooks.fire('before_emulate', options, function(err) {
-        if (err) {
-            if (callback) callback(err);
-            else throw err;
-        } else {
-            var end = n(options.platforms.length, function() {
-                hooks.fire('after_emulate', options, function(err) {
-                    if (err) {
-                        if (callback) callback(err);
-                        else throw err;
-                    } else {
-                        if (callback) callback();
-                    }
-                });
-            });
-
-            // Run a prepare first!
-            require('../cordova').prepare(options.platforms, function(err) {
-                if (err) {
-                    if (callback) callback(err);
-                    else throw err;
-                } else {
-                    options.platforms.forEach(function(platform) {
-                        try {
-                            shell_out_to_emulate(projectRoot, platform, options.options, callback, end);
-                        } catch(e) {
-                            if (callback) callback(e);
-                            else throw e;
-                        }
-                    });
-                }
-            });
-        }
+    return hooks.fire('before_emulate', options)
+    .then(function() {
+        // Run a prepare first!
+        return require('../cordova').raw.prepare(options.platforms);
+    }).then(function() {
+        return Q.all(options.platforms.map(function(platform) {
+            return shell_out_to_emulate(projectRoot, platform, options.options);
+        }));
+    }).then(function() {
+        return hooks.fire('after_emulate', options);
     });
 };

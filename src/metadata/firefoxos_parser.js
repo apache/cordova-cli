@@ -16,32 +16,29 @@
     specific language governing permissions and limitations
     under the License.
 */
-var fs = require('fs');
-var path = require('path');
-var shell = require('shelljs');
-var util = require('../util');
-var config_parser = require('../config_parser');
-var config = require('../config');
+var fs = require('fs'),
+    path = require('path'),
+    shell = require('shelljs'),
+    util = require('../util'),
+    Q = require('q'),
+    child_process = require('child_process'),
+    config_parser = require('../config_parser'),
+    config = require('../config');
 
 module.exports = function firefoxos_parser(project) {
     this.path = project;
 };
 
-module.exports.check_requirements = function(project_root, callback) {
-    callback(false);
+// Returns a promise.
+module.exports.check_requirements = function(project_root) {
+    return Q(); // Requirements always met.
 };
 
 module.exports.prototype = {
-    update_from_config: function(config, callback) {
+    // Returns a promise.
+    update_from_config: function(config) {
         if (!(config instanceof config_parser)) {
-            var err = new Error('update_from_config requires a config_parser object');
-            if (callback) {
-                callback(err);
-                return;
-            }
-            else {
-                throw err;
-            }
+            return Q.reject(new Error('update_from_config requires a config_parser object'));
         }
 
         var name = config.name();
@@ -66,9 +63,7 @@ module.exports.prototype = {
         manifest.pkgName = pkg;
         fs.writeFileSync(manifestPath, JSON.stringify(manifest));
 
-        if(callback) {
-            callback();
-        }
+        return Q();
     },
 
     www_dir: function() {
@@ -115,26 +110,15 @@ module.exports.prototype = {
         }
     },
 
-    update_project: function(cfg, callback) {
+    // Returns a promise.
+    update_project: function(cfg) {
         this.update_www();
 
-        this.update_from_config(cfg, function(err) {
-            if(err) {
-                if(callback) {
-                    callback(err);
-                }
-                else {
-                    throw err;
-                }
-            } else {
-                this.update_overrides();
-                this.update_staging();
-                util.deleteSvnFolders(this.www_dir());
-
-                if(callback) {
-                    callback();
-                }
-            }
-        }.bind(this));
+        return this.update_from_config(cfg)
+        .then(function() {
+            this.update_overrides();
+            this.update_staging();
+            util.deleteSvnFolders(this.www_dir());
+        });
     }
 };
