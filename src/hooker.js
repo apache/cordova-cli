@@ -19,6 +19,7 @@
 var shell = require('shelljs'),
     util  = require('./util'),
     fs    = require('fs'),
+    os    = require('os'),
     events= require('./events'),
     path  = require('path');
 
@@ -77,9 +78,39 @@ function execute_scripts_serially(scripts, root, dir, callback) {
         var s = scripts.shift();
         var fullpath = path.join(dir, s);
         if (fs.statSync(fullpath).isDirectory()) {
+            events.emit('log', 'skipped directory "' + fullpath + '" within hook directory');
             execute_scripts_serially(scripts, root, dir, callback); // skip directories if they're in there.
         } else {
             var command = fullpath + ' "' + root + '"';
+            // according to the http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/wsh_runfromwindowsbasedhost.mspx?mfr=true
+            // win32 cscript natively supports .wsf, .vbs, .js extensions
+            // also, cmd.exe supports .bat files
+            var sExt = path.extname(s);
+            if (sExt.match(/^.(bat|wsf|vbs|js)$/)) {
+                // check for unix shebang
+                var fileData = fs.readFileSync (fullpath);
+
+                var shebangMatch = fileData.toString().match(/^#!(\/usr\/bin\/env )?([^\r\n]+)/m);
+                if (shebangMatch) {
+                    if (os.platform() == 'win32') {
+                        // found unix script under windows, emulating shell
+                        var shMatch = shebangMatch[2].match(/bin\/((ba)?sh)$/)
+                        if (shMatch) {
+                            // windows don't like absolute paths
+                            command = shMatch[1] + ' ' + command;
+                        } else {
+                            command = shebangMatch[2] + ' ' + command;
+                        }
+                    }
+                } else {
+                    if (os.platform() != 'win32') {
+                        events.emit('log', 'hook file "' + fullpath + '" skipped');
+                        // found windows script, without shebang this script definitely will not run
+                        execute_scripts_serially(scripts, root, dir, callback);
+                        return;
+                    }
+                }
+            }
             events.emit('log', 'Executing hook "' + command + '" (output to follow)...');
             shell.exec(command, {silent:true, async:true}, function(code, output) {
                 events.emit('log', output);
