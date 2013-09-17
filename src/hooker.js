@@ -18,6 +18,7 @@
 */
 var util  = require('./util'),
     fs    = require('fs'),
+    os    = require('os'),
     events= require('./events'),
     child_process = require('child_process'),
     Q     = require('q'),
@@ -68,9 +69,48 @@ function execute_scripts_serially(scripts, root, dir) {
         var s = scripts.shift();
         var fullpath = path.join(dir, s);
         if (fs.statSync(fullpath).isDirectory()) {
+            events.emit('log', 'skipped directory "' + fullpath + '" within hook directory');
             return execute_scripts_serially(scripts, root, dir); // skip directories if they're in there.
         } else {
             var command = fullpath + ' "' + root + '"';
+
+            var hookFd = fs.openSync(fullpath, "r");
+            // this is a modern cluster size. no need to read less
+            var fileData = new Buffer (4096);
+            var octetsRead = fs.readSync(hookFd, fileData, 0, 4096, 0);
+            var fileChunk = fileData.toString();
+
+            var hookCmd, shMatch;
+            var shebangMatch = fileChunk.match(/^#!(\/usr\/bin\/env )?([^\r\n]+)/m);
+            if (octetsRead == 4096 && !fileChunk.match(/[\r\n]/))
+                events.emit('log', 'shebang is too long for "' + fullpath + '"');
+            if (shebangMatch)
+                hookCmd = shebangMatch[2];
+            if (hookCmd)
+                shMatch = hookCmd.match(/bin\/((ba)?sh)$/)
+            if (shMatch)
+                hookCmd = shMatch[1]
+
+            // according to the http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/wsh_runfromwindowsbasedhost.mspx?mfr=true
+            // win32 cscript natively supports .wsf, .vbs, .js extensions
+            // also, cmd.exe supports .bat files
+            // .ps1 powershell http://technet.microsoft.com/en-us/library/ee176949.aspx
+            var sExt = path.extname(s);
+
+            if (sExt.match(/^.(bat|wsf|vbs|js|ps1)$/)) {
+                if (os.platform() != 'win32' && !hookCmd) {
+                    events.emit('log', 'hook file "' + fullpath + '" skipped');
+                    // found windows script, without shebang this script definitely
+                    // will not run on unix
+                    return execute_scripts_serially(scripts, root, dir);
+                }
+            }
+
+            if (os.platform() == 'win32' && hookCmd) {
+                // we have shebang, so try to run this script using correct interpreter
+                command = hookCmd + ' ' + command;
+            }
+
             events.emit('log', 'Executing hook "' + command + '" (output to follow)...');
             var d = Q.defer();
             child_process.exec(command, function(err, stdout, stderr) {
