@@ -57,6 +57,10 @@ module.exports.prototype = {
         return path.join(this.path, 'www');
     },
 
+    staging_dir: function() {
+        return path.join(this.path, '.staging', 'www');
+    },
+
     update_www: function() {
         var projectRoot = util.isCordova(this.path);
         var projectWww = util.projectWww(projectRoot);
@@ -86,7 +90,7 @@ module.exports.prototype = {
 
     update_staging: function() {
         var projectRoot = util.isCordova(this.path);
-        var stagingDir = path.join(this.path, '.staging', 'www');
+        var stagingDir = this.staging_dir();
 
         if(fs.existsSync(stagingDir)) {
             shell.cp('-rf',
