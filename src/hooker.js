@@ -39,6 +39,12 @@ module.exports.fire = function global_fire(hook, opts, callback) {
     });
 };
 
+function compareNumbers(a, b) {
+    return isNaN (parseInt(a))
+        ? a.toLowerCase().localeCompare(b.toLowerCase ? b.toLowerCase(): b)
+        : parseInt(a) > parseInt(b) ? 1 : parseInt(a) < parseInt(b) ? -1 : 0;
+}
+
 module.exports.prototype = {
     fire:function fire(hook, opts, callback) {
         if (arguments.length == 2) {
@@ -57,7 +63,7 @@ module.exports.prototype = {
             if (!(fs.existsSync(dir))) {
                 callback(); // hooks directory got axed post-create; ignore.
             } else {
-                var scripts = fs.readdirSync(dir).filter(function(s) {
+                var scripts = fs.readdirSync(dir).sort(compareNumbers).filter(function(s) {
                     return s[0] != '.';
                 });
                 execute_scripts_serially(scripts, self.root, dir, function(err) {
