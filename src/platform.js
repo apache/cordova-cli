@@ -141,6 +141,50 @@ module.exports = function platform(command, targets, callback) {
                 }
             });
             break;
+        case 'update':
+        case 'up':
+            // Shell out to the update script provided by the named platform.
+            if (!targets || !targets.length) {
+                var err = new Error('No platform provided. Please specify a platform to update.');
+                if (callback) callback(err);
+                else throw err;
+            } else if (targets.length > 1) {
+                var err = new Error('Platform update can only be executed on one platform at a time.');
+                if (callback) callback(err);
+                else throw err;
+            } else {
+                var plat = targets[0];
+                var installed_platforms = cordova_util.listPlatforms(projectRoot);
+                if (installed_platforms.indexOf(plat) < 0) {
+                    var err = new Error('Platform "' + plat + '" is not installed.');
+                    if (callback) callback(err);
+                    else throw err;
+                    return;
+                }
+
+                // First, lazy_load the latest version.
+                var config_json = config.read(projectRoot);
+                lazy_load.based_on_config(projectRoot, plat, function(err) {
+                    if (err) {
+                        if (callback) callback(err);
+                        else throw err;
+                    } else {
+                        var platDir = plat == 'wp7' || plat == 'wp8' ? 'wp' : plat;
+                        var script = path.join(cordova_util.libDirectory, platDir, 'cordova', platforms[plat].version, 'bin', 'update');
+                        shell.exec(script + ' "' + path.join(projectRoot, 'platforms', plat) + '"', { silent: false, async: true }, function(code, output) {
+                            if (code > 0) {
+                                var err = new Error('Error running update script.');
+                                if (callback) callback(err);
+                                else throw err;
+                            } else {
+                                events.emit('log', plat + ' updated to ' + platforms[plat].version);
+                                if (callback) callback();
+                            }
+                        });
+                    }
+                });
+            }
+            break;
         case 'ls':
         case 'list':
         default:

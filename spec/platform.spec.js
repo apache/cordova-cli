@@ -53,6 +53,7 @@ describe('platform command', function() {
         });
         find_plugins = spyOn(util, 'findPlugins').andReturn([]);
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
+        util.libDirectory = path.join('HOMEDIR', '.cordova', 'lib');
         config_read = spyOn(config, 'read').andReturn({});
         load = spyOn(lazy_load, 'based_on_config').andCallFake(function(root, platform, cb) {
             cb();
@@ -200,6 +201,36 @@ describe('platform command', function() {
                 expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'merges', 'android'));
                 expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'platforms', 'blackberry10'));
                 expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'merges', 'blackberry10'));
+            });
+        });
+        describe('`update`', function() {
+            describe('failure', function() {
+                it('should fail if no platform is specified', function(done) {
+                    cordova.platform('update', [], function(err) {
+                        expect(err).toEqual(new Error('No platform provided. Please specify a platform to update.'));
+                        done();
+                    });
+                });
+                it('should fail if more than one platform is specified', function(done) {
+                    cordova.platform('update', ['android', 'ios'], function(err) {
+                        expect(err).toEqual(new Error('Platform update can only be executed on one platform at a time.'));
+                        done();
+                    });
+                });
+            });
+
+            describe('success', function() {
+                it('should shell out to the platform update script', function(done) {
+                    var oldVersion = platforms['ios'].version;
+                    platforms['ios'].version = '1.0.0';
+                    cordova.platform('update', ['ios'], function(err) {
+                        expect(err).toBeUndefined();
+                        expect(exec).toHaveBeenCalledWith('HOMEDIR/.cordova/lib/ios/cordova/1.0.0/bin/update "some/path/platforms/ios"', jasmine.any(Object), jasmine.any(Function));
+
+                        platforms['ios'].version = oldVersion;
+                        done();
+                    });
+                });
             });
         });
     });
