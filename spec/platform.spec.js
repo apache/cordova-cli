@@ -67,7 +67,8 @@ describe('platform command', function() {
             cb();
         });
         exec = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
-            cb(0, '');
+            if (cb) cb(0, '');
+            else return { code: 0, output: '' };
         });
         prep_spy = spyOn(cordova, 'prepare').andCallFake(function(t, cb) {
             cb();

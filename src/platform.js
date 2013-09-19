@@ -150,8 +150,19 @@ module.exports = function platform(command, targets, callback) {
                     if (callback) callback(err);
                     else throw err;
                 } else {
-                    var results = 'Installed platforms: ' + platforms_on_fs.join(', ') + '\n';
-                    var available = ['android', 'blackberry10'];
+                    // Acquire the version number of each platform we have installed, and output that too.
+                    var platformsText = platforms_on_fs.map(function(p) {
+                        var script = path.join(projectRoot, 'platforms', p, 'cordova', 'version');
+                        var result = shell.exec(script, { silent: true, async: false });
+                        if (result.code > 0 || !result.output) {
+                            return p; // Unknown version number, so output without it.
+                        } else {
+                            return p + ' ' + result.output.trim();
+                        }
+                    });
+
+                    var results = 'Installed platforms: ' + platformsText.join(', ') + '\n';
+                    var available = ['android', 'blackberry10', 'firefoxos'];
                     if (os.platform() === 'darwin')
                         available.push('ios');
                     if (os.platform() === 'win32') {
