@@ -82,12 +82,17 @@ function execute_scripts_serially(scripts, root, dir, callback) {
             execute_scripts_serially(scripts, root, dir, callback); // skip directories if they're in there.
         } else {
             var command = fullpath + ' "' + root + '"';
+
             var hookFd = fs.openSync(fullpath, "r");
             // this is a modern cluster size. no need to read less
             var fileData = new Buffer (4096);
-            fs.readSync(hookFd, fileData, 0, 4096, 0);
+            var octetsRead = fs.readSync(hookFd, fileData, 0, 4096, 0);
+            var fileChunk = fileData.toString();
+
             var hookCmd, shMatch;
-            var shebangMatch = fileData.toString().match(/^#!(\/usr\/bin\/env )?([^\r\n]+)/m);
+            var shebangMatch = fileChunk.match(/^#!(\/usr\/bin\/env )?([^\r\n]+)/m);
+            if (octetsRead == 4096 && !fileChunk.match(/[\r\n]/))
+                events.emit('log', 'shebang is too long for "' + fullpath + '"');
             if (shebangMatch)
                 hookCmd = shebangMatch[2];
             if (hookCmd)
