@@ -144,6 +144,14 @@ module.exports.prototype = {
     },
     config_xml:function() {
     },
+    // copy files from merges directory to actual www dir
+    copy_merges:function(merges_sub_path) {
+        var merges_path = path.join(util.appDir(util.isCordova(this.wp8_proj_dir)), 'merges', merges_sub_path);
+        if (fs.existsSync(merges_path)) {
+            var overrides = path.join(merges_path, '*');
+            shell.cp('-rf', overrides, this.www_dir());
+        }
+    },
     // copies the app www folder into the wp8 project's www folder and updates the csproj file.
     update_www:function() {
         var project_root = util.isCordova(this.wp8_proj_dir);
@@ -153,12 +161,9 @@ module.exports.prototype = {
         // copy over all app www assets
         shell.cp('-rf', project_www, this.wp8_proj_dir);
 
-        // copy all files from merges directory
-        var merges_path = path.join(util.appDir(project_root), 'merges', 'wp8');
-        if (fs.existsSync(merges_path)) {
-            var overrides = path.join(merges_path, '*');
-            shell.cp('-rf', overrides, this.www_dir());
-        }
+        // copy all files from merges directories (generic first, then specific)
+        this.copy_merges('wp');
+        this.copy_merges('wp8');
 
         // copy over wp8 lib's cordova.js
         var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').wp8.version);
@@ -178,7 +183,7 @@ module.exports.prototype = {
             var files = group.findall('Content');
             for (var j = 0, k = files.length; j < k; j++) {
                 var file = files[j];
-                if (file.attrib.Include.substr(0, 3) == 'www' && file.attrib.Include.indexOf('cordova.js') < 0) {
+                if (file.attrib.Include.substr(0, 3) == 'www') {
                     // remove file reference
                     group.remove(0, file);
                     // remove ItemGroup if empty

@@ -141,6 +141,14 @@ module.exports.prototype = {
     www_dir:function() {
         return path.join(this.wp7_proj_dir, 'www');
     },
+    // copy files from merges directory to actual www dir
+    copy_merges:function(merges_sub_path) {
+        var merges_path = path.join(util.appDir(util.isCordova(this.wp7_proj_dir)), 'merges', merges_sub_path);
+        if (fs.existsSync(merges_path)) {
+            var overrides = path.join(merges_path, '*');
+            shell.cp('-rf', overrides, this.www_dir());
+        }
+    },
     // copies the app www folder into the wp7 project's www folder and updates the csproj file.
     update_www:function() {
         var project_root = util.isCordova(this.wp7_proj_dir);
@@ -149,6 +157,10 @@ module.exports.prototype = {
         shell.rm('-rf', this.www_dir());
         // copy over all app www assets
         shell.cp('-rf', project_www, this.wp7_proj_dir);
+
+        // copy all files from merges directories (generic first, then specific)
+        this.copy_merges('wp');
+        this.copy_merges('wp7');
 
         // copy over wp7 lib's cordova.js
         var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').wp7.version);
@@ -168,7 +180,7 @@ module.exports.prototype = {
             var files = group.findall('Content');
             for (var j = 0, k = files.length; j < k; j++) {
                 var file = files[j];
-                if (file.attrib.Include.substr(0, 3) == 'www' && file.attrib.Include.indexOf('cordova.js') < 0) {
+                if (file.attrib.Include.substr(0, 3) == 'www') {
                     // remove file reference
                     group.remove(0, file);
                     // remove ItemGroup if empty
@@ -182,7 +194,7 @@ module.exports.prototype = {
 
         // now add all www references back in from the root www folder
         var project_root = util.isCordova(this.wp7_proj_dir);
-        var www_files = this.folder_contents('www', util.projectWww(project_root));
+        var www_files = this.folder_contents('www', this.www_dir());
         for(file in www_files) {
             var item = new et.Element('ItemGroup');
             var content = new et.Element('Content');
