@@ -73,7 +73,6 @@ describe('build command', function() {
 
     describe('success', function() {
         it('should run inside a Cordova-based project with at least one added platform and call both prepare and compile', function(done) {
-            debugger;
             cordova.raw.build(['android','ios']).then(function() {
                 expect(prepare_spy).toHaveBeenCalledWith({verbose: false, platforms: ['android', 'ios'], options: []});
                 expect(compile_spy).toHaveBeenCalledWith({verbose: false, platforms: ['android', 'ios'], options: []});

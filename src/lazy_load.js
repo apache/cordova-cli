@@ -82,7 +82,6 @@ module.exports = {
                         d.reject(err);
                     })
                     .on('end', function() {
-                        debugger;
                         events.emit('log', 'Downloaded, unzipped and extracted ' + size + ' byte response.');
                         var entries = fs.readdirSync(download_dir);
                         var entry = path.join(download_dir, entries[0]);
