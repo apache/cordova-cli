@@ -25,7 +25,8 @@ var fs            = require('fs'),
     shell         = require('shelljs'),
     events        = require('../events'),
     config_parser = require('../config_parser'),
-    config        = require('../config');
+    config        = require('../config'),
+    hooker        = require('../hooker');
 
 module.exports = function wp7_parser(project) {
     try {
@@ -84,7 +85,7 @@ module.exports.prototype = {
             manifest.find('.//PrimaryToken').attrib.TokenID = name;
             //update name of sln and csproj.
             name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a ligitamate name
-            prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); 
+            prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_');
             var sln_name = fs.readdirSync(this.wp7_proj_dir).filter(function(e) { return e.match(/\.sln$/i); })[0];
             var sln_path = path.join(this.wp7_proj_dir, sln_name);
             var sln_file = fs.readFileSync(sln_path, 'utf-8');
@@ -168,7 +169,7 @@ module.exports.prototype = {
         if (custom_path) lib_path = custom_path;
         var cordovajs_path = path.join(lib_path, 'common', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
-        this.update_csproj();
+
     },
     // updates the csproj file to explicitly list all www content.
     update_csproj:function() {
@@ -192,8 +193,7 @@ module.exports.prototype = {
             }
         }
 
-        // now add all www references back in from the root www folder
-        var project_root = util.isCordova(this.wp7_proj_dir);
+        // now add all www references back in from the wp www folder
         var www_files = this.folder_contents('www', this.www_dir());
         for(file in www_files) {
             var item = new et.Element('ItemGroup');
@@ -239,10 +239,9 @@ module.exports.prototype = {
         }
     },
 
-    // calls the nessesary functions to update the wp7 project 
-    update_project:function(cfg, callback) {
-        //console.log("Updating wp7 project...");
 
+    // calls the nessesary functions to update the wp7 project
+    update_project:function(cfg, callback) {
         try {
             this.update_from_config(cfg);
         } catch(e) {
@@ -250,6 +249,12 @@ module.exports.prototype = {
             else throw e;
         }
         this.update_www();
+
+        // trigger an event in case anyone needs to modify the contents of the www folder before we package it.
+        var projectRoot = util.isCordova(process.cwd());
+        var hooks = new hooker(projectRoot);
+        hooks.fire('pre_package', { wwwPath:this.www_dir() }, function(err) { });
+        this.update_csproj();
         // TODO: Add overrides support? Why is this missing?
         this.update_staging();
         util.deleteSvnFolders(this.www_dir());
