@@ -57,11 +57,11 @@ module.exports.prototype = {
         } else throw new Error('update_from_config requires a config_parser object');
 
         this.xml.name(config.name());
-        events.emit('log', 'Wrote out BlackBerry application name to "' + config.name() + '"');
+        events.emit('verbose', 'Wrote out BlackBerry application name to "' + config.name() + '"');
         this.xml.packageName(config.packageName());
-        events.emit('log', 'Wrote out BlackBerry package name to "' + config.packageName() + '"');
+        events.emit('verbose', 'Wrote out BlackBerry package name to "' + config.packageName() + '"');
         this.xml.version(config.version());
-        events.emit('log', 'Wrote out BlackBerry version to "' + config.version() + '"');
+        events.emit('verbose', 'Wrote out BlackBerry version to "' + config.version() + '"');
         this.xml.access.remove();
         config.access.getAttributes().forEach(function(attribs) {
             self.xml.access.add(attribs.uri || attribs.origin, attribs.subdomains);

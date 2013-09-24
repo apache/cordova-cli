@@ -140,15 +140,15 @@ module.exports = function create (dir, id, name) {
         events.emit('log', 'Using custom www assets ('+config_json.lib.www.id+').');
         return lazy_load.custom(config_json.lib.www.uri, config_json.lib.www.id, 'www', config_json.lib.www.version)
         .then(function() {
-            events.emit('log', 'Copying custom www assets into "' + www_dir + '"');
+            events.emit('verbose', 'Copying custom www assets into "' + www_dir + '"');
             return finalize(path.join(util.libDirectory, 'www', config_json.lib.www.id, config_json.lib.www.version));
         });
     } else {
         // Nope, so use stock cordova-hello-world-app one.
-        events.emit('log', 'Using stock cordova hello-world application.');
+        events.emit('verbose', 'Using stock cordova hello-world application.');
         return lazy_load.cordova('www')
         .then(function() {
-            events.emit('log', 'Copying stock Cordova www assets into "' + www_dir + '"');
+            events.emit('verbose', 'Copying stock Cordova www assets into "' + www_dir + '"');
             return finalize(path.join(util.libDirectory, 'www', 'cordova', platforms.www.version));
         });
     }

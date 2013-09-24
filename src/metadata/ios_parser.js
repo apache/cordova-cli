@@ -67,10 +67,10 @@ module.exports.check_requirements = function(project_root) {
     events.emit('log', 'Checking iOS requirements...');
     // Check xcode + version.
     var command = 'xcodebuild -version';
-    events.emit('log', 'Running "' + command + '" (output to follow)');
+    events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
     child_process.exec(command, function(err, output, stderr) {
-        events.emit('log', output);
+        events.emit('verbose', output+stderr);
         if (err) {
             d.reject(new Error('Xcode is (probably) not installed, specifically the command `xcodebuild` is unavailable or erroring out. Output of `'+command+'` is: ' + output + stderr));
         } else {
@@ -107,8 +107,8 @@ module.exports.prototype = {
         var info_contents = plist.build(infoPlist);
         info_contents = info_contents.replace(/<string>[\s\r\n]*<\/string>/g,'<string></string>');
         fs.writeFileSync(plistFile, info_contents, 'utf-8');
-        events.emit('log', 'Wrote out iOS Bundle Identifier to "' + pkg + '"');
-        events.emit('log', 'Wrote out iOS Bundle Version to "' + version + '"');
+        events.emit('verbose', 'Wrote out iOS Bundle Identifier to "' + pkg + '"');
+        events.emit('verbose', 'Wrote out iOS Bundle Version to "' + version + '"');
 
         // Update whitelist
         var self = this;
@@ -168,13 +168,13 @@ module.exports.prototype = {
                     var pbx_contents = fs.readFileSync(parser.pbxproj, 'utf-8');
                     pbx_contents = pbx_contents.split(old_name).join(name);
                     fs.writeFileSync(parser.pbxproj, pbx_contents, 'utf-8');
-                    events.emit('log', 'Wrote out iOS Product Name and updated XCode project file names from "'+old_name+'" to "' + name + '".');
+                    events.emit('verbose', 'Wrote out iOS Product Name and updated XCode project file names from "'+old_name+'" to "' + name + '".');
                     d.resolve();
                 }
             });
             return d.promise;
         } else {
-            events.emit('log', 'iOS Product Name has not changed (still "' + this.originalName + '")');
+            events.emit('verbose', 'iOS Product Name has not changed (still "' + this.originalName + '")');
             return Q();
         }
     },

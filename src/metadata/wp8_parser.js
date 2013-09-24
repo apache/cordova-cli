@@ -51,10 +51,10 @@ module.exports.check_requirements = function(project_root) {
     var custom_path = config.has_custom_path(project_root, 'wp8');
     if (custom_path) lib_path = custom_path;
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
-    events.emit('log', 'Running "' + command + '" (output to follow)');
+    events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
     child_process.exec(command, function(err, output, stderr) {
-        events.emit('log', output);
+        events.emit('verbose', output);
         if (err) {
             d.reject(new Error('Error while checking requirements: ' + output + stderr));
         } else {

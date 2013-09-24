@@ -243,11 +243,11 @@ function call_into_create(target, projectRoot, cfg, id, version, template_dir) {
             if (template_dir) {
                 command += ' "' + template_dir + '"';
             }
-            events.emit('log', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
+            events.emit('verbose', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
 
             var d = Q.defer();
             child_process.exec(command, function(err, create_output, stderr) {
-                events.emit('log', create_output);
+                events.emit('verbose', create_output);
                 if (err) {
                     d.reject(new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output));
                 } else {
@@ -262,7 +262,7 @@ function call_into_create(target, projectRoot, cfg, id, version, template_dir) {
                 var parser = new platforms[target].parser(output);
                 if (!plugins) return Q();
                 var promises = plugins.map(function(plugin) {
-                    events.emit('log', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
+                    events.emit('verbose', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
                     return require('plugman').install(target, output, path.basename(plugin), plugins_dir, { www_dir: parser.staging_dir() });
                 });
                 return promises.reduce(function(soFar, f) {

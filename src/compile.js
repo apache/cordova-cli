@@ -26,10 +26,11 @@ var cordova_util      = require('./util'),
 // Returns a promise.
 function shell_out_to_build(projectRoot, platform, options) {
     var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'build') + (options.length ? '" ' + options.join(" ") : '"');
-    events.emit('log', 'Compiling platform "' + platform + '" with command "' + cmd + '" (output to follow)...');
+    events.emit('log', 'Compiling platform "' + platform + '" with command "' + cmd + '"');
     var d = Q.defer();
     child_process.exec(cmd, function(err, stdout, stderr) {
-        events.emit('log', stdout);
+        events.emit('verbose', stdout);
+        events.emit('verbose', stderr);
         if (err) {
             d.reject(new Error('An error occurred while building the ' + platform + ' project. ' + stderr));
         } else {

@@ -46,10 +46,10 @@ module.exports = function android_parser(project) {
 module.exports.check_requirements = function(project_root) {
     events.emit('log', 'Checking Android requirements...');
     var command = 'android list target';
-    events.emit('log', 'Running "' + command + '" (output to follow)');
+    events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
     child_process.exec(command, function(err, output, stderr) {
-        events.emit('log', output);
+        events.emit('verbose', output);
         if (err) {
             d.reject(new Error('The command `android` failed. Make sure you have the latest Android SDK installed, and the `android` command (inside the tools/ folder) added to your path. Output: ' + output));
         } else {
@@ -64,10 +64,10 @@ module.exports.check_requirements = function(project_root) {
                     framework_path = path.join(util.libDirectory, 'android', 'cordova', require('../../platforms').android.version, 'framework');
                 }
                 var cmd = 'android update project -p "' + framework_path  + '" -t android-17';
-                events.emit('log', 'Running "' + cmd + '" (output to follow)...');
+                events.emit('verbose', 'Running "' + cmd + '" (output to follow)...');
                 var d2 = Q.defer();
                 child_process.exec(cmd, function(err, output, stderr) {
-                    events.emit('log', output);
+                    events.emit('verbose', output + stderr);
                     if (err) {
                         d2.reject(new Error('Error updating the Cordova library to work with your Android environment. Command run: "' + cmd + '", output: ' + output));
                     } else {
@@ -91,7 +91,7 @@ module.exports.prototype = {
         var strings = xml.parseElementtreeSync(this.strings);
         strings.find('string[@name="app_name"]').text = name;
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
-        events.emit('log', 'Wrote out Android application name to "' + name + '"');
+        events.emit('verbose', 'Wrote out Android application name to "' + name + '"');
 
         var manifest = xml.parseElementtreeSync(this.manifest);
         // Update the version by changing the AndroidManifest android:versionName
@@ -115,7 +115,7 @@ module.exports.prototype = {
         var new_javs = path.join(pkgDir, orig_java_class);
         var javs_contents = fs.readFileSync(orig_javs, 'utf-8');
         javs_contents = javs_contents.replace(/package [\w\.]*;/, 'package ' + pkg + ';');
-        events.emit('log', 'Wrote out Android package name to "' + pkg + '"');
+        events.emit('verbose', 'Wrote out Android package name to "' + pkg + '"');
         fs.writeFileSync(new_javs, javs_contents, 'utf-8');
 
         // Update whitelist by changing res/xml/config.xml

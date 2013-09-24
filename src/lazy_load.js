@@ -50,6 +50,7 @@ module.exports = {
             events.emit('log', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
             return Q();
         }
+        events.emit('log', 'Downloading ' + id + ' library for ' + platform + '...');
         return hooker.fire('before_library_download', {
             platform:platform,
             url:url,
@@ -74,7 +75,7 @@ module.exports = {
                     if (proxy) {
                         request_options.proxy = proxy;
                     }
-                    events.emit('log', 'Requesting ' + JSON.stringify(request_options) + '...');
+                    events.emit('verbose', 'Requesting ' + JSON.stringify(request_options) + '...');
                     var req = request.get(request_options, function(err, res, body) {
                         if (err) {
                             shell.rm('-rf', download_dir);
@@ -94,7 +95,8 @@ module.exports = {
                         d.reject(err);
                     })
                     .on('end', function() {
-                        events.emit('log', 'Downloaded, unzipped and extracted ' + size + ' byte response.');
+                        events.emit('verbose', 'Downloaded, unzipped and extracted ' + size + ' byte response.');
+                        events.emit('log', 'Download complete');
                         var entries = fs.readdirSync(download_dir);
                         var entry = path.join(download_dir, entries[0]);
                         shell.mv('-f', path.join(entry, (platform=='blackberry10'?'blackberry10':''), '*'), download_dir);

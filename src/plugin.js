@@ -86,7 +86,7 @@ module.exports = function plugin(command, targets) {
                     }
 
                     // Fetch the plugin first.
-                    events.emit('log', 'Calling plugman.fetch on plugin "' + target + '"');
+                    events.emit('verbose', 'Calling plugman.fetch on plugin "' + target + '"');
                     var plugman = require('plugman');
                     return plugman.raw.fetch(target, pluginsDir, {})
                     .fail(function(err) {
@@ -116,7 +116,7 @@ module.exports = function plugin(command, targets) {
                                 }
                             }
 
-                            events.emit('log', 'Calling plugman.install on plugin "' + dir + '" for platform "' + platform + '" with options "' + JSON.stringify(options)  + '"');
+                            events.emit('verbose', 'Calling plugman.install on plugin "' + dir + '" for platform "' + platform + '" with options "' + JSON.stringify(options)  + '"');
                             return plugman.raw.install(platform, platformRoot, path.basename(dir), pluginsDir, options);
                         }));
                     });
@@ -143,7 +143,7 @@ module.exports = function plugin(command, targets) {
                                 var platformRoot = path.join(projectRoot, 'platforms', platform);
                                 var platforms = require('../platforms');
                                 var parser = new platforms[platform].parser(platformRoot);
-                                events.emit('log', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
+                                events.emit('verbose', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
                                 return plugman.raw.uninstall.uninstallPlatform(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
                             })
                         ).then(function() {

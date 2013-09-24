@@ -26,6 +26,7 @@ module.exports = function CLI(inputArgs) {
         .boolean('verbose')
         .boolean('v')
         .boolean('version')
+        .boolean('silent')
         .argv;
 
     if (args.v || args.version) {
@@ -51,12 +52,19 @@ module.exports = function CLI(inputArgs) {
     });
     cordova.on('results', console.log);
 
-    if (opts.verbose) {
+    if (!opts.silent) {
         cordova.on('log', console.log);
         cordova.on('warn', console.warn);
         var plugman = require('plugman');
         plugman.on('log', console.log);
         plugman.on('warn', console.warn);
+    }
+
+    if (opts.verbose) {
+        // Add handlers for verbose logging.
+        cordova.on('verbose', console.log);
+        require('plugman').on('verbose', console.log);
+
         //Remove the corresponding token
         if(args.d && args.verbose) {
             tokens.splice(Math.min(tokens.indexOf("-d"), tokens.indexOf("--verbose")), 1);
@@ -65,7 +73,11 @@ module.exports = function CLI(inputArgs) {
         } else if (args.verbose) {
             tokens.splice(tokens.indexOf("--verbose"), 1);
         }
+    }
 
+    if (opts.silent) {
+        // Remove the token.
+        tokens.splice(tokens.indexOf('--silent'));
     }
 
     cmd = tokens && tokens.length ? tokens.splice(0,1) : undefined;

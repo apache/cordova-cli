@@ -69,7 +69,7 @@ function execute_scripts_serially(scripts, root, dir) {
         var s = scripts.shift();
         var fullpath = path.join(dir, s);
         if (fs.statSync(fullpath).isDirectory()) {
-            events.emit('log', 'skipped directory "' + fullpath + '" within hook directory');
+            events.emit('verbose', 'skipped directory "' + fullpath + '" within hook directory');
             return execute_scripts_serially(scripts, root, dir); // skip directories if they're in there.
         } else {
             var command = fullpath + ' "' + root + '"';
@@ -83,7 +83,7 @@ function execute_scripts_serially(scripts, root, dir) {
             var hookCmd, shMatch;
             var shebangMatch = fileChunk.match(/^#!(\/usr\/bin\/env )?([^\r\n]+)/m);
             if (octetsRead == 4096 && !fileChunk.match(/[\r\n]/))
-                events.emit('log', 'shebang is too long for "' + fullpath + '"');
+                events.emit('warn', 'shebang is too long for "' + fullpath + '"');
             if (shebangMatch)
                 hookCmd = shebangMatch[2];
             if (hookCmd)
@@ -99,7 +99,7 @@ function execute_scripts_serially(scripts, root, dir) {
 
             if (sExt.match(/^.(bat|wsf|vbs|js|ps1)$/)) {
                 if (os.platform() != 'win32' && !hookCmd) {
-                    events.emit('log', 'hook file "' + fullpath + '" skipped');
+                    events.emit('verbose', 'hook file "' + fullpath + '" skipped');
                     // found windows script, without shebang this script definitely
                     // will not run on unix
                     return execute_scripts_serially(scripts, root, dir);
@@ -111,10 +111,10 @@ function execute_scripts_serially(scripts, root, dir) {
                 command = hookCmd + ' ' + command;
             }
 
-            events.emit('log', 'Executing hook "' + command + '" (output to follow)...');
+            events.emit('verbose', 'Executing hook "' + command + '" (output to follow)...');
             var d = Q.defer();
             child_process.exec(command, function(err, stdout, stderr) {
-                events.emit('log', stdout);
+                events.emit('verbose', stdout, stderr);
                 if (err) {
                     d.reject(new Error('Script "' + fullpath + '" exited with non-zero status code. Aborting. Output: ' + stdout + stderr));
                 } else {
