@@ -42,7 +42,7 @@ function shell_out_to_run(projectRoot, platform, options) {
     }
 */
     events.emit('log', 'Running app on ' + platform);
-    events.emit('verbose', 'Run command: "' + command + '" (output to follow)');
+    events.emit('verbose', 'Run command: "' + cmd + '" (output to follow)');
     var d = Q.defer();
     child_process.exec(cmd, function(err, output, stderr) {
         events.emit('verbose', output);

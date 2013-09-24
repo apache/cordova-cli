@@ -67,6 +67,7 @@ describe('run command', function() {
                 expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'android', 'cordova', 'run') + '" --device', jasmine.any(Function));
                 expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'ios', 'cordova', 'run') + '" --device', jasmine.any(Function));
             }, function(err) {
+                console.log(err);
                 expect(err).toBeUndefined();
             }).fin(done);
         });
