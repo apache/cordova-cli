@@ -23,6 +23,7 @@ var path          = require('path'),
     npm           = require('npm'),
     events        = require('./events'),
     request       = require('request'),
+    //http          = require('http'),
     config        = require('./config'),
     hooker        = require('./hooker'),
     https         = require('follow-redirects').https,
@@ -74,7 +75,18 @@ module.exports = {
                         request_options.proxy = proxy;
                     }
                     events.emit('log', 'Requesting ' + JSON.stringify(request_options) + '...');
-                    var req = request.get(request_options, function(err, req, body) { size = body.length; });
+                    var req = request.get(request_options, function(err, res, body) {
+                        if (err) {
+                            shell.rm('-rf', download_dir);
+                            d.reject(err);
+                        } else if (res.statusCode != 200) {
+                            shell.rm('-rf', download_dir);
+                            d.reject(new Error('HTTP error ' + res.statusCode + ' retrieving version ' + version + ' of ' + id + ' for ' + platform));
+                        } else {
+                            size = body.length;
+                        }
+                    });
+
                     req.pipe(zlib.createUnzip())
                     .pipe(tar.Extract({path:download_dir}))
                     .on('error', function(err) {

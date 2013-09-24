@@ -69,19 +69,19 @@ module.exports = function platform(command, targets) {
 
             return hooks.fire('before_platform_add', opts)
             .then(function() {
-                var promises = targets.map(function(t) {
-                    return lazy_load.based_on_config(projectRoot, t)
-                    .then(function() {
-                        if (config_json.lib && config_json.lib[t]) {
-                            return call_into_create(t, projectRoot, cfg, config_json.lib[t].id, config_json.lib[t].version, config_json.lib[t].template);
-                        } else {
-                            return call_into_create(t, projectRoot, cfg, 'cordova', platforms[t].version, null);
-                        }
+                return targets.reduce(function(soFar, t) {
+                    return soFar.then(function() {
+                        return lazy_load.based_on_config(projectRoot, t)
+                        .then(function() {
+                            if (config_json.lib && config_json.lib[t]) {
+                                return call_into_create(t, projectRoot, cfg, config_json.lib[t].id, config_json.lib[t].version, config_json.lib[t].template);
+                            } else {
+                                return call_into_create(t, projectRoot, cfg, 'cordova', platforms[t].version, null);
+                            }
+                        }, function(err) {
+                            throw new Error('Unable to fetch platform ' + t + ': ' + err);
+                        });
                     });
-                });
-
-                return promises.reduce(function(soFar, f) {
-                    return soFar.then(f);
                 }, Q());
             })
             .then(function() {
@@ -225,7 +225,7 @@ function call_into_create(target, projectRoot, cfg, id, version, template_dir) {
 
     // Check if output directory already exists.
     if (fs.existsSync(output)) {
-        return Q.reject(err);
+        return Q.reject(new Error('Platform ' + target + ' already added'));
     } else {
         // Make sure we have minimum requirements to work with specified platform
         events.emit('log', 'Checking if platform "' + target + '" passes minimum requirements...');
