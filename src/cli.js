@@ -37,7 +37,8 @@ module.exports = function CLI(inputArgs) {
         opts = {
             platforms: [],
             options: [],
-            verbose: (args.d || args.verbose)
+            verbose: (args.d || args.verbose),
+            silent: args.silent
         },
         cmd;
 
@@ -58,7 +59,11 @@ module.exports = function CLI(inputArgs) {
         var plugman = require('plugman');
         plugman.on('log', console.log);
         plugman.on('warn', console.warn);
+    } else {
+        // Remove the token.
+        tokens.splice(tokens.indexOf('--silent'), 1);
     }
+
 
     if (opts.verbose) {
         // Add handlers for verbose logging.
@@ -73,11 +78,6 @@ module.exports = function CLI(inputArgs) {
         } else if (args.verbose) {
             tokens.splice(tokens.indexOf("--verbose"), 1);
         }
-    }
-
-    if (opts.silent) {
-        // Remove the token.
-        tokens.splice(tokens.indexOf('--silent'));
     }
 
     cmd = tokens && tokens.length ? tokens.splice(0,1) : undefined;

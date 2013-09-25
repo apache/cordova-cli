@@ -47,7 +47,7 @@ module.exports = {
         var download_dir = (platform == 'wp7' || platform == 'wp8' ? path.join(util.libDirectory, 'wp', id, version) :
                                                                      path.join(util.libDirectory, platform, id, version));
         if (fs.existsSync(download_dir)) {
-            events.emit('log', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
+            events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
             return Q();
         }
         events.emit('log', 'Downloading ' + id + ' library for ' + platform + '...');

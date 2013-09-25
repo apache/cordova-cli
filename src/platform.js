@@ -228,7 +228,7 @@ function call_into_create(target, projectRoot, cfg, id, version, template_dir) {
         return Q.reject(new Error('Platform ' + target + ' already added'));
     } else {
         // Make sure we have minimum requirements to work with specified platform
-        events.emit('log', 'Checking if platform "' + target + '" passes minimum requirements...');
+        events.emit('verbose', 'Checking if platform "' + target + '" passes minimum requirements...');
         return module.exports.supports(projectRoot, target)
         .then(function() {
             // Create a platform app using the ./bin/create scripts that exist in each repo.
@@ -243,6 +243,7 @@ function call_into_create(target, projectRoot, cfg, id, version, template_dir) {
             if (template_dir) {
                 command += ' "' + template_dir + '"';
             }
+            events.emit('log', 'Creating ' + target + ' project...');
             events.emit('verbose', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
 
             var d = Q.defer();
