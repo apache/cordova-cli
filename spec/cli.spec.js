@@ -57,27 +57,32 @@ describe("cordova cli", function () {
 
         it("will call command with all arguments passed through", function () {
             new CLI(["node", "cordova", "build", "blackberry10", "-k", "abcd1234"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: false, platforms: ["blackberry10"], options: ["-k", "abcd1234"]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: false, silent: false, platforms: ["blackberry10"], options: ["-k", "abcd1234"]});
         });
 
         it("will consume the first instance of -d", function () {
             new CLI(["node", "cordova", "-d", "build", "blackberry10", "-k", "abcd1234", "-d"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "-d"]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, silent: false, platforms: ["blackberry10"], options: ["-k", "abcd1234", "-d"]});
         });
 
         it("will consume the first instance of --verbose", function () {
             new CLI(["node", "cordova", "--verbose", "build", "blackberry10", "-k", "abcd1234", "--verbose"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--verbose"]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, silent: false, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--verbose"]});
         });
 
         it("will consume the first instance of either --verbose of -d", function () {
             new CLI(["node", "cordova", "--verbose", "build", "blackberry10", "-k", "abcd1234", "-d"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "-d"]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, silent: false, platforms: ["blackberry10"], options: ["-k", "abcd1234", "-d"]});
         });
 
         it("will consume the first instance of either --verbose of -d", function () {
             new CLI(["node", "cordova", "-d", "build", "blackberry10", "-k", "abcd1234", "--verbose"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--verbose"]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, silent: false, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--verbose"]});
+        });
+
+        it("will consume the first instance of --silent", function () {
+            new CLI(["node", "cordova", "--silent", "build", "blackberry10", "-k", "abcd1234", "--silent"]);
+            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: false, silent: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--silent"]});
         });
     });
 
