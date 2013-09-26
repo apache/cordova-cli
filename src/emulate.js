@@ -21,11 +21,13 @@ var cordova_util      = require('./util'),
     child_process     = require('child_process'),
     events            = require('./events'),
     hooker            = require('./hooker'),
-    Q                 = require('q');
+    Q                 = require('q'),
+    DEFAULT_OPTIONS   = ["--emulator"];
 
 // Returns a promise.
 function shell_out_to_emulate(root, platform, options) {
-    var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '" ' + (options.length ? options.join(" ") : '--emulator');
+    options = options.length ? DEFAULT_OPTIONS.concat(options) : DEFAULT_OPTIONS;
+    var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '" ' + options.join(" ");
     events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '"');
     var d = Q.defer();
     child_process.exec(cmd, function(err, stdout, stderr) {
