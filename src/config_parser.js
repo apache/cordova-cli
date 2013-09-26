@@ -72,9 +72,15 @@ function access(cfg) {
 };
 
 access.prototype = {
-    add:function(uri, subdomain) {
+    add:function(uri, subdomain, use_uri) {
         var el = new et.Element('access');
-        el.attrib.origin = uri;
+        //fix for blackberry which requires <access uri=... rather than <access origin=...
+        use_uri = typeof use_uri !== 'undefined' ? use_uri : false;
+        if (use_uri ) {
+            el.attrib.uri = uri;
+        } else {
+            el.attrib.origin = uri;
+        }
         if (typeof subdomain !== "undefined") el.attrib.subdomains = subdomain;
         this.config.doc.getroot().append(el);
         this.config.update();
