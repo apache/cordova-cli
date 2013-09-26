@@ -228,7 +228,16 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
         .then(function() {
             // Create a platform app using the ./bin/create scripts that exist in each repo.
             // Run platform's create script
-            var bin = path.join(libDir, 'bin', 'create');
+            var bin = path.join(cordova_util.libDirectory, target, id, version, 'bin', 'create');
+            if(target == 'wp7') {
+                bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp7', 'bin', 'create');
+            }
+            else if(target == 'wp8') {
+                bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp8', 'bin', 'create');
+            }
+            else if(target == 'windows8') {
+                bin = path.join(cordova_util.libDirectory, 'windows8', id, version, 'windows8', 'bin', 'create');
+            }
             var args = (target=='ios') ? '--arc' : '';
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
             var name = cfg.name();

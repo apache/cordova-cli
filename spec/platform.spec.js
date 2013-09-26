@@ -261,14 +261,14 @@ describe('platform command', function() {
             if(!require('os').platform().match(/^win/)) {
                 describe('success', function() {
                     it('should shell out to the platform update script', function(done) {
-                        var oldVersion = lazyLoadVersion;
-                        lazyLoadVersion = '1.0.0';
+                        var oldVersion = platforms['ios'].version;
+                        platforms['ios'].version = '1.0.0';
                         cordova.raw.platform('update', ['ios']).then(function() {
-                            expect(exec).toHaveBeenCalledWith('lib/ios/cordova/1.0.0/bin/update "some/path/platforms/ios"', jasmine.any(Function));
+                            expect(exec).toHaveBeenCalledWith('HOMEDIR/.cordova/lib/ios/cordova/1.0.0/bin/update "some/path/platforms/ios"', jasmine.any(Function));
                         }, function(err) {
                             expect(err).toBeUndefined();
                         }).fin(function() {
-                            lazyLoadVersion = oldVersion;
+                            platforms['ios'].version = oldVersion;
                             done();
                         });
                     });
