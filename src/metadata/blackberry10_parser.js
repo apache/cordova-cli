@@ -64,7 +64,7 @@ module.exports.prototype = {
         events.emit('verbose', 'Wrote out BlackBerry version to "' + config.version() + '"');
         this.xml.access.remove();
         config.access.getAttributes().forEach(function(attribs) {
-            self.xml.access.add(attribs.uri || attribs.origin, attribs.subdomains);
+            self.xml.access.add(attribs.uri || attribs.origin, attribs.subdomains, true);
         });
         this.xml.preference.remove();
         config.preference.get().forEach(function (pref) {

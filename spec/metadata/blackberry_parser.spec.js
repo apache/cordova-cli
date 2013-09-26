@@ -174,8 +174,8 @@ describe('blackberry10 project parser', function() {
             it('should update the whitelist', function() {
                 cfg.access.getAttributes = function() { return [{origin: 'one'},{uri: "two", subdomains: "false"}]; };
                 p.update_from_config(cfg);
-                expect(xml_access_add).toHaveBeenCalledWith('one', undefined);
-                expect(xml_access_add).toHaveBeenCalledWith('two', 'false');
+                expect(xml_access_add).toHaveBeenCalledWith('one', undefined, true);
+                expect(xml_access_add).toHaveBeenCalledWith('two', 'false', true);
             });
             it('should update the start page (content tag)', function() {
                 p.update_from_config(cfg);
