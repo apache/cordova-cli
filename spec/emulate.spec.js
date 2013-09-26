@@ -77,7 +77,7 @@ describe('emulate command', function() {
         it('should pass down options', function(done) {
             cordova.raw.emulate({platforms: ['ios'], options:["--optionTastic"]}).then(function(err) {
                 expect(prepare_spy).toHaveBeenCalledWith(['ios']);
-                expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'ios', 'cordova', 'run') + '" --optionTastic', jasmine.any(Function));
+                expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'ios', 'cordova', 'run') + '" --emulator --optionTastic', jasmine.any(Function));
                 done();
             });
         });
