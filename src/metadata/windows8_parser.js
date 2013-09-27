@@ -39,13 +39,15 @@ module.exports = function windows8_parser(project) {
         throw new Error('The provided path "' + project + '" is not a Windows 8 project. ' + e);
     }
     this.manifest_path  = path.join(this.windows8_proj_dir, 'Properties', 'WMAppManifest.xml');
-    this.config_path = path.join(this.windows8_proj_dir, 'config.xml');
+    this.config_path = this.config_xml();
     this.config = new util.config_parser(this.config_path);
 };
 
 module.exports.check_requirements = function(project_root, callback) {
     events.emit('log', 'Checking windows8 requirements...');
-    var lib_path = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version, 'windows8');
+    var lib_path = path.join(util.libDirectory, 'windows8', 'cordova',
+                    require('../../platforms').windows8.version, 'windows8');
+
     var custom_path = config.has_custom_path(project_root, 'windows8');
     if (custom_path) lib_path = custom_path;
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
@@ -61,6 +63,7 @@ module.exports.check_requirements = function(project_root, callback) {
 };
 
 module.exports.prototype = {
+
     update_from_config:function(config) {
         //check config parser
         if (config instanceof config_parser) {
@@ -83,10 +86,12 @@ module.exports.prototype = {
             manifest.find('.//App').attrib.Author = name + " Author";
             manifest.find('.//PrimaryToken').attrib.TokenID = name;
             //update name of sln and jsproj.
-            name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a ligitamate name
+            name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a valid name
             prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_');
             // TODO: might return .sln.user? (generated file)
-            var sln_name = fs.readdirSync(this.windows8_proj_dir).filter(function(e) { return e.match(/\.sln$/i); })[0];
+            var sln_name = fs.readdirSync(this.windows8_proj_dir).filter(function(e) {
+                    return e.match(/\.sln$/i);
+                })[0];
             var sln_path = path.join(this.windows8_proj_dir, sln_name);
             var sln_file = fs.readFileSync(sln_path, 'utf-8');
             var name_regex = new RegExp(prev_name, "g");
@@ -143,6 +148,7 @@ module.exports.prototype = {
         return path.join(this.windows8_proj_dir, 'www');
     },
     config_xml:function() {
+        return path.join(this.windows8_proj_dir,"config.xml");
     },
     // copy files from merges directory to actual www dir
     copy_merges:function(merges_sub_path) {
@@ -162,11 +168,11 @@ module.exports.prototype = {
         shell.cp('-rf', project_www, this.windows8_proj_dir);
 
         // copy all files from merges directories (generic first, then specific)
-        this.copy_merges('wp');
         this.copy_merges('windows8');
 
+
         // copy over windows8 lib's cordova.js
-        var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').windows8.version);
+        var lib_path = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
         var custom_path = config.has_custom_path(project_root, 'windows8');
         if (custom_path) lib_path = custom_path;
         var cordovajs_path = path.join(lib_path, 'common', 'www', 'cordova.js');
