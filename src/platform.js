@@ -42,7 +42,6 @@ module.exports = function platform(command, targets, callback) {
 
     var hooks = new hooker(projectRoot);
 
-
     if (arguments.length === 0) command = 'ls';
     if (targets) {
         if (!(targets instanceof Array)) targets = [targets];
@@ -91,6 +90,7 @@ module.exports = function platform(command, targets, callback) {
                         else throw err;
                     } else {
                         if (config_json.lib && config_json.lib[t]) {
+
                             call_into_create(t, projectRoot, cfg, config_json.lib[t].id, config_json.lib[t].version, config_json.lib[t].template, callback, end(index));
                         } else {
                             call_into_create(t, projectRoot, cfg, 'cordova', platforms[t].version, null, callback, end(index));
@@ -212,6 +212,7 @@ module.exports = function platform(command, targets, callback) {
                     if (os.platform() === 'win32') {
                         available.push('wp7');
                         available.push('wp8');
+                        available.push('windows8');
                     }
 
                     available = available.filter(function(p) {
@@ -299,8 +300,15 @@ function call_into_create(target, projectRoot, cfg, id, version, template_dir, c
                 // Create a platform app using the ./bin/create scripts that exist in each repo.
                 // Run platform's create script
                 var bin = path.join(cordova_util.libDirectory, target, id, version, 'bin', 'create');
-                if(target == 'wp7') bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp7', 'bin', 'create');
-                if(target == 'wp8') bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp8', 'bin', 'create');
+                if(target == 'wp7') {
+                    bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp7', 'bin', 'create');
+                }
+                else if(target == 'wp8') {
+                    bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp8', 'bin', 'create');
+                }
+                else if(target == 'windows8') {
+                    bin = path.join(cordova_util.libDirectory, 'windows8', id, version, 'windows8', 'bin', 'create');
+                }
                 var args = (target=='ios') ? '--arc' : '';
                 var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
                 var name = cfg.name();

@@ -118,19 +118,27 @@ describe('platform command', function() {
 
             it('should list out added platforms in a project', function(done) {
                 cordova.on('results', function(res) {
-                    expect(res).toMatch(/^Installed platforms: ios, android, wp7, wp8, blackberry10, firefoxos\s*Available platforms:\s*$/);
+                    expect(res).toMatch(/^Installed platforms: ios, android, wp7, wp8, blackberry10, firefoxos, windows8\s*Available platforms:\s*$/);
                     done();
                 });
                 cordova.platform('list');
             });
         });
         describe('`add`', function() {
-            it('should shell out to specified platform\'s bin/create, using the version that is specified in platforms manifest', function() {
+            it('%%% should shell out to specified platform\'s bin/create, using the version that is specified in platforms manifest', function() {
+                // Android
                 cordova.platform('add', 'android');
-                expect(exec.mostRecentCall.args[0]).toMatch(/lib.android.cordova.\d.\d.\d[\d\w]*.bin.create/gi);
+                expect(exec.mostRecentCall.args[0]).toMatch(/lib.android.cordova.\d.\d.\d[\d\w\-]*.bin.create/gi);
                 expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+
+                // Windows Phone 8
                 cordova.platform('add', 'wp8');
-                expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w]*.wp8.bin.create/gi);
+                expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w\-]*.wp8.bin.create/gi);
+                expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+
+                // Windows 8
+                cordova.platform('add', 'windows8');
+                expect(exec.mostRecentCall.args[0]).toMatch(/lib.windows8.cordova.\d.\d.\d[\d\w\-]*.windows8.bin.create/gi);
                 expect(exec.mostRecentCall.args[0]).toContain(project_dir);
             });
             it('should call into lazy_load.custom if there is a user-specified configruation for consuming custom libraries', function() {
@@ -219,19 +227,22 @@ describe('platform command', function() {
                 });
             });
 
-            describe('success', function() {
-                it('should shell out to the platform update script', function(done) {
-                    var oldVersion = platforms['ios'].version;
-                    platforms['ios'].version = '1.0.0';
-                    cordova.platform('update', ['ios'], function(err) {
-                        expect(err).toBeUndefined();
-                        expect(exec).toHaveBeenCalledWith('HOMEDIR/.cordova/lib/ios/cordova/1.0.0/bin/update "some/path/platforms/ios"', jasmine.any(Object), jasmine.any(Function));
+            // Don't run this test on windows ... iOS will fail always
+            if(!require('os').platform().match(/^win/)) {
+                describe('success', function() {
+                    it('should shell out to the platform update script', function(done) {
+                        var oldVersion = platforms['ios'].version;
+                        platforms['ios'].version = '1.0.0';
+                        cordova.platform('update', ['ios'], function(err) {
+                            expect(err).toBeUndefined();
+                            expect(exec).toHaveBeenCalledWith('HOMEDIR/.cordova/lib/ios/cordova/1.0.0/bin/update "some/path/platforms/ios"', jasmine.any(Object), jasmine.any(Function));
 
-                        platforms['ios'].version = oldVersion;
-                        done();
+                            platforms['ios'].version = oldVersion;
+                            done();
+                        });
                     });
                 });
-            });
+            }
         });
     });
     describe('hooks', function() {
