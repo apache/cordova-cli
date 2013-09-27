@@ -42,7 +42,6 @@ module.exports = function platform(command, targets, callback) {
 
     var hooks = new hooker(projectRoot);
 
-
     if (arguments.length === 0) command = 'ls';
     if (targets) {
         if (!(targets instanceof Array)) targets = [targets];
@@ -91,6 +90,7 @@ module.exports = function platform(command, targets, callback) {
                         else throw err;
                     } else {
                         if (config_json.lib && config_json.lib[t]) {
+
                             call_into_create(t, projectRoot, cfg, config_json.lib[t].id, config_json.lib[t].version, config_json.lib[t].template, callback, end(index));
                         } else {
                             call_into_create(t, projectRoot, cfg, 'cordova', platforms[t].version, null, callback, end(index));
@@ -212,6 +212,7 @@ module.exports = function platform(command, targets, callback) {
                     if (os.platform() === 'win32') {
                         available.push('wp7');
                         available.push('wp8');
+                        available.push('windows8');
                     }
 
                     available = available.filter(function(p) {
