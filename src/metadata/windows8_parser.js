@@ -39,28 +39,6 @@ module.exports = function windows8_parser(project) {
         throw new Error('The provided path "' + project + '" is not a Windows 8 project. ' + e);
     }
     this.manifest_path  = path.join(this.windows8_proj_dir, 'Properties', 'WMAppManifest.xml');
-    this.config_path = this.config_xml();
-    this.config = new util.config_parser(this.config_path);
-};
-
-module.exports.check_requirements = function(project_root, callback) {
-    events.emit('log', 'Checking windows8 requirements...');
-    var lib_path = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version, 'windows8');
-    var custom_path = config.has_custom_path(project_root, 'windows8');
-    if (custom_path) lib_path = custom_path;
-    var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
-    events.emit('log', 'Running "' + command + '" (output to follow)');
-    shell.exec(command, {silent:true, async:true}, function(code, output) {
-        events.emit('log', output);
-        if (code != 0) {
-            callback(output);
-        } else {
-            callback(false);
-        }
-    });
-};
-
-module.exports.prototype = {
     this.config_path = path.join(this.windows8_proj_dir, 'config.xml');
     this.config = new util.config_parser(this.config_path);
 };
