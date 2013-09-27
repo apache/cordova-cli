@@ -66,7 +66,6 @@ module.exports = function platform(command, targets) {
         case 'add':
             var config_json = config.read(projectRoot);
 
-
             return hooks.fire('before_platform_add', opts)
             .then(function() {
                 return targets.reduce(function(soFar, t) {
@@ -143,7 +142,6 @@ module.exports = function platform(command, targets) {
         case 'list':
         default:
             var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
-
             return hooks.fire('before_platform_ls')
             .then(function() {
                 // Acquire the version number of each platform we have installed, and output that too.
@@ -167,6 +165,7 @@ module.exports = function platform(command, targets) {
                 if (os.platform() === 'win32') {
                     available.push('wp7');
                     available.push('wp8');
+                    available.push('windows8');
                 }
 
                 available = available.filter(function(p) {
