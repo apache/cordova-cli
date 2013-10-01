@@ -92,43 +92,43 @@ exports = module.exports = {
         return path.join(projectDir, 'www', 'config.xml');
     },
     preProcessOptions: function (inputOptions) {
-        var projectRoot = this.isCordova(process.cwd()),
-            projectPlatforms = this.listPlatforms(projectRoot),
-            DEFAULT_OPTIONS = {
+        var DEFAULT_OPTIONS = {
                 verbose: false,
                 platforms: [],
                 options: []
             },
-            result = inputOptions || DEFAULT_OPTIONS;
+            result = inputOptions || DEFAULT_OPTIONS,
+            projectRoot = this.isCordova(process.cwd());
 
         if (!projectRoot) {
-            result = new Error('Current working directory is not a Cordova-based project.');
-        } else if (projectPlatforms.length === 0) {
-            result = new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
-        } else {
-            /**
-             * Current Desired Arguments
-             * options: {verbose: boolean, platforms: [String], options: [String]}
-             * Accepted Arguments
-             * platformList: [String] -- assume just a list of platforms
-             * platform: String -- assume this is a platform
-             */
-            if (Array.isArray(inputOptions)) {
-                result = {
-                    verbose: false,
-                    platforms: inputOptions,
-                    options: []
-                };
-            } else if (typeof inputOptions === 'string') {
-                result = {
-                    verbose: false,
-                    platforms: [inputOptions],
-                    options: []
-                };
-            }
-            if (!result.platforms || (result.platforms && result.platforms.length === 0) ) {
-                result.platforms = projectPlatforms;
-            }
+            return new Error('Current working directory is not a Cordova-based project.');
+        }
+        var projectPlatforms = this.listPlatforms(projectRoot);
+        if (projectPlatforms.length === 0) {
+            return new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+        }
+        /**
+         * Current Desired Arguments
+         * options: {verbose: boolean, platforms: [String], options: [String]}
+         * Accepted Arguments
+         * platformList: [String] -- assume just a list of platforms
+         * platform: String -- assume this is a platform
+         */
+        if (Array.isArray(inputOptions)) {
+            result = {
+                verbose: false,
+                platforms: inputOptions,
+                options: []
+            };
+        } else if (typeof inputOptions === 'string') {
+            result = {
+                verbose: false,
+                platforms: [inputOptions],
+                options: []
+            };
+        }
+        if (!result.platforms || (result.platforms && result.platforms.length === 0) ) {
+            result.platforms = projectPlatforms;
         }
         return result;
     }
