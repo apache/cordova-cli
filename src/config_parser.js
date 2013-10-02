@@ -53,7 +53,7 @@ config_parser.prototype = {
             content.attrib.src = src;
             this.update();
         } else {
-            if (content === undefined) {
+            if (!content) {
                 content = new et.Element('content');
                 content.attrib.src = 'index.html';
                 this.doc.getroot().append(content);
