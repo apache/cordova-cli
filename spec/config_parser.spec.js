@@ -22,9 +22,8 @@ var path = require('path'),
     config_parser = require('../src/config_parser'),
     et = require('elementtree'),
     xml = path.join(__dirname, '..', 'templates', 'config.xml'),
-    util = require('../src/util');
-
-var xml_contents = fs.readFileSync(xml, 'utf-8');
+    util = require('../src/util'),
+    xml_contents = fs.readFileSync(xml, 'utf-8');
 
 describe('config.xml parser', function () {
     var readFile, update;
@@ -41,7 +40,7 @@ describe('config.xml parser', function () {
         expect(cfg).toBeDefined();
         expect(cfg.doc).toBeDefined();
     });
-    
+
     describe('methods', function() {
         var cfg;
         beforeEach(function() {
@@ -87,6 +86,14 @@ describe('config.xml parser', function () {
             it('should write to disk after setting the content', function() {
                 cfg.content('batman.html');
                 expect(update).toHaveBeenCalled();
+            });
+            it('should not error out if there is no content element', function () {
+                readFile.andCallThrough();
+                var no_content_xml = path.join(__dirname, "fixtures", "templates", "no_content_config.xml"),
+                    no_content_xml_contents = fs.readFileSync(no_content_xml, "utf-8");
+                readFile.andReturn(no_content_xml_contents);
+                var no_content_cfg = new config_parser(no_content_xml);
+                expect(no_content_cfg.content()).toEqual('index.html');
             });
         });
 
