@@ -21,6 +21,7 @@ var cordova_util = require('./util'),
     shell = require('shelljs'),
     platforms     = require('../platforms'),
     config_parser = require('./config_parser'),
+    hooker        = require('./hooker'),
     fs = require('fs'),
     util = require('util'),
     http = require("http"),
@@ -122,7 +123,14 @@ module.exports = function server(port) {
         throw new Error('Current working directory is not a Cordova-based project.');
     }
 
-    // Return for testing.
-    return launchServer(projectRoot, port);
+    var hooks = new hooker(projectRoot);
+    return hooks.fire('before_serve')
+    .then(function() {
+        // Run a prepare first!
+        return require('../cordova').raw.prepare([]);
+    }).then(function() {
+        launchServer(projectRoot, port);
+        return hooks.fire('after_serve');
+    });
 };
 
