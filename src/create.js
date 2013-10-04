@@ -71,6 +71,11 @@ module.exports = function create (dir, id, name) {
     var dotCordova = path.join(dir, '.cordova');
     var www_dir = path.join(dir, 'www');
 
+    // dir must be either empty or not exist at all.
+    if (fs.existsSync(dir) && fs.readdirSync(dir).length > 0) {
+        return Q.reject(new Error('Path already exists and is not empty: ' + dir));
+    }
+
     // Create basic project structure.
     shell.mkdir('-p', dotCordova);
     shell.mkdir('-p', path.join(dir, 'platforms'));
