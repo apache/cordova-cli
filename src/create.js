@@ -32,36 +32,23 @@ var DEFAULT_NAME = "HelloCordova",
 
 /**
  * Usage:
- * create(dir) - creates in the specified directory
- * create(dir, name) - as above, but with specified name
- * create(dir, id, name) - you get the gist
+ * @dir - required, directory where the poroject will be created.
+ * @id - app id.
+ * @name - app name.
+ * @cfg - extra config to be saved in .cordova/config.json
  **/
 // Returns a promise.
-module.exports = function create (dir, id, name) {
-    var options = [];
-
-    if (arguments.length === 0) {
+module.exports = function create (dir, id, name, cfg) {
+    if (!dir ) {
         return Q(help());
     }
 
-    var args = Array.prototype.slice.call(arguments, 0);
-
     // Massage parameters
-    if (args.length === 0) {
-        dir = process.cwd();
-        id = DEFAULT_ID;
-        name = DEFAULT_NAME;
-    } else if (args.length == 1) {
-        id = DEFAULT_ID;
-        name = DEFAULT_NAME;
-    } else if (args.length == 2) {
-        name = DEFAULT_NAME;
-    } else {
-        dir = args.shift();
-        id = args.shift();
-        name = args.shift();
-        options = args;
-    }
+    cfg = cfg || {};
+    id = id || cfg.id || DEFAULT_ID;
+    name = name || cfg.name || DEFAULT_NAME;
+    cfg.id = id;
+    cfg.name = name;
 
     // Make absolute.
     dir = path.resolve(dir);
@@ -70,6 +57,11 @@ module.exports = function create (dir, id, name) {
 
     var dotCordova = path.join(dir, '.cordova');
     var www_dir = path.join(dir, 'www');
+
+    // dir must be either empty or not exist at all.
+    if (fs.existsSync(dir) && fs.readdirSync(dir).length > 0) {
+        return Q.reject(new Error('Path already exists and is not empty: ' + dir));
+    }
 
     // Create basic project structure.
     shell.mkdir('-p', dotCordova);
@@ -106,13 +98,8 @@ module.exports = function create (dir, id, name) {
     shell.mkdir(path.join(hooks, 'before_prepare'));
     shell.mkdir(path.join(hooks, 'before_run'));
 
-    // Write out .cordova/config.json file with a simple json manifest
-    require('../cordova').config(dir, {
-        id:id,
-        name:name
-    });
-
-    var config_json = config.read(dir);
+    // Write out .cordova/config.json file.
+    var config_json = config(dir, cfg);
 
     // Returns a promise.
     var finalize = function(www_lib) {

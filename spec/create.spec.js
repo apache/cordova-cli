@@ -27,13 +27,14 @@ var cordova = require('../cordova'),
     tempDir = path.join(__dirname, '..', 'temp');
 
 describe('create command', function () {
-    var mkdir, cp, config_spy, load_cordova, load_custom, exists, config_read, parser, package, name;
+    var mkdir, cp, config_spy, load_cordova, load_custom, exists, config_read, config_write, parser, package, name;
     beforeEach(function() {
         shell.rm('-rf', tempDir);
         mkdir = spyOn(shell, 'mkdir');
         cp = spyOn(shell, 'cp');
         config_spy = spyOn(cordova, 'config');
         config_read = spyOn(config, 'read').andReturn({});
+        config_write = spyOn(config, 'write').andReturn({});
         exists = spyOn(fs, 'existsSync').andReturn(false);
         load_cordova = spyOn(lazy_load, 'cordova').andReturn(Q());
         load_custom = spyOn(lazy_load, 'custom').andReturn(Q());
@@ -140,7 +141,8 @@ describe('create command', function () {
                 }
             };
             config_read.andReturn(fake_config);
-            cordova.raw.create(tempDir).then(function() {
+            config_write.andReturn(fake_config);
+            cordova.raw.create(tempDir, 'some.app.id', 'SomeAppName', fake_config).then(function() {
                 expect(load_custom).toHaveBeenCalledWith(fake_config.lib.www.uri, fake_config.lib.www.id, 'www', fake_config.lib.www.version);
                 done();
             });
