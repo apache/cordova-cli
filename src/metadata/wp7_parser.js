@@ -259,13 +259,13 @@ module.exports.prototype = {
         var projectRoot = util.isCordova(process.cwd());
         var hooks = new hooker(projectRoot);
         hooks.fire('pre_package', { wwwPath:this.www_dir() }, function(err) { })
-            .then(function() {
-                that.update_csproj();
-                // TODO: Add overrides support? Why is this missing?
-                that.update_staging();
-                util.deleteSvnFolders(that.www_dir());
-                deferred.resolve();
-            });
+        .then(function() {
+            that.update_csproj();
+            // TODO: Add overrides support? Why is this missing?
+            that.update_staging();
+            util.deleteSvnFolders(that.www_dir());
+            deferred.resolve();
+        });
 
         return deferred.promise;
     }
