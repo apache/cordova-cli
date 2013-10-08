@@ -104,7 +104,7 @@ function processAddRequest(request, response, platformId, projectRoot) {
         'configPath': '/' + platformId + '/config.xml',
         'wwwPath': '/' + platformId + '/www',
         'wwwFileList': shell.find(wwwDir)
-            .filter(function(a) { return !fs.statSync(a).isDirectory(); })
+            .filter(function(a) { return !fs.statSync(a).isDirectory() && !/(^\.)|(\/\.)/.test(a) })
             .map(function(a) { return a.slice(wwwDir.length); })
     };
     response.writeHead(200, {
