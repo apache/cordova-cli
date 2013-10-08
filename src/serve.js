@@ -32,6 +32,7 @@ var cordova_util = require('./util'),
 function launchServer(projectRoot, port) {
     var server = http.createServer(function(request, response) {
         function do404() {
+            console.log('404 ' + request.url);
             response.writeHead(404, {"Content-Type": "text/plain"});
             response.write("404 Not Found\n");
             response.end();
@@ -65,6 +66,7 @@ function launchServer(projectRoot, port) {
         fs.exists(filePath, function(exists) {
             if (exists) {
                 if (fs.statSync(filePath).isDirectory()) {
+                    console.log('200 ' + request.url);
                     response.writeHead(200, {"Content-Type": "text/plain"});
                     response.write("TODO: show a directory listing.\n");
                     response.end();
@@ -83,6 +85,7 @@ function launchServer(projectRoot, port) {
                         respHeaders['content-encoding'] = 'gzip';
                         readStream = readStream.pipe(zlib.createGzip());
                     }
+                    console.log('200 ' + request.url);
                     response.writeHead(200, respHeaders);
                     readStream.pipe(response);
                 }
@@ -107,6 +110,7 @@ function processAddRequest(request, response, platformId, projectRoot) {
             .filter(function(a) { return !fs.statSync(a).isDirectory() && !/(^\.)|(\/\.)/.test(a) })
             .map(function(a) { return a.slice(wwwDir.length); })
     };
+    console.log('200 ' + request.url);
     response.writeHead(200, {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache'
