@@ -88,6 +88,8 @@ module.exports = function prepare(options) {
                     }
                     events.emit('verbose', 'Plugin "' + plugin_id + '" is good to go.');
                 });
+            }).fail(function(e) {
+                console.error(e);
             });
         })).then(function() {
             return hooks.fire('after_prepare', options);
