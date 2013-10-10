@@ -51,26 +51,8 @@ module.exports.check_requirements = function(project_root) {
 
 module.exports.prototype = {
     update_from_config:function(config) {
-        var self = this;
-
         if (config instanceof config_parser) {
         } else throw new Error('update_from_config requires a config_parser object');
-
-        this.xml.name(config.name());
-        events.emit('verbose', 'Wrote out BlackBerry application name to "' + config.name() + '"');
-        this.xml.packageName(config.packageName());
-        events.emit('verbose', 'Wrote out BlackBerry package name to "' + config.packageName() + '"');
-        this.xml.version(config.version());
-        events.emit('verbose', 'Wrote out BlackBerry version to "' + config.version() + '"');
-        this.xml.access.remove();
-        config.access.getAttributes().forEach(function(attribs) {
-            self.xml.access.add(attribs.uri || attribs.origin, attribs.subdomains);
-        });
-        this.xml.preference.remove();
-        config.preference.get().forEach(function (pref) {
-            self.xml.preference.add(pref);
-        });
-        this.xml.content(config.content());
     },
 
     // Returns a promise.
@@ -103,16 +85,18 @@ module.exports.prototype = {
     },
 
     update_www:function() {
-        var projectRoot = util.isCordova(this.path);
-        var www = util.projectWww(projectRoot);
-        var platformWww = this.www_dir();
+        var projectRoot = util.isCordova(this.path),
+            www = util.projectWww(projectRoot),
+            platformWww = this.www_dir(),
+            platform_cfg_backup = new util.config_parser(this.config_path);
+
 
         // remove the stock www folder
         shell.rm('-rf', this.www_dir());
         // copy over project www assets
         shell.cp('-rf', www, this.path);
         //Re-Write config.xml
-        this.xml.update();
+        platform_cfg_backup.update();
 
         var custom_path = config.has_custom_path(projectRoot, 'blackberry10');
         var lib_path = path.join(util.libDirectory, 'blackberry10', 'cordova', require('../../platforms').blackberry10.version);
