@@ -89,10 +89,10 @@ describe('firefoxos project parser', function() {
                 });
             });
 
-          /*  it('should write manifest.webapp', function() {
+            it('should write manifest.webapp', function() {
                 //p.update_from_config(cfg);
                 //expect(write.mostRecentCall.args[0]).toEqual('manifest.webapp');
-            });*/
+            });
         });
     });
 });
