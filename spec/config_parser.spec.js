@@ -47,6 +47,102 @@ describe('config.xml parser', function () {
             cfg = new config_parser(xml);
         });
 
+        describe('merge_with', function () {
+            it("should merge attributes and text of the root element without clobbering", function () {
+                var testXML = new et.ElementTree(et.XML("<widget foo='bar' id='NOTANID'>TEXT</widget>"));
+                cfg.merge_with({doc: testXML});
+                expect(cfg.doc.getroot().attrib.foo).toEqual("bar");
+                expect(cfg.doc.getroot().attrib.id).not.toEqual("NOTANID");
+                expect(cfg.doc.getroot().text).not.toEqual("TEXT");
+            });
+
+            it("should merge attributes and text of the root element with clobbering", function () {
+                var testXML = new et.ElementTree(et.XML("<widget foo='bar' id='NOTANID'>TEXT</widget>"));
+                cfg.merge_with({doc: testXML}, "foo", true);
+                expect(cfg.doc.getroot().attrib.foo).toEqual("bar");
+                expect(cfg.doc.getroot().attrib.id).toEqual("NOTANID");
+                expect(cfg.doc.getroot().text).toEqual("TEXT");
+            });
+
+            it("should not merge platform tags with the wrong platform", function () {
+                var testXML = new et.ElementTree(et.XML("<widget><platform name='bar'><testElement testAttrib='value'>testTEXT</testElement></platform></widget>")),
+                    origCfg = et.tostring(cfg.doc.getroot());
+
+                cfg.merge_with({doc: testXML}, "foo", true);
+                expect(et.tostring(cfg.doc.getroot())).toEqual(origCfg);
+            });
+
+            it("should merge platform tags with the correct platform", function () {
+                var testXML = new et.ElementTree(et.XML("<widget><platform name='bar'><testElement testAttrib='value'>testTEXT</testElement></platform></widget>")),
+                    origCfg = et.tostring(cfg.doc.getroot()),
+                    testElement;
+
+                cfg.merge_with({doc: testXML}, "bar", true);
+                expect(et.tostring(cfg.doc.getroot())).not.toEqual(origCfg);
+                testElement = cfg.doc.getroot().find("testElement");
+                expect(testElement).toBeDefined();
+                expect(testElement.attrib.testAttrib).toEqual("value");
+                expect(testElement.text).toEqual("testTEXT");
+            });
+
+            it("should merge singelton children without clobber", function () {
+                var testXML = new et.ElementTree(et.XML("<widget><author testAttrib='value' href='http://www.nowhere.com'>SUPER_AUTHOR</author></widget>")),
+                    testElements;
+
+                cfg.merge_with({doc: testXML});
+                testElements = cfg.doc.getroot().findall("author");
+                expect(testElements).toBeDefined();
+                expect(testElements.length).toEqual(1);
+                expect(testElements[0].attrib.testAttrib).toEqual("value");
+                expect(testElements[0].attrib.href).toEqual("http://cordova.io");
+                expect(testElements[0].attrib.email).toEqual("dev@callback.apache.org");
+                expect(testElements[0].text).toContain("Apache Cordova Team");
+            });
+
+            it("should clobber singelton children with clobber", function () {
+                var testXML = new et.ElementTree(et.XML("<widget><author testAttrib='value' href='http://www.nowhere.com'>SUPER_AUTHOR</author></widget>")),
+                    testElements;
+
+                cfg.merge_with({doc: testXML}, "", true);
+                testElements = cfg.doc.getroot().findall("author");
+                expect(testElements).toBeDefined();
+                expect(testElements.length).toEqual(1);
+                expect(testElements[0].attrib.testAttrib).toEqual("value");
+                expect(testElements[0].attrib.href).toEqual("http://www.nowhere.com");
+                expect(testElements[0].attrib.email).toEqual("dev@callback.apache.org");
+                expect(testElements[0].text).toEqual("SUPER_AUTHOR");
+            });
+
+            it("should append non singelton children", function () {
+                var testXML = new et.ElementTree(et.XML("<widget><preference num='1'/> <preference num='2'/></widget>")),
+                    testElements;
+
+                cfg.merge_with({doc: testXML}, "", true);
+                testElements = cfg.doc.getroot().findall("preference");
+                expect(testElements.length).toEqual(4);
+            });
+
+            it("should handle namespaced elements", function () {
+                var testXML = new et.ElementTree(et.XML("<widget><foo:bar testAttrib='value'>testText</foo:bar></widget>")),
+                    testElement;
+
+                cfg.merge_with({doc: testXML}, "foo", true);
+                testElement = cfg.doc.getroot().find("foo:bar");
+                expect(testElement).toBeDefined();
+                expect(testElement.attrib.testAttrib).toEqual("value");
+                expect(testElement.text).toEqual("testText");
+            });
+
+            it("should not append duplicate non singelton children", function () {
+                var testXML = new et.ElementTree(et.XML("<widget><preference name='fullscreen' value='true'/></widget>")),
+                    testElements;
+
+                cfg.merge_with({doc: testXML}, "", true);
+                testElements = cfg.doc.getroot().findall("preference");
+                expect(testElements.length).toEqual(2);
+            });
+        });
+
         describe('package name / id', function() {
             it('should get the (default) packagename', function() {
                 expect(cfg.packageName()).toEqual('io.cordova.hellocordova');

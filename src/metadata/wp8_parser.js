@@ -88,7 +88,7 @@ module.exports.prototype = {
             manifest.find('.//PrimaryToken').attrib.TokenID = name;
             //update name of sln and csproj.
             name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a ligitamate name
-            prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); 
+            prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_');
             // TODO: might return .sln.user? (generated file)
             var sln_name = fs.readdirSync(this.wp8_proj_dir).filter(function(e) { return e.match(/\.sln$/i); })[0];
             var sln_path = path.join(this.wp8_proj_dir, sln_name);
@@ -135,9 +135,6 @@ module.exports.prototype = {
             var appCS = fs.readFileSync(path.join(this.wp8_proj_dir, 'App.xaml.cs'), 'utf-8');
             fs.writeFileSync(path.join(this.wp8_proj_dir, 'App.xaml.cs'), appCS.replace(namespaceRegEx, 'namespace ' + pkg), 'utf-8');
          }
-
-         // Update content (start page) element
-         this.config.content(config.content());
 
          //Write out manifest
          fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');

@@ -72,7 +72,7 @@ describe('run command', function() {
             }).fin(done);
         });
         it('should pass down parameters', function(done) {
-            cordova.raw.run({platforms: ['blackberry10'], options:['--device', '--password', '1q1q']}).then(function() {
+            cordova.raw.run({platforms: ['blackberry10'], options:['--password', '1q1q']}).then(function() {
                 expect(prepare_spy).toHaveBeenCalledWith(['blackberry10']);
                 expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'run') + '" --device --password 1q1q', jasmine.any(Function));
             }, function(err) {

@@ -21,11 +21,13 @@ var cordova_util      = require('./util'),
     hooker            = require('./hooker'),
     events            = require('./events'),
     Q                 = require('q'),
-    child_process     = require('child_process');
+    child_process     = require('child_process'),
+    DEFAULT_OPTIONS   = ["--device"];
 
 // Returns a promise.
 function shell_out_to_run(projectRoot, platform, options) {
-    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" ' + ( options.length ? options.join(" ") : '--device');
+    options = options.length ? DEFAULT_OPTIONS.concat(options) : DEFAULT_OPTIONS;
+    var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'run') + '" ' + options.join(" ");
     // TODO: inconsistent API for BB10 run command
 /*    if (platform == 'blackberry') {
         var bb_project = path.join(projectRoot, 'platforms', 'blackberry')

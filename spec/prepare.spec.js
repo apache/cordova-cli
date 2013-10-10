@@ -34,17 +34,30 @@ var supported_platforms = Object.keys(platforms).filter(function(p) { return p !
 var supported_platforms_paths = supported_platforms.map(function(p) { return path.join(project_dir, 'platforms', p, 'www'); });
 
 describe('prepare command', function() {
-    var is_cordova, list_platforms, fire, config_parser, parsers = {}, plugman_prepare, find_plugins, plugman_get_json, load;
+    var is_cordova,
+        list_platforms,
+        fire,
+        config_parser,
+        mock_config_parser,
+        parsers = {},
+        plugman_prepare,
+        find_plugins,
+        plugman_get_json,
+        load;
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
         fire = spyOn(hooker.prototype, 'fire').andReturn(Q());
-        config_parser = spyOn(util, 'config_parser');
+        mock_config_parser = {
+            merge_with: jasmine.createSpy("config_parser merge_with")
+        };
+        config_parser = spyOn(util, 'config_parser').andReturn(mock_config_parser);
         supported_platforms.forEach(function(p) {
             parsers[p] = jasmine.createSpy(p + ' update_project').andReturn(Q());
             spyOn(platforms[p], 'parser').andReturn({
                 update_project:parsers[p],
-                www_dir:function() { return path.join(project_dir, 'platforms', p, 'www'); }
+                www_dir:function() { return path.join(project_dir, 'platforms', p, 'www'); },
+                config_xml: function () { return path.join(project_dir, "platforms", p, "www", "config.xml");}
             });
         });
         plugman_prepare = spyOn(plugman, 'prepare').andReturn(Q());
@@ -84,6 +97,7 @@ describe('prepare command', function() {
             var before_prep;
             config_parser.andCallFake(function() {
                 expect(before_prep).toBe(true);
+                return mock_config_parser;
             });
             fire.andCallFake(function(e, opts) {
                 if (e == 'before_prepare') {
@@ -148,6 +162,16 @@ describe('prepare command', function() {
                     expect(err).toBeUndefined();
                 }).fin(done);
             });
+        });
+        it('should merge the platform level config.xml with the top level config.xml', function (done) {
+            cordova.raw.prepare().then(function() {
+                supported_platforms.forEach(function(p) {
+                    expect(util.config_parser).toHaveBeenCalledWith(platforms[p].parser().config_xml());
+                    expect(mock_config_parser.merge_with).toHaveBeenCalledWith(mock_config_parser, p, true);
+                });
+            }, function(err) {
+                expect(err).toBeUndefined();
+            }).fin(done);
         });
     });
 
