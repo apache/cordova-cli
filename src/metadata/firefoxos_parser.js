@@ -86,6 +86,7 @@ module.exports.prototype = {
         shell.cp('-f',
                  path.join(libPath, 'cordova-lib', 'cordova.js'),
                  path.join(platformWww, 'cordova.js'));
+        this.config_path = path.join(projectWww, 'config.xml');
     },
 
     update_overrides: function() {
@@ -108,6 +109,10 @@ module.exports.prototype = {
                      path.join(stagingDir, '*'),
                      this.www_dir());
         }
+    },
+    
+    config_xml:function(){
+        return path.join(util.projectWww(util.isCordova(this.path)), 'config.xml')
     },
 
     // Returns a promise.

@@ -144,6 +144,7 @@ module.exports.prototype = {
         return path.join(this.wp8_proj_dir, 'www');
     },
     config_xml:function() {
+        return this.config_path;
     },
     // copy files from merges directory to actual www dir
     copy_merges:function(merges_sub_path) {
