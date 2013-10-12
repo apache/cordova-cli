@@ -70,14 +70,18 @@ module.exports = function prepare(options) {
             .then(function() {
                 var parser = new platforms[platform].parser(platformPath),
                     defaults_xml_path = path.join(platformPath, "cordova", "defaults.xml");
-
                 //If defaults.xml is present, overwrite platform config.xml with it
                 //Otherwise save whatever is there as defaults so it can be restored
+                //or copy project config into platform if none exists
                 if (fs.existsSync(defaults_xml_path)) {
                     shell.cp("-f", defaults_xml_path, parser.config_xml());
                     events.emit('log', 'Generating config.xml from defaults for platform "' + platform + '"');
                 } else {
-                    shell.cp("-f", parser.config_xml(), defaults_xml_path);
+                    if(fs.existsSync(parser.config_xml())){
+                        shell.cp("-f", parser.config_xml(), defaults_xml_path);
+                    }else{
+                        shell.cp("-f",xml,parser.config_xml());
+                    }   
                 }
 
                 // Call plugman --prepare for this platform. sets up js-modules appropriately.
