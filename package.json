@@ -145,6 +145,10 @@
     {
       "name": "Steven Gill",
       "email": "stevengill97@gmail.com"
+    },
+    {
+      "name":"Jesse",
+      "email":"purplecabbage@gmail.com"
     }
   ],
   "license": "Apache version 2.0"
