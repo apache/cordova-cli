@@ -84,6 +84,9 @@ module.exports = function prepare(options) {
                     }   
                 }
 
+                // Replace the existing web assets with the app master versions
+                parser.update_www();
+
                 // Call plugman --prepare for this platform. sets up js-modules appropriately.
                 var plugins_dir = path.join(projectRoot, 'plugins');
                 events.emit('verbose', 'Calling plugman.prepare for platform "' + platform + '"');

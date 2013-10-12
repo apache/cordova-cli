@@ -115,8 +115,6 @@ module.exports.prototype = {
 
     // Returns a promise.
     update_project: function(cfg) {
-        this.update_www();
-
         return this.update_from_config(cfg)
         .then(function(){
             this.update_overrides();

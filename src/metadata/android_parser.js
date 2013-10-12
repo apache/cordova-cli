@@ -178,7 +178,6 @@ module.exports.prototype = {
         } catch(e) {
             return Q.reject(e);
         }
-        this.update_www();
         this.update_overrides();
         this.update_staging();
         // delete any .svn folders copied over

@@ -200,7 +200,6 @@ module.exports.prototype = {
         var self = this;
         return this.update_from_config(cfg)
         .then(function() {
-            self.update_www();
             self.update_overrides();
             self.update_staging();
             util.deleteSvnFolders(self.www_dir());

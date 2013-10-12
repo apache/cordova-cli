@@ -64,7 +64,6 @@ module.exports.prototype = {
         } catch(e) {
             return Q.reject(e);
         }
-        self.update_www();
         self.update_overrides();
         self.update_staging();
         util.deleteSvnFolders(this.www_dir());

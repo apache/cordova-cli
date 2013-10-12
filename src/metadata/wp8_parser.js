@@ -253,7 +253,6 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         // overrides (merges) are handled in update_www()
-        this.update_www();
         this.update_staging();
         util.deleteSvnFolders(this.www_dir());
         return Q();
