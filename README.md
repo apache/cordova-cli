@@ -47,6 +47,8 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/gu
 
 cordova-cli has been tested on Mas OS X, Linux, Windows 7 and Windows 8.
 
+Note also, that some platforms have OS restrictions.  For example, you cannot build for Windows 8 or Windows Phone 7 & 8 on Mac OS, and you cannot build for iOS in Windows.
+
 # Install
 
     npm install -g cordova
