@@ -1,31 +1,48 @@
 var cordova = require('../cordova'),
     path = require('path'),
     shell = require('shelljs'),
+    fs = require('fs'),
     util = require('../src/util');
 
 var cwd = process.cwd();
 var project_dir = path.join('spec','fixtures', 'projects', 'cordova');
 
 describe('info flag', function(){
-    var is_cordova, exec = {};
+    var is_cordova,
+        writeFileSync,
+        shellSpy,
+        exec = {},
+        done = false;
+
+    function infoPromise( f ) {
+        f.then( function() { done = true; }, function(err) { done = err; } );
+    }
+
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
+        writeFileSync = spyOn( fs, 'writeFileSync' );
+        shellSpy = spyOn( shell, 'exec' ).andReturn( "" );
+        done = false;
     });
 
-    describe('failure', function() {
-        it('should not run outside of a Cordova-based project by calling util.isCordova', function() {
-            is_cordova.andReturn(false);
-            expect(function() {
-                cordova.info();
-                expect(is_cordova).toHaveBeenCalled();
-            }).toThrow('Current working directory is not a Cordova-based project.');
+    it('should not run outside of a Cordova-based project by calling util.isCordova', function() {
+        is_cordova.andReturn(false);
+        runs(function() {
+            infoPromise( cordova.info() );
+        });
+        waitsFor(function() { return done; }, 'platform promise never resolved', 500);
+        runs(function() {
+            expect( done ).toEqual( new Error( 'Current working directory is not a Cordova-based project.' ) );
         });
     });
 
-    describe('success', function() {
-        it('should run inside a Cordova-based project by calling util.isCordova', function() {
-            cordova.info();
-            expect(is_cordova).toHaveBeenCalled();
+    it('should run inside a Cordova-based project by calling util.isCordova', function() {
+        runs(function() {
+            infoPromise( cordova.info() );
+        });
+        waitsFor(function() { return done; }, 'platform promise never resolved', 500);
+        runs(function() {
+            expect( done ).toBe( true );
         });
     });
 

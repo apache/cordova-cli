@@ -20,6 +20,7 @@ var cordova_util  = require('./util'),
     shell         = require('shelljs'),
     path          = require('path'),
     fs            = require('fs'),
+    Q             = require('q'),
     events        = require('./events');
 
 /*
@@ -34,13 +35,13 @@ module.exports = function info() {
     var projectRoot = cordova_util.isCordova(process.cwd());
 
     if (!projectRoot) {
-        var err = new Error('Current working directory is not a Cordova-based project.');
-        throw err;
+        return Q.reject( new Error('Current working directory is not a Cordova-based project.') );
     }
 
-    var raw = fs.readFileSync(path.join(__dirname, '..', 'doc', 'info.txt')).toString('utf8').split("\n");
+    var raw = fs.readFileSync(path.join(__dirname, '..', 'doc', 'info.txt')).toString('utf8').split("\n"),
+        output;
 
-    events.emit('results', raw.map(function(line) {
+    output = raw.map(function(line) {
         if(line.match('    %') ) {
             var type = line.substr(5),
                 out = "";
@@ -66,15 +67,16 @@ module.exports = function info() {
             }
             return line.replace( "%"+type, out );
         } else {
-            return line.magenta;
+            return line;
         }
-    }).join("\n"));
+    }).join("\n");
 
     // /*
     //     Write to File;
     // */
-
-    //fs.writeFileSync('info.txt', output );
+    events.emit('results', output);
+    fs.writeFileSync('info.txt', output );
+    return Q();
 };
 
 function doPlatform( currentPlatform ) {

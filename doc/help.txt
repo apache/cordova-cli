@@ -9,7 +9,8 @@ Global Commands
     help ..................................... shows this syntax summary
 
     info ..................................... print out useful information helpful for submitting bug
-                                               reports and getting help.
+                                               reports and getting help.  Creates a info.txt file at the
+                                               base of your project
 
 Project-Level Commands
 
