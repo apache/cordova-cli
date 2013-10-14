@@ -18,9 +18,11 @@
 */
 var fs = require('fs'),
     events = require('./events'),
+    Q = require('q'),
     path = require('path');
 
 module.exports = function help () {
     var raw = fs.readFileSync(path.join(__dirname, '..', 'doc', 'help.txt')).toString('utf8');
     events.emit('results', raw);
+    return Q();
 };
