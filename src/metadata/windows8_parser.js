@@ -23,6 +23,8 @@ var fs            = require('fs'),
     events        = require('../events'),
     shell         = require('shelljs'),
     events        = require('../events'),
+    Q             = require('q'),
+    child_process = require('child_process'),
     config_parser = require('../config_parser'),
     xml           = require('../xml-helpers'),
     config        = require('../config');
@@ -43,7 +45,8 @@ module.exports = function windows8_parser(project) {
     this.config = new util.config_parser(this.config_path);
 };
 
-module.exports.check_requirements = function(project_root, callback) {
+// Returns a promise
+module.exports.check_requirements = function(project_root) {
     events.emit('log', 'Checking windows8 requirements...');
     var lib_path = path.join(util.libDirectory, 'windows8', 'cordova',
                     require('../../platforms').windows8.version, 'windows8');
@@ -51,15 +54,17 @@ module.exports.check_requirements = function(project_root, callback) {
     var custom_path = config.has_custom_path(project_root, 'windows8');
     if (custom_path) lib_path = custom_path;
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
-    events.emit('log', 'Running "' + command + '" (output to follow)');
-    shell.exec(command, {silent:true, async:true}, function(code, output) {
-        events.emit('log', output);
-        if (code != 0) {
-            callback(output);
+    events.emit('verbose', 'Running "' + command + '" (output to follow)');
+    var d = Q.defer();
+    child_process.exec(command, function(err, output, stderr) {
+        events.emit('verbose', output);
+        if (err) {
+            d.reject(new Error('Error while checking requirements: ' + output + stderr));
         } else {
-            callback(false);
+            d.resolve();
         }
     });
+    return d.promise;
 };
 
 module.exports.prototype = {
@@ -249,20 +254,18 @@ module.exports.prototype = {
     },
 
     // calls the nessesary functions to update the windows8 project
-    update_project:function(cfg, callback) {
+    update_project:function(cfg) {
         //console.log("Updating windows8 project...");
 
         try {
             this.update_from_config(cfg);
         } catch(e) {
-            if (callback) return callback(e);
-            else throw e;
+            return Q.reject(e);
         }
         // overrides (merges) are handled in update_www()
         this.update_www();
         this.update_staging();
         util.deleteSvnFolders(this.www_dir());
-
-        if (callback) callback();
+        return Q();
     }
 };
