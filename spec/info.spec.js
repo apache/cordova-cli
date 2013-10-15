@@ -2,14 +2,16 @@ var cordova = require('../cordova'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
-    util = require('../src/util');
+    cordova_util = require('../src/util');
 
 var cwd = process.cwd();
-var project_dir = path.join('spec','fixtures', 'projects', 'cordova');
+var project_dir = path.join('spec', 'fixtures', 'templates');
 
 describe('info flag', function(){
     var is_cordova,
         writeFileSync,
+        cordova_utilSpy,
+        readFileSync,
         shellSpy,
         exec = {},
         done = false;
@@ -19,9 +21,10 @@ describe('info flag', function(){
     }
 
     beforeEach(function() {
-        is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
+        is_cordova = spyOn(cordova_util, 'isCordova').andReturn(project_dir);
         writeFileSync = spyOn( fs, 'writeFileSync' );
         shellSpy = spyOn( shell, 'exec' ).andReturn( "" );
+        cordova_utilSpy = spyOn( cordova_util, 'projectConfig').andReturn( fs.readFileSync( project_dir + "/no_content_config.xml" ) );
         done = false;
     });
 
@@ -37,16 +40,15 @@ describe('info flag', function(){
     });
 
     it('should run inside a Cordova-based project by calling util.isCordova', function() {
-        runs(function() {
-            infoPromise( cordova.info() );
-        });
-        waitsFor(function() { return done; }, 'platform promise never resolved', 500);
-        runs(function() {
-            expect( done ).toBe( true );
+        readFileSync = spyOn( fs, 'readFileSync' ).andReturn( "" );
+         cordova.raw.info().then(function() {
+            expect(is_cordova).toHaveBeenCalled();
+            done();
         });
     });
 
     it('should emit a results event with info contents', function(done) {
+        readFileSync = spyOn( fs, 'readFileSync' ).andReturn( "info" );
         this.after(function() {
             cordova.removeAllListeners('results');
         });

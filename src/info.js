@@ -38,7 +38,7 @@ module.exports = function info() {
         return Q.reject( new Error('Current working directory is not a Cordova-based project.') );
     }
 
-    var raw = fs.readFileSync(path.join(__dirname, '..', 'doc', 'info.txt')).toString('utf8').split("\n"),
+    var raw = fs.readFileSync(path.join(__dirname, '..', 'doc', 'info.txt'), 'utf-8').split("\n"),
         output;
 
     output = raw.map(function(line) {
