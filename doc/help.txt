@@ -1,5 +1,5 @@
 Synopsis
-    
+
     cordova command [options]
 
 Global Commands
@@ -7,6 +7,10 @@ Global Commands
     create <PATH> [ID] [NAME] ................ creates a cordova project in the specified PATH, with
                                                optional NAME and ID (reverse-domain-style package name)
     help ..................................... shows this syntax summary
+
+    info ..................................... print out useful information helpful for submitting bug
+                                               reports and getting help.  Creates a info.txt file at the
+                                               base of your project
 
 Project-Level Commands
 
