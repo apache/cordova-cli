@@ -99,7 +99,10 @@ module.exports.prototype = {
                 app['attrib']['Id'] = name;
             }
 
-            var visualElems = app['VisualElements'];
+            if(app['_children'][0]['tag'] == 'VisualElements'){
+                var visualElems = app['_children'][0];
+            }
+
             if(visualElems) {
                 var displayName = visualElems['attrib']['DisplayName'];
                 if(displayName != name) {
