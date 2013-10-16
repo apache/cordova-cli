@@ -66,7 +66,6 @@ module.exports = function platform(command, targets) {
         case 'add':
             var config_json = config.read(projectRoot);
 
-
             return hooks.fire('before_platform_add', opts)
             .then(function() {
                 return targets.reduce(function(soFar, t) {
@@ -143,7 +142,6 @@ module.exports = function platform(command, targets) {
         case 'list':
         default:
             var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
-
             return hooks.fire('before_platform_ls')
             .then(function() {
                 // Acquire the version number of each platform we have installed, and output that too.
@@ -167,6 +165,7 @@ module.exports = function platform(command, targets) {
                 if (os.platform() === 'win32') {
                     available.push('wp7');
                     available.push('wp8');
+                    available.push('windows8');
                 }
 
                 available = available.filter(function(p) {
@@ -234,8 +233,15 @@ function call_into_create(target, projectRoot, cfg, id, version, template_dir) {
             // Create a platform app using the ./bin/create scripts that exist in each repo.
             // Run platform's create script
             var bin = path.join(cordova_util.libDirectory, target, id, version, 'bin', 'create');
-            if(target == 'wp7') bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp7', 'bin', 'create');
-            if(target == 'wp8') bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp8', 'bin', 'create');
+            if(target == 'wp7') {
+                bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp7', 'bin', 'create');
+            }
+            else if(target == 'wp8') {
+                bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp8', 'bin', 'create');
+            }
+            else if(target == 'windows8') {
+                bin = path.join(cordova_util.libDirectory, 'windows8', id, version, 'windows8', 'bin', 'create');
+            }
             var args = (target=='ios') ? '--arc' : '';
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
             var name = cfg.name();

@@ -117,7 +117,7 @@ describe('platform command', function() {
 
             it('should list out added platforms in a project', function(done) {
                 cordova.on('results', function(res) {
-                    expect(res).toMatch(/^Installed platforms: ios, android, wp7, wp8, blackberry10, firefoxos\s*Available platforms:\s*$/);
+                    expect(res).toMatch(/^Installed platforms: ios, android, wp7, wp8, blackberry10, firefoxos, windows8\s*Available platforms:\s*$/);
                     done();
                 });
                 cordova.raw.platform('list');
@@ -132,6 +132,11 @@ describe('platform command', function() {
                     return cordova.raw.platform('add', 'wp8');
                 }).then(function() {
                     expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w\-]*.wp8.bin.create/gi);
+                    expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+                }).then(function(){
+                    return cordova.raw.platform('add', 'windows8');
+                }).then(function(){
+                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.windows8.cordova.\d.\d.\d[\d\w\-]*.windows8.bin.create/gi);
                     expect(exec.mostRecentCall.args[0]).toContain(project_dir);
                     done();
                 });
@@ -236,20 +241,23 @@ describe('platform command', function() {
                 });
             });
 
-            describe('success', function() {
-                it('should shell out to the platform update script', function(done) {
-                    var oldVersion = platforms['ios'].version;
-                    platforms['ios'].version = '1.0.0';
-                    cordova.raw.platform('update', ['ios']).then(function() {
-                        expect(exec).toHaveBeenCalledWith('HOMEDIR/.cordova/lib/ios/cordova/1.0.0/bin/update "some/path/platforms/ios"', jasmine.any(Function));
-                    }, function(err) {
-                        expect(err).toBeUndefined();
-                    }).fin(function() {
-                        platforms['ios'].version = oldVersion;
-                        done();
+            // Don't run this test on windows ... iOS will fail always
+            if(!require('os').platform().match(/^win/)) {
+                describe('success', function() {
+                    it('should shell out to the platform update script', function(done) {
+                        var oldVersion = platforms['ios'].version;
+                        platforms['ios'].version = '1.0.0';
+                        cordova.raw.platform('update', ['ios']).then(function() {
+                            expect(exec).toHaveBeenCalledWith('HOMEDIR/.cordova/lib/ios/cordova/1.0.0/bin/update "some/path/platforms/ios"', jasmine.any(Function));
+                        }, function(err) {
+                            expect(err).toBeUndefined();
+                        }).fin(function() {
+                            platforms['ios'].version = oldVersion;
+                            done();
+                        });
                     });
                 });
-            });
+            }
         });
     });
     describe('hooks', function() {
