@@ -29,7 +29,7 @@ module.exports = {
         version: '3.0.0'
     },
     'amazon-fireos' : {
-        parser : require('./src/metadata/amazon_parser'),
+        parser : require('./src/metadata/amazon_fireos_parser'),
         url    : '~/Dev/cordova-awv/Cordova-AmazonWebView',
         version: '3.0.0'
     },
