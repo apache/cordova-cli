@@ -234,9 +234,9 @@ describe('wp8 project parser', function() {
                     expect(e).toEqual(err);
                 });
             });
-            it('should call update_www', function(done) {
+            it('should not call update_www', function(done) {
                 wrapper(p.update_project(), done, function() {
-                    expect(www).toHaveBeenCalled();
+                    expect(www).not.toHaveBeenCalled();
                 });
             });
             it('should call update_staging', function(done) {

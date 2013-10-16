@@ -260,9 +260,9 @@ describe('android project parser', function() {
                     expect(err).toEqual(err);
                 });
             });
-            it('should call update_www', function() {
+            it('should not call update_www', function() {
                 p.update_project();
-                expect(www).toHaveBeenCalled();
+                expect(www).not.toHaveBeenCalled();
             });
             it('should call update_overrides', function() {
                 p.update_project();
