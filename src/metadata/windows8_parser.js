@@ -99,9 +99,8 @@ module.exports.prototype = {
                 app['attrib']['Id'] = name;
             }
 
-            if(app['_children'][0]['tag'] == 'VisualElements'){
-                var visualElems = app['_children'][0];
-            }
+            var visualElems = manifest.find('.//VisualElements');
+            console.log(visualElems);
 
             if(visualElems) {
                 var displayName = visualElems['attrib']['DisplayName'];
