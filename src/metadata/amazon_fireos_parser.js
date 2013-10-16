@@ -57,7 +57,7 @@ module.exports.check_requirements = function(project_root, callback) {
                 if (custom_path) {
                     framework_path = path.resolve(path.join(custom_path, 'framework'));
                 } else {
-                    framework_path = path.join(util.libDirectory, 'amazon-fireos', 'cordova', require('../../platforms').amazon.version, 'framework');
+                    framework_path = path.join(util.libDirectory, 'amazon-fireos', 'cordova', require('../../platforms').android.version, 'framework');
                 }
                 var cmd = 'android update project -p "' + framework_path  + '" -t android-17';
                 events.emit('log', 'Running "' + cmd + '" (output to follow)...');
