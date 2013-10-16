@@ -40,7 +40,7 @@ module.exports = function windows8_parser(project) {
     } catch(e) {
         throw new Error('The provided path "' + project + '" is not a Windows 8 project. ' + e);
     }
-    this.manifest_path  = path.join(this.windows8_proj_dir, 'Properties', 'WMAppManifest.xml');
+    this.manifest_path  = path.join(this.windows8_proj_dir, 'package.appxmanifest');
     this.config_path = this.config_xml();
     this.config = new util.config_parser(this.config_path);
 };
@@ -70,6 +70,7 @@ module.exports.check_requirements = function(project_root) {
 module.exports.prototype = {
 
     update_from_config:function(config) {
+
         //check config parser
         if (config instanceof config_parser) {
         } else throw new Error('update_from_config requires a config_parser object');
@@ -79,74 +80,52 @@ module.exports.prototype = {
 
         //Update app version
         var version = config.version();
-        manifest.find('.//App').attrib.Version = version;
-
-        // Update app name by editing app title in Properties\WMAppManifest.xml
-        var name = config.name();
-        var prev_name = manifest.find('.//App[@Title]')['attrib']['Title'];
-        if(prev_name != name) {
-            //console.log("Updating app name from " + prev_name + " to " + name);
-            manifest.find('.//App').attrib.Title = name;
-            manifest.find('.//App').attrib.Publisher = name + " Publisher";
-            manifest.find('.//App').attrib.Author = name + " Author";
-            manifest.find('.//PrimaryToken').attrib.TokenID = name;
-            //update name of sln and jsproj.
-            name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a valid name
-            prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_');
-            // TODO: might return .sln.user? (generated file)
-            var sln_name = fs.readdirSync(this.windows8_proj_dir).filter(function(e) {
-                    return e.match(/\.sln$/i);
-                })[0];
-            var sln_path = path.join(this.windows8_proj_dir, sln_name);
-            var sln_file = fs.readFileSync(sln_path, 'utf-8');
-            var name_regex = new RegExp(prev_name, "g");
-            fs.writeFileSync(sln_path, sln_file.replace(name_regex, name), 'utf-8');
-            shell.mv('-f', this.jsproj_path, path.join(this.windows8_proj_dir, name + '.jsproj'));
-            this.jsproj_path = path.join(this.windows8_proj_dir, name + '.jsproj');
-            shell.mv('-f', sln_path, path.join(this.windows8_proj_dir, name + '.sln'));
-            this.sln_path    = path.join(this.windows8_proj_dir, name + '.sln');
+        var identityNode = manifest.find('.//Identity');
+        if(identityNode) {
+            var appVersion = identityNode['attrib']['Version'];
+            if(appVersion != version) {
+                identityNode['attrib']['Version'] = version;
+            }
         }
 
-        // Update package name by changing:
-        /*  - CordovaAppProj.jsproj
-         *  - MainPage.xaml
-         *  - MainPage.xaml.cs
-         *  - App.xaml
-         *  - App.xaml.cs
-         */
-         var pkg = config.packageName();
-         var jsproj = xml.parseElementtreeSync(this.jsproj_path);
-         prev_name = jsproj.find('.//RootNamespace').text;
-         if(prev_name != pkg) {
-            //console.log("Updating package name from " + prev_name + " to " + pkg);
-            //CordovaAppProj.jsproj
-            jsproj.find('.//RootNamespace').text = pkg;
-            jsproj.find('.//AssemblyName').text = pkg;
-            jsproj.find('.//XapFilename').text = pkg + '.xap';
-            jsproj.find('.//SilverlightAppEntry').text = pkg + '.App';
-            fs.writeFileSync(this.jsproj_path, jsproj.write({indent: 4}), 'utf-8');
-            //MainPage.xaml
-            var mainPageXAML = xml.parseElementtreeSync(path.join(this.windows8_proj_dir, 'MainPage.xaml'));
-            mainPageXAML.getroot().attrib['x:Class'] = pkg + '.MainPage';
-            fs.writeFileSync(path.join(this.windows8_proj_dir, 'MainPage.xaml'), mainPageXAML.write({indent: 4}), 'utf-8');
-            //MainPage.xaml.cs
-            var mainPageCS = fs.readFileSync(path.join(this.windows8_proj_dir, 'MainPage.xaml.cs'), 'utf-8');
-            var namespaceRegEx = new RegExp('namespace ' + prev_name);
-            fs.writeFileSync(path.join(this.windows8_proj_dir, 'MainPage.xaml.cs'), mainPageCS.replace(namespaceRegEx, 'namespace ' + pkg), 'utf-8');
-            //App.xaml
-            var appXAML = xml.parseElementtreeSync(path.join(this.windows8_proj_dir, 'App.xaml'));
-            appXAML.getroot().attrib['x:Class'] = pkg + '.App';
-            fs.writeFileSync(path.join(this.windows8_proj_dir, 'App.xaml'), appXAML.write({indent: 4}), 'utf-8');
-            //App.xaml.cs
-            var appCS = fs.readFileSync(path.join(this.windows8_proj_dir, 'App.xaml.cs'), 'utf-8');
-            fs.writeFileSync(path.join(this.windows8_proj_dir, 'App.xaml.cs'), appCS.replace(namespaceRegEx, 'namespace ' + pkg), 'utf-8');
-         }
+        // update name ( windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
+        var name = config.name();
+        var app = manifest.find('.//Application');
+        if(app) {
+
+            var appId = app['attrib']['Id'];
+
+            if(appId != name) {
+                app['attrib']['Id'] = name;
+            }
+
+            var visualElems = app['VisualElements'];
+            if(visualElems) {
+                var displayName = visualElems['attrib']['DisplayName'];
+                if(displayName != name) {
+                    visualElems['attrib']['DisplayName'] = name;
+                }
+            }
+            else {
+                throw new Error('update_from_config expected a valid package.appxmanifest' +
+                                ' with a <VisualElements> node');
+            }
+        }
+        else {
+            throw new Error('update_from_config expected a valid package.appxmanifest' +
+                            ' with a <Application> node');
+        }
+
+
+
 
          // Update content (start page) element
          this.config.content(config.content());
 
          //Write out manifest
          fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
+
+         console.log("returning");
     },
     // Returns the platform-specific www directory.
     www_dir:function() {
@@ -175,12 +154,11 @@ module.exports.prototype = {
         // copy all files from merges directories (generic first, then specific)
         this.copy_merges('windows8');
 
-
         // copy over windows8 lib's cordova.js
         var lib_path = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
         var custom_path = config.has_custom_path(project_root, 'windows8');
         if (custom_path) lib_path = custom_path;
-        var cordovajs_path = path.join(lib_path, 'common', 'www', 'cordova.js');
+        var cordovajs_path = path.join(lib_path, 'windows8', "template", 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
         this.update_jsproj();
     },
