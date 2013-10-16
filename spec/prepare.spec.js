@@ -56,6 +56,7 @@ describe('prepare command', function() {
             parsers[p] = jasmine.createSpy(p + ' update_project').andReturn(Q());
             spyOn(platforms[p], 'parser').andReturn({
                 update_project:parsers[p],
+                update_www: jasmine.createSpy(p + ' update_www'),
                 www_dir:function() { return path.join(project_dir, 'platforms', p, 'www'); },
                 config_xml: function () { return path.join(project_dir, "platforms", p, "www", "config.xml");}
             });
