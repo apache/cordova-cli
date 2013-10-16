@@ -28,9 +28,9 @@ module.exports = {
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-android.git',
         version: '3.0.0'
     },
-    'amazon' : {
+    'amazon-fireos' : {
         parser : require('./src/metadata/amazon_parser'),
-        url    : '../Cordova-AmazonWebView',
+        url    : '~/Dev/cordova-awv/Cordova-AmazonWebView',
         version: '3.0.0'
     },
     'wp7' : {

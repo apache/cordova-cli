@@ -57,7 +57,7 @@ module.exports.check_requirements = function(project_root, callback) {
                 if (custom_path) {
                     framework_path = path.resolve(path.join(custom_path, 'framework'));
                 } else {
-                    framework_path = path.join(util.libDirectory, 'amazon', 'cordova', require('../../platforms').amazon.version, 'framework');
+                    framework_path = path.join(util.libDirectory, 'amazon-fireos', 'cordova', require('../../platforms').amazon.version, 'framework');
                 }
                 var cmd = 'android update project -p "' + framework_path  + '" -t android-17';
                 events.emit('log', 'Running "' + cmd + '" (output to follow)...');
@@ -169,12 +169,12 @@ module.exports.prototype = {
         shell.cp('-rf', www, platformWww);
 
         // write out android lib's cordova.js
-        var custom_path = project_config.has_custom_path(projectRoot, 'amazon');
+        var custom_path = project_config.has_custom_path(projectRoot, 'amazon-fireos');
         var jsPath;
         if (custom_path) {
             jsPath = path.resolve(path.join(custom_path, 'framework', 'assets', 'www', 'cordova.js'));
         } else {
-            jsPath = path.join(util.libDirectory, 'amazon', 'cordova', require('../../platforms').android.version, 'framework', 'assets', 'www', 'cordova.js');
+            jsPath = path.join(util.libDirectory, 'amazon-fireos', 'cordova', require('../../platforms').android.version, 'framework', 'assets', 'www', 'cordova.js');
         }
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
     },
@@ -182,7 +182,7 @@ module.exports.prototype = {
     // update the overrides folder into the www folder
     update_overrides:function() {
         var projectRoot = util.isCordova(this.path);
-        var merges_path = path.join(util.appDir(projectRoot), 'merges', 'amazon');
+        var merges_path = path.join(util.appDir(projectRoot), 'merges', 'amazon-fireos');
         if (fs.existsSync(merges_path)) {
             var overrides = path.join(merges_path, '*');
             shell.cp('-rf', overrides, this.www_dir());
