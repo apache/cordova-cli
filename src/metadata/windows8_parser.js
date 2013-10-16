@@ -120,7 +120,6 @@ module.exports.prototype = {
          //Write out manifest
          fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
 
-         console.log("returning");
     },
     // Returns the platform-specific www directory.
     www_dir:function() {
