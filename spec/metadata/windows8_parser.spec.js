@@ -52,7 +52,7 @@ describe('windows8 project parser', function() {
             expect(function() {
                 var p = new platforms.windows8.parser(proj);
                 expect(p.windows8_proj_dir).toEqual(proj);
-                expect(p.manifest_path).toEqual(path.join(proj, 'Properties', 'WMAppManifest.xml'));
+                expect(p.manifest_path).toEqual(path.join(proj, 'package.appxmanifest'));
             }).not.toThrow();
         });
     });
@@ -104,8 +104,16 @@ describe('windows8 project parser', function() {
             var et, xml, find, write_xml, root, cfg, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
             beforeEach(function() {
                 find_obj = {
-                    text:'hi',
-                    attrib:{Title:'old'}
+                    text:'.//Application',
+                    attrib:{
+                        Id:'old',
+                        Version:'0.0.0.0'
+                    },
+                    VisualElements:{
+                        attrib:{
+                            DisplayName:"old"
+                        }
+                    }
                 };
                 root_obj = {
                     attrib:{
@@ -149,22 +157,26 @@ describe('windows8 project parser', function() {
                 readdir.andReturn(['test.sln']);
             });
 
-            it('should write out the app name to wmappmanifest.xml', function() {
+            it('should write out the app name to package.appxmanifest', function() {
                 p.update_from_config(cfg);
-                expect(find_obj.attrib.Title).toEqual('testname');
+                expect(find_obj.attrib.Id).toEqual('testname');
             });
-            it('should write out the app id to jsproj file', function() {
-                p.update_from_config(cfg);
-                expect(find_obj.text).toContain('testpkg');
-            });
-            it('should write out the app version to wmappmanifest.xml', function() {
+
+            // This test removed (jm) does not seem to be valid in winjs land.
+            // it('should write out the app id to jsproj file', function() {
+            //     p.update_from_config(cfg);
+            //     expect(find_obj.text).toContain('testpkg');
+            // });
+
+            it('should write out the app version to package.appxmanifest', function() {
                 p.update_from_config(cfg);
                 expect(find_obj.attrib.Version).toEqual('one point oh');
             });
-            it('should update the content element (start page)', function() {
+           it('should update the content element (start page)', function() {
                 p.update_from_config(cfg);
                 expect(cfg_content).toHaveBeenCalledWith('index.html');
             });
+
         });
         describe('www_dir method', function() {
             it('should return www', function() {
