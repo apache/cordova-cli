@@ -21,18 +21,19 @@ var cordova_util      = require('./util'),
     child_process     = require('child_process'),
     hooker            = require('./hooker'),
     events            = require('./events'),
-    Q                 = require('q');
+    Q                 = require('q'),
+    MAX_BUFFER        = 500*1024;
 
 // Returns a promise.
 function shell_out_to_build(projectRoot, platform, options) {
     var cmd = '"' + path.join(projectRoot, 'platforms', platform, 'cordova', 'build') + (options.length ? '" ' + options.join(" ") : '"');
     events.emit('log', 'Compiling ' + platform + ' project.');
     var d = Q.defer();
-    child_process.exec(cmd, function(err, stdout, stderr) {
+    child_process.exec(cmd, {maxBuffer: MAX_BUFFER}, function(err, stdout, stderr) {
         events.emit('verbose', stdout);
         events.emit('verbose', stderr);
         if (err) {
-            d.reject(new Error('An error occurred while building the ' + platform + ' project. ' + stderr));
+            d.reject(new Error('An error occurred while building the ' + platform + ' project. ' + stderr + err.message));
         } else {
             events.emit('log', 'Platform "' + platform + '" compiled successfully.');
             d.resolve();

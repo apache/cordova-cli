@@ -22,7 +22,8 @@ var cordova_util      = require('./util'),
     events            = require('./events'),
     Q                 = require('q'),
     child_process     = require('child_process'),
-    DEFAULT_OPTIONS   = ["--device"];
+    DEFAULT_OPTIONS   = ["--device"],
+    MAX_BUFFER        = 500*1024;
 
 // Returns a promise.
 function shell_out_to_run(projectRoot, platform, options) {
@@ -46,10 +47,10 @@ function shell_out_to_run(projectRoot, platform, options) {
     events.emit('log', 'Running app on ' + platform);
     events.emit('verbose', 'Run command: "' + cmd + '" (output to follow)');
     var d = Q.defer();
-    child_process.exec(cmd, function(err, output, stderr) {
+    child_process.exec(cmd, {maxBuffer: MAX_BUFFER}, function(err, output, stderr) {
         events.emit('verbose', output);
         if (err) {
-            d.reject(new Error('An error occurred while running the ' + platform + ' project. ' + output + stderr));
+            d.reject(new Error('An error occurred while running the ' + platform + ' project. ' + output + stderr + err.message));
         } else {
             events.emit('log', 'Platform "' + platform + '" ran successfully.');
             d.resolve();
