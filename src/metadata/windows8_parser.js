@@ -49,15 +49,18 @@ module.exports.check_requirements = function(project_root, callback) {
     var custom_path = config.has_custom_path(project_root, 'windows8');
     if (custom_path) lib_path = custom_path;
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
-    events.emit('log', 'Running "' + command + '" (output to follow)');
-    shell.exec(command, {silent:true, async:true}, function(code, output) {
-        events.emit('log', output);
-        if (code != 0) {
-            callback(output);
+    events.emit('verbose', 'Running "' + command + '" (output to follow)');
+    var d = Q.defer();
+    
+    child_process.exec(command, function(err, output, stderr) {
+        events.emit('verbose', output);
+        if (err) {
+            d.reject(new Error('Error while checking requirements: ' + output + stderr));
         } else {
-            callback(false);
+            d.resolve();
         }
     });
+    return d.promise;
 };
 
 module.exports.prototype = {
@@ -82,26 +85,31 @@ module.exports.prototype = {
 
         // update name ( windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
         var name = config.name();
-        var prev_name = manifest.find('.//App[@Title]')['attrib']['Title'];
-        if(prev_name != name) {
-            //console.log("Updating app name from " + prev_name + " to " + name);
-            manifest.find('.//App').attrib.Title = name;
-            manifest.find('.//App').attrib.Publisher = name + " Publisher";
-            manifest.find('.//App').attrib.Author = name + " Author";
-            manifest.find('.//PrimaryToken').attrib.TokenID = name;
-            //update name of sln and jsproj.
-            name = name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_'); //make it a ligitamate name
-            prev_name = prev_name.replace(/(\.\s|\s\.|\s+|\.+)/g, '_');
-            // TODO: might return .sln.user? (generated file)
-            var sln_name = fs.readdirSync(this.windows8_proj_dir).filter(function(e) { return e.match(/\.sln$/i); })[0];
-            var sln_path = path.join(this.windows8_proj_dir, sln_name);
-            var sln_file = fs.readFileSync(sln_path, 'utf-8');
-            var name_regex = new RegExp(prev_name, "g");
-            fs.writeFileSync(sln_path, sln_file.replace(name_regex, name), 'utf-8');
-            shell.mv('-f', this.jsproj_path, path.join(this.windows8_proj_dir, name + '.jsproj'));
-            this.jsproj_path = path.join(this.windows8_proj_dir, name + '.jsproj');
-            shell.mv('-f', sln_path, path.join(this.windows8_proj_dir, name + '.sln'));
-            this.sln_path    = path.join(this.windows8_proj_dir, name + '.sln');
+        var app = manifest.find('.//Application');
+        if(app) {
+
+            var appId = app['attrib']['Id'];
+
+            if(appId != name) {
+                app['attrib']['Id'] = name;
+            }
+
+            var visualElems = manifest.find('.//VisualElements');
+
+            if(visualElems) {
+                var displayName = visualElems['attrib']['DisplayName'];
+                if(displayName != name) {
+                    visualElems['attrib']['DisplayName'] = name;
+                }
+            }
+            else {
+                throw new Error('update_from_config expected a valid package.appxmanifest' +
+                                ' with a <VisualElements> node');
+            }
+        }
+        else {
+            throw new Error('update_from_config expected a valid package.appxmanifest' +
+                            ' with a <Application> node');
         }
 
          // Update content (start page) element
