@@ -49,15 +49,18 @@ module.exports.check_requirements = function(project_root, callback) {
     var custom_path = config.has_custom_path(project_root, 'windows8');
     if (custom_path) lib_path = custom_path;
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
-    events.emit('log', 'Running "' + command + '" (output to follow)');
-    shell.exec(command, {silent:true, async:true}, function(code, output) {
-        events.emit('log', output);
-        if (code != 0) {
-            callback(output);
+    events.emit('verbose', 'Running "' + command + '" (output to follow)');
+    var d = Q.defer();
+    
+    child_process.exec(command, function(err, output, stderr) {
+        events.emit('verbose', output);
+        if (err) {
+            d.reject(new Error('Error while checking requirements: ' + output + stderr));
         } else {
-            callback(false);
+            d.resolve();
         }
     });
+    return d.promise;
 };
 
 module.exports.prototype = {
@@ -91,7 +94,8 @@ module.exports.prototype = {
                 app['attrib']['Id'] = name;
             }
 
-            var visualElems = app['VisualElements'];
+            var visualElems = manifest.find('.//VisualElements');
+
             if(visualElems) {
                 var displayName = visualElems['attrib']['DisplayName'];
                 if(displayName != name) {
