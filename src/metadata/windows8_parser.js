@@ -56,6 +56,7 @@ module.exports.check_requirements = function(project_root) {
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
     events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
+    
     child_process.exec(command, function(err, output, stderr) {
         events.emit('verbose', output);
         if (err) {
@@ -100,7 +101,6 @@ module.exports.prototype = {
             }
 
             var visualElems = manifest.find('.//VisualElements');
-            console.log(visualElems);
 
             if(visualElems) {
                 var displayName = visualElems['attrib']['DisplayName'];
