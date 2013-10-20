@@ -43,6 +43,7 @@ describe('prepare command', function() {
         plugman_prepare,
         find_plugins,
         plugman_get_json,
+        cp,
         load;
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
@@ -65,6 +66,7 @@ describe('prepare command', function() {
         find_plugins = spyOn(util, 'findPlugins').andReturn([]);
         plugman_get_json = spyOn(plugman.config_changes, 'get_platform_json').andReturn({});
         load = spyOn(lazy_load, 'based_on_config').andReturn(Q());
+        cp = spyOn(shell, 'cp').andReturn(true);
     });
 
     describe('failure', function() {
