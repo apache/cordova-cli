@@ -174,6 +174,8 @@ module.exports.prototype = {
     },
     // updates the csproj file to explicitly list all www content.
     update_csproj:function() {
+        console.log('csproj');
+        console.log(this.csproj_path);
         var csproj_xml = xml.parseElementtreeSync(this.csproj_path);
         // remove any previous references to the www files
         var item_groups = csproj_xml.findall('ItemGroup');
@@ -248,7 +250,6 @@ module.exports.prototype = {
         } catch(e) {
             return Q.reject(e);
         }
-
         // trigger an event in case anyone needs to modify the contents of the www folder before we package it.
         var projectRoot = util.isCordova(process.cwd());
         var hooks = new hooker(projectRoot);

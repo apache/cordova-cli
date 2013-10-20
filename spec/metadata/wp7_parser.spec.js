@@ -215,17 +215,18 @@ describe('wp7 project parser', function() {
             });
         });
         describe('update_project method', function() {
-            var config, www, overrides, staging, svn;
+            var config, www, overrides, staging, svn, cfg, csproj;
             beforeEach(function() {
                 config = spyOn(p, 'update_from_config');
                 www = spyOn(p, 'update_www');
                 staging = spyOn(p, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
+                csproj = spyOn(p, 'update_csproj');
             });
             it('should call update_from_config', function(done) {
-                wrapper(p.update_project(), done, function() {
+                wrapper(p.update_project(), done, function(){
                     expect(config).toHaveBeenCalled();
-                });
+                })
             });
             it('should throw if update_from_config throws', function(done) {
                 var err = new Error('uh oh!');
@@ -236,7 +237,7 @@ describe('wp7 project parser', function() {
             });
             it('should call update_www', function(done) {
                 wrapper(p.update_project(), done, function() {
-                    expect(www).toHaveBeenCalled();
+                    expect(www).not.toHaveBeenCalled();
                 });
             });
             it('should call update_staging', function(done) {
