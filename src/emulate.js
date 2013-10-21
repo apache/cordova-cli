@@ -22,7 +22,8 @@ var cordova_util      = require('./util'),
     events            = require('./events'),
     hooker            = require('./hooker'),
     Q                 = require('q'),
-    DEFAULT_OPTIONS   = ["--emulator"];
+    DEFAULT_OPTIONS   = ["--emulator"],
+    MAX_BUFFER        = 500*1024;
 
 // Returns a promise.
 function shell_out_to_emulate(root, platform, options) {
@@ -30,10 +31,10 @@ function shell_out_to_emulate(root, platform, options) {
     var cmd = '"' + path.join(root, 'platforms', platform, 'cordova', 'run') + '" ' + options.join(" ");
     events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '"');
     var d = Q.defer();
-    child_process.exec(cmd, function(err, stdout, stderr) {
+    child_process.exec(cmd, {maxBuffer: MAX_BUFFER}, function(err, stdout, stderr) {
         events.emit('verbose', stdout + stderr);
         if (err) {
-            d.reject(new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + stdout + stderr));
+            d.reject(new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + stdout + stderr + err.message));
         } else {
             events.emit('log', 'Platform "' + platform + '" deployed to emulator.');
             d.resolve();
