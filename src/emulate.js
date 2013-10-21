@@ -37,14 +37,9 @@ function shell_out_to_emulate(projectRoot, platform, options) {
         errors = "",
         child;
 
-    if (os.platform() === 'win32') {
-        args = ['/c',cmd].concat(args);
-        cmd = 'cmd';
-    }
-
     events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '" ' + args.join(" "));
 
-    //using spawn instead of exec to avoid errors with stdout on maxBuffer
+    //CB-5125 using spawn instead of exec to avoid errors with stdout on maxBuffer
     child = child_process.spawn(cmd, args);
 
     child.stdout.setEncoding('utf8');
@@ -59,12 +54,12 @@ function shell_out_to_emulate(projectRoot, platform, options) {
     });
 
     child.on('close', function (code) {
-        events.emit('verbose', "child_process.spawn(" + cmd + "," + "[" + args.join(", ") + "]) = " + code);
+        events.emit('verbose', "child_process.spawn(" + cmd + "," + args.join(" ") + ") = " + code);
         if (code === 0) {
             events.emit('log', 'Platform "' + platform + '" deployed to emulator.');
             d.resolve();
         } else {
-            d.reject(new Error('An error occurred while emulating/deploying the ' + platform + ' project. ' + errors));
+            d.reject(new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + errors));
         }
     });
 

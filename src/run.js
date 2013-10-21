@@ -37,14 +37,25 @@ function shell_out_to_run(projectRoot, platform, options) {
         errors = "",
         child;
 
-    if (os.platform() === 'win32') {
-        args = ['/c',cmd].concat(args);
-        cmd = 'cmd';
-    }
-
     events.emit('log', 'Running app on platform "' + platform + '" via command "' + cmd + '" ' + args.join(" "));
 
-    //using spawn instead of exec to avoid errors with stdout on maxBuffer
+    // TODO: inconsistent API for BB10 run command
+/*  if (platform == 'blackberry') {
+        var bb_project = path.join(projectRoot, 'platforms', 'blackberry')
+        var project = new platforms.blackberry.parser(bb_project);
+        if (project.has_device_target()) {
+            var bb_config = project.get_cordova_config();
+            var device = project.get_device_targets()[0].name;
+            cmd = '"' + path.join(bb_project, 'cordova', 'run') + '" --target=' + device + ' -k ' + bb_config.signing_password;
+        } else {
+            var err = new Error('No BlackBerry device targets defined. If you want to run `run` with BB10, please add a device target. For more information run "' + path.join(bb_project, 'cordova', 'target') + '" -h');
+            if (error_callback) error_callback(err);
+            else throw err;
+        }
+    }
+*/
+
+    //CB-5125 using spawn instead of exec to avoid errors with stdout on maxBuffer
     child = child_process.spawn(cmd, args);
 
     child.stdout.setEncoding('utf8');
@@ -59,12 +70,12 @@ function shell_out_to_run(projectRoot, platform, options) {
     });
 
     child.on('close', function (code) {
-        events.emit('verbose', "child_process.spawn(" + cmd + "," + "[" + args.join(", ") + "]) = " + code);
+        events.emit('verbose', "child_process.spawn(" + cmd + "," + args.join(" ") + ") = " + code);
         if (code === 0) {
             events.emit('log', 'Platform "' + platform + '" ran successfully.');
             d.resolve();
         } else {
-            d.reject(new Error('An error occurred while running the ' + platform + ' project.' + errors));
+            d.reject(new Error('n error occurred while running the ' + platform + ' project.' + errors));
         }
     });
 
