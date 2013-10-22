@@ -67,7 +67,7 @@ module.exports = function prepare(options) {
         return Q.all(options.platforms.map(function(platform) {
             var platformPath = path.join(projectRoot, 'platforms', platform);
             return lazy_load.based_on_config(projectRoot, platform)
-            .then(function() {
+            .then(function(libDir) {
                 var parser = new platforms[platform].parser(platformPath),
                     defaults_xml_path = path.join(platformPath, "cordova", "defaults.xml");
                 //If defaults.xml is present, overwrite platform config.xml with it
@@ -85,7 +85,7 @@ module.exports = function prepare(options) {
                 }
 
                 // Replace the existing web assets with the app master versions
-                parser.update_www();
+                parser.update_www(libDir);
 
                 // Call plugman --prepare for this platform. sets up js-modules appropriately.
                 var plugins_dir = path.join(projectRoot, 'plugins');

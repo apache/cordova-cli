@@ -36,8 +36,8 @@ describe('create command', function () {
         config_read = spyOn(config, 'read').andReturn({});
         config_write = spyOn(config, 'write').andReturn({});
         exists = spyOn(fs, 'existsSync').andReturn(false);
-        load_cordova = spyOn(lazy_load, 'cordova').andReturn(Q());
-        load_custom = spyOn(lazy_load, 'custom').andReturn(Q());
+        load_cordova = spyOn(lazy_load, 'cordova').andReturn(Q('lib/dir'));
+        load_custom = spyOn(lazy_load, 'custom').andReturn(Q('lib/dir'));
         package = jasmine.createSpy('config.packageName');
         name = jasmine.createSpy('config.name');
         parser = spyOn(util, 'config_parser').andReturn({

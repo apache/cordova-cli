@@ -70,7 +70,7 @@ module.exports.prototype = {
         return path.join(this.path, 'www');
     },
 
-    update_www: function() {
+    update_www: function(libDir) {
         var projectRoot = util.isCordova(this.path);
         var projectWww = util.projectWww(projectRoot);
         var platformWww = this.www_dir();
@@ -78,13 +78,8 @@ module.exports.prototype = {
         shell.rm('-rf', platformWww);
         shell.cp('-rf', projectWww, this.path);
 
-        var customPath = config.has_custom_path(projectRoot, 'firefoxos');
-        var libPath = (customPath ?
-                       customPath :
-                       path.join(util.libDirectory, 'firefoxos', 'cordova',
-                                 require('../../platforms').ios.version));
         shell.cp('-f',
-                 path.join(libPath, 'cordova-lib', 'cordova.js'),
+                 path.join(libDir, 'cordova-lib', 'cordova.js'),
                  path.join(platformWww, 'cordova.js'));
     },
 

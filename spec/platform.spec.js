@@ -54,8 +54,24 @@ describe('platform command', function() {
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
         util.libDirectory = path.join('HOMEDIR', '.cordova', 'lib');
         config_read = spyOn(config, 'read').andReturn({});
-        load = spyOn(lazy_load, 'based_on_config').andReturn(Q());
-        load_custom = spyOn(lazy_load, 'custom').andReturn(Q());
+
+        fakeLazyLoad = function(id, platform, version) {
+            if (platform == 'wp7' || platform == 'wp8') {
+                return Q(path.join('lib', 'wp', id, version, platform));
+            } else if (platform == 'windows8') {
+                return Q(path.join('lib', 'windows8', id, version, 'windows8'));
+            } else {
+                return Q(path.join('lib', platform, id, version));
+            }
+        };
+        lazyLoadVersion = '3.1.0';
+        load = spyOn(lazy_load, 'based_on_config').andCallFake(function(root, platform) {
+            return fakeLazyLoad('cordova', platform, lazyLoadVersion);
+        });
+        load_custom = spyOn(lazy_load, 'custom').andCallFake(function(url, id, platform, version) {
+            return fakeLazyLoad(id, platform, version);
+        });
+
         rm = spyOn(shell, 'rm');
         mkdir = spyOn(shell, 'mkdir');
         existsSync = spyOn(fs, 'existsSync').andReturn(false);
@@ -245,14 +261,14 @@ describe('platform command', function() {
             if(!require('os').platform().match(/^win/)) {
                 describe('success', function() {
                     it('should shell out to the platform update script', function(done) {
-                        var oldVersion = platforms['ios'].version;
-                        platforms['ios'].version = '1.0.0';
+                        var oldVersion = lazyLoadVersion;
+                        lazyLoadVersion = '1.0.0';
                         cordova.raw.platform('update', ['ios']).then(function() {
-                            expect(exec).toHaveBeenCalledWith('HOMEDIR/.cordova/lib/ios/cordova/1.0.0/bin/update "some/path/platforms/ios"', jasmine.any(Function));
+                            expect(exec).toHaveBeenCalledWith('lib/ios/cordova/1.0.0/bin/update "some/path/platforms/ios"', jasmine.any(Function));
                         }, function(err) {
                             expect(err).toBeUndefined();
                         }).fin(function() {
-                            platforms['ios'].version = oldVersion;
+                            lazyLoadVersion = oldVersion;
                             done();
                         });
                     });

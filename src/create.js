@@ -101,8 +101,25 @@ module.exports = function create (dir, id, name, cfg) {
     // Write out .cordova/config.json file.
     var config_json = config(dir, cfg);
 
-    // Returns a promise.
-    var finalize = function(www_lib) {
+    var p;
+    if (config_json.lib && config_json.lib.www) {
+        events.emit('log', 'Using custom www assets ('+config_json.lib.www.id+').');
+        p = lazy_load.custom(config_json.lib.www.uri, config_json.lib.www.id, 'www', config_json.lib.www.version)
+        .then(function(dir) {
+            events.emit('verbose', 'Copying custom www assets into "' + www_dir + '"');
+            return dir;
+        });
+    } else {
+        // Nope, so use stock cordova-hello-world-app one.
+        events.emit('verbose', 'Using stock cordova hello-world application.');
+        p = lazy_load.cordova('www')
+        .then(function(dir) {
+            events.emit('verbose', 'Copying stock Cordova www assets into "' + www_dir + '"');
+            return dir;
+        });
+    }
+
+    return p.then(function(www_lib) {
         // Keep going into child "www" folder if exists in stock app package.
         while (fs.existsSync(path.join(www_lib, 'www'))) {
             www_lib = path.join(www_lib, 'www');
@@ -120,23 +137,5 @@ module.exports = function create (dir, id, name, cfg) {
         config.packageName(id);
         config.name(name);
         return Q();
-    };
-
-    // Check if www assets to use was overridden.
-    if (config_json.lib && config_json.lib.www) {
-        events.emit('log', 'Using custom www assets ('+config_json.lib.www.id+').');
-        return lazy_load.custom(config_json.lib.www.uri, config_json.lib.www.id, 'www', config_json.lib.www.version)
-        .then(function() {
-            events.emit('verbose', 'Copying custom www assets into "' + www_dir + '"');
-            return finalize(path.join(util.libDirectory, 'www', config_json.lib.www.id, config_json.lib.www.version));
-        });
-    } else {
-        // Nope, so use stock cordova-hello-world-app one.
-        events.emit('verbose', 'Using stock cordova hello-world application.');
-        return lazy_load.cordova('www')
-        .then(function() {
-            events.emit('verbose', 'Copying stock Cordova www assets into "' + www_dir + '"');
-            return finalize(path.join(util.libDirectory, 'www', 'cordova', platforms.www.version));
-        });
-    }
+    });
 };

@@ -132,7 +132,8 @@ module.exports.prototype = {
         return this.android_config;
     },
 
-    update_www:function() {
+    // Takes the directory where the lazy-loaded platform can be found.
+    update_www:function(libDir) {
         var projectRoot = util.isCordova(this.path);
         var www = util.projectWww(projectRoot);
         var platformWww = path.join(this.path, 'assets');
@@ -142,13 +143,7 @@ module.exports.prototype = {
         shell.cp('-rf', www, platformWww);
 
         // write out android lib's cordova.js
-        var custom_path = project_config.has_custom_path(projectRoot, 'android');
-        var jsPath;
-        if (custom_path) {
-            jsPath = path.resolve(path.join(custom_path, 'framework', 'assets', 'www', 'cordova.js'));
-        } else {
-            jsPath = path.join(util.libDirectory, 'android', 'cordova', require('../../platforms').android.version, 'framework', 'assets', 'www', 'cordova.js');
-        }
+        var jsPath = path.resolve(path.join(libDir, 'framework', 'assets', 'www', 'cordova.js'));
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
     },
 

@@ -155,7 +155,7 @@ module.exports.prototype = {
         }
     },
     // copies the app www folder into the wp8 project's www folder and updates the csproj file.
-    update_www:function() {
+    update_www:function(libDir) {
         var project_root = util.isCordova(this.wp8_proj_dir);
         var project_www = util.projectWww(project_root);
         // remove stock platform assets
@@ -168,10 +168,7 @@ module.exports.prototype = {
         this.copy_merges('wp8');
 
         // copy over wp8 lib's cordova.js
-        var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').wp8.version);
-        var custom_path = config.has_custom_path(project_root, 'wp8');
-        if (custom_path) lib_path = custom_path;
-        var cordovajs_path = path.join(lib_path, 'common', 'www', 'cordova.js');
+        var cordovajs_path = path.join(libDir, 'common', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
         this.update_csproj();
     },

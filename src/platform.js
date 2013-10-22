@@ -71,12 +71,9 @@ module.exports = function platform(command, targets) {
                 return targets.reduce(function(soFar, t) {
                     return soFar.then(function() {
                         return lazy_load.based_on_config(projectRoot, t)
-                        .then(function() {
-                            if (config_json.lib && config_json.lib[t]) {
-                                return call_into_create(t, projectRoot, cfg, config_json.lib[t].id, config_json.lib[t].version, config_json.lib[t].template);
-                            } else {
-                                return call_into_create(t, projectRoot, cfg, 'cordova', platforms[t].version, null);
-                            }
+                        .then(function(libDir) {
+                            var template = config_json.lib && config_json.lib[t] && config_json.lib[t].template || null;
+                            return call_into_create(t, projectRoot, cfg, libDir, template);
                         }, function(err) {
                             throw new Error('Unable to fetch platform ' + t + ': ' + err);
                         });
@@ -122,9 +119,8 @@ module.exports = function platform(command, targets) {
                 return hooks.fire('before_platform_update', opts)
                 .then(function() {
                     return lazy_load.based_on_config(projectRoot, plat);
-                }).then(function() {
-                    var platDir = plat == 'wp7' || plat == 'wp8' ? 'wp' : plat;
-                    var script = path.join(cordova_util.libDirectory, platDir, 'cordova', platforms[plat].version, 'bin', 'update');
+                }).then(function(libDir) {
+                    var script = path.join(libDir, 'bin', 'update');
                     var d = Q.defer();
                     child_process.exec(script + ' "' + path.join(projectRoot, 'platforms', plat) + '"', function(err, stdout, stderr) {
                         if (err) {
@@ -219,7 +215,7 @@ function createOverrides(projectRoot, target) {
 };
 
 // Returns a promise.
-function call_into_create(target, projectRoot, cfg, id, version, template_dir) {
+function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
     var output = path.join(projectRoot, 'platforms', target);
 
     // Check if output directory already exists.
@@ -232,16 +228,7 @@ function call_into_create(target, projectRoot, cfg, id, version, template_dir) {
         .then(function() {
             // Create a platform app using the ./bin/create scripts that exist in each repo.
             // Run platform's create script
-            var bin = path.join(cordova_util.libDirectory, target, id, version, 'bin', 'create');
-            if(target == 'wp7') {
-                bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp7', 'bin', 'create');
-            }
-            else if(target == 'wp8') {
-                bin = path.join(cordova_util.libDirectory, 'wp', id, version, 'wp8', 'bin', 'create');
-            }
-            else if(target == 'windows8') {
-                bin = path.join(cordova_util.libDirectory, 'windows8', id, version, 'windows8', 'bin', 'create');
-            }
+            var bin = path.join(libDir, 'bin', 'create');
             var args = (target=='ios') ? '--arc' : '';
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
             var name = cfg.name();
@@ -256,7 +243,7 @@ function call_into_create(target, projectRoot, cfg, id, version, template_dir) {
             child_process.exec(command, function(err, create_output, stderr) {
                 events.emit('verbose', create_output);
                 if (err) {
-                    d.reject(new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output));
+                    d.reject(new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output + '\n' + stderr));
                 } else {
                     d.resolve(require('../cordova').raw.prepare(target));
                 }

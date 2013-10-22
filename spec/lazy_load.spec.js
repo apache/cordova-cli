@@ -36,7 +36,7 @@ describe('lazy_load module', function() {
     describe('cordova method (loads stock cordova libs)', function() {
         var custom;
         beforeEach(function() {
-            custom = spyOn(lazy_load, 'custom').andReturn(Q());
+            custom = spyOn(lazy_load, 'custom').andReturn(Q('lib/dir'));
         });
         it('should throw if platform is not a stock cordova platform', function(done) {
             lazy_load.cordova('atari').then(function() {
@@ -46,8 +46,9 @@ describe('lazy_load module', function() {
             }).fin(done);
         });
         it('should invoke lazy_load.custom with appropriate url, platform, and version as specified in platforms manifest', function(done) {
-            lazy_load.cordova('android').then(function() {
+            lazy_load.cordova('android').then(function(dir) {
                 expect(custom).toHaveBeenCalledWith(platforms.android.url + ';a=snapshot;h=' + platforms.android.version + ';sf=tgz', 'cordova', 'android', platforms.android.version);
+                expect(dir).toBeDefined();
                 done();
             });
         });
@@ -147,16 +148,16 @@ describe('lazy_load module', function() {
         });
 
         describe('local paths for libraries', function() {
-            it('should symlink to local path', function(done) {
-                lazy_load.custom('/some/random/lib', 'id', 'X', 'three point five').then(function() {
-                    expect(sym).toHaveBeenCalledWith('/some/random/lib', path.join(util.libDirectory, 'X', 'id', 'three point five'), 'dir');
+            it('should return the local path, no symlink', function(done) {
+                lazy_load.custom('/some/random/lib', 'id', 'X', 'three point five').then(function(dir) {
+                    expect(dir).toEqual('/some/random/lib');
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);
             });
             it('should fire after hook once done', function(done) {
                 lazy_load.custom('/some/random/lib', 'id', 'X', 'three point five').then(function() {
-                    expect(fire).toHaveBeenCalledWith('after_library_download', {platform:'X',url:'/some/random/lib',id:'id',version:'three point five',path:path.join(util.libDirectory, 'X', 'id', 'three point five'), symlink:true});
+                    expect(fire).toHaveBeenCalledWith('after_library_download', {platform:'X',url:'/some/random/lib',id:'id',version:'three point five',path:'/some/random/lib', symlink:false});
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);

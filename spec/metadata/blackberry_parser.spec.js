@@ -180,20 +180,14 @@ describe('blackberry10 project parser', function() {
             });
 
             it('should rm project-level www and cp in platform agnostic www', function() {
-                p.update_www();
+                p.update_www('lib/dir');
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
                 expect(backup_cfg_parser.update).toHaveBeenCalled();
             });
-            it('should copy in a fresh cordova.js from stock cordova lib if no custom lib is specified', function() {
-                p.update_www();
-                expect(cp).toHaveBeenCalledWith('-f', path.join(util.libDirectory, 'blackberry10', 'cordova', platforms.blackberry10.version, 'javascript', 'cordova.blackberry10.js'), path.join(proj, 'platforms', 'blackberry10', 'www', 'cordova.js'));
-            });
-            it('should copy in a fresh cordova.js from custom cordova lib if custom lib is specified', function() {
-                var custom_path = '/custom/path';
-                custom.andReturn(custom_path);
-                p.update_www();
-                expect(cp).toHaveBeenCalledWith('-f', path.join(custom_path, 'javascript', 'cordova.blackberry10.js'), path.join(proj, 'platforms', 'blackberry10', 'www', 'cordova.js'));
+            it('should copy in a fresh cordova.js from given cordova lib', function() {
+                p.update_www(path.join('lib', 'dir'));
+                expect(cp).toHaveBeenCalledWith('-f', path.join('lib', 'dir', 'javascript', 'cordova.blackberry10.js'), path.join(proj, 'platforms', 'blackberry10', 'www', 'cordova.js'));
             });
         });
         describe('update_overrides method', function() {

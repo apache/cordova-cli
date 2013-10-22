@@ -157,7 +157,7 @@ module.exports.prototype = {
         return this.config_path;
     },
 
-    update_www:function() {
+    update_www:function(libDir) {
         var projectRoot = util.isCordova(this.path);
         var www = util.projectWww(projectRoot);
         var project_www = this.www_dir();
@@ -169,11 +169,7 @@ module.exports.prototype = {
         shell.cp('-rf', www, this.path);
 
         // write out proper cordova.js
-        var custom_path = config.has_custom_path(projectRoot, 'ios');
-        var lib_path = path.join(util.libDirectory, 'ios', 'cordova', require('../../platforms').ios.version);
-        if (custom_path) lib_path = custom_path;
-        shell.cp('-f', path.join(lib_path, 'CordovaLib', 'cordova.js'), path.join(project_www, 'cordova.js'));
-
+        shell.cp('-f', path.join(libDir, 'CordovaLib', 'cordova.js'), path.join(project_www, 'cordova.js'));
     },
 
     // update the overrides folder into the www folder

@@ -23,7 +23,6 @@ var path          = require('path'),
     npm           = require('npm'),
     events        = require('./events'),
     request       = require('request'),
-    //http          = require('http'),
     config        = require('./config'),
     hooker        = require('./hooker'),
     https         = require('follow-redirects').https,
@@ -34,7 +33,7 @@ var path          = require('path'),
     util          = require('./util');
 
 module.exports = {
-    // Returns a promise.
+    // Returns a promise for the path to the lazy-loaded directory.
     cordova:function lazy_load(platform) {
         if (!(platform in platforms)) {
             return Q.reject(new Error('Cordova library "' + platform + '" not recognized.'));
@@ -43,12 +42,13 @@ module.exports = {
         var url = platforms[platform].url + ';a=snapshot;h=' + platforms[platform].version + ';sf=tgz';
         return module.exports.custom(url, 'cordova', platform, platforms[platform].version);
     },
+    // Returns a promise for the path to the lazy-loaded directory.
     custom:function(url, id, platform, version) {
         var download_dir = (platform == 'wp7' || platform == 'wp8' ? path.join(util.libDirectory, 'wp', id, version) :
                                                                      path.join(util.libDirectory, platform, id, version));
         if (fs.existsSync(download_dir)) {
             events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
-            return Q();
+            return Q(download_dir);
         }
         events.emit('log', 'Downloading ' + id + ' library for ' + platform + '...');
         return hooker.fire('before_library_download', {
@@ -113,24 +113,22 @@ module.exports = {
                     });
                 });
             } else {
-                // local path
-                // symlink instead of copying
-                // TODO: Unixy platforms only! We should fall back to copying on Windows.
-                shell.mkdir('-p', path.join(download_dir, '..'));
-                fs.symlinkSync((uri.protocol && uri.protocol[1] == ':' ? uri.href : uri.path), download_dir, 'dir');
+                // Local path.
+                // Do nothing here; users of this code should be using the returned path.
+                download_dir = uri.protocol && uri.protocol[1] == ':' ? uri.href : uri.path;
                 d.resolve(hooker.fire('after_library_download', {
                     platform:platform,
                     url:url,
                     id:id,
                     version:version,
                     path:download_dir,
-                    symlink:true
+                    symlink:false
                 }));
             }
-            return d.promise;
+            return d.promise.then(function() { return download_dir; });
         });
     },
-    // Returns a promise.
+    // Returns a promise for the path to the lazy-loaded directory.
     based_on_config:function(project_root, platform) {
         var custom_path = config.has_custom_path(project_root, platform);
         if (custom_path) {

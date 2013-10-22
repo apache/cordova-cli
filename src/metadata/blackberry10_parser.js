@@ -83,7 +83,7 @@ module.exports.prototype = {
         return this.config_path;
     },
 
-    update_www:function() {
+    update_www:function(libDir) {
         var projectRoot = util.isCordova(this.path),
             www = util.projectWww(projectRoot),
             platformWww = this.www_dir(),
@@ -97,11 +97,8 @@ module.exports.prototype = {
         //Re-Write config.xml
         platform_cfg_backup.update();
 
-        var custom_path = config.has_custom_path(projectRoot, 'blackberry10');
-        var lib_path = path.join(util.libDirectory, 'blackberry10', 'cordova', require('../../platforms').blackberry10.version);
-        if (custom_path) lib_path = custom_path;
         // add cordova.js
-        shell.cp('-f', path.join(lib_path, 'javascript', 'cordova.blackberry10.js'), path.join(this.www_dir(), 'cordova.js'));
+        shell.cp('-f', path.join(libDir, 'javascript', 'cordova.blackberry10.js'), path.join(this.www_dir(), 'cordova.js'));
     },
 
     // update the overrides folder into the www folder
