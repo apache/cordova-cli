@@ -282,7 +282,8 @@ module.exports.prototype = {
 
     copy_splashes:function(cfg) {
         var projectRoot = util.isCordova(this.path),
-            splashes = cfg.doc.getroot().findall('.//splash'),
+            androidRoot = this.path,
+            splashes = cfg.doc.getroot().findall('.//splash[@gap:platform="android"]'),
             www = path.dirname(cfg.path),
             splash,
             dest,
@@ -294,31 +295,30 @@ module.exports.prototype = {
                 'xhdpi': {dest: 'res/drawable-xhdpi/ic_launcher.png', width: '720' , height: '1280', orientation: 'portrait'},
             };
 
-        for (idx in splashes) {
-            splash = splashes[idx];
+        splashes.forEach(function(splash) {
+            var density = splash.attrib['density'] || splash.attrib['gap:density'];
+            var size = sizeMapping[density];
+            if (!size)
+               return;
 
-            if (splash.attrib['gap:platform'] != 'android')
-               continue;
-
-            if (!sizeMapping[splash.attrib.density])
-               continue;
-
-            dest = path.join(this.path, sizeMapping[splash.attrib.density].dest);
+            dest = path.join(androidRoot, size.dest);
 
             events.emit('log', 'Copying Android splash '.green + path.join(www, splash.attrib.src) + ' to ' + dest);
             shell.cp('-f', path.join(www, splash.attrib.src), dest);
             copied.push(dest);
-        }
+        });
 
-        this.generate_assets(splashes, sizeMapping, copied, cfg);
+        if (splashes.length) {
+            this.generate_assets(splashes, sizeMapping, copied, cfg);
+            update_main_java_forsplash(cfg);
+        }
     },
 
     copy_icons:function(cfg) {
         var projectRoot = util.isCordova(this.path),
-            icons = cfg.doc.getroot().findall('.//icon'),
+            androidRoot = this.path,
+            icons = cfg.doc.getroot().findall('.//icon[@gap:platform="android"]'),
             www = path.dirname(cfg.path),
-            icon,
-            dest,
             copied = [],
             sizeMapping = {
                 'ldpi': {dest: 'res/drawable-ldpi/icon.png', width: '36', height: '36' , orientation: 'portrait'},
@@ -327,25 +327,23 @@ module.exports.prototype = {
                 'xhdpi': {dest: 'res/drawable-xhdpi/icon.png', width: '96', height: '96', orientation: 'portrait'}
             };
 
-        for (idx in icons) {
-            icon = icons[idx];
+        icons.forEach(function(icon) {
+            var density = icon.attrib['density'] || icon.attrib['gap:density'];
+            var size = sizeMapping[density];
+            if (!size)
+               return;
 
-            if (icon.attrib['gap:platform'] != 'android')
-               continue;
-
-            if (!sizeMapping[icon.attrib.density])
-               continue;
-
-            dest = path.join(this.path, sizeMapping[icon.attrib.density].dest);
-            events.emit('log', 'Copying Android icon '.green + path.join(www, icon.attrib.src) + ' to ' + dest);
-            shell.cp('-f', path.join(www, icon.attrib.src), dest);
+            var dest = path.join(androidRoot, size.dest);
+            var src = path.join(www, icon.attrib.src);
+            events.emit('log', 'Copying Android icon '.green + src + ' to ' + dest);
+            shell.cp('-f', src, dest);
             copied.push(dest);
-        }
+        });
 
         this.generate_assets(icons, sizeMapping, copied, cfg);
     },
 
-    fix_android:function(cfg) {
+    update_main_java_forsplash:function(cfg) {
         var androidJavaPath = cfg.packageName(),
             source,
             lines,
@@ -353,10 +351,13 @@ module.exports.prototype = {
             line,
             newLines;
 
+        var project_name = cfg.name();
+        var safe_project_name = project_name.replace(/\W/g, '');
+
         androidJavaPath = androidJavaPath.split('.');
         androidJavaPath.unshift('src');
         androidJavaPath.unshift(this.path);
-        androidJavaPath.push(cfg.name() + '.java');
+        androidJavaPath.push(safe_project_name + '.java');
         androidJavaPath = path.join.apply(path, androidJavaPath);
 
         source = fs.readFileSync(androidJavaPath, 'utf8');
@@ -367,13 +368,12 @@ module.exports.prototype = {
         lines = source.split(/\r\n|\r|\n/);
         newLines = [];
 
-        for (idx in lines) {
-            line = lines[idx];
+        lines.forEach(function(line) {
             if (line.indexOf('.loadUrl') !== -1 && !line.match(/\s*\/\//)) {
                 newLines.push('        super.setIntegerProperty("splashscreen", R.drawable.ic_launcher);')
             }
             newLines.push(line);
-        }
+        });
 
         source = newLines.join("\n");
         fs.writeFileSync(androidJavaPath, source, 'utf8');
@@ -392,7 +392,6 @@ module.exports.prototype = {
         this.update_overrides();
         this.update_staging();
         this.copy_resources(cfg);
-        this.fix_android(cfg);
         // delete any .svn folders copied over
         util.deleteSvnFolders(platformWww);
         if (callback) callback();
