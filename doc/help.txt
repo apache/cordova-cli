@@ -22,7 +22,7 @@ Project-Level Commands
                                                 so that the project is ready to build in each SDK.
     compile [PLATFORM..] ...................... builds the app for specified platforms, or all platforms
     build [PLATFORM...] ....................... shortcut for prepare, then compile
-    emulate [PLATFORM...] ..................... deploys app in specified (or all) platforms' emulator,
+    emulate [PLATFORM...] ..................... deploys app in specified (or all) platform emulator(s),
                                                 opening emulator if necessary
     run [PLATFORM...] ......................... deploys app on specified (or all) platform devices, which
                                                 must be properly connected and configured in each SDK
