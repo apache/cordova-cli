@@ -58,7 +58,7 @@ function shell_out_to_emulate(projectRoot, platform, options) {
             events.emit('log', 'Platform "' + platform + '" deployed to emulator.');
             d.resolve();
         } else {
-            d.reject(new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + errors));
+            d.reject(new Error('An error occurred while emulating/deploying the ' + platform + ' project. ' + errors));
         }
     });
 
