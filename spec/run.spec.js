@@ -29,7 +29,7 @@ var cordova = require('../cordova'),
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
 
 describe('run command', function() {
-    var is_cordova, list_platforms, fire, child, spawn_wrap;
+    var is_cordova, list_platforms, fire, child;
     var project_dir = '/some/path';
     var prepare_spy;
     child = {
@@ -46,21 +46,6 @@ describe('run command', function() {
             setEncoding: function(){},
             on: function(){}
         }
-    };
-    spawn_wrap = function(cmd,args,options){
-        var _cmd = cmd,
-            _args = args;
-
-        if (os.platform() === 'win32') {
-            _args = ['/c',_cmd].concat(_args);
-            _cmd = 'cmd';
-        }
-
-        return {
-                    "cmd": _cmd,
-                    "args": _args,
-                    "options": options
-                };
     };
 
     beforeEach(function() {
@@ -93,12 +78,8 @@ describe('run command', function() {
         it('should run inside a Cordova-based project with at least one added platform and call prepare and shell out to the run script', function(done) {
             cordova.raw.run(['android','ios']).then(function() {
                 expect(prepare_spy).toHaveBeenCalledWith(['android', 'ios']);
-
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'android', 'cordova', 'run'), ['--device']);
-                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
-
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), ['--device']);
-                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
+                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'android', 'cordova', 'run'), ['--device']);
+                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), ['--device']);
 
             }, function(err) {
                 console.log(err);
@@ -108,9 +89,7 @@ describe('run command', function() {
         it('should pass down parameters', function(done) {
             cordova.raw.run({platforms: ['blackberry10'], options:['--password', '1q1q']}).then(function() {
                 expect(prepare_spy).toHaveBeenCalledWith(['blackberry10']);
-
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'run'), ['--device', '--password', '1q1q']);
-                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
+                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'run'), ['--device', '--password', '1q1q']);
             }, function(err) {
                 expect(err).toBeUndefined();
             }).fin(done);
