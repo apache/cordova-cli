@@ -135,7 +135,7 @@ module.exports.prototype = {
         }
     },
     // copies the app www folder into the windows8 project's www folder and updates the jsproj file.
-    update_www:function() {
+    update_www:function(libDir) {
         var project_root = util.isCordova(this.windows8_proj_dir);
         var project_www = util.projectWww(project_root);
         // remove stock platform assets
@@ -148,10 +148,7 @@ module.exports.prototype = {
         this.copy_merges('windows8');
 
         // copy over windows8 lib's cordova.js
-        var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').windows8.version);
-        var custom_path = config.has_custom_path(project_root, 'windows8');
-        if (custom_path) lib_path = custom_path;
-        var cordovajs_path = path.join(lib_path, 'windows8', "template", 'www', 'cordova.js');
+        var cordovajs_path = path.join(libDir, 'windows8', "template", 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
         this.update_jsproj();
     },
