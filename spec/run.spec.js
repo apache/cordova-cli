@@ -28,18 +28,31 @@ var cordova = require('../cordova'),
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
 
 describe('run command', function() {
-    var is_cordova, list_platforms, fire, exec;
+    var is_cordova, list_platforms, fire, child;
     var project_dir = '/some/path';
     var prepare_spy;
+    child = {
+        on: function(child_event,cb){
+            if(child_event === 'close'){
+                cb(0);
+            }
+        },
+        stdout: {
+            setEncoding: function(){},
+            on: function(){}
+        },
+        stderr: {
+            setEncoding: function(){},
+            on: function(){}
+        }
+    };
+
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
         fire = spyOn(hooker.prototype, 'fire').andReturn(Q());
         prepare_spy = spyOn(cordova.raw, 'prepare').andReturn(Q());
-        exec = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
-            if (!cb) cb = opts;
-            cb(0, '', '');
-        });
+        spyOn(child_process, 'spawn').andReturn(child);
     });
     describe('failure', function() {
         it('should not run inside a Cordova-based project with no added platforms by calling util.listPlatforms', function(done) {
@@ -64,8 +77,9 @@ describe('run command', function() {
         it('should run inside a Cordova-based project with at least one added platform and call prepare and shell out to the run script', function(done) {
             cordova.raw.run(['android','ios']).then(function() {
                 expect(prepare_spy).toHaveBeenCalledWith(['android', 'ios']);
-                expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'android', 'cordova', 'run') + '" --device', jasmine.any(Function));
-                expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'ios', 'cordova', 'run') + '" --device', jasmine.any(Function));
+                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'android', 'cordova', 'run'), ['--device']);
+                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), ['--device']);
+
             }, function(err) {
                 console.log(err);
                 expect(err).toBeUndefined();
@@ -74,7 +88,7 @@ describe('run command', function() {
         it('should pass down parameters', function(done) {
             cordova.raw.run({platforms: ['blackberry10'], options:['--password', '1q1q']}).then(function() {
                 expect(prepare_spy).toHaveBeenCalledWith(['blackberry10']);
-                expect(exec).toHaveBeenCalledWith('"' + path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'run') + '" --device --password 1q1q', jasmine.any(Function));
+                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'run'), ['--device', '--password', '1q1q']);
             }, function(err) {
                 expect(err).toBeUndefined();
             }).fin(done);
