@@ -33,7 +33,7 @@ function shell_out_to_emulate(root, platform, options) {
     child_process.exec(cmd, function(err, stdout, stderr) {
         events.emit('verbose', stdout + stderr);
         if (err) {
-            d.reject(new Error('An error occurred while emulating/deploying the ' + platform + ' project.' + stdout + stderr));
+            d.reject(new Error('An error occurred while emulating/deploying the ' + platform + ' project. ' + stdout + stderr));
         } else {
             events.emit('log', 'Platform "' + platform + '" deployed to emulator.');
             d.resolve();
