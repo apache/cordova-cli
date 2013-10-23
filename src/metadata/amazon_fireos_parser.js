@@ -26,6 +26,8 @@ var fs            = require('fs'),
     project_config= require('../config'),
     config_parser = require('../config_parser');
 
+var awv_interface='awv_interface.jar';
+
 var default_prefs = {
     "useBrowserHistory":"true",
     "exit-on-suspend":"false"
@@ -60,6 +62,7 @@ module.exports.check_requirements = function(project_root, callback) {
                 } else {
                     framework_path = path.join(util.libDirectory, 'amazon-fireos', 'cordova', require('../../platforms').android.version, 'framework');
                 }
+
                 var cmd = 'android update project -p "' + framework_path  + '" -t android-17';
                 events.emit('log', 'Running "' + cmd + '" (output to follow)...');
                 shell.exec(cmd, {silent:true, async:true}, function(code, output) {
@@ -70,6 +73,13 @@ module.exports.check_requirements = function(project_root, callback) {
                         callback(false);
                     }
                 });
+
+                events.emit('log', 'Checking if ' + awv_interface + ' exists... in framework/libs folder');
+                var awv_interface_expected_path=path.join(framework_path,'libs');
+                if(!shell.test('-e', path.join(awv_interface_expected_path , awv_interface))){
+                   callback('awv_interface.jar not found in ' + awv_interface_expected_path +' folder. Please download the AmazonWebView SDK from http://developer.amazon.com/.. and copy the awv_interface.jar file to this folder:' + awv_interface_expected_path + 'and re-run cordova platform add amazon-fireos command');
+                }
+
             }
         }
     });
