@@ -50,7 +50,7 @@ module.exports.check_requirements = function(project_root) {
     events.emit('log', 'Checking wp7 requirements...');
     var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').wp7.version, 'wp7');
     var custom_path = config.has_custom_path(project_root, 'wp7');
-    if (custom_path) lib_path = custom_path;
+    if (custom_path) lib_path = path.join(custom_path, 'wp7');
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
     events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
