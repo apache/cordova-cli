@@ -57,8 +57,9 @@ Note also, that some platforms have OS restrictions.  For example, you cannot bu
 
 cordova-cli has a single global `create` command that creates new cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
 
-## Global Command
+## Global Commands
 
+- `help` display a help page with all available commands
 - `create <directory> [<id> [<name>]]` create a new cordova project with optional name and id (package name, reverse-domain style)
 
 <a name="project_commands" />
@@ -67,9 +68,11 @@ cordova-cli has a single global `create` command that creates new cordova projec
 - `platform [ls | list]` list all platforms the project will build to
 - `platform add <platform> [<platform> ...]` add one (or more) platforms as a build target for the project
 - `platform [rm | remove] <platform> [<platform> ...]` removes one (or more) platforms as a build target for the project
+- `platform [up | update] <platform> ` - updates the Cordova version used for the given platform
 - `plugin [ls | list]` list all plugins added to the project
 - `plugin add <path-to-plugin> [<path-to-plugin> ...]` add one (or more) plugins to the project
 - `plugin [rm | remove] <plugin-name> [<plugin-name> ...]` remove one (or more) added plugins
+- `plugin search [<keyword1> <keyword2> ...]` search the plugin registry for plugins matching the list of keywords
 - `prepare [platform...]` copies files into the specified platforms, or all platforms. it is then ready for building by Eclipse/Xcode/etc.
 - `compile [platform...]` compiles the app into a binary for each added platform. With no parameters, builds for all platforms, otherwise builds for the specified platforms.
 - `build [<platform> [<platform> [...]]]` an alias for `cordova prepare` followed by `cordova compile`
