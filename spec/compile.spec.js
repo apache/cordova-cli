@@ -28,7 +28,7 @@ var cordova = require('../cordova'),
 
 
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
-var os_platform = os.platform();
+
 
 
 describe('compile command', function() {
