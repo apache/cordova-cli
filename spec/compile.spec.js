@@ -28,10 +28,11 @@ var cordova = require('../cordova'),
 
 
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
+var os_platform = os.platform();
 
 
 describe('compile command', function() {
-    var is_cordova, list_platforms, fire, result, child;
+    var is_cordova, list_platforms, fire, result, child, spawn_wrap;
     var project_dir = '/some/path';
     child = {
         on: function(child_event,cb){
@@ -48,6 +49,22 @@ describe('compile command', function() {
             on: function(){}
         }
     };
+    spawn_wrap = function(cmd,args,options){
+        var _cmd = cmd,
+            _args = args;
+
+        if (os.platform() === 'win32') {
+            _args = ['/c',_cmd].concat(_args);
+            _cmd = 'cmd';
+        }
+
+        return {
+                    "cmd": _cmd,
+                    "args": _args,
+                    "options": options
+                };
+    };
+
     function wrapper(f, post) {
         runs(function() {
             f.then(function() { result = true; }, function(err) { result = err; });
@@ -80,16 +97,21 @@ describe('compile command', function() {
         var spawn_call;
         it('should run inside a Cordova-based project with at least one added platform and shell out to build', function(done) {
             cordova.raw.compile(['android','ios']).then(function() {
-                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'android', 'cordova', 'build'),[]);
-                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'ios', 'cordova', 'build'),[]);
+                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'android', 'cordova', 'build'),[]);
+                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
+
+                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'ios', 'cordova', 'build'),[]);
+                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
+
                 done();
             });
-
         });
 
         it('should pass down optional parameters', function (done) {
             cordova.raw.compile({platforms:["blackberry10"], options:["--release"]}).then(function () {
-                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'build'),['--release']);
+                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'build'),['--release']);
+                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
+
                 done();
             });
         });

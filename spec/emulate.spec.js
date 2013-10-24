@@ -29,7 +29,7 @@ var cordova = require('../cordova'),
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
 
 describe('emulate command', function() {
-    var is_cordova, list_platforms, fire, result, child;
+    var is_cordova, list_platforms, fire, result, child, spawn_wrap;
     var project_dir = '/some/path';
     var prepare_spy;
     child = {
@@ -46,6 +46,21 @@ describe('emulate command', function() {
             setEncoding: function(){},
             on: function(){}
         }
+    };
+    spawn_wrap = function(cmd,args,options){
+        var _cmd = cmd,
+            _args = args;
+
+        if (os.platform() === 'win32') {
+            _args = ['/c',_cmd].concat(_args);
+            _cmd = 'cmd';
+        }
+
+        return {
+                    "cmd": _cmd,
+                    "args": _args,
+                    "options": options
+                };
     };
 
     function wrapper(f, post) {
@@ -83,15 +98,23 @@ describe('emulate command', function() {
         it('should run inside a Cordova-based project with at least one added platform and call prepare and shell out to the emulate script', function(done) {
             cordova.raw.emulate(['android','ios']).then(function(err) {
                 expect(prepare_spy).toHaveBeenCalledWith(['android', 'ios']);
-                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'android', 'cordova', 'run'), ['--emulator']);
-                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), ['--emulator']);
+
+                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'android', 'cordova', 'run'), ['--emulator']);
+                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
+
+                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), ['--emulator']);
+                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
+
                 done();
             });
         });
         it('should pass down options', function(done) {
             cordova.raw.emulate({platforms: ['ios'], options:["--optionTastic"]}).then(function(err) {
                 expect(prepare_spy).toHaveBeenCalledWith(['ios']);
-                expect(child_process.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), ['--emulator', '--optionTastic']);
+
+                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), ['--emulator', '--optionTastic']);
+                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
+
                 done();
             });
         });
