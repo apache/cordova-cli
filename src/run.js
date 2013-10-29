@@ -74,7 +74,7 @@ function shell_out_to_run(projectRoot, platform, options) {
             events.emit('log', 'Platform "' + platform + '" ran successfully.');
             d.resolve();
         } else {
-            d.reject(new Error('n error occurred while running the ' + platform + ' project.' + errors));
+            d.reject(new Error('An error occurred while running the ' + platform + ' project.' + errors));
         }
     });
 
