@@ -53,7 +53,7 @@ module.exports = {
             events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
             return Q(lib_dir);
         }
-        events.emit('log', 'Downloading ' + id + ' library for ' + platform + '...');
+        events.emit('log', 'Installing ' + id + ' library for ' + platform + '...');
         return hooker.fire('before_library_download', {
             platform:platform,
             url:url,
