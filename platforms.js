@@ -30,7 +30,7 @@ module.exports = {
     }, 
      'amazon-fireos' : {
         parser : './src/metadata/amazon_fireos_parser',
-        url    : '~/Dev/cordova/Cordova-AmazonWebView',
+        url    : 'https://github.com/archananaik/cordova-amazon-fireos.git',
         version: '3.1.0'
     },
     'wp7' : {
