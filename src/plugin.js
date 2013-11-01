@@ -85,19 +85,6 @@ module.exports = function plugin(command, targets) {
                             target = target.substring(0, target.length - 1);
                         }
 
-                        // Allow options in url
-                        // https://github.com/apache/cordova-labs?subdir=cordova-plugin-echo&branch=master
-                        var uri = url.parse(target, true);
-
-                        var fetchOptions = {};
-                        if(uri.query.subdir)
-                            fetchOptions.subdir = uri.query.subdir;
-                        if(uri.query.branch)
-                            fetchOptions.git_ref = uri.query.branch;
-
-                        if(uri.query.subdir || uri.query.branch)
-                            target =  target.replace(/\?.*/, '');
-
                         // Fetch the plugin first.
                         events.emit('verbose', 'Calling plugman.fetch on plugin "' + target + '"');
                         var plugman = require('plugman');
@@ -151,23 +138,23 @@ module.exports = function plugin(command, targets) {
                         return Q.reject(new Error('Plugin "' + target + '" not added to project.'));
                     }
 
-                            // Iterate over all installed platforms and uninstall.
-                            // If this is a web-only or dependency-only plugin, then
-                            // there may be nothing to do here except remove the
-                            // reference from the platform's plugin config JSON.
-                            platformList.forEach(function(platform) {
-                                var platformRoot = path.join(projectRoot, 'platforms', platform);
-                                var parser = new platforms[platform].parser(platformRoot);
-                                events.emit('log', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
-                                plugman.uninstall.uninstallPlatform(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir(), cmd: opts.options });
-                            });
-                            plugman.uninstall.uninstallPlugin(target, path.join(projectRoot, 'plugins'), end);
-                        } else {
-                            var err = new Error('Plugin "' + target + '" not added to project.');
-                            if (callback) callback(err);
-                            else throw err;
-                            return;
-                        }
+                    var targetPath = path.join(pluginPath, target);
+                    // Iterate over all installed platforms and uninstall.
+                    // If this is a web-only or dependency-only plugin, then
+                    // there may be nothing to do here except remove the
+                    // reference from the platform's plugin config JSON.
+                    var plugman = require('plugman');
+                    return platformList.reduce(function(soFar, platform) {
+                        return soFar.then(function() {
+                            var platformRoot = path.join(projectRoot, 'platforms', platform);
+                            var platforms = require('../platforms');
+                            var parser = new platforms[platform].parser(platformRoot);
+                            events.emit('verbose', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
+                            return plugman.raw.uninstall.uninstallPlatform(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
+                        });
+                    }, Q())
+                    .then(function() {
+                        return plugman.raw.uninstall.uninstallPlugin(target, path.join(projectRoot, 'plugins'));
                     });
                 }, Q());
             }).then(function() {
