@@ -32,7 +32,7 @@
     "elementtree": "0.1.5",
     "plugman": "0.14.x",
     "plist": "0.4.x",
-    "xcode": "0.5.1",
+    "xcode": "0.6.2",
     "express": "3.0.0",
     "shelljs": "0.1.2",
     "ncallbacks": "1.0.0",
