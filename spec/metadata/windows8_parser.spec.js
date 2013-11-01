@@ -21,27 +21,29 @@ var platforms = require('../../platforms'),
     util = require('../../src/util'),
     path = require('path'),
     shell = require('shelljs'),
+    child_process = require('child_process'),
+    Q = require('q'),
     fs = require('fs'),
     ET = require('elementtree'),
-    Q = require('q'),
-    child_process = require('child_process'),
     config = require('../../src/config'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
 
-describe('wp8 project parser', function() {
+describe('windows8 project parser', function() {
+
     var proj = '/some/path';
     var exists, exec, custom, readdir, cfg_parser;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
         exec = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
-            (cb || opts)(0, '', '');
+            if (!cb) cb = opts;
+            cb(null, '', '');
         });
         custom = spyOn(config, 'has_custom_path').andReturn(false);
-        readdir = spyOn(fs, 'readdirSync').andReturn(['test.csproj']);
+        readdir = spyOn(fs, 'readdirSync').andReturn(['test.jsproj']);
         cfg_parser = spyOn(util, 'config_parser');
     });
-
+    
     function wrapper(p, done, post) {
         p.then(post, function(err) {
             expect(err).toBeUndefined();
@@ -55,17 +57,17 @@ describe('wp8 project parser', function() {
     }
 
     describe('constructions', function() {
-        it('should throw if provided directory does not contain a csproj file', function() {
+        it('should throw if provided directory does not contain a jsproj file', function() {
             readdir.andReturn([]);
             expect(function() {
-                new platforms.wp8.parser(proj);
-            }).toThrow('The provided path "' + proj + '" is not a Windows Phone 8 project. Error: No .csproj file.');
+                new platforms.windows8.parser(proj);
+            }).toThrow('The provided path "' + proj + '" is not a Windows 8 project. Error: No .jsproj file.');
         });
         it('should create an instance with path, manifest properties', function() {
             expect(function() {
-                var p = new platforms.wp8.parser(proj);
-                expect(p.wp8_proj_dir).toEqual(proj);
-                expect(p.manifest_path).toEqual(path.join(proj, 'Properties', 'WMAppManifest.xml'));
+                var p = new platforms.windows8.parser(proj);
+                expect(p.windows8_proj_dir).toEqual(proj);
+                expect(p.manifest_path).toEqual(path.join(proj, 'package.appxmanifest'));
             }).not.toThrow();
         });
     });
@@ -73,33 +75,35 @@ describe('wp8 project parser', function() {
     describe('check_requirements', function() {
         it('should fire a callback if there is an error during shelling out', function(done) {
             exec.andCallFake(function(cmd, opts, cb) {
-                (cb || opts)(50, 'there was an errorz!');
+                if (!cb) cb = opts;
+                cb(50, 'there was an errorz!', '');
             });
-            errorWrapper(platforms.wp8.parser.check_requirements(proj), done, function(err) {
+            errorWrapper(platforms.windows8.parser.check_requirements(proj), done, function(err) {
                 expect(err).toContain('there was an errorz!');
             });
         });
         it('should check by calling check_reqs on the stock lib path if no custom path is defined', function(done) {
-            wrapper(platforms.wp8.parser.check_requirements(proj), done, function() {
+            wrapper(platforms.windows8.parser.check_requirements(proj), done, function() {
                 expect(exec.mostRecentCall.args[0]).toContain(util.libDirectory);
                 expect(exec.mostRecentCall.args[0]).toMatch(/check_reqs"$/);
             });
         });
         it('should check by calling check_reqs on a custom path if it is so defined', function(done) {
-            var custom_path = path.join('some','custom','path','to','wp8','lib');
+            var custom_path = path.join('some','custom','path','to','windows8','lib');
             custom.andReturn(custom_path);
-            wrapper(platforms.wp8.parser.check_requirements(proj), done, function(err) {
+            wrapper(platforms.windows8.parser.check_requirements(proj),done, function() {
                 expect(exec.mostRecentCall.args[0]).toContain(custom_path);
                 expect(exec.mostRecentCall.args[0]).toMatch(/check_reqs"$/);
             });
+            done();
         });
     });
 
     describe('instance', function() {
         var p, cp, rm, is_cordova, write, read, mv;
-        var wp8_proj = path.join(proj, 'platforms', 'wp8');
+        var windows8_proj = path.join(proj, 'platforms', 'windows8');
         beforeEach(function() {
-            p = new platforms.wp8.parser(wp8_proj);
+            p = new platforms.windows8.parser(windows8_proj);
             cp = spyOn(shell, 'cp');
             rm = spyOn(shell, 'rm');
             mv = spyOn(shell, 'mv');
@@ -112,8 +116,16 @@ describe('wp8 project parser', function() {
             var et, xml, find, write_xml, root, cfg, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
             beforeEach(function() {
                 find_obj = {
-                    text:'hi',
-                    attrib:{Title:'old'}
+                    text:'.//Application',
+                    attrib:{
+                        Id:'old',
+                        Version:'0.0.0.0'
+                    },
+                    VisualElements:{
+                        attrib:{
+                            DisplayName:"old"
+                        }
+                    }
                 };
                 root_obj = {
                     attrib:{
@@ -157,33 +169,42 @@ describe('wp8 project parser', function() {
                 readdir.andReturn(['test.sln']);
             });
 
-            it('should write out the app name to wmappmanifest.xml', function() {
+            it('should write out the app name to package.appxmanifest', function() {
+                //following line outputs json
                 p.update_from_config(cfg);
-                expect(find_obj.attrib.Title).toEqual('testname');
+                expect(find_obj.attrib.Id).toEqual('testname');
             });
-            it('should write out the app id to csproj file', function() {
-                p.update_from_config(cfg);
-                expect(find_obj.text).toContain('testpkg');
-            });
-            it('should write out the app version to wmappmanifest.xml', function() {
+
+            // This test removed (jm) does not seem to be valid in winjs land.
+            // it('should write out the app id to jsproj file', function() {
+            //     p.update_from_config(cfg);
+            //     expect(find_obj.text).toContain('testpkg');
+            // });
+
+            it('should write out the app version to package.appxmanifest', function() {
                 p.update_from_config(cfg);
                 expect(find_obj.attrib.Version).toEqual('one point oh');
             });
+           it('should update the content element (start page)', function() {
+                p.update_from_config(cfg);
+                expect(cfg_content).toHaveBeenCalledWith('index.html');
+            });
+
         });
         describe('www_dir method', function() {
             it('should return www', function() {
-                expect(p.www_dir()).toEqual(path.join(wp8_proj, 'www'));
+                expect(p.www_dir()).toEqual(path.join(windows8_proj, 'www'));
             });
         });
         describe('staging_dir method', function() {
             it('should return .staging/www', function() {
-                expect(p.staging_dir()).toEqual(path.join(wp8_proj, '.staging', 'www'));
+                expect(p.staging_dir()).toEqual(path.join(windows8_proj, '.staging', 'www'));
             });
         });
         describe('update_www method', function() {
-            var update_csproj;
+            var update_jsproj;
             beforeEach(function() {
-                update_csproj = spyOn(p, 'update_csproj');
+                update_jsproj = spyOn(p, 'update_jsproj');
             });
             it('should rm project-level www and cp in platform agnostic www', function() {
                 p.update_www('lib/dir');
@@ -215,32 +236,28 @@ describe('wp8 project parser', function() {
                 staging = spyOn(p, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
             });
-            it('should call update_from_config', function(done) {
-                wrapper(p.update_project(), done, function() {
-                    expect(config).toHaveBeenCalled();
-                });
+            it('should call update_from_config', function() {
+                p.update_project();
+                expect(config).toHaveBeenCalled();
             });
             it('should throw if update_from_config throws', function(done) {
                 var err = new Error('uh oh!');
                 config.andCallFake(function() { throw err; });
-                errorWrapper(p.update_project({}), done, function(e) {
-                    expect(e).toEqual(err);
+                errorWrapper(p.update_project({}), done, function(err) {
+                    expect(err).toEqual(err);
                 });
             });
-            it('should not call update_www', function(done) {
-                wrapper(p.update_project(), done, function() {
-                    expect(www).not.toHaveBeenCalled();
-                });
+            it('should call update_www', function() {
+                p.update_project();
+                expect(www).toHaveBeenCalled();
             });
-            it('should call update_staging', function(done) {
-                wrapper(p.update_project(), done, function() {
-                    expect(staging).toHaveBeenCalled();
-                });
+            it('should call update_staging', function() {
+                p.update_project();
+                expect(staging).toHaveBeenCalled();
             });
-            it('should call deleteSvnFolders', function(done) {
-                wrapper(p.update_project(), done, function() {
-                    expect(svn).toHaveBeenCalled();
-                });
+            it('should call deleteSvnFolders', function() {
+                p.update_project();
+                expect(svn).toHaveBeenCalled();
             });
         });
     });
