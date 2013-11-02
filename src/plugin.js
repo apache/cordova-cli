@@ -154,7 +154,7 @@ module.exports = function plugin(command, targets) {
                         });
                     }, Q())
                     .then(function() {
-                        return plugman.raw.uninstall.uninstallPlugin(target, path.join(projectRoot, 'plugins'));
+                        return plugman.raw.uninstall.uninstallPlugin(target, path.join(projectRoot, 'plugins'), opts.options);
                     });
                 }, Q());
             }).then(function() {
