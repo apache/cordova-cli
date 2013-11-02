@@ -16,8 +16,5 @@
     specific language governing permissions and limitations
     under the License.
 */
-var events = require('events');
 
-var emitter = new events.EventEmitter();
-
-module.exports = emitter;
+module.exports = require('plugman')._emitter;
