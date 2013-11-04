@@ -37,6 +37,46 @@ function launchServer(projectRoot, port) {
             response.write("404 Not Found\n");
             response.end();
         }
+        function do302(where) {
+            console.log('302 ' + request.url);
+            response.setHeader("Location", where);
+            response.writeHead(302, {"Content-Type": "text/plain"});
+            response.end();
+        }
+        function doRoot() {
+            response.writeHead(200, {"Content-Type": "text/html"});
+            var config = new cordova_util.config_parser(path.join(projectRoot, "www/config.xml"));
+            response.write("<html><head><title>"+config.name()+"</title></head><body>");
+            response.write("<table border cellspacing=0><thead><caption><h3>Package Metadata</h3></caption></thead><tbody>");
+            for (var c in {"name": true, "packageName": true, "version": true}) {
+                response.write("<tr><th>"+c+"</th><td>"+config[c]()+"</td></tr>");
+            }
+            response.write("</tbody></table>");
+            response.write("<h3>Platforms</h3><ul>");
+            var installed_platforms = cordova_util.listPlatforms(projectRoot);
+            for (var p in platforms) {
+                if (installed_platforms.indexOf(p) >= 0) {
+                    response.write("<li><a href='"+p+"/'>"+p+"</a></li>\n");
+                } else {
+                    response.write("<li><em>"+p+"</em></li>\n");
+                }
+            }
+            response.write("</ul>");
+            response.write("<h3>Plugins</h3><ul>");
+            var pluginPath = path.join(projectRoot, 'plugins');
+            var plugins = cordova_util.findPlugins(pluginPath);
+            for (var p in plugins) {
+                response.write("<li>"+plugins[p]+"</li>\n");
+            }
+            response.write("</ul>");
+            response.write("<table border cellspacing=0><thead><caption><h3>Package Metadata</h3></caption></thead><tbody>");
+            for (var c in {"name": true, "packageName": true, "version": true}) {
+                response.write("<tr><th>"+c+"</th><td>"+config[c]()+"</td></tr>");
+            }
+            response.write("</tbody></table>");
+            response.write("</body></html>");
+            response.end();
+        }
         var urlPath = url.parse(request.url).pathname;
         var firstSegment = /\/(.*?)\//.exec(urlPath);
         if (!firstSegment) {
@@ -49,7 +89,11 @@ function launchServer(projectRoot, port) {
         // Strip the platform out of the path.
         urlPath = urlPath.slice(platformId.length + 1);
 
-        var parser = new platforms[platformId].parser(path.join(projectRoot, 'platforms', platformId));
+        try {
+            var parser = new platforms[platformId].parser(path.join(projectRoot, 'platforms', platformId));
+        } catch (e) {
+            return do404();
+        }
         var filePath = null;
 
         if (urlPath == '/config.xml') {
@@ -59,6 +103,8 @@ function launchServer(projectRoot, port) {
             return;
         } else if (/^\/www\//.test(urlPath)) {
             filePath = path.join(parser.www_dir(), urlPath.slice(5));
+        } else if (/^\/+[^\/]*$/.test(urlPath)) {
+            return do302("/" + platformId + "/www/");
         } else {
             return do404();
         }
@@ -66,9 +112,30 @@ function launchServer(projectRoot, port) {
         fs.exists(filePath, function(exists) {
             if (exists) {
                 if (fs.statSync(filePath).isDirectory()) {
+                    index = path.join(filePath, "index.html");
+                    try {
+                        if (fs.statSync(index)) {
+                            filePath = index;
+                        }
+                    } catch (e) {}
+                }
+                if (fs.statSync(filePath).isDirectory()) {
+                    if (!/\/$/.test(urlPath)) {
+                        return do302("/" + platformId + urlPath + "/");
+                    }
                     console.log('200 ' + request.url);
-                    response.writeHead(200, {"Content-Type": "text/plain"});
-                    response.write("TODO: show a directory listing.\n");
+                    response.writeHead(200, {"Content-Type": "text/html"});
+                    response.write("<html><head><title>Directory listing of "+ urlPath + "</title></head>");
+                    response.write("<h3>Items in this directory</h3>");
+                    var items = fs.readdirSync(filePath);
+                    response.write("<ul>");
+                    for (var i in items) {
+                        var file = items[i];
+                        if (file) {
+                            response.write('<li><a href="'+file+'">'+file+'</a></li>\n');
+                        }
+                    }
+                    response.write("</ul>");
                     response.end();
                 } else {
                     var mimeType = mime.lookup(filePath);
