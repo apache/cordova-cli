@@ -251,13 +251,19 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         // trigger an event in case anyone needs to modify the contents of the www folder before we package it.
+        var deferred = Q.defer();
+        var that = this;
         var projectRoot = util.isCordova(process.cwd());
         var hooks = new hooker(projectRoot);
-        hooks.fire('pre_package', { wwwPath:this.www_dir() }, function(err) { });
-        this.update_csproj();
-        // TODO: Add overrides support? Why is this missing?
-        this.update_staging();
-        util.deleteSvnFolders(this.www_dir());
-        return Q();
+        hooks.fire('pre_package', { wwwPath:this.www_dir() }, function(err) { })
+        .then(function() {
+            that.update_csproj();
+            // TODO: Add overrides support? Why is this missing?
+            that.update_staging();
+            util.deleteSvnFolders(that.www_dir());
+            deferred.resolve();
+        });
+
+        return deferred.promise;
     }
 };

@@ -26,7 +26,8 @@ var fs            = require('fs'),
     Q             = require('q'),
     config_parser = require('../config_parser'),
     xml           = require('../xml-helpers'),
-    config        = require('../config');
+    config        = require('../config'),
+    hooker        = require('../hooker');
 
 module.exports = function wp8_parser(project) {
     try {
@@ -172,7 +173,6 @@ module.exports.prototype = {
         // copy over wp8 lib's cordova.js
         var cordovajs_path = path.join(libDir, 'common', 'www', 'cordova.js');
         fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
-        this.update_csproj();
     },
     // updates the csproj file to explicitly list all www content.
     update_csproj:function() {
@@ -197,7 +197,6 @@ module.exports.prototype = {
         }
 
         // now add all www references back in from the root www folder
-        var project_root = util.isCordova(this.wp8_proj_dir);
         var www_files = this.folder_contents('www', this.www_dir());
         for(file in www_files) {
             var item = new et.Element('ItemGroup');
@@ -252,8 +251,21 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         // overrides (merges) are handled in update_www()
-        this.update_staging();
-        util.deleteSvnFolders(this.www_dir());
-        return Q();
+        this.update_www();
+
+        // trigger an event in case anyone needs to modify the contents of the www folder before we package it.
+        var deferred = Q.defer();
+        var that = this;
+        var projectRoot = util.isCordova(process.cwd());
+        var hooks = new hooker(projectRoot);
+        hooks.fire('pre_package', { wwwPath:this.www_dir() }, function(err) { })
+        .then(function() {
+            that.update_csproj();
+            that.update_staging();
+            util.deleteSvnFolders(that.www_dir());
+            deferred.resolve();
+        });
+
+        return deferred.promise;
     }
 };
