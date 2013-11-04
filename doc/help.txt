@@ -4,8 +4,11 @@ Synopsis
 
 Global Commands
 
-    create <PATH> [ID] [NAME] ................ creates a cordova project in the specified PATH, with
-                                               optional NAME and ID (reverse-domain-style package name)
+    create <PATH> [ID [NAME [CONFIG]]] ....... creates a cordova project in the specified PATH, with
+                                               ID reverse-domain-style package name - used in <widget id>
+                                               NAME is a human readable field
+                                               CONFIG is a json string whose key/values will be included
+                                               in [PATH]/.codova/config.json 
     help ..................................... shows this syntax summary
 
     info ..................................... print out useful information helpful for submitting bug
