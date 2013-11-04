@@ -49,7 +49,9 @@ module.exports.check_requirements = function(project_root) {
     events.emit('log', 'Checking wp8 requirements...');
     var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').wp8.version, 'wp8');
     var custom_path = config.has_custom_path(project_root, 'wp8');
-    if (custom_path) lib_path = path.join(custom_path, 'wp8');
+    if (custom_path) {
+        lib_path = path.join(custom_path, 'wp8');
+    }
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
     events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
