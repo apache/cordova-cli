@@ -251,7 +251,8 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         // overrides (merges) are handled in update_www()
-        this.update_www();
+        var libDir = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').wp8.version);
+        this.update_www(libDir);
 
         // trigger an event in case anyone needs to modify the contents of the www folder before we package it.
         var deferred = Q.defer();
