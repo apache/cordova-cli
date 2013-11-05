@@ -142,7 +142,7 @@ describe('android project parser', function() {
                     getroot:root
                 });
                 xml = spyOn(ET, 'XML');
-                readdir = spyOn(fs, 'readdirSync').andReturn([path.join(proj, 'src', 'android_pkg')]);
+                readdir = spyOn(fs, 'readdirSync').andReturn([path.join(proj, 'src', 'android_pkg', 'MyApp.java')]);
                 cfg = new config_parser();
                 cfg.name = function() { return 'testname' };
                 cfg.packageName = function() { return 'testpkg' };
@@ -150,7 +150,7 @@ describe('android project parser', function() {
                 cfg.access.get = function() { return [] };
                 cfg.preference.get = function() { return [] };
                 cfg.content = function() { return 'index.html' };
-                read.andReturn('some java package');
+                read.andReturn('package org.cordova.somepackage; public class MyApp extends CordovaActivity { }');
                 cfg_access_add = jasmine.createSpy('config_parser access add');
                 cfg_access_rm = jasmine.createSpy('config_parser access rm');
                 cfg_pref_rm = jasmine.createSpy('config_parser pref rm');

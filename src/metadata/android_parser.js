@@ -108,7 +108,16 @@ module.exports.prototype = {
         fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');
 
         var orig_pkgDir = path.join(this.path, 'src', path.join.apply(null, orig_pkg.split('.')));
-        var orig_java_class = fs.readdirSync(orig_pkgDir).filter(function(f) {return f.indexOf('.svn') == -1;})[0];
+        var java_files = fs.readdirSync(orig_pkgDir).filter(function(f) {
+          return f.indexOf('.svn') == -1 && f.indexOf('.java') >= 0 && fs.readFileSync(path.join(orig_pkgDir, f), 'utf-8').match(/extends\s+CordovaActivity/);
+        });
+        if (java_files.length == 0) {
+          throw new Error('No Java files found which extend CordovaActivity.');
+        } else if(java_files.length > 1) {
+          events.emit('log', 'Multiple candidate Java files (.java files which extend CordovaActivity) found. Guessing at the first one, ' + java_files[0]);
+        }
+
+        var orig_java_class = java_files[0];
         var pkgDir = path.join(this.path, 'src', path.join.apply(null, pkg.split('.')));
         shell.mkdir('-p', pkgDir);
         var orig_javs = path.join(orig_pkgDir, orig_java_class);
