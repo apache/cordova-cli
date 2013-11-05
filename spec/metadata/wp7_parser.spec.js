@@ -215,11 +215,12 @@ describe('wp7 project parser', function() {
                 staging = spyOn(p, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
                 csproj = spyOn(p, 'update_csproj');
+                exists.andReturn(false);
             });
             it('should call update_from_config', function(done) {
                 wrapper(p.update_project(), done, function(){
                     expect(config).toHaveBeenCalled();
-                })
+                });
             });
             it('should throw if update_from_config throws', function(done) {
                 var err = new Error('uh oh!');

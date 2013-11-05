@@ -250,22 +250,17 @@ module.exports.prototype = {
         } catch(e) {
             return Q.reject(e);
         }
-        // overrides (merges) are handled in update_www()
-        this.update_www();
 
         // trigger an event in case anyone needs to modify the contents of the www folder before we package it.
-        var deferred = Q.defer();
         var that = this;
         var projectRoot = util.isCordova(process.cwd());
+
         var hooks = new hooker(projectRoot);
-        hooks.fire('pre_package', { wwwPath:this.www_dir() }, function(err) { })
+        return hooks.fire('pre_package', { wwwPath:this.www_dir() })
         .then(function() {
             that.update_csproj();
             that.update_staging();
             util.deleteSvnFolders(that.www_dir());
-            deferred.resolve();
         });
-
-        return deferred.promise;
     }
 };
