@@ -69,18 +69,13 @@ function launchServer(projectRoot, port) {
                 response.write("<li>"+plugins[p]+"</li>\n");
             }
             response.write("</ul>");
-            response.write("<table border cellspacing=0><thead><caption><h3>Package Metadata</h3></caption></thead><tbody>");
-            for (var c in {"name": true, "packageName": true, "version": true}) {
-                response.write("<tr><th>"+c+"</th><td>"+config[c]()+"</td></tr>");
-            }
-            response.write("</tbody></table>");
             response.write("</body></html>");
             response.end();
         }
         var urlPath = url.parse(request.url).pathname;
         var firstSegment = /\/(.*?)\//.exec(urlPath);
         if (!firstSegment) {
-            return do404();
+            return doRoot();
         }
         var platformId = firstSegment[1];
         if (!platforms[platformId]) {
