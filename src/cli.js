@@ -19,6 +19,7 @@
 
 module.exports = function CLI(inputArgs) {
     var optimist  = require('optimist'),
+        exit      = require('exit'),
         cordova   = require('../cordova');
 
    args = optimist(inputArgs)
@@ -49,7 +50,7 @@ module.exports = function CLI(inputArgs) {
         } else {
             console.error(err);
         }
-        process.exit(1);
+        exit(1);
     });
     cordova.on('results', console.log);
 
