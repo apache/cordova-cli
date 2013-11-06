@@ -118,11 +118,11 @@ describe('hooker', function() {
                 beforeEach(function() {
                     shell.mkdir('-p', hook);
                     if (platform.match(/(win32|win64)/)) {
-                        shell.cp(path.join(hooks, 'test', '0.bat'), hook);
                         shell.cp(path.join(hooks, 'test', '1.bat'), hook);
+                        shell.cp(path.join(hooks, 'test', '07.bat'), hook);
                     } else {
-                        shell.cp(path.join(hooks, 'test', '0.sh'), hook);
                         shell.cp(path.join(hooks, 'test', '1.sh'), hook);
+                        shell.cp(path.join(hooks, 'test', '07.sh'), hook);
                     }
                     fs.readdirSync(hook).forEach(function(script) {
                         fs.chmodSync(path.join(hook, script), '754');
@@ -138,11 +138,11 @@ describe('hooker', function() {
                 it('should execute all scripts in order and fire callback', function(done) {
                     h.fire('before_build').then(function() {
                         if (platform.match(/(win32|win64)/)) {
-                            expect(s.calls[0].args[0]).toMatch(/0.bat/);
-                            expect(s.calls[1].args[0]).toMatch(/1.bat/);
+                            expect(s.calls[0].args[0]).toMatch(/1.bat/);
+                            expect(s.calls[1].args[0]).toMatch(/07.bat/);
                         } else {
-                            expect(s.calls[0].args[0]).toMatch(/0.sh/);
-                            expect(s.calls[1].args[0]).toMatch(/1.sh/);
+                            expect(s.calls[0].args[0]).toMatch(/1.sh/);
+                            expect(s.calls[1].args[0]).toMatch(/07.sh/);
                         }
                     }, function(err) {
                         expect(err).not.toBeDefined();
@@ -152,17 +152,18 @@ describe('hooker', function() {
                     h.fire('before_build').then(function() {
                         var param_str;
                         if (platform.match(/(win32|win64)/)) {
-                            param_str = '0.bat "'+tempDir+'"';
-                        } else { 
-                            param_str = '0.sh "'+tempDir+'"'; 
+                            param_str = '1.bat "'+tempDir+'"';
+                        } else {
+                            param_str = '1.sh "'+tempDir+'"';
                         }
+                        console.log(s.calls);
                         expect(s.calls[0].args[0].indexOf(param_str)).not.toEqual(-1);
                     }, function(err) {
                         expect(err).toBeUndefined();
                     }).fin(done);
                 });
                 it('should skip any files starting with a dot on the scripts', function(done) {
-                    shell.cp(path.join(hooks, 'test', '0.bat'), path.join(hook, '.swp.file'));
+                    shell.cp(path.join(hooks, 'test', '07.bat'), path.join(hook, '.swp.file'));
                     h.fire('before_build').then(function() {
                         expect(s).not.toHaveBeenCalledWith(path.join(tempDir, '.cordova', 'hooks', 'before_build', '.swp.file') + ' "' + tempDir + '"', jasmine.any(Object), jasmine.any(Function));
                     }, function(err) {
