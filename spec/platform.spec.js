@@ -76,9 +76,7 @@ describe('platform command', function() {
 
         fakeLazyLoad = function(id, platform, version) {
             if (platform == 'wp7' || platform == 'wp8') {
-                return Q(path.join('lib', 'wp', id, version, platform));
-            } else if (platform == 'windows8') {
-                return Q(path.join('lib', 'windows8', id, version, 'windows8'));
+                return Q(path.join('lib', 'wp', id, version));
             } else {
                 return Q(path.join('lib', platform, id, version));
             }
