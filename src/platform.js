@@ -120,6 +120,10 @@ module.exports = function platform(command, targets) {
                 .then(function() {
                     return lazy_load.based_on_config(projectRoot, plat);
                 }).then(function(libDir) {
+                    // Windows platforms are in subdirectories into repositories
+                    if (["wp7", "wp8", "windows8", "windows81", "blackberry10"].indexOf(target) !== -1)
+                        libDir = path.join(libDir, target);
+
                     var script = path.join(libDir, 'bin', 'update');
                     var d = Q.defer();
                     child_process.exec(script + ' "' + path.join(projectRoot, 'platforms', plat) + '"', function(err, stdout, stderr) {
@@ -226,8 +230,11 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
         events.emit('verbose', 'Checking if platform "' + target + '" passes minimum requirements...');
         return module.exports.supports(projectRoot, target)
         .then(function() {
+            // Windows platforms are in subdirectories into repositories
+            if (["wp7", "wp8", "windows8", "windows81", "blackberry10"].indexOf(target) !== -1)
+                libDir = path.join(libDir, target);
+
             // Create a platform app using the ./bin/create scripts that exist in each repo.
-            // Run platform's create script
             var bin = path.join(libDir, 'bin', 'create');
             var args = (target=='ios') ? '--arc' : '';
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
@@ -239,6 +246,7 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
             events.emit('log', 'Creating ' + target + ' project...');
             events.emit('verbose', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
 
+            // Run platform's create script
             var d = Q.defer();
             child_process.exec(command, function(err, create_output, stderr) {
                 events.emit('verbose', create_output);
