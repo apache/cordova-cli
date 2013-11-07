@@ -226,6 +226,10 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
         events.emit('verbose', 'Checking if platform "' + target + '" passes minimum requirements...');
         return module.exports.supports(projectRoot, target)
         .then(function() {
+            // CB-5183 WP7/8 path is not correctly resolved by CLI
+            if (target == 'wp7' || target == 'wp8' || target == 'windows8') {
+                libDir =  path.join(libDir, target);
+            }            
             // Create a platform app using the ./bin/create scripts that exist in each repo.
             // Run platform's create script
             var bin = path.join(libDir, 'bin', 'create');

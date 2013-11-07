@@ -239,7 +239,8 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         // overrides (merges) are handled in update_www()
-        this.update_www();
+        var libDir = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
+        this.update_www(libDir);
         this.update_staging();
         util.deleteSvnFolders(this.www_dir());
         return Q();
