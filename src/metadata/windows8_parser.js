@@ -143,23 +143,33 @@ module.exports.prototype = {
             shell.cp('-rf', overrides, this.www_dir());
         }
     },
-    // copies the app www folder into the windows8 project's www folder and updates the jsproj file.
-    update_www:function(libDir) {
-        var project_root = util.isCordova(this.windows8_proj_dir);
-        var project_www = util.projectWww(project_root);
-        // remove stock platform assets
-        shell.rm('-rf', this.www_dir());
-        // copy over all app www assets
-        shell.cp('-rf', project_www, this.windows8_proj_dir);
 
-        // copy all files from merges directories (generic first, then specific)
+    // Used for creating platform_www in projects created by older versions.
+    cordovajs_path:function(libDir) {
+        var jsPath = path.join(libDir, 'windows8', "template", 'www', 'cordova.js');
+        return path.resolve(jsPath);
+    },
+
+    // Replace the www dir with contents of platform_www and app www and updates the csproj file.
+    update_www:function() {
+        var projectRoot = util.isCordova(this.windows8_proj_dir);
+        var app_www = util.projectWww(projectRoot);
+        var platform_www = path.join(this.windows8_proj_dir, 'platform_www');
+
+        // Clear the www dir
+        shell.rm('-rf', this.www_dir());
+        shell.mkdir(this.www_dir());
+        // Copy over stock platform www assets (cordova.js)
+        shell.cp('-rf', path.join(platform_www, '*'), this.www_dir());
+        // Copy over all app www assets
+        shell.cp('-rf', path.join(app_www, '*'), this.www_dir());
+
+        // Copy all files from merges directory.
         this.copy_merges('windows8');
 
-        // copy over windows8 lib's cordova.js
-        var cordovajs_path = path.join(libDir, 'windows8', "template", 'www', 'cordova.js');
-        fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(cordovajs_path, 'utf-8'), 'utf-8');
         this.update_jsproj();
     },
+
     // updates the jsproj file to explicitly list all www content.
     update_jsproj:function() {
         var jsproj_xml = xml.parseElementtreeSync(this.jsproj_path);

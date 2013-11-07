@@ -96,13 +96,14 @@ describe('wp7 project parser', function() {
     });
 
     describe('instance', function() {
-        var p, cp, rm, is_cordova, write, read, mv;
+        var p, cp, rm, is_cordova, write, read, mv, mkdir;
         var wp7_proj = path.join(proj, 'platforms', 'wp7');
         beforeEach(function() {
             p = new platforms.wp7.parser(wp7_proj);
             cp = spyOn(shell, 'cp');
             rm = spyOn(shell, 'rm');
             mv = spyOn(shell, 'mv');
+            mkdir = spyOn(shell, 'mkdir');
             is_cordova = spyOn(util, 'isCordova').andReturn(proj);
             write = spyOn(fs, 'writeFileSync');
             read = spyOn(fs, 'readFileSync').andReturn('');
@@ -186,14 +187,9 @@ describe('wp7 project parser', function() {
                 update_csproj = spyOn(p, 'update_csproj');
             });
             it('should rm project-level www and cp in platform agnostic www', function() {
-                p.update_www(path.join('lib','dir'));
+                p.update_www();
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
-            });
-            it('should copy in a fresh cordova.js from given cordova lib', function() {
-                p.update_www(path.join('lib','dir'));
-                expect(write).toHaveBeenCalled();
-                expect(read.mostRecentCall.args[0]).toContain(path.join('lib','dir'));
             });
         });
         describe('update_staging method', function() {

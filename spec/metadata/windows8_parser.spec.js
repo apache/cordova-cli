@@ -100,13 +100,14 @@ describe('windows8 project parser', function() {
     });
 
     describe('instance', function() {
-        var p, cp, rm, is_cordova, write, read, mv;
+        var p, cp, rm, is_cordova, write, read, mv, mkdir;
         var windows8_proj = path.join(proj, 'platforms', 'windows8');
         beforeEach(function() {
             p = new platforms.windows8.parser(windows8_proj);
             cp = spyOn(shell, 'cp');
             rm = spyOn(shell, 'rm');
             mv = spyOn(shell, 'mv');
+            mkdir = spyOn(shell, 'mkdir');
             is_cordova = spyOn(util, 'isCordova').andReturn(proj);
             write = spyOn(fs, 'writeFileSync');
             read = spyOn(fs, 'readFileSync').andReturn('');
@@ -210,11 +211,6 @@ describe('windows8 project parser', function() {
                 p.update_www(path.join('lib','dir'));
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
-            });
-            it('should copy in a fresh cordova.js from given cordova lib', function() {
-                p.update_www(path.join('lib','dir'));
-                expect(write).toHaveBeenCalled();
-                expect(read.mostRecentCall.args[0]).toContain(path.join('lib','dir'));
             });
         });
         describe('update_staging method', function() {

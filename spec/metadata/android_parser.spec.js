@@ -111,7 +111,7 @@ describe('android project parser', function() {
     });
 
     describe('instance', function() {
-        var p, cp, rm, is_cordova, write, read;
+        var p, cp, rm, mkdir, is_cordova, write, read;
         var android_proj = path.join(proj, 'platforms', 'android');
         beforeEach(function() {
             p = new platforms.android.parser(android_proj);
@@ -120,6 +120,7 @@ describe('android project parser', function() {
             is_cordova = spyOn(util, 'isCordova').andReturn(proj);
             write = spyOn(fs, 'writeFileSync');
             read = spyOn(fs, 'readFileSync');
+            mkdir = spyOn(shell, 'mkdir');
         });
 
         describe('update_from_config method', function() {
@@ -201,14 +202,9 @@ describe('android project parser', function() {
         });
         describe('update_www method', function() {
             it('should rm project-level www and cp in platform agnostic www', function() {
-                p.update_www(path.join('lib','dir'));
+                p.update_www();
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
-            });
-            it('should copy in a fresh cordova.js from the given cordova lib', function() {
-                p.update_www(path.join('lib','dir'));
-                expect(write).toHaveBeenCalled();
-                expect(read.mostRecentCall.args[0]).toContain(path.join('lib','dir'));
             });
         });
         describe('update_overrides method', function() {

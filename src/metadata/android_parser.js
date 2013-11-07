@@ -141,19 +141,25 @@ module.exports.prototype = {
         return this.android_config;
     },
 
-    // Takes the directory where the lazy-loaded platform can be found.
-    update_www:function(libDir) {
-        var projectRoot = util.isCordova(this.path);
-        var www = util.projectWww(projectRoot);
-        var platformWww = path.join(this.path, 'assets');
-        // remove stock platform assets
-        shell.rm('-rf', this.www_dir());
-        // copy over all app www assets
-        shell.cp('-rf', www, platformWww);
+    // Used for creating platform_www in projects created by older versions.
+    cordovajs_path:function(libDir) {
+        var jsPath = path.join(libDir, 'framework', 'assets', 'www', 'cordova.js');
+        return path.resolve(jsPath);
+    },
 
-        // write out android lib's cordova.js
-        var jsPath = path.resolve(path.join(libDir, 'framework', 'assets', 'www', 'cordova.js'));
-        fs.writeFileSync(path.join(this.www_dir(), 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
+    // Replace the www dir with contents of platform_www and app www.
+    update_www:function() {
+        var projectRoot = util.isCordova(this.path);
+        var app_www = util.projectWww(projectRoot);
+        var platform_www = path.join(this.path, 'platform_www');
+
+        // Clear the www dir
+        shell.rm('-rf', this.www_dir());
+        shell.mkdir(this.www_dir());
+        // Copy over stock platform www assets (cordova.js)
+        shell.cp('-rf', path.join(platform_www, '*'), this.www_dir());
+        // Copy over all app www assets
+        shell.cp('-rf', path.join(app_www, '*'), this.www_dir());
     },
 
     // update the overrides folder into the www folder
