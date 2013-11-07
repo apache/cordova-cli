@@ -156,7 +156,6 @@ describe('hooker', function() {
                         } else {
                             param_str = '1.sh "'+tempDir+'"';
                         }
-                        console.log(s.calls);
                         expect(s.calls[0].args[0].indexOf(param_str)).not.toEqual(-1);
                     }, function(err) {
                         expect(err).toBeUndefined();

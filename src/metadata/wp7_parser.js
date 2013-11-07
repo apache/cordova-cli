@@ -174,8 +174,6 @@ module.exports.prototype = {
     },
     // updates the csproj file to explicitly list all www content.
     update_csproj:function() {
-        console.log('csproj');
-        console.log(this.csproj_path);
         var csproj_xml = xml.parseElementtreeSync(this.csproj_path);
         // remove any previous references to the www files
         var item_groups = csproj_xml.findall('ItemGroup');

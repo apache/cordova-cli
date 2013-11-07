@@ -101,7 +101,6 @@ describe('run command', function() {
                 expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
 
             }, function(err) {
-                console.log(err);
                 expect(err).toBeUndefined();
             }).fin(done);
         });

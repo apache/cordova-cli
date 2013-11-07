@@ -115,7 +115,6 @@ describe('lazy_load module', function() {
                         uri:url
                     }, jasmine.any(Function));
                 }, function(err) {
-                    console.log(err);
                     expect(err).not.toBeDefined();
                 }).fin(done);
             });
