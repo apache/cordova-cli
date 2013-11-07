@@ -201,14 +201,14 @@ describe('android project parser', function() {
         });
         describe('update_www method', function() {
             it('should rm project-level www and cp in platform agnostic www', function() {
-                p.update_www('lib/dir');
+                p.update_www(path.join('lib','dir'));
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
             });
             it('should copy in a fresh cordova.js from the given cordova lib', function() {
-                p.update_www('lib/dir');
+                p.update_www(path.join('lib','dir'));
                 expect(write).toHaveBeenCalled();
-                expect(read.mostRecentCall.args[0]).toContain('lib/dir');
+                expect(read.mostRecentCall.args[0]).toContain(path.join('lib','dir'));
             });
         });
         describe('update_overrides method', function() {

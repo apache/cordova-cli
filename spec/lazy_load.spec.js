@@ -36,7 +36,7 @@ describe('lazy_load module', function() {
     describe('cordova method (loads stock cordova libs)', function() {
         var custom;
         beforeEach(function() {
-            custom = spyOn(lazy_load, 'custom').andReturn(Q('lib/dir'));
+            custom = spyOn(lazy_load, 'custom').andReturn(Q(path.join('lib','dir')));
         });
         it('should throw if platform is not a stock cordova platform', function(done) {
             lazy_load.cordova('atari').then(function() {

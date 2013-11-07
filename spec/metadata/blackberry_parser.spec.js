@@ -180,7 +180,7 @@ describe('blackberry10 project parser', function() {
             });
 
             it('should rm project-level www and cp in platform agnostic www', function() {
-                p.update_www('lib/dir');
+                p.update_www(path.join('lib','dir'));
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
                 expect(backup_cfg_parser.update).toHaveBeenCalled();
