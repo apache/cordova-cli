@@ -36,18 +36,18 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/gu
 
 # Requirements
 
-* [nodejs](http://nodejs.org/)
-* SDKs for every platform you wish to support
-  - BlackBerry 10: [BlackBerry 10 WebWorks SDK](http://developer.blackberry.com/html5/download/). Make sure you have the `dependencies/tools/bin` folder inside the SDK directory added to your path!
-  - iOS: [iOS SDK](http://developer.apple.com) with the latest Xcode and Xcode Command Line Tools
-  - [Android SDK](http://developer.android.com) - **NOTE** This tool
+* [Node.js](http://nodejs.org/)
+* SDKs for each platform you wish to support:
+  - **Android**: [Android SDK](http://developer.android.com) - **NOTE** This tool
     will not work unless you have the absolute latest updates for all
     Android SDK components. Also you will need the SDK's `tools` and `platform-tools` directories on your __system path__ otherwise Android support will fail.
-  - [Windows Phone SDK](http://dev.windowsphone.com/en-us/downloadsdk) - **NOTE** This tool will not work unless you have `msbuild` on your __system path__ otherwise Windows Phone support will fail (`msbuild.exe` is generally located in `C:\Windows\Microsoft.NET\Framework\v4.0.30319`).
+  - **BlackBerry 10**: [BlackBerry 10 WebWorks SDK](http://developer.blackberry.com/html5/download/). Make sure you have the `dependencies/tools/bin` folder inside the SDK directory added to your path!
+  - **iOS**: [iOS SDK](http://developer.apple.com) with the latest `Xcode` and `Xcode Command Line Tools`
+  - **Windows Phone**: [Windows Phone SDK](http://dev.windowsphone.com/en-us/downloadsdk) - **NOTE** This tool will not work unless you have `msbuild` on your __system path__ otherwise Windows Phone support will fail (`msbuild.exe` is generally located in `C:\Windows\Microsoft.NET\Framework\v4.0.30319`).
 
-cordova-cli has been tested on Mas OS X, Linux, Windows 7 and Windows 8.
+`cordova-cli` has been tested on **Mac OS X**, **Linux**, **Windows 7**, and **Windows 8**.
 
-Note also, that some platforms have OS restrictions.  For example, you cannot build for Windows 8 or Windows Phone 7 & 8 on Mac OS, and you cannot build for iOS in Windows.
+Please note that some platforms have OS restrictions.  For example, you cannot build for Windows 8 or Windows Phone 7 & 8 on Mac OS X, nor can you build for iOS on Windows.
 
 # Install
 
@@ -55,7 +55,7 @@ Note also, that some platforms have OS restrictions.  For example, you cannot bu
 
 ## Installing from master
 
-You'll need to install both CLI and Plugman from git. Running the npm version of one and master version of the other is likely to end in suffering.
+You'll need to install both [CLI](https://git-wip-us.apache.org/repos/asf/cordova-cli.git) and [Plugman](https://git-wip-us.apache.org/repos/asf/cordova-plugman.git) from `git`. Running the *npm version* of one and *(git) master version* of the other is likely to end with you suffering.
 
 Run the following commands:
 
@@ -74,7 +74,7 @@ Now the `cordova` and `plugman` in your path are the local git versions. Don't f
 
 # Getting Started
 
-cordova-cli has a single global `create` command that creates new cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
+`cordova-cli` has a single global `create` command that creates new cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
 
 ## Global Command
 
@@ -83,25 +83,25 @@ cordova-cli has a single global `create` command that creates new cordova projec
 <a name="project_commands" />
 ## Project Commands
 
-- `platform [ls | list]` list all platforms the project will build to
+- `platform [ls | list]` list all platforms for which the project will build
 - `platform add <platform> [<platform> ...]` add one (or more) platforms as a build target for the project
-- `platform [rm | remove] <platform> [<platform> ...]` removes one (or more) platforms as a build target for the project
-- `plugin [ls | list]` list all plugins added to the project
+- `platform [rm | remove] <platform> [<platform> ...]` removes one (or more) platform build targets from the project
+- `plugin [ls | list]` list all plugins included in the project
 - `plugin add <path-to-plugin> [<path-to-plugin> ...]` add one (or more) plugins to the project
-- `plugin [rm | remove] <plugin-name> [<plugin-name> ...]` remove one (or more) added plugins
-- `prepare [platform...]` copies files into the specified platforms, or all platforms. it is then ready for building by Eclipse/Xcode/etc.
-- `compile [platform...]` compiles the app into a binary for each added platform. With no parameters, builds for all platforms, otherwise builds for the specified platforms.
+- `plugin [rm | remove] <plugin-name> [<plugin-name> ...]` remove one (or more) plugins from the project.
+- `prepare [platform...]` copies files into the specified platforms, or all platforms. It is then ready for building by `Eclipse`, `Xcode`, etc.
+- `compile [platform...]` compiles the app into a binary for each targetted platform. With no parameters, builds for all platforms, otherwise builds for the specified platforms.
 - `build [<platform> [<platform> [...]]]` an alias for `cordova prepare` followed by `cordova compile`
 - `emulate [<platform> [<platform> [...]]]` launch emulators and deploy app to them. With no parameters emulates for all platforms added to the project, otherwise emulates for the specified platforms
-- `serve <platform> [port]` launch a local web server for that platform's www directory on the given port (default 8000).
+- `serve [port]` launch a local web server allowing you to access each  platform's www directory on the given port (default 8000).
 
 ### Optional Flags
 
-- `-d` or `--verbose` will pipe out more verbose output to your shell. You can also subscribe to `log` and `warn` events if you are consuming cordova-cli as a node module by calling `cordova.on('log', function() {})` or `cordova.on('warn', function() {})`.
-- `-v` or `--version` will print out the version of your cordova-cli install.
+- `-d` or `--verbose` will pipe out more verbose output to your shell. You can also subscribe to `log` and `warn` events if you are consuming `cordova-cli` as a node module by calling `cordova.on('log', function() {})` or `cordova.on('warn', function() {})`.
+- `-v` or `--version` will print out the version of your `cordova-cli` install.
 
 # Project Directory Structure
-A Cordova application built with cordova-cli will have the following directory structure:
+A Cordova application built with `cordova-cli` will have the following directory structure:
 
     myApp/
     |--.cordova/
@@ -120,7 +120,7 @@ A Cordova application built with cordova-cli will have the following directory s
 ## .cordova/
 This directory identifies a tree as a cordova project. Simple configuration information is stored in here (such as BlackBerry environment variables).
 
-Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find the project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a cordova project directory (same as git).
+Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find this project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a cordova project directory (same as `git`).
 
 ## merges/
 Platform-specific web assets (HTML, CSS and JavaScript files) are contained within appropriate subfolders in this directory. These are deployed during a `prepare` to the appropriate native directory.  Files placed under `merges/` will override matching files in the `www/` folder for the relevant platform. A quick example, assuming a project structure of:
@@ -172,9 +172,9 @@ These are located under the `.cordova/hooks` directory in the root of your cordo
 
 ## Module-level Hooks
 
-If you are using cordova-cli as a module within a larger node application, you can also use the standard `EventEmitter` methods to attach to the events. The events include `before_build`, `before_compile`, `before_docs`, `before_emulate`, `before_run`, `before_platform_add`, `before_library_download`, `before_platform_ls`, `before_platform_rm`, `before_plugin_add`, `before_plugin_ls`, `before_plugin_rm` and `before_prepare`. There is also a `library_download` progress event. Additionally, there are `after_` flavours of all the above events.
+If you are using cordova-cli as a module within a larger **Node** application, you can also use the standard `EventEmitter` methods to attach to the events. The events include `before_build`, `before_compile`, `before_docs`, `before_emulate`, `before_run`, `before_platform_add`, `before_library_download`, `before_platform_ls`, `before_platform_rm`, `before_plugin_add`, `before_plugin_ls`, `before_plugin_rm` and `before_prepare`. There is also a `library_download` progress event. Additionally, there are `after_` flavours of all the above events.
 
-Once you `require('cordova')` in your node project, you will have the usual `EventEmitter` methods available (`on`, `off` or `removeListener`, `removeAllListeners`, and `emit` or `trigger`).
+Once you `require('cordova')` in your Node project, you will have the usual `EventEmitter` methods available (`on`, `off` or `removeListener`, `removeAllListeners`, and `emit` or `trigger`).
 
 # Examples
 
@@ -216,7 +216,7 @@ Please check [Cordova issues with the CLI Component](http://issues.cordova.io). 
 
 - Your operating system and version
 - The application name, directory location, and identifier used with `create`
-- Which mobile SDKs you have installed, and which version. Related to this: which Xcode version if you are submitting issues related to iOS
+- Which mobile SDKs you have installed, and their versions. Related to this: which `Xcode` version if you are submitting issues related to iOS
 - Any error stack traces you received
 
 ## Contributors
@@ -230,7 +230,7 @@ Thanks to everyone for contributing! For a list of people involved, please see t
 
 ### Proxy Settings
 
-cordova-cli will use `npm`'s proxy settings. If you downloaded cordova-cli via `npm` and are behind a proxy, chances are cordova-cli should work for you as it will use those settings in the first place. Make sure that the `https-proxy` and `proxy` npm config variables are set properly. See [npm's configuration documentation](https://npmjs.org/doc/config.html) for more information.
+`cordova-cli` will use `npm`'s proxy settings. If you downloaded cordova-cli via `npm` and are behind a proxy, chances are cordova-cli should work for you as it will use those settings in the first place. Make sure that the `https-proxy` and `proxy` npm config variables are set properly. See [npm's configuration documentation](https://npmjs.org/doc/config.html) for more information.
 
 ## Windows
 
@@ -252,15 +252,16 @@ When trying to add a platform on a Windows machine if you run into the following
     at ChildProcess.EventEmitter.emit (events.js:95:17)
     at Process.ChildProcess._handle.onexit (child_process.js:787:12)
 
-run the command "android list target".  If you see:
+run the command `android list target`.  If you see:
+
     'xcopy' is not recognized as an internal or external command,
     operable program or batch file.
 
-at the beginning of the command output, it means you will need to update your Windows Path variable to include xcopy. This location is typically under C:\Windows\System32.
+at the beginning of the command output, it means you will need to fix your Windows Path variable to include xcopy. This location is typically under C:\Windows\System32.
 
 ## Windows 8
 
-Windows 8 support does not include the ability to launch/run/emulate, so you will need to open visual studio to see your app live.  You are still able to use the following commands with windows8
+Windows 8 support does not include the ability to launch/run/emulate, so you will need to open **Visual Studio** to see your app live.  You are still able to use the following commands with windows8:
 
 - `platform add windows8`
 - `platform remove windows8`
@@ -268,6 +269,7 @@ Windows 8 support does not include the ability to launch/run/emulate, so you wil
 - `compile windows8`
 - `build windows8`
 
-To run your app, you will need to open the .sln in the platforms/windows8 folder using Visual Studio 2012.
-Note also that Visual Studio will inform you to reload the project if you run any of the above commands while the project is loaded.
+To run your app, you will need to open the `.sln` in the `platforms/windows8` folder using **Visual Studio 2012**.
+
+**Visual Studio** will tell you to reload the project if you run any of the above commands while the project is loaded.
 
