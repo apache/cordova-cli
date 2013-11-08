@@ -52,7 +52,9 @@ module.exports.check_requirements = function(project_root) {
                     require('../../platforms').windows8.version, 'windows8');
 
     var custom_path = config.has_custom_path(project_root, 'windows8');
-    if (custom_path) lib_path = custom_path;
+    if (custom_path) {
+        lib_path = path.join(custom_path, "windows8");
+    }
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
     events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
