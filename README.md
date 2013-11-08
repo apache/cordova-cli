@@ -57,6 +57,8 @@ Note also, that some platforms have OS restrictions.  For example, you cannot bu
 
 You'll need to install both CLI and Plugman from git. Running the npm version of one and master version of the other is likely to end in suffering.
 
+To avoid using sudo, see [Get away from sudo: npm without root](http://justjs.com/posts/npm-link-developing-your-own-npm-modules-without-tears).
+
 Run the following commands:
 
     git clone https://git-wip-us.apache.org/repos/asf/cordova-plugman.git
