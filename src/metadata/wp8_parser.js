@@ -173,8 +173,6 @@ module.exports.prototype = {
         // Clear the www dir
         shell.rm('-rf', this.www_dir());
         shell.mkdir(this.www_dir());
-        // Copy over stock platform www assets (cordova.js)
-        shell.cp('-rf', path.join(platform_www, '*'), this.www_dir());
         // Copy over all app www assets
         shell.cp('-rf', path.join(app_www, '*'), this.www_dir());
 
@@ -182,6 +180,8 @@ module.exports.prototype = {
         this.copy_merges('wp');
         this.copy_merges('wp8');
 
+        // Copy over stock platform www assets (cordova.js)
+        shell.cp('-rf', path.join(platform_www, '*'), this.www_dir());
         this.update_csproj();
     },
 
