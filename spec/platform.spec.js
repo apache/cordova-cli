@@ -145,14 +145,19 @@ describe('platform command', function() {
                     expect(exec.mostRecentCall.args[0]).toMatch(/lib.android.cordova.\d.\d.\d[\d\-\w]*.bin.create/gi);
                     expect(exec.mostRecentCall.args[0]).toContain(project_dir);
                 }).then(function() {
+                    return cordova.raw.platform('add', 'wp7');
+                }).then(function() {
+                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w\-]*.wp7.*.bin.create/gi);
+                    expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+                }).then(function() {
                     return cordova.raw.platform('add', 'wp8');
                 }).then(function() {
-                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w\-]*.wp8.bin.create/gi);
+                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w\-]*.wp8.*.bin.create/gi);
                     expect(exec.mostRecentCall.args[0]).toContain(project_dir);
                 }).then(function(){
                     return cordova.raw.platform('add', 'windows8');
                 }).then(function(){
-                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.windows8.cordova.\d.\d.\d[\d\w\-]*.windows8.bin.create/gi);
+                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.windows8.cordova.\d.\d.\d[\d\w\-]*.windows8.*.bin.create/gi);
                     expect(exec.mostRecentCall.args[0]).toContain(project_dir);
                     done();
                 });
@@ -170,7 +175,7 @@ describe('platform command', function() {
                 });
                 cordova.raw.platform('add', 'wp8').then(function() {
                     expect(load_custom).toHaveBeenCalledWith('haha', 'phonegap', 'wp8', 'bleeding edge');
-                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.phonegap.bleeding edge.wp8.bin.create/gi);
+                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.phonegap.bleeding edge.wp8.*.bin.create/gi);
                     expect(exec.mostRecentCall.args[0]).toContain(project_dir);
                     done();
                 });
