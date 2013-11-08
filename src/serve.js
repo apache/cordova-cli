@@ -182,12 +182,8 @@ function processAddRequest(request, response, platformId, projectRoot) {
 }
 
 module.exports = function server(port) {
-    var projectRoot = cordova_util.isCordova(process.cwd());
+    var projectRoot = cordova_util.cdProjectRoot();
     port = +port || 8000;
-
-    if (!projectRoot) {
-        throw new Error('Current working directory is not a Cordova-based project.');
-    }
 
     var hooks = new hooker(projectRoot);
     return hooks.fire('before_serve')

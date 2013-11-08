@@ -35,6 +35,7 @@ var supported_platforms_paths = supported_platforms.map(function(p) { return pat
 
 describe('prepare command', function() {
     var is_cordova,
+        cd_project_root,
         list_platforms,
         fire,
         config_parser,
@@ -48,6 +49,7 @@ describe('prepare command', function() {
         load;
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
+        cd_project_root = spyOn(util, 'cdProjectRoot').andReturn(project_dir);
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
         fire = spyOn(hooker.prototype, 'fire').andReturn(Q());
         mock_config_parser = {

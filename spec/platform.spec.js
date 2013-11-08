@@ -35,7 +35,25 @@ var supported_platforms = Object.keys(platforms).filter(function(p) { return p !
 var project_dir = path.join('some', 'path');
 
 describe('platform command', function() {
-    var is_cordova, list_platforms, fire, config_parser, find_plugins, config_read, load, load_custom, rm, mkdir, existsSync, supports, pkg, name, exec, prep_spy, plugman_install, parsers = {};
+    var is_cordova,
+        cd_project_root,
+        list_platforms,
+        fire,
+        config_parser,
+        find_plugins,
+        config_read,
+        load,
+        load_custom,
+        rm,
+        mkdir,
+        existsSync,
+        supports,
+        pkg,
+        name,
+        exec,
+        prep_spy,
+        plugman_install,
+        parsers = {};
     beforeEach(function() {
         supported_platforms.forEach(function(p) {
             parsers[p] = spyOn(platforms[p], 'parser').andReturn({
@@ -43,6 +61,7 @@ describe('platform command', function() {
             });
         });
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
+        cd_project_root = spyOn(util, 'cdProjectRoot').andReturn(project_dir);
         fire = spyOn(hooker.prototype, 'fire').andReturn(Q());
         name = jasmine.createSpy('config name').andReturn('magical mystery tour');
         pkg = jasmine.createSpy('config packageName').andReturn('ca.filmaj.id');
@@ -92,10 +111,11 @@ describe('platform command', function() {
         }
 
         it('should not run outside of a Cordova-based project by calling util.isCordova', function(done) {
-            is_cordova.andReturn(false);
-            expectFailure(cordova.raw.platform(), done, function(err) {
-                expect(is_cordova).toHaveBeenCalled();
-                expect(err).toEqual(new Error('Current working directory is not a Cordova-based project.'));
+            var msg = 'Dummy message about not being in a cordova dir.';
+            cd_project_root.andThrow(new Error(msg));
+            expectFailure(Q().then(cordova.raw.platform), done, function(err) {
+                expect(cd_project_root).toHaveBeenCalled();
+                expect(err.message).toEqual(msg);
             });
         });
         it('should report back an error if used with `add` and no platform is specified', function(done) {

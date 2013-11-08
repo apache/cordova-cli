@@ -32,11 +32,7 @@ var config            = require('./config'),
 
 // Returns a promise.
 module.exports = function platform(command, targets) {
-    var projectRoot = cordova_util.isCordova(process.cwd());
-
-    if (!projectRoot) {
-        return Q.reject(new Error('Current working directory is not a Cordova-based project.'));
-    }
+    var projectRoot = cordova_util.cdProjectRoot();
 
     var hooks = new hooker(projectRoot);
 
