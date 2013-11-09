@@ -21,41 +21,41 @@ module.exports = {
     'ios' : {
         parser : './src/metadata/ios_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-ios.git',
-        version: '3.1.0'
+        version: '3.2.0-rc1'
     }, 
     'android' : {
         parser : './src/metadata/android_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-android.git',
-        version: '3.1.0'
+        version: '3.2.0-rc1'
     }, 
     'wp7' : {
         parser : './src/metadata/wp7_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
-        version: '3.1.0'
+        version: '3.2.0-rc1'
     },
     'wp8' : {
         parser : './src/metadata/wp8_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
-        version: '3.1.0'
+        version: '3.2.0-rc1'
     },
     'blackberry10' : {
         parser : './src/metadata/blackberry10_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-blackberry.git',
-        version: '3.1.0'
+        version: '3.2.0-rc1'
     },
     'www':{
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-app-hello-world.git',
-        version: '3.1.0'
+        version: '3.2.0-rc1'
     },
     'firefoxos':{
         parser: './src/metadata/firefoxos_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-firefoxos.git',
-        version: '3.1.0'
+        version: '3.2.0-rc1'
     },
     'windows8':{
         parser: './src/metadata/windows8_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-windows.git',
-        version: '3.1.0'
+        version: '3.2.0-rc1'
     }
 };
 
