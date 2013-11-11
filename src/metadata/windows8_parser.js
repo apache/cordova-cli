@@ -258,8 +258,9 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         // overrides (merges) are handled in update_www()
-        var libDir = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
-        this.update_www(libDir);
+        // CB-5340 Windows8 build does no write cordova_plugins.js
+        //var libDir = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
+        //this.update_www(libDir);
         this.update_staging();
         util.deleteSvnFolders(this.www_dir());
         return Q();
