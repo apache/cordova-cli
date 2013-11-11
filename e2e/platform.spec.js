@@ -16,13 +16,31 @@ var project = path.join(tmpDir, 'project');
 var platformParser = platforms[helpers.testPlatform].parser;
 
 describe('platform end-to-end', function() {
+    var results;
 
     beforeEach(function() {
-        shell.rm('-rf', path.join(tmpDir, '*'));
+        shell.rm('-rf', project);
     });
     afterEach(function() {
-        shell.rm('-rf', path.join(tmpDir, '*'));
+        shell.rm('-rf', project);
     });
+
+    // Factoring out some repeated checks.
+    function emptyPlatformList() {
+        return cordova.raw.platform('list').then(function() {
+            var installed = results.match(/Installed platforms: (.*)/);
+            expect(installed).toBeDefined();
+            expect(installed[1].indexOf(helpers.testPlatform)).toBe(-1);
+        });
+    }
+
+    function fullPlatformList() {
+        return cordova.raw.platform('list').then(function() {
+            var installed = results.match(/Installed platforms: (.*)/);
+            expect(installed).toBeDefined();
+            expect(installed[1].indexOf(helpers.testPlatform)).toBeGreaterThan(-1);
+        });
+    }
 
     // The flows we want to test are add, rm, list, and upgrade.
     // They should run the appropriate hooks.
@@ -49,35 +67,49 @@ describe('platform end-to-end', function() {
         var check_reqs = spyOn(platformParser, 'check_requirements').andReturn(Q());
         var exec = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
             if (!cb) cb = opts;
-            // This is a call to the bin/create script, so do the copy ourselves.
-            shell.cp('-R', path.join(__dirname, 'fixtures', 'platforms', 'android'), path.join(project, 'platforms'));
-            cb(null, '', '');
+
+            if (cmd.match(/^"[^"]*create"/)) {
+                // This is a call to the bin/create script, so do the copy ourselves.
+                shell.cp('-R', path.join(__dirname, 'fixtures', 'platforms', 'android'), path.join(project, 'platforms'));
+                cb(null, '', '');
+            } else if(cmd.match(/^"[^"]*version"/)) {
+                cb(null, 'dev', '');
+            } else if(cmd.match(/update\b/)) {
+                fs.writeFileSync(path.join(project, 'platforms', helpers.testPlatform, 'updated'), 'I was updated!', 'utf-8');
+                cb(null, '', '');
+            } else {
+                cb(null, '', '');
+            }
         });
 
-        var results;
         events.on('results', function(res) { results = res; });
 
-        // Install the recommended platform.
-        console.log(process.cwd());
-        cordova.raw.platform('list').then(function() {
-            var installed = results.match(/Installed platforms: (.*)/);
-            expect(installed).toBeDefined();
-            expect(installed[1].indexOf(helpers.testPlatform)).toBe(-1);
-        }).then(function() {
+        // Check there are no platforms yet.
+        emptyPlatformList().then(function() {
+            // Add the testing platform.
             return cordova.raw.platform('add', [helpers.testPlatform]);
         }).then(function() {
-            // Now the platform add has finished.
+            // Check the platform add was successful.
             expect(path.join(project, 'platforms', helpers.testPlatform)).toExist();
             expect(path.join(project, 'merges', helpers.testPlatform)).toExist();
             expect(path.join(project, 'platforms', helpers.testPlatform, 'cordova')).toExist();
+        }).then(fullPlatformList) // Check for it in platform ls.
+        .then(function() {
+            // Try to update the platform.
+            return cordova.raw.platform('update', [helpers.testPlatform]);
         }).then(function() {
-            return cordova.raw.platform('list');
+            // Our fake update script in the exec mock above creates this dummy file.
+            expect(path.join(project, 'platforms', helpers.testPlatform, 'updated')).toExist();
+        }).then(fullPlatformList) // Platform should still be in platform ls.
+        .then(function() {
+            // And now remove it.
+            return cordova.raw.platform('rm', [helpers.testPlatform]);
         }).then(function() {
-            var installed = results.match(/Installed platforms: (.*)/);
-            expect(installed).toBeDefined();
-            expect(installed[1].indexOf(helpers.testPlatform)).toBeGreaterThan(-1);
-        }).fail(function(err) {
-            console.log(err);
+            // It should be gone.
+            expect(path.join(project, 'platforms', helpers.testPlatform)).not.toExist();
+            expect(path.join(project, 'merges', helpers.testPlatform)).not.toExist();
+        }).then(emptyPlatformList) // platform ls should be empty too.
+        .fail(function(err) {
             expect(err).toBeUndefined();
         }).fin(done);
     });
