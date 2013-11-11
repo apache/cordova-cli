@@ -18,10 +18,16 @@
 */
 
 module.exports = function CLI(inputArgs) {
-    var optimist  = require('optimist'),
-        cordova   = require('../cordova');
+    try {
+        var optimist  = require('optimist');
+    } catch (e) {
+        console.error("Please run npm install from this directory:\n\t" +
+                      require('path').dirname(__dirname));
+        process.exit(2);
+    }
+    var cordova   = require('../cordova');
 
-   args = optimist(inputArgs)
+    args = optimist(inputArgs)
         .boolean('d')
         .boolean('verbose')
         .boolean('v')
