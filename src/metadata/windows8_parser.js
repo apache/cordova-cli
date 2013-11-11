@@ -27,7 +27,8 @@ var fs            = require('fs'),
     child_process = require('child_process'),
     config_parser = require('../config_parser'),
     xml           = require('../xml-helpers'),
-    config        = require('../config');
+    config        = require('../config'),
+    hooker        = require('../hooker');
 
 module.exports = function windows8_parser(project) {
     try {
@@ -167,7 +168,6 @@ module.exports.prototype = {
 
         // Copy over stock platform www assets (cordova.js)
         shell.cp('-rf', path.join(platform_www, '*'), this.www_dir());
-        this.update_jsproj();
     },
 
     // updates the jsproj file to explicitly list all www content.
@@ -248,11 +248,16 @@ module.exports.prototype = {
         } catch(e) {
             return Q.reject(e);
         }
-        // overrides (merges) are handled in update_www()
-        var libDir = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
-        this.update_www(libDir);
-        this.update_staging();
-        util.deleteSvnFolders(this.www_dir());
-        return Q();
+
+        var that = this;
+        var projectRoot = util.isCordova(process.cwd());
+
+        var hooks = new hooker(projectRoot);
+        return hooks.fire('pre_package', { wwwPath:this.www_dir() })
+        .then(function() {
+            that.update_jsproj();
+            that.update_staging();
+            util.deleteSvnFolders(that.www_dir());
+        });
     }
 };
