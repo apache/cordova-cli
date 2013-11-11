@@ -182,7 +182,6 @@ module.exports.prototype = {
 
         // Copy over stock platform www assets (cordova.js)
         shell.cp('-rf', path.join(platform_www, '*'), this.www_dir());
-        this.update_csproj();
     },
 
     // updates the csproj file to explicitly list all www content.
