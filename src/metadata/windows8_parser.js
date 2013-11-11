@@ -27,7 +27,8 @@ var fs            = require('fs'),
     child_process = require('child_process'),
     config_parser = require('../config_parser'),
     xml           = require('../xml-helpers'),
-    config        = require('../config');
+    config        = require('../config'),
+    hooker        = require('../hooker');
 
 module.exports = function windows8_parser(project) {
     try {
@@ -254,9 +255,9 @@ module.exports.prototype = {
         var hooks = new hooker(projectRoot);
         return hooks.fire('pre_package', { wwwPath:this.www_dir() })
         .then(function() {
-            this.update_jsproj();
-            this.update_staging();
-            util.deleteSvnFolders(this.www_dir());
+            that.update_jsproj();
+            that.update_staging();
+            util.deleteSvnFolders(that.www_dir());
         });
     }
 };
