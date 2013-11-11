@@ -83,6 +83,13 @@ module.exports.prototype = {
 
         //Update app version
         var version = config.version();
+
+        // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version        
+        var numVersionComponents = version.match(/\./g).length + 1;
+        while (numVersionComponents++ < 4) {
+            version += '.0';
+        }
+
         var identityNode = manifest.find('.//Identity');
         if(identityNode) {
             var appVersion = identityNode['attrib']['Version'];
