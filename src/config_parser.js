@@ -113,17 +113,22 @@ config_parser.prototype = {
                                 query += "[@" + attribute + '="' + srcChild.attrib[attribute] + '"]';
                             });
                             foundChild = dest.find(query);
-                            if (foundChild) {
-                                //Don't add duplicates
+                            if (foundChild && textMatch(srcChild, foundChild)) {
+                                destChild = foundChild;
+                                dest.remove(0, destChild);
                                 shouldMerge = false;
                             }
                         }
 
-                        if (shouldMerge) {
-                            mergeXml(srcChild, destChild, platform, clobber);
-                            dest.append(destChild);
-                        }
+                        mergeXml(srcChild, destChild, platform, clobber && shouldMerge);
+                        dest.append(destChild);
                     }
+                }
+
+                function textMatch(elm1, elm2) {
+                    var text1 = elm1.text.replace(/\s+/, ""),
+                        text2 = elm2.text.replace(/\s+/, "");
+                    return (text1 === "" || text1 === text2);
                 }
             }
         }
