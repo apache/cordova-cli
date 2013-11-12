@@ -1,3 +1,22 @@
+/**
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+*/
+
 var helpers = require('./helpers'),
     path = require('path'),
     fs = require('fs'),
@@ -8,15 +27,12 @@ var helpers = require('./helpers'),
     util = require('../src/util'),
     cordova = require('../cordova');
 
-
-// TODO (kamrik): what's the right place for such utility funcs? Is this an ok way to do this in JS?
+// A utility function to generate all combinations of elements from 2 arrays.
 // crossConcat(['x', 'y'], ['1', '2', '3'])
 // -> [ 'x1', 'x2', 'x3', 'y1', 'y2', 'y3']
 var crossConcat = function(a, b, delimiter){
     var result = [];
-    if (typeof delimiter == 'undefined') {
-        delimiter = '';
-    }
+    delimiter = delimiter || '';
     for (var i = 0; i < a.length; i++) {
         for (var j = 0; j < b.length; j++) {
             result.push(a[i] + delimiter + b[j]);
@@ -24,7 +40,6 @@ var crossConcat = function(a, b, delimiter){
     }
     return result;
 };
-
 
 var tmpDir = helpers.tmpDir();
 var appName = 'TestCreate';
@@ -44,17 +59,16 @@ var extraConfig = {
 describe('create end-to-end', function() {
 
     beforeEach(function() {
-        shell.rm('-rf', path.join(tmpDir, '*'));
+        shell.rm('-rf', project);
     });
     afterEach(function() {
-        shell.rm('-rf', path.join(tmpDir, '*'));
+        shell.rm('-rf', project);
     });
 
     var results;
     events.on('results', function(res) { results = res; });
 
     it('should successfully run', function(done) {
-        console.log(process.cwd());
         // Call cordova create with no args, should return help.
         cordova.raw.create().then(function() {
             expect(results).toMatch(/synopsis/gi);
@@ -91,7 +105,7 @@ describe('create end-to-end', function() {
             var configXml = new util.config_parser(path.join(project, 'www', 'config.xml'));
             expect(configXml.packageName()).toEqual(appId);
 
-            // TODO (kamrik): check somehow that we got the right config.cml from the fixture and not some place else.
+            // TODO (kamrik): check somehow that we got the right config.xml from the fixture and not some place else.
             // expect(configXml.name()).toEqual('TestBase');
         }).fail(function(err) {
             console.log(err);
