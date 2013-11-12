@@ -44,8 +44,7 @@ module.exports = {
     },
     // Returns a promise for the path to the lazy-loaded directory.
     custom:function(url, id, platform, version) {
-        var download_dir = (platform == 'wp7' || platform == 'wp8' ? path.join(util.libDirectory, 'wp', id, version) :
-                                                                     path.join(util.libDirectory, platform, id, version));
+        var download_dir = path.join(util.libDirectory, platform, id, version);
         if (fs.existsSync(download_dir)) {
             events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
             return Q(download_dir);
@@ -99,7 +98,14 @@ module.exports = {
                         events.emit('log', 'Download complete');
                         var entries = fs.readdirSync(download_dir);
                         var entry = path.join(download_dir, entries[0]);
-                        shell.mv('-f', path.join(entry, (platform=='blackberry10'?'blackberry10':''), '*'), download_dir);
+                        var platformsubdir = '';
+                        switch (platform) {
+                            case "blackberry10":
+                            case "wp7":
+                            case "wp8":
+                                platformsubdir = platform;
+                        }
+                        shell.mv('-f', path.join(entry, platformsubdir, '*'), download_dir);
                         shell.rm('-rf', entry);
                         d.resolve(hooker.fire('after_library_download', {
                             platform:platform,
