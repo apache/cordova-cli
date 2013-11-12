@@ -127,6 +127,20 @@ module.exports.prototype = {
                             ' with a <Application> node');
         }
 
+        // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
+        // to sort elements we remove them and then add again in the appropriate order
+        var capabilitiesRoot = manifest.find('.//Capabilities'),
+            capabilities = capabilitiesRoot._children;
+
+        capabilities.forEach(function(elem){
+            capabilitiesRoot.remove(0, elem);
+        });
+        capabilities.sort(function(a, b) {
+            return (a.tag > b.tag)? 1: -1;
+        });
+        capabilities.forEach(function(elem){
+            capabilitiesRoot.append(elem);
+        });
 
 
 
