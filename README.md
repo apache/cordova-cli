@@ -95,7 +95,7 @@ cordova-cli has a single global `create` command that creates new cordova projec
 - `compile [platform...]` compiles the app into a binary for each added platform. With no parameters, builds for all platforms, otherwise builds for the specified platforms.
 - `build [<platform> [<platform> [...]]]` an alias for `cordova prepare` followed by `cordova compile`
 - `emulate [<platform> [<platform> [...]]]` launch emulators and deploy app to them. With no parameters emulates for all platforms added to the project, otherwise emulates for the specified platforms
-- `serve <platform> [port]` launch a local web server for that platform's www directory on the given port (default 8000).
+- `serve [port]` launch a local web server for that platform's www directory on the given port (default 8000).
 
 ### Optional Flags
 
