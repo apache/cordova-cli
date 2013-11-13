@@ -156,9 +156,9 @@ function launchServer(projectRoot, port) {
             }
         });
 
-    }).listen(port);
-
-    console.log("Static file server running on port " + port + " (i.e. http://localhost:" + port + ")\nCTRL + C to shut down");
+    }).listen(port, undefined, undefined, function (listeningEvent) {
+        console.log("Static file server running on port " + port + " (i.e. http://localhost:" + port + ")\nCTRL + C to shut down");
+    });
     return server;
 }
 
