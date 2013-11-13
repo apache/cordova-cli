@@ -140,12 +140,12 @@ function launchServer(projectRoot, port) {
                     var readStream = fs.createReadStream(filePath);
 
                     var acceptEncoding = request.headers['accept-encoding'] || '';
-                    if (acceptEncoding.match(/\bdeflate\b/)) {
-                        respHeaders['content-encoding'] = 'deflate';
-                        readStream = readStream.pipe(zlib.createDeflate());
-                    } else if (acceptEncoding.match(/\bgzip\b/)) {
+                    if (acceptEncoding.match(/\bgzip\b/)) {
                         respHeaders['content-encoding'] = 'gzip';
                         readStream = readStream.pipe(zlib.createGzip());
+                    } else if (acceptEncoding.match(/\bdeflate\b/)) {
+                        respHeaders['content-encoding'] = 'deflate';
+                        readStream = readStream.pipe(zlib.createDeflate());
                     }
                     console.log('200 ' + request.url);
                     response.writeHead(200, respHeaders);
