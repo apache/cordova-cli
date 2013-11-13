@@ -23,7 +23,7 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/gu
   - [Android SDK](http://developer.android.com) - **NOTE** This tool
     will not work unless you have the absolute latest updates for all
     Android SDK components. Also you will need the SDK's `tools` and `platform-tools` directories on your __system path__ otherwise Android support will fail.
-  - [Amazon Fire OS SDK](AWV SDK url) - **NOTE** This tool will not work unless you have Android SDK installed and paths are updated as mentioned above. In addition you need to install AmazonWebView SDK and copy awv_interface.jar to corodva-amazon-fireos/framework/libs folder. If libs folder does not exist then create one.
+  - [Amazon Fire OS SDK](https://developer.integ.amazon.com/sdk/fire/IntegratingAWV.html#installawv) - **NOTE** This tool will not work unless you have Android SDK installed and paths are updated as mentioned above. In addition you need to install AmazonWebView SDK and copy awv_interface.jar to corodva-amazon-fireos/framework/libs folder. If libs folder does not exist then create one.
   - [Windows Phone SDK](http://dev.windowsphone.com/en-us/downloadsdk) - **NOTE** This tool will not work unless you have `msbuild` on your __system path__ otherwise Windows Phone support will fail (`msbuild.exe` is generally located in `C:\Windows\Microsoft.NET\Framework\v4.0.30319`).
 
 
