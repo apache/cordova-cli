@@ -111,7 +111,7 @@ describe('android project parser', function() {
     });
 
     describe('instance', function() {
-        var p, cp, rm, is_cordova, write, read;
+        var p, cp, rm, mkdir, is_cordova, write, read;
         var android_proj = path.join(proj, 'platforms', 'android');
         beforeEach(function() {
             p = new platforms.android.parser(android_proj);
@@ -120,6 +120,7 @@ describe('android project parser', function() {
             is_cordova = spyOn(util, 'isCordova').andReturn(proj);
             write = spyOn(fs, 'writeFileSync');
             read = spyOn(fs, 'readFileSync');
+            mkdir = spyOn(shell, 'mkdir');
         });
 
         describe('update_from_config method', function() {
@@ -142,7 +143,7 @@ describe('android project parser', function() {
                     getroot:root
                 });
                 xml = spyOn(ET, 'XML');
-                readdir = spyOn(fs, 'readdirSync').andReturn([path.join(proj, 'src', 'android_pkg')]);
+                readdir = spyOn(fs, 'readdirSync').andReturn([path.join(proj, 'src', 'android_pkg', 'MyApp.java')]);
                 cfg = new config_parser();
                 cfg.name = function() { return 'testname' };
                 cfg.packageName = function() { return 'testpkg' };
@@ -150,7 +151,7 @@ describe('android project parser', function() {
                 cfg.access.get = function() { return [] };
                 cfg.preference.get = function() { return [] };
                 cfg.content = function() { return 'index.html' };
-                read.andReturn('some java package');
+                read.andReturn('package org.cordova.somepackage; public class MyApp extends CordovaActivity { }');
                 cfg_access_add = jasmine.createSpy('config_parser access add');
                 cfg_access_rm = jasmine.createSpy('config_parser access rm');
                 cfg_pref_rm = jasmine.createSpy('config_parser pref rm');
@@ -201,14 +202,9 @@ describe('android project parser', function() {
         });
         describe('update_www method', function() {
             it('should rm project-level www and cp in platform agnostic www', function() {
-                p.update_www('lib/dir');
+                p.update_www();
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
-            });
-            it('should copy in a fresh cordova.js from the given cordova lib', function() {
-                p.update_www('lib/dir');
-                expect(write).toHaveBeenCalled();
-                expect(read.mostRecentCall.args[0]).toContain('lib/dir');
             });
         });
         describe('update_overrides method', function() {

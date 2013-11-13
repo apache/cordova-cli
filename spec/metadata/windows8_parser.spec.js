@@ -43,7 +43,7 @@ describe('windows8 project parser', function() {
         readdir = spyOn(fs, 'readdirSync').andReturn(['test.jsproj']);
         cfg_parser = spyOn(util, 'config_parser');
     });
-    
+
     function wrapper(p, done, post) {
         p.then(post, function(err) {
             expect(err).toBeUndefined();
@@ -100,13 +100,14 @@ describe('windows8 project parser', function() {
     });
 
     describe('instance', function() {
-        var p, cp, rm, is_cordova, write, read, mv;
+        var p, cp, rm, is_cordova, write, read, mv, mkdir;
         var windows8_proj = path.join(proj, 'platforms', 'windows8');
         beforeEach(function() {
             p = new platforms.windows8.parser(windows8_proj);
             cp = spyOn(shell, 'cp');
             rm = spyOn(shell, 'rm');
             mv = spyOn(shell, 'mv');
+            mkdir = spyOn(shell, 'mkdir');
             is_cordova = spyOn(util, 'isCordova').andReturn(proj);
             write = spyOn(fs, 'writeFileSync');
             read = spyOn(fs, 'readFileSync').andReturn('');
@@ -207,14 +208,9 @@ describe('windows8 project parser', function() {
                 update_jsproj = spyOn(p, 'update_jsproj');
             });
             it('should rm project-level www and cp in platform agnostic www', function() {
-                p.update_www('lib/dir');
+                p.update_www(path.join('lib','dir'));
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
-            });
-            it('should copy in a fresh cordova.js from given cordova lib', function() {
-                p.update_www('lib/dir');
-                expect(write).toHaveBeenCalled();
-                expect(read.mostRecentCall.args[0]).toContain('lib/dir');
             });
         });
         describe('update_staging method', function() {
