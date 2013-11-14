@@ -126,8 +126,8 @@ config_parser.prototype = {
                 }
 
                 function textMatch(elm1, elm2) {
-                    var text1 = elm1.text.replace(/\s+/, ""),
-                        text2 = elm2.text.replace(/\s+/, "");
+                    var text1 = elm1.text ? elm1.text.replace(/\s+/, "") : "",
+                        text2 = elm2.text ? elm2.text.replace(/\s+/, "") : "";
                     return (text1 === "" || text1 === text2);
                 }
             }
