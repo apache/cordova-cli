@@ -17,6 +17,7 @@
     under the License.
 */
 var cordova_util = require('./util'),
+    crypto = require('crypto'),
     path = require('path'),
     shell = require('shelljs'),
     platforms     = require('../platforms'),
@@ -162,6 +163,26 @@ function launchServer(projectRoot, port) {
     return server;
 }
 
+function calculateMd5(fileName) {
+    var BUF_LENGTH = 64*1024,
+        buf = new Buffer(BUF_LENGTH),
+        bytesRead = BUF_LENGTH,
+        pos = 0,
+        fdr = fs.openSync(fileName, 'r');
+
+    try {
+        var md5sum = crypto.createHash('md5');
+        while (bytesRead === BUF_LENGTH) {
+            bytesRead = fs.readSync(fdr, buf, 0, BUF_LENGTH, pos);
+            pos += bytesRead;
+            md5sum.update(buf.slice(0, bytesRead));
+        }
+    } finally {
+        fs.closeSync(fdr);
+    }
+    return md5sum.digest('hex');
+}
+
 function processAddRequest(request, response, platformId, projectRoot) {
     var parser = new platforms[platformId].parser(path.join(projectRoot, 'platforms', platformId));
     var wwwDir = parser.www_dir();
@@ -170,7 +191,7 @@ function processAddRequest(request, response, platformId, projectRoot) {
         'wwwPath': '/' + platformId + '/www',
         'wwwFileList': shell.find(wwwDir)
             .filter(function(a) { return !fs.statSync(a).isDirectory() && !/(^\.)|(\/\.)/.test(a) })
-            .map(function(a) { return a.slice(wwwDir.length); })
+            .map(function(a) { return {'path': a.slice(wwwDir.length), 'etag': '' + calculateMd5(a)}; })
     };
     console.log('200 ' + request.url);
     response.writeHead(200, {
