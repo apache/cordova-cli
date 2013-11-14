@@ -120,7 +120,7 @@ module.exports = function platform(command, targets) {
                 .then(function() {
                     return lazy_load.based_on_config(projectRoot, plat);
                 }).then(function(libDir) {
-                    // Windows platforms are in subdirectories into repositories
+                    // Check for platforms are in subdirectories into repositories
                     if (["wp7", "wp8", "windows8", "windows81", "blackberry10"].indexOf(target) !== -1)
                         libDir = path.join(libDir, target);
 
@@ -230,7 +230,7 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
         events.emit('verbose', 'Checking if platform "' + target + '" passes minimum requirements...');
         return module.exports.supports(projectRoot, target)
         .then(function() {
-            // Windows platforms are in subdirectories into repositories
+            // Check for platforms are in subdirectories into repositories
             if (["wp7", "wp8", "windows8", "windows81", "blackberry10"].indexOf(target) !== -1)
                 libDir = path.join(libDir, target);
 
