@@ -31,17 +31,20 @@ module.exports = {
     'wp7' : {
         parser : './src/metadata/wp7_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
-        version: '3.2.0-rc1'
+        version: '3.2.0-rc1',
+        subdirectory: 'wp7'
     },
     'wp8' : {
         parser : './src/metadata/wp8_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
-        version: '3.2.0-rc1'
+        version: '3.2.0-rc1',
+        subdirectory: 'wp8'
     },
     'blackberry10' : {
         parser : './src/metadata/blackberry10_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-blackberry.git',
-        version: '3.2.0-rc1'
+        version: '3.2.0-rc1',
+        subdirectory: 'blackberry10'
     },
     'www':{
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-app-hello-world.git',
@@ -55,7 +58,8 @@ module.exports = {
     'windows8':{
         parser: './src/metadata/windows8_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-windows.git',
-        version: '3.2.0-rc1'
+        version: '3.2.0-rc1',
+        subdirectory: 'windows8'
     }
 };
 
