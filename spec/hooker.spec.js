@@ -30,6 +30,11 @@ var hooker = require('../src/hooker'),
 
 var platform = os.platform();
 var cwd = process.cwd();
+var dot_ext = platform.match(/(win32|win64)/) ? '.bat' : '.sh';
+var fileNames = ['1', '07', 'fail'];
+var file = {};
+for(var i in fileNames)
+	file[fileNames[i] +'.sh'] = fileNames[i] + dot_ext;
 
 describe('hooker', function() {
     it('should throw if provided directory is not a cordova project', function() {
@@ -81,34 +86,34 @@ describe('hooker', function() {
         });
 
         describe('failure', function() {
-            it('should not error if the hook is unrecognized', function() {
-                var p;
-                runs(function() {
-                    p = h.fire('CLEAN YOUR SHORTS GODDAMNIT LIKE A BIG BOY!');
-                });
-                waitsFor(function() { return !p.isPending() }, 'promise not resolved', 500);
-                runs(function() {
-                    expect(p.isFulfilled()).toBe(true);
-                });
-            });
-            it('should error if any script exits with non-zero code', function(done) {
-                var script = path.join(tempDir, '.cordova', 'hooks', 'before_build');
-                shell.mkdir('-p', script);
-                this.after(function() { shell.rm('-rf', tempDir); });
-                if (platform.match(/(win32|win64)/)) {
-                    script = path.join(script, 'fail.bat');
-                    shell.cp(path.join(hooks, 'fail', 'fail.bat'), script);
-                } else {
-                    script = path.join(script, 'fail.sh');
-                    shell.cp(path.join(hooks, 'fail', 'fail.sh'), script);
-                }
-                fs.chmodSync(script, '754');
-                h.fire('before_build').then(function() {
-                    expect('the call').toBe('a failure');
-                }, function(err) {
-                    expect(err).toBeDefined();
-                }).fin(done);
-            });
+            describe('project-level hooks fails', function() {
+                var hook = path.join(tempDir, '.cordova', 'hooks', 'before_build'),
+				    script = path.join(hook, file['fail.sh'] );
+				beforeEach(function() {
+					shell.rm('-rf', hook);
+                    shell.mkdir('-p', hook);
+				});
+				it('should not error if the hook is unrecognized', function() {
+					var p;
+					runs(function() {
+						p = h.fire('CLEAN YOUR SHORTS GODDAMNIT LIKE A BIG BOY!');
+					});
+					waitsFor(function() { return !p.isPending() }, 'promise not resolved', 500);
+					runs(function() {
+						expect(p.isFulfilled()).toBe(true);
+					});
+				});
+				it('should error if any script exits with non-zero code', function(done) {
+					shell.cp('-f', path.join(hooks, 'fail', file['fail.sh']), script);
+					shell.chmod('754', script);
+
+					h.fire('before_build').then(function() {
+						expect('the call').toBe('a failure');
+					}, function(err) {
+						expect(err).toBeDefined();
+					}).fin(done);
+				});
+			});
         });
 
         describe('success', function() {
@@ -116,55 +121,42 @@ describe('hooker', function() {
                 var hook = path.join(tempDir, '.cordova', 'hooks', 'before_build'),
                     s;
                 beforeEach(function() {
-                    shell.mkdir('-p', hook);
-                    if (platform.match(/(win32|win64)/)) {
-                        shell.cp(path.join(hooks, 'test', '1.bat'), hook);
-                        shell.cp(path.join(hooks, 'test', '07.bat'), hook);
-                    } else {
-                        shell.cp(path.join(hooks, 'test', '1.sh'), hook);
-                        shell.cp(path.join(hooks, 'test', '07.sh'), hook);
-                    }
-                    fs.readdirSync(hook).forEach(function(script) {
-                        fs.chmodSync(path.join(hook, script), '754');
+					shell.rm('-rf', hook);	
+					shell.mkdir('-p', hook);
+					shell.cp(path.join(hooks, 'test', file['1.sh']), hook);
+                    shell.cp(path.join(hooks, 'test', file['07.sh']), hook);
+
+                    fs.readdirSync(hook).forEach(function(fileName) {
+                        shell.chmod('754', path.join(hook, fileName));
                     });
+
                     s = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
                         if (!cb) cb = opts;
                         cb(0, '', '');
                     });
                 });
-                afterEach(function() {
-                    shell.rm('-rf', tempDir);
-                });
+
                 it('should execute all scripts in order and fire callback', function(done) {
                     h.fire('before_build').then(function() {
-                        if (platform.match(/(win32|win64)/)) {
-                            expect(s.calls[0].args[0]).toMatch(/1.bat/);
-                            expect(s.calls[1].args[0]).toMatch(/07.bat/);
-                        } else {
-                            expect(s.calls[0].args[0]).toMatch(/1.sh/);
-                            expect(s.calls[1].args[0]).toMatch(/07.sh/);
-                        }
+                        expect(s.calls[0].args[0]).toMatch( new RegExp( file['1.sh'] ) );
+                        expect(s.calls[1].args[0]).toMatch( new RegExp( file['07.sh'] ) );
+
                     }, function(err) {
                         expect(err).not.toBeDefined();
                     }).fin(done);
                 });
                 it('should pass the project root folder as parameter into the project-level hooks', function(done) {
                     h.fire('before_build').then(function() {
-                        var param_str;
-                        if (platform.match(/(win32|win64)/)) {
-                            param_str = '1.bat "'+tempDir+'"';
-                        } else {
-                            param_str = '1.sh "'+tempDir+'"';
-                        }
+                        var param_str = file['1.sh'] +' "'+tempDir+'"';
                         expect(s.calls[0].args[0].indexOf(param_str)).not.toEqual(-1);
                     }, function(err) {
                         expect(err).toBeUndefined();
                     }).fin(done);
                 });
                 it('should skip any files starting with a dot on the scripts', function(done) {
-                    shell.cp(path.join(hooks, 'test', '07.bat'), path.join(hook, '.swp.file'));
+                    shell.cp(path.join(hooks, 'test', file['07.sh']), path.join(hook, '.swp.file'));
                     h.fire('before_build').then(function() {
-                        expect(s).not.toHaveBeenCalledWith(path.join(tempDir, '.cordova', 'hooks', 'before_build', '.swp.file') + ' "' + tempDir + '"', jasmine.any(Object), jasmine.any(Function));
+                        expect(s).not.toHaveBeenCalledWith(path.join(hook, '.swp.file') + ' "' + tempDir + '"', jasmine.any(Object), jasmine.any(Function));
                     }, function(err) {
                         expect(err).not.toBeDefined();
                     }).fin(done);
