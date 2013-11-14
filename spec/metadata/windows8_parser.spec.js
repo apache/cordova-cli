@@ -228,7 +228,6 @@ describe('windows8 project parser', function() {
             var config, www, overrides, staging, svn;
             beforeEach(function() {
                 config = spyOn(p, 'update_from_config');
-                www = spyOn(p, 'update_www');
                 staging = spyOn(p, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
             });
@@ -242,10 +241,6 @@ describe('windows8 project parser', function() {
                 errorWrapper(p.update_project({}), done, function(err) {
                     expect(err).toEqual(err);
                 });
-            });
-            it('should call update_www', function() {
-                p.update_project();
-                expect(www).toHaveBeenCalled();
             });
             it('should call update_staging', function() {
                 p.update_project();
