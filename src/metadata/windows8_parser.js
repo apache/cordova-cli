@@ -82,6 +82,7 @@ module.exports.prototype = {
         var version = this.fixConfigVersion(config);
         var name = config.name();
         var pkgName = config.packageName();
+        var author = config.author();
 
         var identityNode = manifest.find('.//Identity');
         if(identityNode) {
@@ -126,14 +127,31 @@ module.exports.prototype = {
                             ' with a <Application> node');
         }
 
+        // Update properties
+        var properties = manifest.find('.//Properties');
+        if (properties) {
+            var displayNameElement = properties.find('.//DisplayName');
+            if (displayNameElement) {
+                var displayName = displayNameElement.text;
+                if (displayName != name) {
+                    displayNameElement.text = name;
+                }
+            }
 
+            var publisherNameElement = properties.find('.//PublisherDisplayName');
+            if (publisherNameElement) {
+                var publisherName = publisherNameElement.text;
+                if (publisherName != author) {
+                    publisherNameElement.text = author;
+                }
+            }
+        }
 
+        // Update content (start page) element
+        this.config.content(config.content());
 
-         // Update content (start page) element
-         this.config.content(config.content());
-
-         //Write out manifest
-         fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
+        //Write out manifest
+        fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
 
     },
     // Returns the platform-specific www directory.
