@@ -62,6 +62,22 @@ config_parser.prototype = {
             return content.attrib.src;
         }
     },
+    author: function (name) {
+        if (name) {
+            var author = this.doc.find('author');
+            if (!author) {
+                author = new et.Element('author');
+                this.doc.getroot().append(author);
+            }
+
+            author.text = name;
+            this.update();
+        }
+        else {
+            var author = this.doc.find('author');
+            return author ? author.text : '';
+        }
+    },
     update:function() {
         fs.writeFileSync(this.path, this.doc.write({indent: 4}), 'utf-8');
     },
