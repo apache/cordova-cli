@@ -27,7 +27,12 @@ module.exports = {
         parser : require('./src/metadata/android_parser'),
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-android.git',
         version: '3.0.0'
-    }, 
+    },
+    'amazon-fireos' : {
+        parser : require('./src/metadata/amazon_fireos_parser'),
+        url    : 'https://github.com/archananaik/cordova-amazon-fireos.git',
+        version: '3.0.0'
+    },
     'wp7' : {
         parser : require('./src/metadata/wp7_parser'),
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
