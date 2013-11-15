@@ -79,7 +79,7 @@ module.exports.prototype = {
         //Get manifest file
         var manifest = xml.parseElementtreeSync(this.manifest_path);
 
-        var version = this.fixConfigVersion(config);
+        var version = this.fixConfigVersion(config.version());
         var name = config.name();
         var pkgName = config.packageName();
         var author = config.author();
@@ -283,8 +283,7 @@ module.exports.prototype = {
     },
 
     // Cordova default version format is not compatible with Windows 8
-    fixConfigVersion: function (config) {
-        var version = config.version();
+    fixConfigVersion: function (version) {
         if (version.match(/^\d+\.\d+\.\d+$/)) {
             return version.concat(".0");
         }
