@@ -79,19 +79,26 @@ module.exports.prototype = {
         //Get manifest file
         var manifest = xml.parseElementtreeSync(this.manifest_path);
 
-        //Update app version
         var version = this.fixConfigVersion(config);
+        var name = config.name();
+        var pkgName = config.packageName();
+
         var identityNode = manifest.find('.//Identity');
         if(identityNode) {
+            // Update app name in identity
+            var appIdName = identityNode['attrib']['Name'];
+            if (appIdName != pkgName) {
+                identityNode['attrib']['Name'] = pkgName;
+            }
+
+            // Update app version
             var appVersion = identityNode['attrib']['Version'];
             if(appVersion != version) {
                 identityNode['attrib']['Version'] = version;
             }
         }
 
-        // update name ( windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
-        var pkgName = config.packageName();
-        var name = config.name();
+        // Update name (windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
         var app = manifest.find('.//Application');
         if(app) {
 
