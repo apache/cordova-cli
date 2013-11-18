@@ -276,7 +276,28 @@ module.exports.prototype = {
         //var libDir = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
         //this.update_www(libDir);
         this.update_staging();
+        this.add_bom();
+
         util.deleteSvnFolders(this.www_dir());
         return Q();
+    },
+
+    // to ensure app pass windows store certification
+    add_bom: function () {
+        var www = this.www_dir();
+        var files = shell.ls('-R', www);
+
+        files.forEach(function (file) {
+            if (!file.match(/\.(js|html|css|json)/)) {
+                return;
+            }
+
+            var filePath = path.join(www, file);
+            var content = fs.readFileSync(filePath);
+
+            if (content[0] !== 0xEF && content[1] !== 0xBE && content[2] !== 0xBB) {
+                fs.writeFileSync(filePath, '\ufeff' + content);
+            }
+        });
     }
 };
