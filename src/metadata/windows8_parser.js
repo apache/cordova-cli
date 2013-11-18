@@ -284,7 +284,13 @@ module.exports.prototype = {
 
     // Cordova default version format is not compatible with Windows 8
     fixConfigVersion: function (version) {
-        if (version.match(/^\d+\.\d+\.\d+$/)) {
+        if (version.match(/^\d+$/)) {
+            return version.concat(".0.0.0");
+        }
+        else if (version.match(/^\d+\.\d+$/)) {
+            return version.concat(".0.0");
+        }
+        else if (version.match(/^\d+\.\d+\.\d+$/)) {
             return version.concat(".0");
         }
         else if (version.match(/^\d+\.\d+\.\d+\.\d+$/)) {
