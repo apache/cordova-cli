@@ -19,7 +19,7 @@ describe('plugin end-to-end', function() {
         shell.rm('-rf', project);
     });
     afterEach(function() {
-        //shell.rm('-rf', project);
+        shell.rm('-rf', project);
     });
 
     // The flow tested is: ls, add, ls, rm, ls.
