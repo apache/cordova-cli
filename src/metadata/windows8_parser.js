@@ -131,19 +131,13 @@ module.exports.prototype = {
         var properties = manifest.find('.//Properties');
         if (properties) {
             var displayNameElement = properties.find('.//DisplayName');
-            if (displayNameElement) {
-                var displayName = displayNameElement.text;
-                if (displayName != name) {
-                    displayNameElement.text = name;
-                }
+            if (displayNameElement && displayNameElement.text != name) {
+                displayNameElement.text = name;
             }
 
             var publisherNameElement = properties.find('.//PublisherDisplayName');
-            if (publisherNameElement) {
-                var publisherName = publisherNameElement.text;
-                if (publisherName != author) {
-                    publisherNameElement.text = author;
-                }
+            if (publisherNameElement && publisherNameElement.text != author) {
+                publisherNameElement.text = author;
             }
         }
 
