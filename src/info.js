@@ -83,6 +83,10 @@ function doPlatform( currentPlatform ) {
         break;
     case "android":
         output = shell.exec('android list target',{silent:true} ).output;
+        break;
+    case "blackberry10":
+        output = shell.exec('blackberry-nativepackager -version',{silent:true} ).output;
+        break;
     }
 
     return output;
