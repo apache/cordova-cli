@@ -228,7 +228,7 @@ module.exports.prototype = {
         for(item in folder_dir) {
             var stat = fs.statSync(path.join(dir, folder_dir[item]));
             // means its a folder?
-            if(stat.size == 0) {
+            if(stat.isDirectory()) {
                 var sub_dir = this.folder_contents(path.join(name, folder_dir[item]), path.join(dir, folder_dir[item]));
                 //Add all subfolder item paths
                 for(sub_item in sub_dir) {
