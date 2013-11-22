@@ -42,11 +42,11 @@ var crossConcat = function(a, b, delimiter){
 };
 
 var tmpDir = helpers.tmpDir('create_test');
-var appName = 'TestCreate';
-var appId = 'io.cordova.' + appName.toLocaleLowerCase();
+var appName = 'TestBase';
+var appId = 'org.testing';
 var project = path.join(tmpDir, appName);
 var cordovaDir = path.join(project, '.cordova');
-var extraConfig = {
+var configNormal = {
       lib: {
         www: {
           uri: path.join(__dirname, 'fixtures', 'base', 'www'),
@@ -55,6 +55,15 @@ var extraConfig = {
         }
       }
     };
+var configSymlink = {
+      lib: {
+        www: {
+          uri: path.join(__dirname, 'fixtures', 'base'), // "create" should copy or link the www child of this dir and not the dir itself.
+          link: true
+        }
+      }
+    };
+
 
 describe('create end-to-end', function() {
 
@@ -66,51 +75,73 @@ describe('create end-to-end', function() {
         shell.rm('-rf', tmpDir);
     });
 
+    function checkProject() {
+        // Check if top level dirs exist.
+        var dirs = ['.cordova', 'platforms', 'merges', 'plugins', 'www'];
+        dirs.forEach(function(d) {
+            expect(path.join(project, d)).toExist();
+        });
+
+        // Check if hook dirs exist.
+        var hooksDir = path.join(project, '.cordova', 'hooks');
+        dirs = crossConcat(['platform', 'plugin'], ['add', 'rm', 'ls'], '_');
+        dirs = dirs.concat(['build', 'compile', 'docs', 'emulate', 'prepare', 'run']);
+        dirs = crossConcat(['before', 'after'], dirs, '_');
+        dirs.forEach(function(d) {
+            expect(path.join(hooksDir, d)).toExist();
+        });
+
+        // Check if config files exist.
+        expect(path.join(cordovaDir, 'config.json')).toExist();
+        expect(path.join(project, 'www', 'config.xml')).toExist();
+        expect(path.join(project, 'www', 'index.html')).toExist();
+
+        // Check contents of config.json
+        var cfg = config.read(project);
+        expect(cfg.id).toEqual(appId);
+        expect(cfg.name).toEqual(appName);
+
+        // Check that www/config.xml was updated.
+        var configXml = new util.config_parser(path.join(project, 'www', 'config.xml'));
+        expect(configXml.packageName()).toEqual(appId);
+
+        // TODO (kamrik): check somehow that we got the right config.xml from the fixture and not some place else.
+        // expect(configXml.name()).toEqual('TestBase');
+    }
+
     var results;
     events.on('results', function(res) { results = res; });
 
-    it('should successfully run', function(done) {
+    it('should successfully run with regualr config', function(done) {
         // Call cordova create with no args, should return help.
-        cordova.raw.create().then(function() {
+        cordova.raw.create()
+        .then(function() {
             expect(results).toMatch(/synopsis/gi);
-        }).then(function() {
+        })
+        .then(function() {
             // Create a real project
-            return cordova.raw.create(project, appId, appName, extraConfig);
-        }).then(function() {
-            // Check if top level dirs exist.
-            var dirs = ['.cordova', 'platforms', 'merges', 'plugins', 'www'];
-            dirs.forEach(function(d) {
-                expect(path.join(project, d)).toExist();
-            });
-
-            // Check if hook dirs exist.
-            var hooksDir = path.join(project, '.cordova', 'hooks');
-            dirs = crossConcat(['platform', 'plugin'], ['add', 'rm', 'ls'], '_');
-            dirs = dirs.concat(['build', 'compile', 'docs', 'emulate', 'prepare', 'run']);
-            dirs = crossConcat(['before', 'after'], dirs, '_');
-            dirs.forEach(function(d) {
-                expect(path.join(hooksDir, d)).toExist();
-            });
-
-            // Check if config files exist.
-            expect(path.join(cordovaDir, 'config.json')).toExist();
-            expect(path.join(project, 'www', 'config.xml')).toExist();
-
-            // Check contents of config.json
-            var cfg = config.read(project);
-            expect(cfg.id).toEqual(appId);
-            expect(cfg.name).toEqual(appName);
-            expect(cfg.lib.www.id).toEqual(appName);
-
-            // Check that www/config.xml was updated.
-            var configXml = new util.config_parser(path.join(project, 'www', 'config.xml'));
-            expect(configXml.packageName()).toEqual(appId);
-
-            // TODO (kamrik): check somehow that we got the right config.xml from the fixture and not some place else.
-            // expect(configXml.name()).toEqual('TestBase');
-        }).fail(function(err) {
+            return cordova.raw.create(project, appId, appName, configNormal);
+        })
+        .then(checkProject)
+        .fail(function(err) {
             console.log(err);
             expect(err).toBeUndefined();
-        }).fin(done);
+        })
+        .fin(done);
+    });
+
+    it('should successfully run with symlinked www', function(done) {
+        // Call cordova create with no args, should return help.
+        cordova.raw.create(project, appId, appName, configSymlink)
+        .then(checkProject)
+        .then(function() {
+            // Check that www is really a symlink
+            expect(fs.lstatSync(path.join(project, 'www')).isSymbolicLink()).toBe(true);
+        })
+        .fail(function(err) {
+            console.log(err);
+            expect(err).toBeUndefined();
+        })
+        .fin(done);
     });
 });

@@ -30,6 +30,9 @@ var platforms = require('../../platforms'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
 
+// Create a real config object before mocking out everything.
+var cfg = new config_parser(path.join(__dirname, '..', 'test-config.xml'));
+
 describe('ios project parser', function () {
     var proj = path.join('some', 'path');
     var exec, custom, readdir, cfg_parser;
@@ -87,7 +90,7 @@ describe('ios project parser', function () {
 
         describe('update_from_config method', function() {
             var et, xml, find, write_xml, root, mv;
-            var cfg, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
+            var find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
             var plist_parse, plist_build, xc;
             var update_name, xc_write;
             beforeEach(function() {
@@ -119,7 +122,6 @@ describe('ios project parser', function () {
                     updateProductName:update_name,
                     writeSync:xc_write
                 });
-                cfg = new config_parser();
                 cfg.name = function() { return 'testname' };
                 cfg.packageName = function() { return 'testpkg' };
                 cfg.version = function() { return 'one point oh' };

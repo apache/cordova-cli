@@ -30,17 +30,17 @@ describe("cordova cli", function () {
             });
 
             it("will spit out the version with -v", function () {
-                new CLI(["-v"]);
+                new CLI(["node", "cordova", "-v"]);
                 expect(console.log).toHaveBeenCalledWith(version);
             });
 
             it("will spit out the version with --version", function () {
-                new CLI(["--version"]);
+                new CLI(["node", "cordova", "--version"]);
                 expect(console.log).toHaveBeenCalledWith(version);
             });
 
             it("will spit out the version with -v anywher", function () {
-                new CLI(["one", "-v", "three"]);
+                new CLI(["node", "cordova", "one", "-v", "three"]);
                 expect(console.log).toHaveBeenCalledWith(version);
             });
         });

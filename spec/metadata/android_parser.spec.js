@@ -28,6 +28,9 @@ var platforms = require('../../platforms'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
 
+// Create a real config object before mocking out everything.
+var cfg = new config_parser(path.join(__dirname, '..', 'test-config.xml'));
+
 describe('android project parser', function() {
     var proj = path.join('some', 'path');
     var exists, exec, custom;
@@ -84,7 +87,7 @@ describe('android project parser', function() {
         });
 
         describe('update_from_config method', function() {
-            var et, xml, find, write_xml, root, cfg, readdir, cfg_parser, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
+            var et, xml, find, write_xml, root, readdir, cfg_parser, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
             beforeEach(function() {
                 find_obj = {
                     text:'hi'
@@ -104,7 +107,6 @@ describe('android project parser', function() {
                 });
                 xml = spyOn(ET, 'XML');
                 readdir = spyOn(fs, 'readdirSync').andReturn([path.join(proj, 'src', 'android_pkg', 'MyApp.java')]);
-                cfg = new config_parser();
                 cfg.name = function() { return 'testname' };
                 cfg.packageName = function() { return 'testpkg' };
                 cfg.version = function() { return 'one point oh' };
