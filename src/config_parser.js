@@ -75,7 +75,7 @@ config_parser.prototype = {
         }
         else {
             var author = this.doc.find('author');
-            return author ? author.text : '';
+            return author ? author.text.trim() : '';
         }
     },
     update:function() {
