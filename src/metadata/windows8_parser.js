@@ -52,7 +52,9 @@ module.exports.check_requirements = function(project_root) {
                     require('../../platforms').windows8.version, 'windows8');
 
     var custom_path = config.has_custom_path(project_root, 'windows8');
-    if (custom_path) lib_path = custom_path;
+    if (custom_path) {
+        lib_path = path.join(custom_path, "windows8");
+    }
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
     events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
@@ -81,6 +83,13 @@ module.exports.prototype = {
 
         //Update app version
         var version = config.version();
+
+        // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version        
+        var numVersionComponents = version.match(/\./g).length + 1;
+        while (numVersionComponents++ < 4) {
+            version += '.0';
+        }
+
         var identityNode = manifest.find('.//Identity');
         if(identityNode) {
             var appVersion = identityNode['attrib']['Version'];
@@ -118,6 +127,20 @@ module.exports.prototype = {
                             ' with a <Application> node');
         }
 
+        // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
+        // to sort elements we remove them and then add again in the appropriate order
+        var capabilitiesRoot = manifest.find('.//Capabilities'),
+            capabilities = capabilitiesRoot._children;
+
+        capabilities.forEach(function(elem){
+            capabilitiesRoot.remove(0, elem);
+        });
+        capabilities.sort(function(a, b) {
+            return (a.tag > b.tag)? 1: -1;
+        });
+        capabilities.forEach(function(elem){
+            capabilitiesRoot.append(elem);
+        });
 
 
 
@@ -249,8 +272,9 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         // overrides (merges) are handled in update_www()
-        var libDir = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
-        this.update_www(libDir);
+        // CB-5340 Windows8 build does no write cordova_plugins.js
+        //var libDir = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
+        //this.update_www(libDir);
         this.update_staging();
         util.deleteSvnFolders(this.www_dir());
         return Q();
