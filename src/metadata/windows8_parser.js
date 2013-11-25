@@ -52,7 +52,9 @@ module.exports.check_requirements = function(project_root) {
                     require('../../platforms').windows8.version, 'windows8');
 
     var custom_path = config.has_custom_path(project_root, 'windows8');
-    if (custom_path) lib_path = custom_path;
+    if (custom_path) {
+        lib_path = path.join(custom_path, "windows8");
+    }
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
     events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
@@ -79,25 +81,34 @@ module.exports.prototype = {
         //Get manifest file
         var manifest = xml.parseElementtreeSync(this.manifest_path);
 
-        //Update app version
-        var version = config.version();
+        var version = this.fixConfigVersion(config.version());
+        var name = config.name();
+        var pkgName = config.packageName();
+        var author = config.author();
+
         var identityNode = manifest.find('.//Identity');
         if(identityNode) {
+            // Update app name in identity
+            var appIdName = identityNode['attrib']['Name'];
+            if (appIdName != pkgName) {
+                identityNode['attrib']['Name'] = pkgName;
+            }
+
+            // Update app version
             var appVersion = identityNode['attrib']['Version'];
             if(appVersion != version) {
                 identityNode['attrib']['Version'] = version;
             }
         }
 
-        // update name ( windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
-        var name = config.name();
+        // Update name (windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
         var app = manifest.find('.//Application');
         if(app) {
 
             var appId = app['attrib']['Id'];
 
-            if(appId != name) {
-                app['attrib']['Id'] = name;
+            if (appId != pkgName) {
+                app['attrib']['Id'] = pkgName;
             }
 
             var visualElems = manifest.find('.//VisualElements');
@@ -118,14 +129,40 @@ module.exports.prototype = {
                             ' with a <Application> node');
         }
 
+        // Update properties
+        var properties = manifest.find('.//Properties');
+        if (properties) {
+            var displayNameElement = properties.find('.//DisplayName');
+            if (displayNameElement && displayNameElement.text != name) {
+                displayNameElement.text = name;
+            }
 
+            var publisherNameElement = properties.find('.//PublisherDisplayName');
+            if (publisherNameElement && publisherNameElement.text != author) {
+                publisherNameElement.text = author;
+            }
+        }
 
+        // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
+        // to sort elements we remove them and then add again in the appropriate order
+        var capabilitiesRoot = manifest.find('.//Capabilities'),
+            capabilities = capabilitiesRoot._children;
 
-         // Update content (start page) element
-         this.config.content(config.content());
+        capabilities.forEach(function(elem){
+            capabilitiesRoot.remove(0, elem);
+        });
+        capabilities.sort(function(a, b) {
+            return (a.tag > b.tag)? 1: -1;
+        });
+        capabilities.forEach(function(elem){
+            capabilitiesRoot.append(elem);
+        });
 
-         //Write out manifest
-         fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
+        // Update content (start page) element
+        this.config.content(config.content());
+
+        //Write out manifest
+        fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
 
     },
     // Returns the platform-specific www directory.
@@ -249,10 +286,42 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         // overrides (merges) are handled in update_www()
-        var libDir = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
-        this.update_www(libDir);
+        // CB-5340 Windows8 build does no write cordova_plugins.js
+        //var libDir = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
+        //this.update_www(libDir);
         this.update_staging();
+        this.add_bom();
+
         util.deleteSvnFolders(this.www_dir());
         return Q();
-    }
+    },
+
+    // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version        
+    fixConfigVersion: function (version) {
+        var numVersionComponents = version.match(/\./g).length + 1;
+        while (numVersionComponents++ < 4) {
+            version += '.0';
+        }
+        return version;
+    },
+
+    // CB-5421 Add BOM to all html, js, css files to ensure app can pass Windows Store Certification
+    add_bom: function () {
+        var www = this.www_dir();
+        var files = shell.ls('-R', www);
+
+        files.forEach(function (file) {
+            if (!file.match(/\.(js|html|css|json)/)) {
+                return;
+            }
+
+            var filePath = path.join(www, file);
+            var content = fs.readFileSync(filePath);
+
+            if (content[0] !== 0xEF && content[1] !== 0xBE && content[2] !== 0xBB) {
+                fs.writeFileSync(filePath, '\ufeff' + content);
+            }
+        });
+  	}
+
 };
