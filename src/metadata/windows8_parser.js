@@ -81,32 +81,34 @@ module.exports.prototype = {
         //Get manifest file
         var manifest = xml.parseElementtreeSync(this.manifest_path);
 
-        //Update app version
-        var version = config.version();
-
-        // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version        
-        var numVersionComponents = version.match(/\./g).length + 1;
-        while (numVersionComponents++ < 4) {
-            version += '.0';
-        }
+        var version = this.fixConfigVersion(config.version());
+        var name = config.name();
+        var pkgName = config.packageName();
+        var author = config.author();
 
         var identityNode = manifest.find('.//Identity');
         if(identityNode) {
+            // Update app name in identity
+            var appIdName = identityNode['attrib']['Name'];
+            if (appIdName != pkgName) {
+                identityNode['attrib']['Name'] = pkgName;
+            }
+
+            // Update app version
             var appVersion = identityNode['attrib']['Version'];
             if(appVersion != version) {
                 identityNode['attrib']['Version'] = version;
             }
         }
 
-        // update name ( windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
-        var name = config.name();
+        // Update name (windows8 has it in the Application[@Id] and Application.VisualElements[@DisplayName])
         var app = manifest.find('.//Application');
         if(app) {
 
             var appId = app['attrib']['Id'];
 
-            if(appId != name) {
-                app['attrib']['Id'] = name;
+            if (appId != pkgName) {
+                app['attrib']['Id'] = pkgName;
             }
 
             var visualElems = manifest.find('.//VisualElements');
@@ -127,6 +129,20 @@ module.exports.prototype = {
                             ' with a <Application> node');
         }
 
+        // Update properties
+        var properties = manifest.find('.//Properties');
+        if (properties) {
+            var displayNameElement = properties.find('.//DisplayName');
+            if (displayNameElement && displayNameElement.text != name) {
+                displayNameElement.text = name;
+            }
+
+            var publisherNameElement = properties.find('.//PublisherDisplayName');
+            if (publisherNameElement && publisherNameElement.text != author) {
+                publisherNameElement.text = author;
+            }
+        }
+
         // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
         // to sort elements we remove them and then add again in the appropriate order
         var capabilitiesRoot = manifest.find('.//Capabilities'),
@@ -142,13 +158,11 @@ module.exports.prototype = {
             capabilitiesRoot.append(elem);
         });
 
+        // Update content (start page) element
+        this.config.content(config.content());
 
-
-         // Update content (start page) element
-         this.config.content(config.content());
-
-         //Write out manifest
-         fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
+        //Write out manifest
+        fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
 
     },
     // Returns the platform-specific www directory.
@@ -282,7 +296,16 @@ module.exports.prototype = {
         return Q();
     },
 
-    // to ensure app pass windows store certification
+    // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version        
+    fixConfigVersion: function (version) {
+        var numVersionComponents = version.match(/\./g).length + 1;
+        while (numVersionComponents++ < 4) {
+            version += '.0';
+        }
+        return version;
+    },
+
+    // CB-5421 Add BOM to all html, js, css files to ensure app can pass Windows Store Certification
     add_bom: function () {
         var www = this.www_dir();
         var files = shell.ls('-R', www);
@@ -299,5 +322,6 @@ module.exports.prototype = {
                 fs.writeFileSync(filePath, '\ufeff' + content);
             }
         });
-    }
+  	}
+
 };
