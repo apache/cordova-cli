@@ -156,7 +156,7 @@ module.exports.prototype = {
 
     // Used for creating platform_www in projects created by older versions.
     cordovajs_path:function(libDir) {
-        var jsPath = path.join(libDir, 'common', 'www', 'cordova.js');
+        var jsPath = path.join(libDir, '..', 'common', 'www', 'cordova.js');
         return path.resolve(jsPath);
     },
 

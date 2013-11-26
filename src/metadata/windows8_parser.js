@@ -183,7 +183,7 @@ module.exports.prototype = {
 
     // Used for creating platform_www in projects created by older versions.
     cordovajs_path:function(libDir) {
-        var jsPath = path.join(libDir, 'windows8', "template", 'www', 'cordova.js');
+        var jsPath = path.join(libDir, "template", 'www', 'cordova.js');
         return path.resolve(jsPath);
     },
 
@@ -287,9 +287,6 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         // overrides (merges) are handled in update_www()
-        // CB-5340 Windows8 build does no write cordova_plugins.js
-        //var libDir = path.join(util.libDirectory, 'windows8', 'cordova', require('../../platforms').windows8.version);
-        //this.update_www(libDir);
         this.update_staging();
         this.add_bom();
 
