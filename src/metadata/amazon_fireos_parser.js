@@ -140,6 +140,12 @@ module.exports.prototype = {
         return this.android_config;
     },
 
+     // Used for creating platform_www in projects created by older versions.
+    cordovajs_path:function(libDir) {
+        var jsPath = path.join(libDir, 'framework', 'assets', 'www', 'cordova.js');
+        return path.resolve(jsPath);
+    },
+    
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
         var www = util.projectWww(projectRoot);
