@@ -219,25 +219,26 @@ module.exports.prototype = {
         // save file
         fs.writeFileSync(this.csproj_path, csproj_xml.write({indent:4}), 'utf-8');
     },
-    // Returns an array of all the files in the given directory with reletive paths
+    // Returns an array of all the files in the given directory with relative paths
     // - name     : the name of the top level directory (i.e all files will start with this in their path)
-    // - path     : the directory whos contents will be listed under 'name' directory
+    // - dir     : the directory whos contents will be listed under 'name' directory
     folder_contents:function(name, dir) {
         var results = [];
         var folder_dir = fs.readdirSync(dir);
         for(item in folder_dir) {
             var stat = fs.statSync(path.join(dir, folder_dir[item]));
-            // means its a folder?
-            if(stat.size == 0) {
+
+            if(stat.isDirectory()) {
                 var sub_dir = this.folder_contents(path.join(name, folder_dir[item]), path.join(dir, folder_dir[item]));
                 //Add all subfolder item paths
                 for(sub_item in sub_dir) {
                     results.push(sub_dir[sub_item]);
                 }
             }
-            else {
+            else if(stat.isFile()) {
                 results.push(path.join(name, folder_dir[item]));
             }
+            // else { it is a FIFO, or a Socket or something ... } 
         }
         return results;
     },
