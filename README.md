@@ -28,6 +28,7 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/gu
 
 # Supported Cordova Platforms
 
+- Amazon Fire OS
 - Android
 - BlackBerry 10
 - iOS
@@ -43,6 +44,7 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/gu
   - [Android SDK](http://developer.android.com) - **NOTE** This tool
     will not work unless you have the absolute latest updates for all
     Android SDK components. Also you will need the SDK's `tools` and `platform-tools` directories on your __system path__ otherwise Android support will fail.
+  - [Amazon Fire OS SDK](https://developer.amazon.com/sdk/fire/IntegratingAWV.html#installawv) - **NOTE** This tool will not work unless you have Android SDK installed and paths are updated as mentioned above. In addition you need to install AmazonWebView SDK and copy awv_interface.jar to corodva-amazon-fireos/framework/libs folder. If libs folder does not exist then create one.
   - [Windows Phone SDK](http://dev.windowsphone.com/en-us/downloadsdk) - **NOTE** This tool will not work unless you have `msbuild` on your __system path__ otherwise Windows Phone support will fail (`msbuild.exe` is generally located in `C:\Windows\Microsoft.NET\Framework\v4.0.30319`).
 
 cordova-cli has been tested on Mas OS X, Linux, Windows 7 and Windows 8.
@@ -273,3 +275,12 @@ Windows 8 support does not include the ability to launch/run/emulate, so you wil
 To run your app, you will need to open the .sln in the platforms/windows8 folder using Visual Studio 2012.
 Note also that Visual Studio will inform you to reload the project if you run any of the above commands while the project is loaded.
 
+## Amazon Fire OS
+
+Amazon Fire OS does not include the ability to emulate. You are still able to use the following commands with Amazon Fire OS
+
+- `platform add amazon-fireos`
+- `platform remove amazon-fireos`
+- `prepare amazon-fireos`
+- `compile amazon-fireos`
+- `build amazon-fireos`
