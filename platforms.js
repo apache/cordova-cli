@@ -28,6 +28,11 @@ module.exports = {
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-android.git',
         version: '3.2.0'
     }, 
+    'ubuntu' : {
+        parser : './src/metadata/ubuntu_parser',
+        url    : 'https://launchpad.net/cordova-ubuntu/3.0/apha1/+download/campo.tar.gz',
+        version: '3.1.0-rc1'
+    }, 
     'wp7' : {
         parser : './src/metadata/wp7_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
