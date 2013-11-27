@@ -40,6 +40,8 @@ module.exports = {
         }
 
         var url = platforms[platform].url + ';a=snapshot;h=' + platforms[platform].version + ';sf=tgz';
+        if (platform == 'ubuntu')
+            url = platforms[platform].url;
         return module.exports.custom(url, 'cordova', platform, platforms[platform].version);
     },
     // Returns a promise for the path to the lazy-loaded directory.

@@ -159,6 +159,8 @@ module.exports = function platform(command, targets) {
                     available.push('wp8');
                     available.push('windows8');
                 }
+                if (os.platform() === 'linux')
+                    available.push('ubuntu');
 
                 available = available.filter(function(p) {
                     return platforms_on_fs.indexOf(p) < 0; // Only those not already installed.
