@@ -44,14 +44,14 @@ describe('windows8 project parser', function() {
         cfg_parser = spyOn(util, 'config_parser');
     });
 
-    function wrapper(p, done, post) {
-        p.then(post, function(err) {
+    function wrapper(promise, done, post) {
+        promise.then(post, function(err) {
             expect(err).toBeUndefined();
         }).fin(done);
     }
 
-    function errorWrapper(p, done, post) {
-        p.then(function() {
+    function errorWrapper(promise, done, post) {
+        promise.then(function() {
             expect('this call').toBe('fail');
         }, post).fin(done);
     }
@@ -65,9 +65,9 @@ describe('windows8 project parser', function() {
         });
         it('should create an instance with path, manifest properties', function() {
             expect(function() {
-                var p = new platforms.windows8.parser(proj);
-                expect(p.windows8_proj_dir).toEqual(proj);
-                expect(p.manifest_path).toEqual(path.join(proj, 'package.appxmanifest'));
+                var parser = new platforms.windows8.parser(proj);
+                expect(parser.windows8_proj_dir).toEqual(proj);
+                expect(parser.manifest_path).toEqual(path.join(proj, 'package.appxmanifest'));
             }).not.toThrow();
         });
     });
@@ -100,10 +100,10 @@ describe('windows8 project parser', function() {
     });
 
     describe('instance', function() {
-        var p, cp, rm, is_cordova, write, read, mv, mkdir;
+        var parser, cp, rm, is_cordova, write, read, mv, mkdir;
         var windows8_proj = path.join(proj, 'platforms', 'windows8');
         beforeEach(function() {
-            p = new platforms.windows8.parser(windows8_proj);
+            parser = new platforms.windows8.parser(windows8_proj);
             cp = spyOn(shell, 'cp');
             rm = spyOn(shell, 'rm');
             mv = spyOn(shell, 'mv');
@@ -130,7 +130,7 @@ describe('windows8 project parser', function() {
                 };
                 root_obj = {
                     attrib:{
-                        package:'android_pkg'
+                        package:'windows8_pkg'
                     }
                 };
                 find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
@@ -154,7 +154,7 @@ describe('windows8 project parser', function() {
                 cfg_pref_rm = jasmine.createSpy('config_parser pref rm');
                 cfg_pref_add = jasmine.createSpy('config_parser pref add');
                 cfg_content = jasmine.createSpy('config_parser content');
-                p.config = {
+                parser.config = {
                     access:{
                         remove:cfg_access_rm,
                         get:function(){},
@@ -171,44 +171,40 @@ describe('windows8 project parser', function() {
             });
 
             it('should write out the app name to package.appxmanifest', function() {
-                //following line outputs json
-                p.update_from_config(cfg);
-                expect(find_obj.attrib.Id).toEqual('testname');
+                parser.update_from_config(cfg);
+                expect(find_obj.attrib.Name).toEqual(cfg.packageName());
+                expect(find_obj.attrib.DisplayName).toEqual(cfg.name());
             });
-
-            // This test removed (jm) does not seem to be valid in winjs land.
-            // it('should write out the app id to jsproj file', function() {
-            //     p.update_from_config(cfg);
-            //     expect(find_obj.text).toContain('testpkg');
-            // });
 
             it('should write out the app version to package.appxmanifest', function() {
-                p.update_from_config(cfg);
+                parser.update_from_config(cfg);
                 expect(find_obj.attrib.Version).toEqual('one point oh');
             });
-           it('should update the content element (start page)', function() {
-                p.update_from_config(cfg);
+
+            it('should update the content element (start page)', function() {
+                parser.update_from_config(cfg);
                 expect(cfg_content).toHaveBeenCalledWith('index.html');
             });
 
         });
+
         describe('www_dir method', function() {
             it('should return www', function() {
-                expect(p.www_dir()).toEqual(path.join(windows8_proj, 'www'));
+                expect(parser.www_dir()).toEqual(path.join(windows8_proj, 'www'));
             });
         });
         describe('staging_dir method', function() {
             it('should return .staging/www', function() {
-                expect(p.staging_dir()).toEqual(path.join(windows8_proj, '.staging', 'www'));
+                expect(parser.staging_dir()).toEqual(path.join(windows8_proj, '.staging', 'www'));
             });
         });
         describe('update_www method', function() {
             var update_jsproj;
             beforeEach(function() {
-                update_jsproj = spyOn(p, 'update_jsproj');
+                update_jsproj = spyOn(parser, 'update_jsproj');
             });
             it('should rm project-level www and cp in platform agnostic www', function() {
-                p.update_www(path.join('lib','dir'));
+                parser.update_www(path.join('lib','dir'));
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
             });
@@ -216,38 +212,38 @@ describe('windows8 project parser', function() {
         describe('update_staging method', function() {
             it('should do nothing if staging dir does not exist', function() {
                 exists.andReturn(false);
-                p.update_staging();
+                parser.update_staging();
                 expect(cp).not.toHaveBeenCalled();
             });
             it('should copy the staging dir into www if staging dir exists', function() {
-                p.update_staging();
+                parser.update_staging();
                 expect(cp).toHaveBeenCalled();
             });
         });
         describe('update_project method', function() {
             var config, www, overrides, staging, svn;
             beforeEach(function() {
-                config = spyOn(p, 'update_from_config');
-                staging = spyOn(p, 'update_staging');
+                config = spyOn(parser, 'update_from_config');
+                staging = spyOn(parser, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
             });
             it('should call update_from_config', function() {
-                p.update_project();
+                parser.update_project();
                 expect(config).toHaveBeenCalled();
             });
             it('should throw if update_from_config throws', function(done) {
                 var err = new Error('uh oh!');
                 config.andCallFake(function() { throw err; });
-                errorWrapper(p.update_project({}), done, function(err) {
+                errorWrapper(parser.update_project({}), done, function(err) {
                     expect(err).toEqual(err);
                 });
             });
             it('should call update_staging', function() {
-                p.update_project();
+                parser.update_project();
                 expect(staging).toHaveBeenCalled();
             });
             it('should call deleteSvnFolders', function() {
-                p.update_project();
+                parser.update_project();
                 expect(svn).toHaveBeenCalled();
             });
         });

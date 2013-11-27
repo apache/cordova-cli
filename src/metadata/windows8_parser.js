@@ -131,7 +131,7 @@ module.exports.prototype = {
 
         // Update properties
         var properties = manifest.find('.//Properties');
-        if (properties) {
+        if (properties && properties.find) {
             var displayNameElement = properties.find('.//DisplayName');
             if (displayNameElement && displayNameElement.text != name) {
                 displayNameElement.text = name;
@@ -146,7 +146,7 @@ module.exports.prototype = {
         // sort Capability elements as per CB-5350 Windows8 build fails due to invalid 'Capabilities' definition
         // to sort elements we remove them and then add again in the appropriate order
         var capabilitiesRoot = manifest.find('.//Capabilities'),
-            capabilities = capabilitiesRoot._children;
+            capabilities = capabilitiesRoot._children || [];
 
         capabilities.forEach(function(elem){
             capabilitiesRoot.remove(0, elem);
@@ -288,7 +288,7 @@ module.exports.prototype = {
         }
         // overrides (merges) are handled in update_www()
         this.update_staging();
-        this.add_bom();
+        //this.add_bom();
 
         util.deleteSvnFolders(this.www_dir());
         return Q();
@@ -296,9 +296,11 @@ module.exports.prototype = {
 
     // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version        
     fixConfigVersion: function (version) {
-        var numVersionComponents = version.match(/\./g).length + 1;
-        while (numVersionComponents++ < 4) {
-            version += '.0';
+        if(version && version.match(/\.d/g)) {
+            var numVersionComponents = version.match(/\.d/g).length + 1;
+            while (numVersionComponents++ < 4) {
+                version += '.0';
+            }
         }
         return version;
     },
