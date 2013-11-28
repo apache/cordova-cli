@@ -19,6 +19,7 @@ describe('plugin end-to-end', function() {
         shell.rm('-rf', project);
     });
     afterEach(function() {
+        process.chdir(path.join(__dirname, '..'));  // Needed to rm the dir on Windows.
         shell.rm('-rf', project);
     });
 
