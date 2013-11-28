@@ -68,7 +68,7 @@ module.exports.has_custom_path = function(project_root, platform) {
     if (json.lib && json.lib[platform]) {
         var uri = url.parse(json.lib[platform].uri);
         if (!(uri.protocol)) return uri.path;
-        else if (uri.protocol && uri.protocol[1] ==':') return uri.href;
+        else if (uri.protocol && uri.protocol[uri.protocol.length - 1] ==':') return uri.href;
     }
     return false;
 };
