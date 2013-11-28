@@ -25,6 +25,7 @@ var fs            = require('fs'),
     child_process = require('child_process'),
     project_config= require('../config'),
     Q             = require('q'),
+    config_parser = require('../config_parser'),
     lazy_load     = require('../lazy_load');
 
 var default_prefs = {

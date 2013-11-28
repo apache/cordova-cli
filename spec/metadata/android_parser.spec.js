@@ -80,34 +80,6 @@ describe('android project parser', function() {
                 expect(err).toContain('there was an errorz!');
             });
         });
-        it('should fire a callback if `android list target` does not return anything containing "android-17"', function(done) {
-            exec.andCallFake(function(cmd, opts, cb) {
-                if (!cb) cb = opts;
-                cb(0, 'android-15', '');
-            });
-            errorWrapper(platforms.android.parser.check_requirements(proj), done, function(err) {
-                expect(err).toEqual(new Error('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.'));
-            });
-        });
-        it('should check that `android` is on the path by calling `android list target`', function(done) {
-            wrapper(platforms.android.parser.check_requirements(proj), done, function() {
-                expect(exec).toHaveBeenCalledWith('android list target', jasmine.any(Function));
-            });
-        });
-        it('should check that we can update an android project by calling `android update project` on stock android path', function(done) {
-            wrapper(platforms.android.parser.check_requirements(proj), done, function() {
-                expect(exec.mostRecentCall.args[0]).toMatch(/^android update project -p .* -t android-17$/gi);
-                expect(exec.mostRecentCall.args[0]).toContain(util.libDirectory);
-            });
-        });
-        it('should check that we can update an android project by calling `android update project` on a custom path if it is so defined', function(done) {
-            var custom_path = path.join('some', 'custom', 'path', 'to', 'android', 'lib');
-            custom.andReturn(custom_path);
-            wrapper(platforms.android.parser.check_requirements(proj), done, function() {
-                expect(exec.mostRecentCall.args[0]).toMatch(/^android update project -p .* -t android-17$/gi);
-                expect(exec.mostRecentCall.args[0]).toContain(custom_path);
-            });
-        });
     });
 
     describe('instance', function() {
