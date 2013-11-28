@@ -47,7 +47,7 @@ module.exports = {
         var download_dir = (platform == 'wp7' || platform == 'wp8' ? path.join(util.libDirectory, 'wp', id, version) :
                                                                      path.join(util.libDirectory, platform, id, version));
 
-        var lib_dir = platforms[platform] && platforms[platform].subdirectory ? path.join(download_dir, platforms[platform].subdirectory) : download_dir;
+        var lib_dir = platforms[platform] && platforms[platform].subdirectory && platform !== "blackberry10" ? path.join(download_dir, platforms[platform].subdirectory) : download_dir;
 
         if (fs.existsSync(download_dir)) {
             events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
@@ -102,7 +102,7 @@ module.exports = {
                         events.emit('log', 'Download complete');
                         var entries = fs.readdirSync(download_dir);
                         var entry = path.join(download_dir, entries[0]);
-                        shell.mv('-f', path.join(entry, '*'), download_dir);
+                        shell.mv('-f', path.join(entry, (platform=='blackberry10'?'blackberry10':''), '*'), download_dir);
                         shell.rm('-rf', entry);
                         d.resolve(hooker.fire('after_library_download', {
                             platform:platform,
