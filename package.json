@@ -12,7 +12,7 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "jasmine-node --color spec",
+    "test": "jasmine-node --color spec e2e",
     "win-test" : "jasmine-node --color spec"
   },
   "repository": {
