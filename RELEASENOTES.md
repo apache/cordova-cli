@@ -20,6 +20,16 @@
 -->
 # Cordova-cli changelog
 
+## 3.2.0-0.3.0
+
+* CB-5501 fix blackberry10 platform
+* [android] fixing failing android parser spec tests
+* [android] call out to platform check_req script
+
+## 3.2.0-0.2.0
+
+* CB-5485 fixed issue with use of cordova cli api
+
 ## 3.2.0-0.1.0
 
 * add the output of the plugman results to the console
