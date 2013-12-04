@@ -296,8 +296,8 @@ module.exports.prototype = {
 
     // Adjust version number as per CB-5337 Windows8 build fails due to invalid app version        
     fixConfigVersion: function (version) {
-        if(version && version.match(/\.d/g)) {
-            var numVersionComponents = version.match(/\.d/g).length + 1;
+        if(version && version.match(/\.\d/g)) {
+            var numVersionComponents = version.match(/\.\d/g).length + 1;
             while (numVersionComponents++ < 4) {
                 version += '.0';
             }
