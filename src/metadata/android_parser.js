@@ -25,8 +25,7 @@ var fs            = require('fs'),
     child_process = require('child_process'),
     project_config= require('../config'),
     Q             = require('q'),
-    config_parser = require('../config_parser'),
-    lazy_load     = require('../lazy_load');
+    config_parser = require('../config_parser');
 
 var default_prefs = {
     "useBrowserHistory":"true",
@@ -45,11 +44,8 @@ module.exports = function android_parser(project) {
 
 // Returns a promise.
 module.exports.check_requirements = function(project_root) {
-    events.emit('log', 'Checking Android requirements...');
-    return lazy_load.based_on_config(project_root, 'android').then(function(lib_path) {
-        var check_reqs = require(path.join(lib_path, 'bin', 'lib', 'check_reqs'));
-        return check_reqs.run();
-    });
+    // Rely on platform's bin/create script to check requirements.
+    return Q(true);
 };
 
 module.exports.prototype = {
