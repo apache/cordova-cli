@@ -152,11 +152,11 @@ module.exports.prototype = {
         var platformWww = path.join(this.path, 'assets');
         try {
             this.update_from_config(cfg);
+            this.update_overrides();
+            this.update_staging();
         } catch(e) {
             return Q.reject(e);
         }
-        this.update_overrides();
-        this.update_staging();
         // delete any .svn folders copied over
         util.deleteSvnFolders(platformWww);
         return Q();
