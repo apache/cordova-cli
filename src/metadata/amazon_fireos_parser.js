@@ -46,7 +46,7 @@ module.exports = function android_parser(project) {
 
 // Returns a promise.
 module.exports.check_requirements = function(project_root) {
-    events.emit('log', 'Checking Android requirements...');
+    events.emit('log', 'Checking Amazon FireOS requirements...');
     var command = 'android list target';
     events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
