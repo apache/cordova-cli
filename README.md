@@ -32,6 +32,7 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/gu
 - Android
 - BlackBerry 10
 - iOS
+- Ubuntu
 - Windows Phone 7 &amp; 8
 - Windows 8
 
@@ -76,6 +77,11 @@ Run the following commands:
     npm link plugman
 
 Now the `cordova` and `plugman` in your path are the local git versions. Don't forget to keep them up to date!
+
+## Installing on Ubuntu
+
+    apt-get install cordova-cli
+
 
 # Getting Started
 
@@ -290,3 +296,9 @@ Amazon Fire OS does not include the ability to emulate. You are still able to us
 - `prepare amazon-fireos`
 - `compile amazon-fireos`
 - `build amazon-fireos`
+
+## Ubuntu
+
+To produce a click package for a particular architecture it is necessary to run the cordova development environment on that architecture. In other words, to make a click package for an arhmf phone, the cordova toolchain needs to be installed and run on that same phone.
+
+A future release will let developers cross-compile armhf click packages directly from an x86 desktop.
