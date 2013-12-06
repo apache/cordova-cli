@@ -30,7 +30,7 @@ module.exports = {
     }, 
     'ubuntu' : {
         parser : './src/metadata/ubuntu_parser',
-        url    : 'https://launchpad.net/cordova-ubuntu/3.0/apha1/+download/campo.tar.gz',
+        url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-ubuntu.git',
         version: '3.2.0'
     }, 
     'wp7' : {
