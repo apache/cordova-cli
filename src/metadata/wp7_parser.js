@@ -145,6 +145,9 @@ module.exports.prototype = {
     www_dir:function() {
         return path.join(this.wp7_proj_dir, 'www');
     },
+    config_xml:function() {
+        return this.config_path;
+    },
     // copy files from merges directory to actual www dir
     copy_merges:function(merges_sub_path) {
         var merges_path = path.join(util.appDir(util.isCordova(this.wp7_proj_dir)), 'merges', merges_sub_path);
