@@ -50,7 +50,7 @@ module.exports = function CLI(inputArgs) {
 
     // provide clean output on exceptions rather than dumping a stack trace
     process.on('uncaughtException', function(err){
-        if (opts.verbose) {
+        if (opts.verbose && err.stack) {
             console.error(err.stack);
         } else {
             console.error(err);
