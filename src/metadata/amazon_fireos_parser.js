@@ -71,7 +71,7 @@ module.exports.check_requirements = function(project_root) {
                 child_process.exec(cmd, function(err, output, stderr) {
                     events.emit('verbose', output + stderr);
                     if (err) {
-                        d2.reject(new Error('Error updating the Cordova library to work with your Android environment. Command run: "' + cmd + '", output: ' + output));
+                        d2.reject(new Error('Updating the Cordova library to work with your Android environment failed when running: "' + cmd + '", output: ' + output));
                     } else {
                         events.emit('log', 'Checking if ' + awv_interface + ' exists... in framework/libs folder');
                         var awv_interface_expected_path=path.join(framework_path,'libs');

@@ -120,7 +120,7 @@ module.exports = function platform(command, targets) {
                     var d = Q.defer();
                     child_process.exec(script + ' "' + path.join(projectRoot, 'platforms', plat) + '"', function(err, stdout, stderr) {
                         if (err) {
-                            d.reject(new Error('Error running update script: ' + err + stderr));
+                            d.reject(new Error('Update script failed: ' + err + stderr));
                         } else {
                             events.emit('log', plat + ' updated to ' + platforms[plat].version);
                             d.resolve();

@@ -47,7 +47,7 @@ module.exports.check_requirements = function(project_root) {
     var d = Q.defer();
     child_process.exec("\"" + path.join(lib_path, 'bin', 'check_reqs') + "\"", function(err, output, stderr) {
         if (err) {
-            d.reject(new Error('Error while checking requirements: ' + output + stderr));
+            d.reject(new Error('Requirements check failed: ' + output + stderr));
         } else {
             d.resolve();
         }

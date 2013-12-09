@@ -63,7 +63,7 @@ module.exports.check_requirements = function(project_root) {
     child_process.exec(command, function(err, output, stderr) {
         events.emit('verbose', output);
         if (err) {
-            d.reject(new Error('Error while checking requirements: ' + output + stderr));
+            d.reject(new Error('Requirements check failed: ' + output + stderr));
         } else {
             d.resolve();
         }
