@@ -122,7 +122,7 @@ function execute_scripts_serially(scripts, root, dir, opts) {
             var execOpts = {cwd: root};
             execOpts.env = _.extend({}, process.env);
             execOpts.env.CORDOVA_VERSION = require('../package').version;
-            execOpts.env.CORDOVA_PLATFORMS = opts.platforms?opts.platforms.join():'';
+            execOpts.env.CORDOVA_PLATFORMS = opts.platforms ? opts.platforms.join() : '';
             execOpts.env.CORDOVA_PLUGINS = opts.plugins?opts.plugins.join():'';
             execOpts.env.CORDOVA_HOOK = fullpath;
             execOpts.env.CORDOVA_CMDLINE = process.argv.join(' ');
