@@ -131,7 +131,7 @@ module.exports = function plugin(command, targets) {
                 return opts.plugins.reduce(function(soFar, target) {
                     // Check if we have the plugin.
                     if (plugins.indexOf(target) < 0) {
-                        return Q.reject(new Error('Plugin "' + target + '" not added to project.'));
+                        return Q.reject(new Error('Plugin "' + target + '" is not in project.'));
                     }
 
                     var targetPath = path.join(pluginPath, target);
