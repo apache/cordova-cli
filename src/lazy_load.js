@@ -53,7 +53,6 @@ module.exports = {
             events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
             return Q(lib_dir);
         }
-        events.emit('log', 'Downloading ' + id + ' library for ' + platform + '...');
         return hooker.fire('before_library_download', {
             platform:platform,
             url:url,
@@ -79,6 +78,7 @@ module.exports = {
                         request_options.proxy = proxy;
                     }
                     events.emit('verbose', 'Requesting ' + JSON.stringify(request_options) + '...');
+                    events.emit('log', 'Downloading ' + id + ' library for ' + platform + '...');
                     var req = request.get(request_options, function(err, res, body) {
                         if (err) {
                             shell.rm('-rf', download_dir);
@@ -104,6 +104,7 @@ module.exports = {
                         var entry = path.join(download_dir, entries[0]);
                         shell.mv('-f', path.join(entry, (platform=='blackberry10'?'blackberry10':''), '*'), download_dir);
                         shell.rm('-rf', entry);
+                        events.emit('log', 'Installing ' + id + ' library for ' + platform + '...');
                         d.resolve(hooker.fire('after_library_download', {
                             platform:platform,
                             url:url,
@@ -121,6 +122,7 @@ module.exports = {
                 download_dir = uri.protocol && uri.protocol[1] == ':' ? uri.href : uri.path;
                 lib_dir = platforms[platform] && platforms[platform].subdirectory ? path.join(download_dir, platforms[platform].subdirectory) : download_dir;
 
+                events.emit('log', 'Installing ' + id + ' library for ' + platform + '...');
                 d.resolve(hooker.fire('after_library_download', {
                     platform:platform,
                     url:url,
