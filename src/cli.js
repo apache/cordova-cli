@@ -48,15 +48,6 @@ module.exports = function CLI(inputArgs) {
         },
         cmd;
 
-    // provide clean output on exceptions rather than dumping a stack trace
-    process.on('uncaughtException', function(err){
-        if (opts.verbose) {
-            console.error(err.stack);
-        } else {
-            console.error(err);
-        }
-        process.exit(1);
-    });
     cordova.on('results', console.log);
 
     if (!opts.silent) {
