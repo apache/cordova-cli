@@ -48,7 +48,8 @@
     "q": "~0.9",
     "optimist": "0.6.0",
     "jshint": "~1.1.0",
-    "mime": "~1.2.11"
+    "mime": "~1.2.11",
+    "lodash": "~2.4.0"
   },
   "devDependencies": {
     "jasmine-node": "1.8.x"
