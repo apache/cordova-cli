@@ -84,7 +84,7 @@ module.exports.prototype = {
 
     update_manifest: function() {
         var nodearch2debarch = { 'arm': 'armhf',
-                                 'i386': 'i386',
+                                 'ia32': 'i386',
                                  'x64': 'amd64'};
         var arch;
         if (os.arch() in nodearch2debarch)
