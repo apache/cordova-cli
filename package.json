@@ -30,7 +30,7 @@
   "dependencies": {
     "colors": ">=0.6.0",
     "elementtree": "0.1.5",
-    "plugman": "0.16.x",
+    "plugman": "0.17.x",
     "plist": "0.4.x",
     "xcode": "0.6.2",
     "express": "3.0.0",
