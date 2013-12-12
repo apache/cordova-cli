@@ -62,7 +62,7 @@ Ubuntu packages are available in a PPA for Ubuntu 13.10 (Saucy) (the current rel
     sudo apt-get install cordova-cli
     npm install -g cordova
 
-To build an application for the Ubuntu platform, the following extra dependencies are required:
+To build an application for the Ubuntu platform, the following extra packages are required:
 
     sudo apt-get install nodejs-legacy npm
     sudo apt-get install cmake debhelper libx11-dev libicu-dev pkg-config qtbase5-dev qtchooser qtdeclarative5-dev qtfeedback5-dev qtlocation5-dev qtmultimedia5-dev qtpim5-dev qtsensors5-dev qtsystems5-dev
