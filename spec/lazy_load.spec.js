@@ -33,12 +33,12 @@ describe('lazy_load module', function() {
     beforeEach(function() {
         custom_path = spyOn(config, 'has_custom_path').andReturn(false);
     });
-    describe('cordova method (loads stock cordova libs)', function() {
+    describe('Cordova method (loads stock Cordova libs)', function() {
         var custom;
         beforeEach(function() {
             custom = spyOn(lazy_load, 'custom').andReturn(Q(path.join('lib','dir')));
         });
-        it('should throw if platform is not a stock cordova platform', function(done) {
+        it('should throw if platform is not a stock Cordova platform', function(done) {
             lazy_load.cordova('atari').then(function() {
                 expect('this call').toEqual('to fail');
             }, function(err) {
@@ -54,7 +54,7 @@ describe('lazy_load module', function() {
         });
     });
 
-    describe('custom method (loads custom cordova libs)', function() {
+    describe('custom method (loads custom Cordova libs)', function() {
         var mkdir, exists, fire, rm, sym;
         beforeEach(function() {
             mkdir = spyOn(shell, 'mkdir');

@@ -42,7 +42,7 @@ module.exports = function platform(command, targets) {
         var err;
         targets.forEach(function(t) {
             if (!(t in platforms)) {
-                err = new Error('Platform "' + t + '" not recognized as core cordova platform.');
+                err = new Error('Platform "' + t + '" not recognized as core Cordova platform.');
             }
         });
         if (err) return Q.reject(err);

@@ -57,7 +57,17 @@ Please note that some platforms have OS restrictions.  For example, you cannot b
 
 # Install
 
+Ubuntu packages are available in a PPA for Ubuntu 13.10 (Saucy) (the current release) as well as 14.04 (Trusty) (under development).
+
+    sudo apt-add-repository ppa:cordova-ubuntu/ppa
+    sudo apt-get update
+    sudo apt-get install cordova-cli
     npm install -g cordova
+
+To build an application for the Ubuntu platform, the following extra packages are required:
+
+    sudo apt-get install cmake debhelper libx11-dev libicu-dev pkg-config qtbase5-dev qtchooser qtdeclarative5-dev qtfeedback5-dev qtlocation5-dev qtmultimedia5-dev qtpim5-dev qtsensors5-dev qtsystems5-dev
+
 
 ## Installing from master
 
@@ -87,12 +97,12 @@ Now the `cordova` and `plugman` in your path are the local git versions. Don't f
 
 # Getting Started
 
-`cordova-cli` has a single global `create` command that creates new cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
+`cordova-cli` has a single global `create` command that creates new Cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
 
 ## Global Commands
 
 - `help` display a help page with all available commands
-- `create <directory> [<id> [<name>]]` create a new cordova project with optional name and id (package name, reverse-domain style)
+- `create <directory> [<id> [<name>]]` create a new Cordova project with optional name and id (package name, reverse-domain style)
 
 <a name="project_commands" />
 ## Project Commands
@@ -134,9 +144,9 @@ A Cordova application built with `cordova-cli` will have the following directory
     `-- plugins/
 
 ## .cordova/
-This directory identifies a tree as a cordova project. Simple configuration information is stored in here (such as BlackBerry environment variables).
+This directory identifies a tree as a Cordova project. Simple configuration information is stored in here (such as BlackBerry environment variables).
 
-Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find this project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a cordova project directory (same as `git`).
+Commands other than `create` operate against the project directory itself, rather than the current directory - a search up the current directory's parents is made to find the project directory. Thus, any command (other than `create`) can be used from any subdirectory whose parent is a Cordova project directory (same as `git`).
 
 ## merges/
 Platform-specific web assets (HTML, CSS and JavaScript files) are contained within appropriate subfolders in this directory. These are deployed during a `prepare` to the appropriate native directory.  Files placed under `merges/` will override matching files in the `www/` folder for the relevant platform. A quick example, assuming a project structure of:
@@ -180,7 +190,7 @@ There are two types of hooks: project-specific ones and module-level ones. Both 
 
 ## Project-specific Hooks
 
-These are located under the `.cordova/hooks` directory in the root of your cordova project. Any scripts you add to these directories will be executed before and after the appropriate commands. Useful for integrating your own build systems or integrating with version control systems. __Remember__: make your scripts executable.
+These are located under the `.cordova/hooks` directory in the root of your Cordova project. Any scripts you add to these directories will be executed before and after the appropriate commands. Useful for integrating your own build systems or integrating with version control systems. __Remember__: make your scripts executable.
 
 ### Examples
 
@@ -194,7 +204,7 @@ Once you `require('cordova')` in your Node project, you will have the usual `Eve
 
 # Examples
 
-## Creating a new cordova project
+## Creating a new Cordova project
 This example shows how to create a project from scratch named KewlApp with iOS and Android platform support, and includes a plugin named Kewlio. The project will live in ~/KewlApp
 
     cordova create ~/KewlApp KewlApp
@@ -253,7 +263,7 @@ Thanks to everyone for contributing! For a list of people involved, please see t
 ### Trouble Adding Android as a Platform
 
 When trying to add a platform on a Windows machine if you run into the following error message:
-    cordova library for "android" already exists. No need to download. Continuing.
+    Cordova library for "android" already exists. No need to download. Continuing.
     Checking if platform "android" passes minimum requirements...
     Checking Android requirements...
     Running "android list target" (output to follow)
@@ -301,6 +311,6 @@ Amazon Fire OS does not include the ability to emulate. You are still able to us
 
 ## Ubuntu
 
-To produce a click package for a particular architecture it is necessary to run the cordova development environment on that architecture. In other words, to make a click package for an arhmf phone, the cordova toolchain needs to be installed and run on that same phone.
+The initial release of cordova-ubuntu does not support building applications for armhf devices automatically. It is possible to produce applications and click packages in a few steps though.
 
-A future release will let developers cross-compile armhf click packages directly from an x86 desktop.
+This bug report documents the issue and solutions for it: https://bugs.launchpad.net/ubuntu/+source/cordova-ubuntu/+bug/1260500 A future release will let developers cross-compile armhf click packages directly from an x86 desktop.
