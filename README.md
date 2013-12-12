@@ -96,12 +96,12 @@ Now the `cordova` and `plugman` in your path are the local git versions. Don't f
 
 # Getting Started
 
-`cordova-cli` has a single global `create` command that creates new cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
+`cordova-cli` has a single global `create` command that creates new Cordova projects into a specified directory. Once you create a project, `cd` into it and you can execute a variety of project-level commands. Completely inspired by git's interface.
 
 ## Global Commands
 
 - `help` display a help page with all available commands
-- `create <directory> [<id> [<name>]]` create a new cordova project with optional name and id (package name, reverse-domain style)
+- `create <directory> [<id> [<name>]]` create a new Cordova project with optional name and id (package name, reverse-domain style)
 
 <a name="project_commands" />
 ## Project Commands
@@ -143,7 +143,7 @@ A Cordova application built with `cordova-cli` will have the following directory
     `-- plugins/
 
 ## hooks/
-This directory may contains scripts used to customize cordova commands. This
+This directory may contains scripts used to customize cordova-cli commands. This
 directory used to exist at `.cordova/hooks`, but has now been moved to the
 project root. Any scripts you add to these directories will be executed before
 and after the commands corresponding to the directory name. Useful for
@@ -193,7 +193,7 @@ There are two types of hooks: project-specific ones and module-level ones. Both 
 
 ## Project-specific Hooks
 
-These are located under the `hooks` directory in the root of your cordova project. Any scripts you add to these directories will be executed before and after the appropriate commands. Useful for integrating your own build systems or integrating with version control systems. __Remember__: make your scripts executable.
+These are located under the `hooks` directory in the root of your Cordova project. Any scripts you add to these directories will be executed before and after the appropriate commands. Useful for integrating your own build systems or integrating with version control systems. __Remember__: make your scripts executable.
 
 ### Examples
 
@@ -207,7 +207,7 @@ Once you `require('cordova')` in your Node project, you will have the usual `Eve
 
 # Examples
 
-## Creating a new cordova project
+## Creating a new Cordova project
 This example shows how to create a project from scratch named KewlApp with iOS and Android platform support, and includes a plugin named Kewlio. The project will live in ~/KewlApp
 
     cordova create ~/KewlApp KewlApp
@@ -270,7 +270,7 @@ Thanks to everyone for contributing! For a list of people involved, please see t
 ### Trouble Adding Android as a Platform
 
 When trying to add a platform on a Windows machine if you run into the following error message:
-    cordova library for "android" already exists. No need to download. Continuing.
+    Cordova library for "android" already exists. No need to download. Continuing.
     Checking if platform "android" passes minimum requirements...
     Checking Android requirements...
     Running "android list target" (output to follow)
