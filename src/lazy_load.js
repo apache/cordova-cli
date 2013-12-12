@@ -53,6 +53,10 @@ module.exports = {
             events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
             return Q(lib_dir);
         }
+        try {
+            var dangling = fs.readlinkSync(download_dir);
+            return Q.reject(download_dir + " points to non-existent or unreadable location: " + dangling);
+        } catch (e) {}
         events.emit('log', 'Downloading ' + id + ' library for ' + platform + '...');
         return hooker.fire('before_library_download', {
             platform:platform,
