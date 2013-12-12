@@ -55,7 +55,18 @@ Please note that some platforms have OS restrictions.  For example, you cannot b
 
 # Install
 
+Ubuntu packages are available in a PPA for the current Ubuntu 13.10 (Saucy) release, as well as the upcoming 14.04 (Trusty) version.
+
+    sudo apt-add-repository ppa:cordova-ubuntu/ppa
+    sudo apt-get update
+    sudo apt-get install cordova-cli
     npm install -g cordova
+
+To build an application for the Ubuntu platform, the following extra dependencies are required:
+
+    sudo apt-get install nodejs-legacy npm
+    sudo apt-get install cmake debhelper libx11-dev libicu-dev pkg-config qtbase5-dev qtchooser qtdeclarative5-dev qtfeedback5-dev qtlocation5-dev qtmultimedia5-dev qtpim5-dev qtsensors5-dev qtsystems5-dev
+
 
 ## Installing from master
 
@@ -299,6 +310,6 @@ Amazon Fire OS does not include the ability to emulate. You are still able to us
 
 ## Ubuntu
 
-To produce a click package for a particular architecture it is necessary to run the cordova development environment on that architecture. In other words, to make a click package for an arhmf phone, the cordova toolchain needs to be installed and run on that same phone.
+The initial release of cordova-ubuntu does not support building applications for armhf devices automatically. It is possible to produce applications and click packages in a few steps though.
 
-A future release will let developers cross-compile armhf click packages directly from an x86 desktop.
+This bug report documents the issue and solutions for it: https://bugs.launchpad.net/ubuntu/+source/cordova-ubuntu/+bug/1260500 A future release will let developers cross-compile armhf click packages directly from an x86 desktop.
