@@ -55,7 +55,7 @@ Please note that some platforms have OS restrictions.  For example, you cannot b
 
 # Install
 
-Ubuntu packages are available in a PPA for the current Ubuntu 13.10 (Saucy) release, as well as the upcoming 14.04 (Trusty) version.
+Ubuntu packages are available in a PPA for Ubuntu 13.10 (Saucy) (the current release) as well as 14.04 (Trusty) (under development).
 
     sudo apt-add-repository ppa:cordova-ubuntu/ppa
     sudo apt-get update
