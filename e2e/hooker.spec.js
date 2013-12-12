@@ -45,7 +45,7 @@ shell.chmod('-R', 'ug+x', hooksDir);
 
 
 describe('hooker', function() {
-    it('should throw if provided directory is not a cordova project', function() {
+    it('should throw if provided directory is not a Cordova project', function() {
         expect(function() {
             new hooker(tmpDir);
         }).toThrow('Not a Cordova project, can\'t use hooks.');

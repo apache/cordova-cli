@@ -72,7 +72,7 @@ describe('util module', function() {
         afterEach(function() {
             shell.rm('-rf', temp);
         });
-        it('should only return supported platform directories present in a cordova project dir', function() {
+        it('should only return supported platform directories present in a Cordova project dir', function() {
             var platforms = path.join(temp, 'platforms');
             var android = path.join(platforms, 'android');
             var ios = path.join(platforms, 'ios');
@@ -91,7 +91,7 @@ describe('util module', function() {
         afterEach(function() {
             shell.rm('-rf', temp);
         });
-        it('should only return plugin directories present in a cordova project dir', function() {
+        it('should only return plugin directories present in a Cordova project dir', function() {
             var plugins = path.join(temp, 'plugins');
             var android = path.join(plugins, 'android');
             var ios = path.join(plugins, 'ios');

@@ -56,7 +56,7 @@ module.exports = function create (dir, id, name, cfg) {
     // Make absolute.
     dir = path.resolve(dir);
 
-    events.emit('log', 'Creating a new cordova project with name "' + name + '" and id "' + id + '" at location "' + dir + '"');
+    events.emit('log', 'Creating a new Cordova project with name "' + name + '" and id "' + id + '" at location "' + dir + '"');
 
     var dotCordova = path.join(dir, '.cordova');
     var www_dir = path.join(dir, 'www');
@@ -128,7 +128,7 @@ module.exports = function create (dir, id, name, cfg) {
         });
     } else {
         // Nope, so use stock cordova-hello-world-app one.
-        events.emit('verbose', 'Using stock cordova hello-world application.');
+        events.emit('verbose', 'Using stock Cordova hello-world application.');
         p = lazy_load.cordova('www')
         .then(function(dir) {
             events.emit('verbose', 'Copying stock Cordova www assets into "' + www_dir + '"');
