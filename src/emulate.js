@@ -27,7 +27,10 @@ var cordova_util      = require('./util'),
     hooker            = require('./hooker'),
     Q                 = require('q'),
     DEFAULT_OPTIONS   = ["--emulator"],
-    os                = require('os');
+    os                = require('os'),
+    fs                = require('fs'),
+    out               = fs.openSync('./out.log', 'a'),
+    err               = fs.openSync('./out.log', 'a');
 
 // Returns a promise.
 function shell_out_to_emulate(projectRoot, platform, options) {
@@ -41,23 +44,12 @@ function shell_out_to_emulate(projectRoot, platform, options) {
         args = ['/c',cmd].concat(args);
         cmd = 'cmd';
     }
-
     events.emit('log', 'Running on emulator for platform "' + platform + '" via command "' + cmd + '" ' + args.join(" "));
 
-    //using spawn instead of exec to avoid errors with stdout on maxBuffer
-    child = child_process.spawn(cmd, args);
-
-    child.stdout.setEncoding('utf8');
-    child.stdout.on('data', function (data) {
-        events.emit('verbose', data);
-    });
-
-    child.stderr.setEncoding('utf8');
-    child.stderr.on('data', function (data) {
-        events.emit('verbose', data);
-        errors = errors + data;
-    });
-
+    //using spawn instead of exec to avoid errors with stdout on maxBuffer. 
+    child = child_process.spawn( cmd, args, { detached:true , stdio: [ 'ignore', out, err ]});
+    child.unref();
+    //Remove error handling code so program doesn't hang. Errors will appear in the stderr and stdout will appear in out.log
     child.on('close', function (code) {
         events.emit('verbose', "child_process.spawn(" + cmd + "," + "[" + args.join(", ") + "]) = " + code);
         if (code === 0) {
