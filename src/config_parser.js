@@ -34,6 +34,7 @@ function config_parser(path) {
     }
     this.access = new access(this);
     this.preference = new preference(this);
+    this.icon = new icon(this);
 }
 
 config_parser.prototype = {
@@ -221,5 +222,42 @@ preference.prototype = {
         });
     }
 };
+
+function icon(cfg) {
+    this.config = cfg;
+};
+
+icon.prototype = {
+    add:function(elt) {
+        var el = new et.Element('icon');
+        for (var p in elt) {
+          if (typeof(elt[p]) === 'string' || typeof(elt[p]) === 'number') {
+            el.attrib[p] = elt[p];
+          }
+        }
+        this.config.doc.getroot().append(el);
+        this.config.update();
+    },
+    remove:function(src) {
+        var self = this;
+        var els = [];
+        if (src) els = this.config.doc.findall('icon[@src="' + src + '"]');
+        else els = this.config.doc.findall('icon');
+        els.forEach(function(a) {
+            self.config.doc.getroot().remove(0, a);
+        });
+        this.config.update();
+    },
+    get:function() {
+        return this.config.doc.findall('icon').map(function(a) {
+            var elt = {};
+            for (var p in a.attrib) {
+              elt[p] = a.attrib[p];
+            }
+            return elt;
+        });
+    }
+};
+
 
 module.exports = config_parser;
