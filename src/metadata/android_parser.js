@@ -60,6 +60,21 @@ module.exports.prototype = {
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
         events.emit('verbose', 'Wrote out Android application name to "' + name + '"');
 
+        if ("icon" in config) {
+          var icons = config.icon.get();
+          if (icons) {
+            for (var i=0; i<icons.length; i++) {
+              var icon = icons[i];
+              var projectRoot = util.isCordova(this.path);
+              var app_www = util.projectWww(projectRoot);
+              var srcfilepath = path.join(app_www, icon.src);
+              var destfilepath = path.join(this.path, 'res', 'drawable', 'icon.png');
+              shell.cp('-f', srcfilepath, destfilepath);
+              events.emit('verbose', 'Copied icon from ' + srcfilepath + ' to ' + destfilepath);
+            }
+          }
+        }
+
         var manifest = xml.parseElementtreeSync(this.manifest);
         // Update the version by changing the AndroidManifest android:versionName
         var version = config.version();
