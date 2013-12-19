@@ -238,18 +238,21 @@ icon.prototype = {
         this.config.doc.getroot().append(el);
         this.config.update();
     },
-    remove:function(src) {
-        var self = this;
-        var els = [];
-        if (src) els = this.config.doc.findall('icon[@src="' + src + '"]');
-        else els = this.config.doc.findall('icon');
-        els.forEach(function(a) {
-            self.config.doc.getroot().remove(0, a);
-        });
-        this.config.update();
+    remove:function(name) {
+      var self = this;
+      var els = [];
+      if (name) els = this.config.doc.findall('icon[@id="' + name + '"]');
+      else els = this.config.doc.findall('icon');
+      els.forEach(function(a) {
+          self.config.doc.getroot().remove(0, a);
+      });
+      this.config.update();
     },
-    get:function() {
-        return this.config.doc.findall('icon').map(function(a) {
+    get:function(id) {
+      var els = [];
+      if (id) els = this.config.doc.findall('icon[@id="' + id + '"]');
+      else els = this.config.doc.findall('icon');
+        return els.map(function(a) {
             var elt = {};
             for (var p in a.attrib) {
               elt[p] = a.attrib[p];

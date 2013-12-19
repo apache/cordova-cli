@@ -276,5 +276,61 @@ describe('config.xml parser', function () {
                 });
             });
         });
+        
+        describe('icon elements', function() {
+          describe('getter', function() {
+            it('should get icon with id icon', function() {
+              expect(cfg.icon.get('icon')[0].src).toEqual('icon.png');
+              expect(cfg.icon.get('logo').length).toEqual(1);
+            });
+            it('should get all icon elements', function() {
+              expect(cfg.icon.get()[0].src).toEqual('icon.png');
+              
+              expect(cfg.icon.get()[1].src).toEqual('logo.png');
+              expect(cfg.icon.get()[1].width).toEqual('255');
+              expect(cfg.icon.get()[1].height).toEqual('255');
+             
+              var androidlogo = cfg.icon.get()[2]; 
+              expect(androidlogo.src).toEqual('logo-android.png');
+              expect(androidlogo.width).toEqual('255');
+              expect(androidlogo.height).toEqual('255');
+              expect(androidlogo['cdv:platform']).toEqual('android');
+              expect(androidlogo['cdv:density']).toEqual('mdpi');
+          });
+              it('should return an array of all icon name/value pairs', function() {
+                  expect(cfg.icon.get() instanceof Array).toBe(true);
+              });
+          });
+          describe('setters', function() {
+              it('should allow removing a icon by id', function() {
+                  cfg.icon.remove('logo');
+                  expect(cfg.icon.get().length).toEqual(2);
+                  expect(cfg.icon.get('logo').length).toEqual(0);
+              });
+              it('should write to disk after removing a preference', function() {
+                cfg.preference.remove('phonegap-version');
+                expect(fs.readFileSync(xml, 'utf-8')).not.toMatch(/<preference\sname="phonegap-version"/);
+              });
+              it('should write to disk after removing a icon', function() {
+                  cfg.icon.remove('icon');
+                  expect(cfg.icon.get().length).toEqual(2);
+                  expect(update).toHaveBeenCalled();
+                  expect(fs.readFileSync(xml, 'utf-8')).not.toMatch(/<icon\sid="icon"/);
+              });
+              it('should allow adding a new icon', function() {
+                  cfg.icon.add({src:'test.png',width:'1024'});
+                  expect(cfg.icon.get().length).toEqual(4);
+                  expect(cfg.icon.get()[3].width).toEqual('1024');
+              });
+              it('should write to disk after adding a icon', function() {
+                  cfg.icon.add({src:'add.png',width:'72'});
+                  expect(update).toHaveBeenCalled();
+              });
+              it('should allow removing all icon elements when no parameter is specified', function() {
+                  cfg.icon.remove();
+                  expect(cfg.icon.get().length).toEqual(0);
+              });
+          });
+      });
     });
 });
