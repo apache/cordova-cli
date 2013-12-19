@@ -253,12 +253,15 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
                 var plugins = cordova_util.findPlugins(plugins_dir);
                 var parser = new platforms[target].parser(output);
                 if (!plugins) return Q();
-                var promises = plugins.map(function(plugin) {
-                    events.emit('verbose', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
-                    return require('plugman').install(target, output, path.basename(plugin), plugins_dir, { www_dir: parser.staging_dir() });
-                });
-                return promises.reduce(function(soFar, f) {
-                    return soFar.then(f);
+
+                var plugman = require('plugman');
+                var staging_dir = parser.staging_dir();
+                // Install them serially.
+                return plugins.reduce(function(soFar, plugin) {
+                    return soFar.then(function() {
+                        events.emit('verbose', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
+                        return plugman.raw.install(target, output, path.basename(plugin), plugins_dir, { www_dir: staging_dir});
+                    });
                 }, Q());
             });
         });
