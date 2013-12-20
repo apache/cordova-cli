@@ -42,7 +42,7 @@ module.exports = function platform(command, targets) {
         var err;
         targets.forEach(function(t) {
             if (!(t in platforms)) {
-                err = new Error('Platform "' + t + '" not recognized as core cordova platform.');
+                err = new Error('Platform "' + t + '" not recognized as a core cordova platform. See "platform list".');
             }
         });
         if (err) return Q.reject(err);
@@ -60,6 +60,9 @@ module.exports = function platform(command, targets) {
 
     switch(command) {
         case 'add':
+            if (!targets || !targets.length) {
+                return Q.reject(new Error('No platform specified. Please specify a platform to add. See "platform list".'));
+            }
             var config_json = config.read(projectRoot);
 
             return hooks.fire('before_platform_add', opts)
@@ -83,6 +86,9 @@ module.exports = function platform(command, targets) {
             break;
         case 'rm':
         case 'remove':
+            if (!targets || !targets.length) {
+                return Q.reject(new Error('No platform[s] specified. Please specify platform[s] to remove. See "platform list".'));
+            }
             return hooks.fire('before_platform_rm', opts)
             .then(function() {
                 targets.forEach(function(target) {
@@ -100,14 +106,14 @@ module.exports = function platform(command, targets) {
         case 'up':
             // Shell out to the update script provided by the named platform.
             if (!targets || !targets.length) {
-                return Q.reject(new Error('No platform provided. Please specify a platform to update.'));
+                return Q.reject(new Error('No platform specified. Please specify a platform to update. See "platform list".'));
             } else if (targets.length > 1) {
                 return Q.reject(new Error('Platform update can only be executed on one platform at a time.'));
             } else {
                 var plat = targets[0];
                 var installed_platforms = cordova_util.listPlatforms(projectRoot);
                 if (installed_platforms.indexOf(plat) < 0) {
-                    return Q.reject(new Error('Platform "' + plat + '" is not installed.'));
+                    return Q.reject(new Error('Platform "' + plat + '" is not installed. See "platform list".'));
                 }
 
                 // First, lazy_load the latest version.
