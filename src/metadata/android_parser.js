@@ -71,8 +71,8 @@ module.exports.prototype = {
               if (!iconplatform || (iconplatform === "android")) {
                 var density = icon["cdv:density"];
                 var projectRoot = util.isCordova(this.path);
-                var app_www = util.projectWww(projectRoot);
-                var srcfilepath = path.join(app_www, icon.src);
+                //var app_www = util.projectWww(projectRoot);
+                var srcfilepath = path.join(projectRoot, "res", "icon", "android", icon.src);
                 var destfilepath;
                 if (density) {
                   destfilepath = path.join(this.path, 'res', 'drawable-'+density, 'icon.png');
