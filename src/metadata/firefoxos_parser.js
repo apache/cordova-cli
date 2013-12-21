@@ -20,6 +20,7 @@ var fs = require('fs'),
     path = require('path'),
     shell = require('shelljs'),
     util = require('../util'),
+    events = require('../events'),
     Q = require('q'),
     child_process = require('child_process'),
     config_parser = require('../config_parser'),
@@ -56,6 +57,41 @@ module.exports.prototype = {
                 launch_path: "/index.html",
                 installs_allowed_from: ["*"]
             };
+        }
+
+        manifest.icons = {};
+        var icons = config.icon.get();
+        if (icons) {
+          for (var i=0; i<icons.length; i++) {
+            var icon = icons[i];
+            var iconplatform = icon["cdv:platform"];
+            if (!iconplatform || (iconplatform === "firefoxos")) {
+              var projectRoot = util.isCordova(this.path);
+              var srcfilepath = path.join(projectRoot, "res", "icon", "firefoxos", icon.src);
+              var destfilepath = null;
+              var iconwidth = icon["width"];
+              var iconheight = icon["height"];
+              events.emit('verbose', 'icon iconwidth=' + iconwidth + ' iconheight=' + iconheight);
+              var size = null;
+              if (iconwidth && iconheight && iconwidth === iconheight) {
+                size = iconwidth;
+              } else if (iconwidth == undefined && iconheight) {
+                size = iconheight;
+              } else if (iconheight == undefined && iconwidth) {
+                size = iconwidth;
+              } 
+              if (size != null) {
+                manifest.icons[size] = icon.src;
+                destfilepath = path.join(this.path, 'www', icon.src);
+                shell.cp('-f', srcfilepath, destfilepath);
+                events.emit('verbose', 'Copied icon from ' + srcfilepath + ' to ' + destfilepath);
+              } else {
+                events.emit('verbose', 'Ignoring icon ' + icon.src + '; width=' + iconwidth + ' height=' + iconheight);
+              }
+            } else {
+              events.emit('verbose', 'Ignoring icon ' + icon.src + '; Platform=' + iconplatform);
+            }
+          }
         }
 
         manifest.version = version;
