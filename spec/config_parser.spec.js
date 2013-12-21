@@ -280,8 +280,8 @@ describe('config.xml parser', function () {
         describe('icon elements', function() {
           describe('getter', function() {
             it('should get icon with id icon', function() {
-              expect(cfg.icon.get('icon')[0].src).toEqual('icon.png');
-              expect(cfg.icon.get('logo').length).toEqual(1);
+              expect(cfg.icon.get('icon[@id="icon"]')[0].src).toEqual('icon.png');
+              expect(cfg.icon.get('icon[@id="logo"]').length).toEqual(1);
             });
             it('should get all icon elements', function() {
               expect(cfg.icon.get()[0].src).toEqual('icon.png');
@@ -303,16 +303,12 @@ describe('config.xml parser', function () {
           });
           describe('setters', function() {
               it('should allow removing a icon by id', function() {
-                  cfg.icon.remove('logo');
+                  cfg.icon.remove('icon[@id="logo"]');
                   expect(cfg.icon.get().length).toEqual(2);
-                  expect(cfg.icon.get('logo').length).toEqual(0);
-              });
-              it('should write to disk after removing a preference', function() {
-                cfg.preference.remove('phonegap-version');
-                expect(fs.readFileSync(xml, 'utf-8')).not.toMatch(/<preference\sname="phonegap-version"/);
+                  expect(cfg.icon.get('icon[@id="logo"]').length).toEqual(0);
               });
               it('should write to disk after removing a icon', function() {
-                  cfg.icon.remove('icon');
+                  cfg.icon.remove('icon[@id="icon"]');
                   expect(cfg.icon.get().length).toEqual(2);
                   expect(update).toHaveBeenCalled();
                   expect(fs.readFileSync(xml, 'utf-8')).not.toMatch(/<icon\sid="icon"/);

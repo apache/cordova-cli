@@ -238,19 +238,19 @@ icon.prototype = {
         this.config.doc.getroot().append(el);
         this.config.update();
     },
-    remove:function(name) {
+    remove:function(xpath) {
       var self = this;
       var els = [];
-      if (name) els = this.config.doc.findall('icon[@id="' + name + '"]');
+      if (xpath) els = this.config.doc.findall(xpath);
       else els = this.config.doc.findall('icon');
       els.forEach(function(a) {
           self.config.doc.getroot().remove(0, a);
       });
       this.config.update();
     },
-    get:function(id) {
+    get:function(xpath) {
       var els = [];
-      if (id) els = this.config.doc.findall('icon[@id="' + id + '"]');
+      if (xpath) els = this.config.doc.findall(xpath);
       else els = this.config.doc.findall('icon');
         return els.map(function(a) {
             var elt = {};
