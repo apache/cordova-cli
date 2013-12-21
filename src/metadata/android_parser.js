@@ -82,7 +82,7 @@ module.exports.prototype = {
                 shell.cp('-f', srcfilepath, destfilepath);
                 events.emit('verbose', 'Copied icon from ' + srcfilepath + ' to ' + destfilepath);
               } else {
-                events.emit('verbose', 'Ignoring icon ' + srcfilepath + '; Platform=' + iconplatform);
+                events.emit('verbose', 'Ignoring icon ' + icon.src + '; Platform=' + iconplatform);
               }
             }
           }
