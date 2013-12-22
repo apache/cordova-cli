@@ -61,10 +61,12 @@ module.exports.prototype = {
 
         manifest.icons = {};
         var icons = config.icon.get();
+        // if there are icon elements in config.xml
         if (icons) {
           for (var i=0; i<icons.length; i++) {
             var icon = icons[i];
             var iconplatform = icon["cdv:platform"];
+            // if the icon is for the firefoxos platform
             if (!iconplatform || (iconplatform === "firefoxos")) {
               var projectRoot = util.isCordova(this.path);
               var srcfilepath = path.join(projectRoot, "res", "icon", "firefoxos", icon.src);

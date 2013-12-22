@@ -60,30 +60,30 @@ module.exports.prototype = {
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
         events.emit('verbose', 'Wrote out Android application name to "' + name + '"');
 
-        if ("icon" in config) {
-          var prefs = config.preference.get();
-          events.emit('verbose', 'prefs.length=' + prefs.length);
-          var icons = config.icon.get();
-          if (icons) {
-            for (var i=0; i<icons.length; i++) {
-              var icon = icons[i];
-              var iconplatform = icon["cdv:platform"];
-              if (!iconplatform || (iconplatform === "android")) {
-                var density = icon["cdv:density"];
-                var projectRoot = util.isCordova(this.path);
-                //var app_www = util.projectWww(projectRoot);
-                var srcfilepath = path.join(projectRoot, "res", "icon", "android", icon.src);
-                var destfilepath;
-                if (density) {
-                  destfilepath = path.join(this.path, 'res', 'drawable-'+density, 'icon.png');
-                } else {
-                  destfilepath = path.join(this.path, 'res', 'drawable', 'icon.png');
-                }
-                shell.cp('-f', srcfilepath, destfilepath);
-                events.emit('verbose', 'Copied icon from ' + srcfilepath + ' to ' + destfilepath);
+        var icons = config.icon.get();
+        // if there are icon elements in config.xml
+        if (icons) {
+          for (var i=0; i<icons.length; i++) {
+            var icon = icons[i];
+            var iconplatform = icon["cdv:platform"];
+            // if the icon is for the Android platform
+            if (!iconplatform || (iconplatform === "android")) {
+              var density = icon["cdv:density"];
+              var projectRoot = util.isCordova(this.path);
+              //var app_www = util.projectWww(projectRoot);
+              // icons live in projectRoot/res/icon/android/
+              var srcfilepath = path.join(projectRoot, "res", "icon", "android", icon.src);
+              var destfilepath;
+              // the target icon is always named icon.png or we would need to patch AndroidManifest.xml too
+              if (density) {
+                destfilepath = path.join(this.path, 'res', 'drawable-'+density, 'icon.png');
               } else {
-                events.emit('verbose', 'Ignoring icon ' + icon.src + '; Platform=' + iconplatform);
+                destfilepath = path.join(this.path, 'res', 'drawable', 'icon.png');
               }
+              shell.cp('-f', srcfilepath, destfilepath);
+              events.emit('verbose', 'Copied icon from ' + srcfilepath + ' to ' + destfilepath);
+            } else {
+              events.emit('verbose', 'Ignoring icon ' + icon.src + '; Platform=' + iconplatform);
             }
           }
         }
