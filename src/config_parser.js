@@ -50,6 +50,12 @@ config_parser.prototype = {
             this.update();
         } else return this.doc.getroot().attrib.version;
     },
+    versionCode:function(versionCode) {
+        if (versionCode) {
+            this.doc.getroot().attrib.versionCode = versionCode;
+            this.update();
+        } else return this.doc.getroot().attrib.versionCode;
+    },
     content: function(src) {
         var content = this.doc.find('content');
         if (src) {

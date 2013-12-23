@@ -55,24 +55,26 @@ module.exports.prototype = {
 
         // Update app name by editing res/values/strings.xml
         var name = config.name();
-        var strings = xml.parseElementtreeSync(this.strings);
-        strings.find('string[@name="app_name"]').text = name;
-        fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
+        var strings = new config_parser(this.strings);
+        strings.doc.find('string[@name="app_name"]').text = name;
+        strings.update();
         events.emit('verbose', 'Wrote out Android application name to "' + name + '"');
 
-        var manifest = xml.parseElementtreeSync(this.manifest);
+        var manifest = new config_parser(this.manifest);
         // Update the version by changing the AndroidManifest android:versionName
         var version = config.version();
-        manifest.getroot().attrib["android:versionName"] = version;
+        var versionCode = config.doc.getroot().get('versionCode');
+        manifest.doc.getroot().attrib["android:versionName"] = version;
+        manifest.doc.getroot().attrib["android:versionCode"] = versionCode;
 
         // Update package name by changing the AndroidManifest id and moving the entry class around to the proper package directory
         var pkg = config.packageName();
         pkg = pkg.replace(/-/g, '_'); // Java packages cannot support dashes
-        var orig_pkg = manifest.getroot().attrib.package;
-        manifest.getroot().attrib.package = pkg;
+        var orig_pkg = manifest.doc.getroot().attrib.package;
+        manifest.doc.getroot().attrib.package = pkg;
 
         // Write out AndroidManifest.xml
-        fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');
+        manifest.update();
 
         var orig_pkgDir = path.join(this.path, 'src', path.join.apply(null, orig_pkg.split('.')));
         var java_files = fs.readdirSync(orig_pkgDir).filter(function(f) {
