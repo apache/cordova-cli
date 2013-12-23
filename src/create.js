@@ -32,9 +32,9 @@ var DEFAULT_NAME = "HelloCordova",
 
 /**
  * Usage:
- * @dir - required, directory where the poroject will be created.
- * @id - app id.
- * @name - app name.
+ * @dir - directory where the project will be created. Required.
+ * @id - app id. Optional, default is DEFAULT_ID.
+ * @name - app name. Optional, default is DEFAULT_NAME.
  * @cfg - extra config to be saved in .cordova/config.json
  **/
 // Returns a promise.
