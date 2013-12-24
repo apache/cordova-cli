@@ -244,18 +244,11 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
 
             // Run platform's create script
             var d = Q.defer();
-            var parser;
             child_process.exec(command, function(err, create_output, stderr) {
                 events.emit('verbose', create_output);
                 if (err) {
                     d.reject(new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output + '\n' + stderr));
                 } else {
-                    parser = new platforms[target].parser(output);
-                    // Fix up www and config.xml project references to point at the top-level ones.
-                    if (target=='ios') {
-                        shell.sed('-i', /(PBXFileReference.*)(path[\s=]*)"?www"?(;)/, '$1name = www; $2"../../www"$3', parser.pbxproj);
-                        shell.sed('-i', /(PBXFileReference.*path[\s=]*)"?[^\/]+\/config.xml"?(;)/, '$1"../../www/config.xml"$2', parser.pbxproj);
-                    }
                     d.resolve(require('../cordova').raw.prepare(target));
                 }
             });
@@ -264,6 +257,7 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
                 // Install all currently installed plugins into this new platform.
                 var plugins_dir = path.join(projectRoot, 'plugins');
                 var plugins = cordova_util.findPlugins(plugins_dir);
+                var parser = new platforms[target].parser(output);
                 if (!plugins) return Q();
 
                 var plugman = require('plugman');
