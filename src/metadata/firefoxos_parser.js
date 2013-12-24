@@ -96,6 +96,21 @@ module.exports.prototype = {
           }
         }
 
+        var author = config.author();
+        if (author) {
+          manifest.developer = {};
+          manifest.developer.name = author;
+        }
+
+        var content = config.content();
+        if (content) {
+          if (content.indexOf('/') !== 0) {
+            // on firefoxos urls must start with /
+            content = '/' + content;
+          }
+          manifest.launch_path = content;
+        }
+
         manifest.version = version;
         manifest.name = name;
         manifest.pkgName = pkg;
