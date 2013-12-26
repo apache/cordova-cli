@@ -82,7 +82,7 @@ module.exports.prototype = {
               } else if (iconheight == undefined && iconwidth) {
                 size = iconwidth;
               } 
-              if (size != null) {
+              if (size != null && fs.existsSync(srcfilepath)) {
                 manifest.icons[size] = icon.src;
                 destfilepath = path.join(this.path, 'www', icon.src);
                 shell.cp('-f', srcfilepath, destfilepath);
