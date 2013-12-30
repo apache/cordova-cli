@@ -28,6 +28,7 @@ var config            = require('./config'),
     Q                 = require('q'),
     platforms         = require('../platforms'),
     child_process     = require('child_process'),
+    semver            = require('semver'),
     shell             = require('shelljs');
 
 // Returns a promise.
@@ -232,7 +233,14 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
         .then(function() {
             // Create a platform app using the ./bin/create scripts that exist in each repo.
             var bin = path.join(libDir, 'bin', 'create');
-            var args = (target=='ios') ? '--arc' : '';
+            var args = '';
+            if (target == 'ios') {
+                var platformVersion = fs.readFileSync(path.join(libDir, 'CordovaLib', 'VERSION'), 'UTF-8').trim();
+                args = '--arc';
+                if (semver.gt(platformVersion, '3.3.0')) {
+                    args += ' --cli';
+                }
+            }
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
             var name = cfg.name();
             var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, pkg, name);
