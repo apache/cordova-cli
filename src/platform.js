@@ -234,7 +234,12 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
             // Create a platform app using the ./bin/create scripts that exist in each repo.
             var bin = path.join(libDir, 'bin', 'create');
             var args = '';
-            if (target == 'ios') {
+            if (target == 'android') {
+                var platformVersion = fs.readFileSync(path.join(libDir, 'VERSION'), 'UTF-8').trim();
+                if (semver.gt(platformVersion, '3.3.0')) {
+                    args = '--cli';
+                }
+            } else if (target == 'ios') {
                 var platformVersion = fs.readFileSync(path.join(libDir, 'CordovaLib', 'VERSION'), 'UTF-8').trim();
                 args = '--arc';
                 if (semver.gt(platformVersion, '3.3.0')) {
