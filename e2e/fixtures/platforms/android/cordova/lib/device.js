@@ -81,7 +81,7 @@ module.exports.install = function(target) {
                 console.error(launch.output);
                 process.exit(2);
             } else {
-                console.log('LANCH SUCCESS');
+                console.log('LAUNCH SUCCESS');
             }
         } else {
             console.error('ERROR : Unable to find target \'' + target + '\'.');
