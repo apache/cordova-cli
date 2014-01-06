@@ -108,7 +108,6 @@ describe('platform end-to-end', function() {
         }).then(function() {
             // It should be gone.
             expect(path.join(project, 'platforms', helpers.testPlatform)).not.toExist();
-            expect(path.join(project, 'merges', helpers.testPlatform)).not.toExist();
         }).then(emptyPlatformList) // platform ls should be empty too.
         .fail(function(err) {
             expect(err).toBeUndefined();

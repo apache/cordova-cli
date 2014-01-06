@@ -252,16 +252,13 @@ describe('platform command', function() {
             it('should remove a supported and added platform', function(done) {
                 cordova.raw.platform('remove', 'android').then(function() {
                     expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'platforms', 'android'));
-                    expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'merges', 'android'));
                 }, fail).fin(done);
             });
 
             it('should be able to remove multiple platforms', function(done) {
                 cordova.raw.platform('remove', ['android', 'blackberry10']).then(function() {
                     expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'platforms', 'android'));
-                    expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'merges', 'android'));
                     expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'platforms', 'blackberry10'));
-                    expect(rm).toHaveBeenCalledWith('-rf', path.join(project_dir, 'merges', 'blackberry10'));
                 }, fail).fin(done);
             });
         });
