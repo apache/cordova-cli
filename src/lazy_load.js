@@ -49,14 +49,9 @@ module.exports = {
 
         var lib_dir = platforms[platform] && platforms[platform].subdirectory && platform !== "blackberry10" ? path.join(download_dir, platforms[platform].subdirectory) : download_dir;
 
-        // For remote resources and archives this will download and/or unpack and cache them in the .cordova dir.
-        // In the event that the custom url is a local dir the cache is not used and we must not return here. The later logic will set things appropriately.
-        var uri = URL.parse(url);
-        if (!(uri.protocol && uri.protocol[1] != ':')) { // second part of conditional is for awesome windows support.
-          if (fs.existsSync(download_dir)) {
+        if (fs.existsSync(download_dir)) {
             events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
             return Q(lib_dir);
-          }
         }
         try {
             // readlinkSync throws if download_dir points to a non-existent file.
