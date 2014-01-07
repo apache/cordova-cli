@@ -161,7 +161,7 @@ module.exports = function create (dir, id, name, cfg) {
         // Add template config.xml for apps that are missing it
         if (!fs.existsSync(configPath)) {
             var template_config_xml = path.join(__dirname, '..', 'templates', 'config.xml');
-            shell.cp(template_config_xml, www_dir);
+            shell.cp(template_config_xml, configPath);
         }
         // Write out id and name to config.xml
         var config = new util.config_parser(configPath);

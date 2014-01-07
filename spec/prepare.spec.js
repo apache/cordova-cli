@@ -117,7 +117,7 @@ describe('prepare command', function() {
 
             cordova.raw.prepare().then(function() {
                 expect(before_prep).toBe(true);
-                expect(config_parser).toHaveBeenCalledWith(path.join(project_dir, 'www', 'config.xml'));
+                expect(config_parser).toHaveBeenCalledWith(path.join(project_dir, 'config.xml'));
             }, function(err) {
                 expect(err).toBeUndefined();
             }).fin(done);

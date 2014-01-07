@@ -109,7 +109,14 @@ exports = module.exports = {
         return path.join(projectDir, 'www');
     },
     projectConfig: function(projectDir) {
-        return path.join(projectDir, 'www', 'config.xml');
+        var rootPath = path.join(projectDir, 'config.xml');
+        var wwwPath = path.join(projectDir, 'www', 'config.xml');
+        if (fs.existsSync(rootPath)) {
+            return rootPath;
+        } else if (fs.existsSync(wwwPath)) {
+            return wwwPath;
+        }
+        return rootPath;
     },
     preProcessOptions: function (inputOptions) {
         var DEFAULT_OPTIONS = {
