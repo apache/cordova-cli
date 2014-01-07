@@ -162,11 +162,10 @@ module.exports = function create (dir, id, name, cfg) {
         if (!fs.existsSync(configPath)) {
             var template_config_xml = path.join(__dirname, '..', 'templates', 'config.xml');
             shell.cp(template_config_xml, configPath);
+            // Write out id and name to config.xml
+            var config = new util.config_parser(configPath);
+            config.packageName(id);
+            config.name(name);
         }
-        // Write out id and name to config.xml
-        var config = new util.config_parser(configPath);
-        config.packageName(id);
-        config.name(name);
-        return Q();
     });
 };
