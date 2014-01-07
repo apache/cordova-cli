@@ -68,8 +68,16 @@ describe('lazy_load module', function() {
 
         it('should callback with no errors and not fire event hooks if library already exists', function(done) {
             exists.andReturn(true);
-            lazy_load.custom('some url', 'some id', 'platform X', 'three point five').then(function() {
+            lazy_load.custom('http://some remote url', 'some id', 'platform X', 'three point five').then(function() {
                 expect(fire).not.toHaveBeenCalled()
+            }, function(err) {
+                expect(err).not.toBeDefined();
+            }).fin(done);
+        });
+        it('should callback with no errors and fire event hooks even if library already exists if the lib url is a local dir', function(done) {
+            exists.andReturn(true);
+            lazy_load.custom('some local dir', 'some id', 'platform X', 'three point five').then(function() {
+                expect(fire).toHaveBeenCalled()
             }, function(err) {
                 expect(err).not.toBeDefined();
             }).fin(done);
