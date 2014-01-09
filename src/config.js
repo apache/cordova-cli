@@ -20,8 +20,7 @@
 var path          = require('path'),
     fs            = require('fs'),
     url           = require('url'),
-    shell         = require('shelljs'),
-    JSHINT        = require("jshint").JSHINT;
+    shell         = require('shelljs');
 
 module.exports = function config(project_root, opts) {
     var json = module.exports.read(project_root);
@@ -43,16 +42,7 @@ module.exports.read = function get_config(project_root) {
         return module.exports.write(project_root, {});
     } else {
         var data = fs.readFileSync(config_json, 'utf-8');
-        try {
-            return JSON.parse(data);
-        } catch (e) {
-            JSHINT(data);
-            var err = JSHINT.errors[0];
-            if (err) {
-                throw new Error('Parsing "'+config_json+'" at line '+err.line+" col "+err.character+"; "+err.reason);
-            }
-            throw e;
-        }
+        return JSON.parse(data);
     }
 };
 
