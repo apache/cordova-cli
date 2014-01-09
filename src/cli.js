@@ -24,7 +24,7 @@ var path = require('path'),
 module.exports = function CLI(inputArgs) {
     try {
         optimist = require('optimist');
-        _ = require('lodash');
+        _ = require('underscore');
     } catch (e) {
         console.error("Please run npm install from this directory:\n\t" +
                       path.dirname(__dirname));

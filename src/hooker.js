@@ -23,7 +23,7 @@ var util  = require('./util'),
     child_process = require('child_process'),
     Q     = require('q'),
     path  = require('path'),
-    _ = require('lodash');
+    _ = require('underscore');
 
 module.exports = function hooker(root) {
     var r = util.isCordova(root);
