@@ -20,7 +20,7 @@ var lazy_load = require('../src/lazy_load'),
     config = require('../src/config'),
     util = require('../src/util'),
     shell = require('shelljs'),
-    npm = require('npm');
+    npmconf = require('npmconf');
     path = require('path'),
     hooker = require('../src/hooker'),
     request = require('request'),
@@ -83,6 +83,7 @@ describe('lazy_load module', function() {
         });
 
         describe('remote URLs for libraries', function() {
+            var npmConfProxy;
             var req,
                 load_spy,
                 events = {},
@@ -94,6 +95,7 @@ describe('lazy_load module', function() {
                     pipe: jasmine.createSpy().andCallFake(function() { return fakeRequest; })
                 };
             beforeEach(function() {
+                npmConfProxy = null;
                 events = {};
                 fakeRequest.on.reset();
                 fakeRequest.pipe.reset();
@@ -104,8 +106,7 @@ describe('lazy_load module', function() {
                     }, 10);
                     return fakeRequest;
                 });
-                load_spy = spyOn(npm, 'load').andCallFake(function(cb) { cb(); });
-                npm.config.get = function() { return null; };
+                load_spy = spyOn(npmconf, 'load').andCallFake(function(cb) { cb(null, { get: function() { return npmConfProxy }}); });
             });
 
             it('should call request with appopriate url params', function(done) {
@@ -120,7 +121,7 @@ describe('lazy_load module', function() {
             });
             it('should take into account https-proxy npm configuration var if exists for https:// calls', function(done) {
                 var proxy = 'https://somelocalproxy.com';
-                npm.config.get = function() { return proxy; };
+                npmConfProxy = proxy;
                 var url = 'https://github.com/apache/someplugin';
                 lazy_load.custom(url, 'random', 'android', '1.0').then(function() {
                     expect(req).toHaveBeenCalledWith({
@@ -133,7 +134,7 @@ describe('lazy_load module', function() {
             });
             it('should take into account proxy npm config var if exists for http:// calls', function(done) {
                 var proxy = 'http://somelocalproxy.com';
-                npm.config.get = function() { return proxy; };
+                npmConfProxy = proxy;
                 var url = 'http://github.com/apache/someplugin';
                 lazy_load.custom(url, 'random', 'android', '1.0').then(function() {
                     expect(req).toHaveBeenCalledWith({

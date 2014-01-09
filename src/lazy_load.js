@@ -20,7 +20,7 @@ var path          = require('path'),
     fs            = require('fs'),
     shell         = require('shelljs'),
     platforms     = require('../platforms'),
-    npm           = require('npm'),
+    npmconf       = require('npmconf'),
     events        = require('./events'),
     request       = require('request'),
     config        = require('./config'),
@@ -69,13 +69,13 @@ module.exports = {
         }).then(function() {
             var uri = URL.parse(url);
             var d = Q.defer();
-            npm.load(function() {
+            npmconf.load(function(err, conf) {
                 // Check if NPM proxy settings are set. If so, include them in the request() call.
                 var proxy;
                 if (uri.protocol == 'https:') {
-                    proxy = npm.config.get('https-proxy');
+                    proxy = conf.get('https-proxy');
                 } else if (uri.protocol == 'http:') {
-                    proxy = npm.config.get('proxy');
+                    proxy = conf.get('proxy');
                 }
 
                 shell.mkdir('-p', download_dir);
