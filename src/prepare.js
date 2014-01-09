@@ -27,7 +27,9 @@ var cordova_util      = require('./util'),
     lazy_load         = require('./lazy_load'),
     config            = require('./config'),
     events            = require('./events'),
+    n                 = require('ncallbacks'),
     Q                 = require('q'),
+    prompt            = require('prompt'),
     plugman           = require('plugman'),
     util              = require('util');
 
