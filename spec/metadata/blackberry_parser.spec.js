@@ -26,7 +26,6 @@ var platforms = require('../../platforms'),
     Q = require('q'),
     child_process = require('child_process'),
     config = require('../../src/config'),
-    prompt = require('prompt'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
 
