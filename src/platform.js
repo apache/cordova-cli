@@ -117,7 +117,6 @@ module.exports = function platform(command, targets) {
                 }
 
                 // First, lazy_load the latest version.
-                var config_json = config.read(projectRoot);
                 return hooks.fire('before_platform_update', opts)
                 .then(function() {
                     return lazy_load.based_on_config(projectRoot, plat);

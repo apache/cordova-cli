@@ -96,11 +96,6 @@ describe('create end-to-end', function() {
         expect(path.join(project, 'www', 'config.xml')).toExist();
         expect(path.join(project, 'www', 'index.html')).toExist();
 
-        // Check contents of config.json
-        var cfg = config.read(project);
-        expect(cfg.id).toEqual(appId);
-        expect(cfg.name).toEqual(appName);
-
         // Check that www/config.xml was updated.
         var configXml = new util.config_parser(path.join(project, 'www', 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);

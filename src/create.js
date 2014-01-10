@@ -51,8 +51,6 @@ module.exports = function create (dir, id, name, cfg) {
     cfg = cfg || {};
     id = id || cfg.id || DEFAULT_ID;
     name = name || cfg.name || DEFAULT_NAME;
-    cfg.id = id;
-    cfg.name = name;
 
     // Make absolute.
     dir = path.resolve(dir);
