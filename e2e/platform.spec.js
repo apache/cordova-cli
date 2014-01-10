@@ -10,7 +10,7 @@ var helpers = require('./helpers'),
     events = require('../src/events'),
     cordova = require('../cordova');
 
-var tmpDir = '/Users/agrieve/tmp/ee';//helpers.tmpDir('platform_test');
+var tmpDir = helpers.tmpDir('platform_test');
 var project = path.join(tmpDir, 'project');
 
 var platformParser = platforms[helpers.testPlatform].parser;
@@ -23,7 +23,7 @@ describe('platform end-to-end', function() {
     });
     afterEach(function() {
         process.chdir(path.join(__dirname, '..'));  // Needed to rm the dir on Windows.
-        //shell.rm('-rf', tmpDir);
+        shell.rm('-rf', tmpDir);
     });
 
     // Factoring out some repeated checks.
