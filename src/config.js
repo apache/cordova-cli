@@ -22,39 +22,37 @@ var path          = require('path'),
     url           = require('url'),
     shell         = require('shelljs');
 
-module.exports = function config(project_root, opts) {
-    var json = module.exports.read(project_root);
+function config(project_root, opts) {
+    var json = config.read(project_root);
     Object.keys(opts).forEach(function(p) {
         json[p] = opts[p];
     });
-    return module.exports.write(project_root, json);
+    return config.write(project_root, json);
 };
 
-module.exports.read = function get_config(project_root) {
-    var dotCordova = path.join(project_root, '.cordova');
-
-    if (!fs.existsSync(dotCordova)) {
-        shell.mkdir('-p', dotCordova);
-    }
-
-    var config_json = path.join(dotCordova, 'config.json');
-    if (!fs.existsSync(config_json)) {
-        return module.exports.write(project_root, {});
+config.read = function get_config(project_root) {
+    var configPath = path.join(project_root, '.cordova', 'config.json');
+    if (!fs.existsSync(configPath)) {
+        return {};
     } else {
-        var data = fs.readFileSync(config_json, 'utf-8');
+        var data = fs.readFileSync(configPath, 'utf-8');
         return JSON.parse(data);
     }
 };
 
-module.exports.write = function set_config(project_root, json) {
-    var dotCordova = path.join(project_root, '.cordova');
-    var config_json = path.join(dotCordova, 'config.json');
-    fs.writeFileSync(config_json, JSON.stringify(json), 'utf-8');
+config.write = function set_config(project_root, json) {
+    var configPath = path.join(project_root, '.cordova', 'config.json');
+    var contents = JSON.stringify(json, null, 4);
+    // Don't write the file for an empty config.
+    if (contents != '{}' || fs.existsSync(configPath)) {
+        shell.mkdir('-p', path.join(project_root, '.cordova'));
+        fs.writeFileSync(configPath, contents, 'utf-8');
+    }
     return json;
 };
 
-module.exports.has_custom_path = function(project_root, platform) {
-    var json = module.exports.read(project_root);
+config.has_custom_path = function(project_root, platform) {
+    var json = config.read(project_root);
     if (json.lib && json.lib[platform]) {
         var uri = url.parse(json.lib[platform].uri);
         if (!(uri.protocol)) return uri.path;
@@ -62,3 +60,5 @@ module.exports.has_custom_path = function(project_root, platform) {
     }
     return false;
 };
+
+module.exports = config;
