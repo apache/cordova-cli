@@ -31,7 +31,7 @@
     "elementtree": "0.1.5",
     "plugman": "0.17.x",
     "plist-with-patches": "0.5.x",
-    "xcode": "git+https://github.com/kronenthaler/node-xcode.git",
+    "xcode": "0.6.4",
     "shelljs": "0.1.x",
     "request": "~2.21.0",
     "semver": "2.0.x",
