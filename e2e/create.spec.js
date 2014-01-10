@@ -77,23 +77,14 @@ describe('create end-to-end', function() {
 
     function checkProject() {
         // Check if top level dirs exist.
-        var dirs = ['.cordova', 'platforms', 'merges', 'plugins', 'www'];
+        var dirs = ['hooks', 'platforms', 'merges', 'plugins', 'www'];
         dirs.forEach(function(d) {
             expect(path.join(project, d)).toExist();
         });
 
-        // Check if hook dirs exist.
-        var hooksDir = path.join(project, '.cordova', 'hooks');
-        dirs = crossConcat(['platform', 'plugin'], ['add', 'rm', 'ls'], '_');
-        dirs = dirs.concat(['build', 'compile', 'docs', 'emulate', 'prepare', 'run']);
-        dirs = crossConcat(['before', 'after'], dirs, '_');
-        dirs.forEach(function(d) {
-            expect(path.join(hooksDir, d)).toExist();
-        });
+        expect(path.join(project, 'hooks', 'README.md')).toExist();
 
         // Check if config files exist.
-        expect(path.join(cordovaDir, 'config.json')).toExist();
-        expect(path.join(project, 'www', 'config.xml')).toExist();
         expect(path.join(project, 'www', 'index.html')).toExist();
 
         // Check that www/config.xml was updated.
