@@ -97,7 +97,7 @@ describe("cordova cli", function () {
 
         it("will call command with all arguments passed through", function () {
             new CLI(["node", "cordova", "plugin", "add", "facebook", "--variable", "FOO=foo"]);
-            expect(cordova.raw.plugin).toHaveBeenCalledWith("add", ["facebook", "--variable", "FOO=foo"]);
+            expect(cordova.raw.plugin).toHaveBeenCalledWith("add", ["facebook", "--variable", "FOO=foo"], {searchpath: undefined});
         });
     });
 });
