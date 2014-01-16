@@ -59,8 +59,7 @@ module.exports = {
             }
         } else {
             // Local path.
-            download_dir = uri.path;
-            lib_dir = platforms[platform] && platforms[platform].subdirectory ? path.join(download_dir, platforms[platform].subdirectory) : download_dir;
+            lib_dir = platforms[platform] && platforms[platform].subdirectory ? path.join(url, platforms[platform].subdirectory) : url;
             return Q(lib_dir);
         }
         return hooker.fire('before_library_download', {
