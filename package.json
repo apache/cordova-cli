@@ -31,7 +31,7 @@
     "elementtree": "0.1.5",
     "plugman": "0.18.0",
     "plist-with-patches": "0.5.x",
-    "xcode": "0.6.4",
+    "xcode": "0.6.5",
     "shelljs": "0.1.x",
     "request": "~2.21.0",
     "semver": "2.0.x",
