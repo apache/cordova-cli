@@ -164,7 +164,7 @@ describe('prepare command', function() {
                 cordova.raw.prepare().then(function() {
                     supported_platforms.forEach(function(p) {
                         var platform_path = path.join(project_dir, 'platforms', p);
-                        expect(add_plugin_changes).toHaveBeenCalledWith((p=='blackberry'?'blackberry10':p), platform_path, plugins_dir, 'testPlugin', 'plugin vars', true, false);
+                        expect(add_plugin_changes).toHaveBeenCalledWith((p=='blackberry'?'blackberry10':p), platform_path, plugins_dir, 'testPlugin', 'plugin vars', true, false, {});
                     });
                 }, function(err) {
                     expect(err).toBeUndefined();
