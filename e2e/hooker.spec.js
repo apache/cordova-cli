@@ -37,7 +37,9 @@ var ext = platform.match(/(win32|win64)/)?'bat':'sh';
 
 
 // copy fixture
-shell.rm('-rf', tmpDir);
+shell.rm('-rf', project);
+shell.mkdir('-p', project);
+shell.cp('-R', path.join(__dirname, 'fixtures', 'base', '*'), project);
 shell.mkdir('-p', dotCordova);
 shell.cp('-R', path.join(__dirname, 'fixtures', 'hooks_' + ext), dotCordova);
 shell.mv(path.join(dotCordova, 'hooks_' + ext), hooksDir);
@@ -243,7 +245,7 @@ describe('hooks', function() {
     it('should not fail during cleanup', function() {
         process.chdir(path.join(__dirname, '..'));  // Non e2e tests assume CWD is repo root.
         if(ext == 'sh') {
-            shell.rm('-rf', tmpDir);
+            //shell.rm('-rf', tmpDir);
         } else { // Windows:
             // For some mysterious reason, both shell.rm and RMDIR /S /Q won't
             // delete the dir on Windows, but they do remove the files leaving

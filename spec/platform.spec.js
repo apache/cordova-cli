@@ -41,6 +41,7 @@ function fail(e) {
 describe('platform command', function() {
     var is_cordova,
         cd_project_root,
+        cp,
         list_platforms,
         fire,
         config_parser,
@@ -61,7 +62,8 @@ describe('platform command', function() {
     beforeEach(function() {
         supported_platforms.forEach(function(p) {
             parsers[p] = spyOn(platforms[p], 'parser').andReturn({
-                staging_dir:function(){}
+                staging_dir:function(){},
+                www_dir:function(){return 'pwww'}
             });
         });
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
@@ -94,6 +96,7 @@ describe('platform command', function() {
         });
 
         rm = spyOn(shell, 'rm');
+        cp = spyOn(shell, 'cp');
         mkdir = spyOn(shell, 'mkdir');
         existsSync = spyOn(fs, 'existsSync').andReturn(false);
         var origReadFile = fs.readFileSync;

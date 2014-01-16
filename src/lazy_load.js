@@ -20,12 +20,11 @@ var path          = require('path'),
     fs            = require('fs'),
     shell         = require('shelljs'),
     platforms     = require('../platforms'),
-    npm           = require('npm'),
+    npmconf       = require('npmconf'),
     events        = require('./events'),
     request       = require('request'),
     config        = require('./config'),
     hooker        = require('./hooker'),
-    https         = require('follow-redirects').https,
     zlib          = require('zlib'),
     tar           = require('tar'),
     URL           = require('url'),
@@ -44,22 +43,23 @@ module.exports = {
     },
     // Returns a promise for the path to the lazy-loaded directory.
     custom:function(url, id, platform, version) {
-        var download_dir = (platform == 'wp7' || platform == 'wp8' ? path.join(util.libDirectory, 'wp', id, version) :
-                                                                     path.join(util.libDirectory, platform, id, version));
-
-        var lib_dir = platforms[platform] && platforms[platform].subdirectory && platform !== "blackberry10" ? path.join(download_dir, platforms[platform].subdirectory) : download_dir;
+        var download_dir;
+        var lib_dir;
 
         // Return early for already-cached remote URL, or for local URLs.
         var uri = URL.parse(url);
-        if (uri.protocol && uri.protocol[1] != ':') { // second part of conditional is for awesome windows support. fuuu windows
-          if (fs.existsSync(download_dir)) {
-            events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
-            return Q(lib_dir);
-          }
+        var isUri = uri.protocol && uri.protocol[1] != ':'; // second part of conditional is for awesome windows support. fuuu windows
+        if (isUri) {
+            download_dir = (platform == 'wp7' || platform == 'wp8' ? path.join(util.libDirectory, 'wp', id, version) :
+                                                                     path.join(util.libDirectory, platform, id, version));
+            lib_dir = platforms[platform] && platforms[platform].subdirectory && platform !== "blackberry10" ? path.join(download_dir, platforms[platform].subdirectory) : download_dir;
+            if (fs.existsSync(download_dir)) {
+                events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
+                return Q(lib_dir);
+            }
         } else {
             // Local path.
-            download_dir = uri.path;
-            lib_dir = platforms[platform] && platforms[platform].subdirectory ? path.join(download_dir, platforms[platform].subdirectory) : download_dir;
+            lib_dir = platforms[platform] && platforms[platform].subdirectory ? path.join(url, platforms[platform].subdirectory) : url;
             return Q(lib_dir);
         }
         return hooker.fire('before_library_download', {
@@ -70,13 +70,13 @@ module.exports = {
         }).then(function() {
             var uri = URL.parse(url);
             var d = Q.defer();
-            npm.load(function() {
+            npmconf.load(function(err, conf) {
                 // Check if NPM proxy settings are set. If so, include them in the request() call.
                 var proxy;
                 if (uri.protocol == 'https:') {
-                    proxy = npm.config.get('https-proxy');
+                    proxy = conf.get('https-proxy');
                 } else if (uri.protocol == 'http:') {
-                    proxy = npm.config.get('proxy');
+                    proxy = conf.get('proxy');
                 }
 
                 shell.mkdir('-p', download_dir);

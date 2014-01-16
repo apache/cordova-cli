@@ -24,7 +24,7 @@ var path = require('path'),
 module.exports = function CLI(inputArgs) {
     try {
         optimist = require('optimist');
-        _ = require('lodash');
+        _ = require('underscore');
     } catch (e) {
         console.error("Please run npm install from this directory:\n\t" +
                       path.dirname(__dirname));
@@ -49,6 +49,7 @@ module.exports = function CLI(inputArgs) {
         .string('src')
         .alias('src', 'source')
         .string('link')
+        .string('searchpath')
         .argv;
 
     if (args.v || args.version) {
@@ -137,15 +138,15 @@ module.exports = function CLI(inputArgs) {
             if (args.link) {
                 wwwCfg.link = true;
             }
-            _.merge(cfg, {lib: {www: wwwCfg}} );
+            cfg.lib = cfg.lib || {};
+            cfg.lib.www = wwwCfg;
         }
         // create(dir, id, name, cfg)
         cordova.raw[cmd].call(this, args._[1], args._[2], args._[3], cfg).done();
     } else {
         // platform/plugins add/rm [target(s)]
-        var invocation = tokens.slice(0,1); // this has the sub-command, i.e. "platform add" or "plugin rm"
+        var subcommand = tokens[0]; // this has the sub-command, like "add", "ls", "rm" etc.
         var targets = tokens.slice(1); // this should be an array of targets, be it platforms or plugins
-        invocation.push(targets);
-        cordova.raw[cmd].apply(this, invocation).done();
+        cordova.raw[cmd].call(this, subcommand, targets, { searchpath: args.searchpath }).done();
     }
 };

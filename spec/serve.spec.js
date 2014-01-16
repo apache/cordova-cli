@@ -19,7 +19,6 @@
 var cordova = require('../cordova'),
     path = require('path'),
     shell = require('shelljs'),
-    request = require('request'),
     fs = require('fs'),
     util = require('../src/util'),
     hooker = require('../src/hooker'),
