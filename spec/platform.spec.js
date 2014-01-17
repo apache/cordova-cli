@@ -290,7 +290,7 @@ describe('platform command', function() {
                         var oldVersion = lazyLoadVersion;
                         lazyLoadVersion = '1.0.0';
                         cordova.raw.platform('update', ['ios']).then(function() {
-                            expect(exec).toHaveBeenCalledWith('lib/ios/cordova/1.0.0/bin/update "some/path/platforms/ios"', jasmine.any(Function));
+                            expect(exec).toHaveBeenCalledWith('"lib/ios/cordova/1.0.0/bin/update" "some/path/platforms/ios"', jasmine.any(Function));
                         }, fail).fin(function() {
                             lazyLoadVersion = oldVersion;
                             done();
