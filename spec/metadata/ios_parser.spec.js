@@ -167,7 +167,7 @@ describe('ios project parser', function () {
             });
             it('should write out the app version to info plist as CFBundleVersion', function(done) {
                 wrapper(p.update_from_config(cfg), done, function() {
-                    expect(plist_build.mostRecentCall.args[0].CFBundleVersion).toEqual('one point oh');
+                    expect(plist_build.mostRecentCall.args[0].CFBundleShortVersionString).toEqual('one point oh');
                 });
             });
         });
