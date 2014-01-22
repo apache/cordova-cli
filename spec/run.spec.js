@@ -140,11 +140,11 @@ describe('run command', function() {
         describe('with no platforms added', function() {
             it('should not fire the hooker', function(done) {
                 list_platforms.andReturn([]);
-                cordova.raw.run().then(function() {
+                Q().then(cordova.raw.run).then(function() {
                     expect('this call').toBe('fail');
                 }, function(err) {
                     expect(fire).not.toHaveBeenCalled();
-                    expect(err).toEqual(new Error('No platforms added to this project. Please use `cordova platform add <platform>`.'));
+                    expect(err.message).toEqual('No platforms added to this project. Please use `cordova platform add <platform>`.');
                 }).fin(done);
             });
         });
