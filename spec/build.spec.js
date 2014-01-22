@@ -53,30 +53,37 @@ describe('build command', function() {
         prepare_spy = spyOn(cordova.raw, 'prepare').andReturn(Q());
         compile_spy = spyOn(cordova.raw, 'compile').andReturn(Q());
     });
-    describe('failure', function(done) {
-        it('should not run inside a Cordova-based project with no added platforms by calling util.listPlatforms', function() {
+    describe('failure', function() {
+        it('should not run inside a project with no platforms', function(done) {
             list_platforms.andReturn([]);
-            runs(function() {
-                buildPromise(cordova.raw.build());
-            });
-            waitsFor(function() { return result; }, 'promise never resolved', 500);
-            runs(function() {
-                expect(result).toEqual(new Error('No platforms added to this project. Please use `cordova platform add <platform>`.'));
-            });
+            Q().then(cordova.raw.build).then(function() {
+                expect('this call').toBe('fail');
+            }, function(err) {
+                expect(err.message).toEqual(
+                    'No platforms added to this project. Please use `cordova platform add <platform>`.'
+                )
+            }).fin(done);
         });
-        it('should not run outside of a Cordova-based project', function() {
+
+        it('should not run outside of a Cordova-based project', function(done) {
             is_cordova.andReturn(false);
-            wrapper(cordova.raw.build(), function() {
-                expect(result).toEqual(new Error('Current working directory is not a Cordova-based project.'));
-            });
+
+            Q().then(cordova.raw.build).then(function() {
+                expect('this call').toBe('fail');
+            }, function(err) {
+                expect(err.message).toEqual(
+                    'Current working directory is not a Cordova-based project.'
+                )
+            }).fin(done);
         });
     });
 
     describe('success', function() {
         it('should run inside a Cordova-based project with at least one added platform and call both prepare and compile', function(done) {
             cordova.raw.build(['android','ios']).then(function() {
-                expect(prepare_spy).toHaveBeenCalledWith({verbose: false, platforms: ['android', 'ios'], options: []});
-                expect(compile_spy).toHaveBeenCalledWith({verbose: false, platforms: ['android', 'ios'], options: []});
+                var opts = {verbose: false, platforms: ['android', 'ios'], options: []};
+                expect(prepare_spy).toHaveBeenCalledWith(opts);
+                expect(compile_spy).toHaveBeenCalledWith(opts);
                 done();
             });
         });
@@ -106,12 +113,15 @@ describe('build command', function() {
         });
 
         describe('with no platforms added', function() {
-            it('should not fire the hooker', function() {
+            it('should not fire the hooker', function(done) {
                 list_platforms.andReturn([]);
-                wrapper(cordova.raw.build(), function() {
-                    expect(result).toEqual(new Error('No platforms added to this project. Please use `cordova platform add <platform>`.'));
-                    expect(fire).not.toHaveBeenCalled();
-                });
+                Q().then(cordova.raw.build).then(function() {
+                    expect('this call').toBe('fail');
+                }, function(err) {
+                    expect(err.message).toEqual(
+                        'No platforms added to this project. Please use `cordova platform add <platform>`.'
+                    )
+                }).fin(done);
             });
         });
     });

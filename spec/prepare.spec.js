@@ -77,7 +77,7 @@ describe('prepare command', function() {
     describe('failure', function() {
         it('should not run outside of a cordova-based project by calling util.isCordova', function(done) {
             is_cordova.andReturn(false);
-            cordova.raw.prepare().then(function() {
+            Q().then(cordova.raw.prepare).then(function() {
                 expect('this call').toBe('fail');
             }, function(err) {
                 expect(err).toEqual(new Error('Current working directory is not a Cordova-based project.'));
@@ -85,7 +85,7 @@ describe('prepare command', function() {
         });
         it('should not run inside a cordova-based project with no platforms', function(done) {
             list_platforms.andReturn([]);
-            cordova.raw.prepare().then(function() {
+            Q().then(cordova.raw.prepare).then(function() {
                 expect('this call').toBe('fail');
             }, function(err) {
                 expect(err).toEqual(new Error('No platforms added to this project. Please use `cordova platform add <platform>`.'));
@@ -207,7 +207,7 @@ describe('prepare command', function() {
                 list_platforms.andReturn([]);
             });
             it('should not fire the hooker', function(done) {
-                cordova.raw.prepare().then(function() {
+                Q().then(cordova.raw.prepare).then(function() {
                     expect('this call').toBe('fail');
                 }, function(err) {
                     expect(err).toEqual(jasmine.any(Error));

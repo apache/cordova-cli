@@ -66,7 +66,7 @@ describe('compile command', function() {
 
     function wrapper(f, post) {
         runs(function() {
-            f.then(function() { result = true; }, function(err) { result = err; });
+            Q().then(f).then(function() { result = true; }, function(err) { result = err; });
         });
         waitsFor(function() { return result; }, 'promise never resolved', 500);
         runs(post);
@@ -81,13 +81,13 @@ describe('compile command', function() {
     describe('failure', function() {
         it('should not run inside a Cordova-based project with no added platforms by calling util.listPlatforms', function() {
             list_platforms.andReturn([]);
-            wrapper(cordova.raw.compile(), function() {
+            wrapper(cordova.raw.compile, function() {
                 expect(result).toEqual(new Error('No platforms added to this project. Please use `cordova platform add <platform>`.'));
             });
         });
         it('should not run outside of a Cordova-based project', function() {
             is_cordova.andReturn(false);
-            wrapper(cordova.raw.compile(), function() {
+            wrapper(cordova.raw.compile, function() {
                 expect(result).toEqual(new Error('Current working directory is not a Cordova-based project.'));
             });
         });
@@ -134,12 +134,16 @@ describe('compile command', function() {
         });
 
         describe('with no platforms added', function() {
-            it('should not fire the hooker', function() {
+            it('should not fire the hooker', function(done) {
                 list_platforms.andReturn([]);
-                wrapper(cordova.raw.compile(), function() {
-                    expect(result).toEqual(new Error('No platforms added to this project. Please use `cordova platform add <platform>`.'));
+                Q().then(cordova.raw.compile).then(function() {
+                    expect('this call').toBe('fail');
+                }, function(err) {
                     expect(fire).not.toHaveBeenCalled();
-                });
+                    expect(err.message).toEqual(
+                        'No platforms added to this project. Please use `cordova platform add <platform>`.'
+                    )
+                }).fin(done);
             });
         });
     });
