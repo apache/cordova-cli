@@ -26,9 +26,14 @@ var cordova = require('../cordova'),
 
 var cwd = process.cwd();
 var home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+var origPWD = process.env['PWD'];
 
 describe('util module', function() {
     describe('isCordova method', function() {
+        afterEach(function() {
+            process.env['PWD'] = origPWD;
+            process.chdir(cwd);
+        });
         it('should return false if it hits the home directory', function() {
             var somedir = path.join(home, 'somedir');
             this.after(function() {
@@ -48,8 +53,57 @@ describe('util module', function() {
                 shell.rm('-rf', somedir);
             });
             shell.mkdir('-p', anotherdir);
-            shell.mkdir(path.join(somedir, '.cordova'));
+            shell.mkdir('-p', path.join(somedir, 'www', 'config.xml'));
             expect(util.isCordova(somedir)).toEqual(somedir);
+        });
+        it('should ignore PWD when its undefined', function() {
+            delete process.env['PWD'];
+            var somedir = path.join(home,'somedir');
+            var anotherdir = path.join(somedir, 'anotherdir');
+            this.after(function() {
+                shell.rm('-rf', somedir);
+            });
+            shell.mkdir('-p', anotherdir);
+            shell.mkdir('-p', path.join(somedir, 'www'));
+            shell.mkdir('-p', path.join(somedir, 'config.xml'));
+            process.chdir(anotherdir);
+            expect(util.isCordova()).toEqual(somedir);
+        });
+        it('should use PWD when available', function() {
+            var somedir = path.join(home,'somedir');
+            var anotherdir = path.join(somedir, 'anotherdir');
+            this.after(function() {
+                shell.rm('-rf', somedir);
+            });
+            shell.mkdir('-p', anotherdir);
+            shell.mkdir('-p', path.join(somedir, 'www', 'config.xml'));
+            process.env['PWD'] = anotherdir;
+            process.chdir(path.sep);
+            expect(util.isCordova()).toEqual(somedir);
+        });
+        it('should use cwd as a fallback when PWD is not a cordova dir', function() {
+            var somedir = path.join(home,'somedir');
+            var anotherdir = path.join(somedir, 'anotherdir');
+            this.after(function() {
+                shell.rm('-rf', somedir);
+            });
+            shell.mkdir('-p', anotherdir);
+            shell.mkdir('-p', path.join(somedir, 'www', 'config.xml'));
+            process.env['PWD'] = path.sep;
+            process.chdir(anotherdir);
+            expect(util.isCordova()).toEqual(somedir);
+        });
+        it('should ignore platform www/config.xml', function() {
+            var somedir = path.join(home,'somedir');
+            var anotherdir = path.join(somedir, 'anotherdir');
+            this.after(function() {
+                shell.rm('-rf', somedir);
+            });
+            shell.mkdir('-p', anotherdir);
+            shell.mkdir('-p', path.join(anotherdir, 'www', 'config.xml'));
+            shell.mkdir('-p', path.join(somedir, 'www'));
+            shell.mkdir('-p', path.join(somedir, 'config.xml'));
+            expect(util.isCordova(anotherdir)).toEqual(somedir);
         });
     });
     describe('deleteSvnFolders method', function() {

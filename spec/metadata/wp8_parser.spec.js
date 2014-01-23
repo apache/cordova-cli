@@ -29,6 +29,9 @@ var platforms = require('../../platforms'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
 
+// Create a real config object before mocking out everything.
+var cfg = new config_parser(path.join(__dirname, '..', 'test-config.xml'));
+
 describe('wp8 project parser', function() {
     var proj = '/some/path';
     var exists, exec, custom, readdir, cfg_parser;
@@ -110,7 +113,7 @@ describe('wp8 project parser', function() {
         });
 
         describe('update_from_config method', function() {
-            var et, xml, find, write_xml, root, cfg, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
+            var et, xml, find, write_xml, root, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
             beforeEach(function() {
                 find_obj = {
                     text:'hi',
@@ -130,7 +133,6 @@ describe('wp8 project parser', function() {
                     getroot:root
                 });
                 xml = spyOn(ET, 'XML');
-                cfg = new config_parser();
                 cfg.name = function() { return 'testname' };
                 cfg.content = function() { return 'index.html' };
                 cfg.packageName = function() { return 'testpkg' };
@@ -181,6 +183,11 @@ describe('wp8 project parser', function() {
                 expect(p.staging_dir()).toEqual(path.join(wp8_proj, '.staging', 'www'));
             });
         });
+        describe('config_xml method', function() {
+            it('should return the location of the config.xml', function() {
+                expect(p.config_xml()).toEqual(path.join(wp8_proj, 'config.xml'));
+            });
+        });
         describe('update_www method', function() {
             var update_csproj;
             beforeEach(function() {
@@ -204,7 +211,7 @@ describe('wp8 project parser', function() {
             });
         });
         describe('update_project method', function() {
-            var config, www, overrides, staging, svn;
+            var config, www, overrides, staging, svn, csproj;
             beforeEach(function() {
                 config = spyOn(p, 'update_from_config');
                 www = spyOn(p, 'update_www');

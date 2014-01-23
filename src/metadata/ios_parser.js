@@ -22,29 +22,10 @@ var fs            = require('fs'),
     util          = require('../util'),
     events        = require('../events'),
     shell         = require('shelljs'),
-    child_process = require('child_process'),
-    plist         = require('plist'),
-    semver        = require('semver'),
+    plist         = require('plist-with-patches'),
     Q             = require('q'),
     config_parser = require('../config_parser'),
     config        = require('../config');
-
-var MIN_XCODE_VERSION = '>=4.5.x';
-
-var default_prefs = {
-    "KeyboardDisplayRequiresUserAction":"true",
-    "SuppressesIncrementalRendering":"false",
-    "UIWebViewBounce":"true",
-    "TopActivityIndicator":"gray",
-    "EnableLocation":"false",
-    "EnableViewportScale":"false",
-    "AutoHideSplashScreen":"true",
-    "ShowSplashScreenSpinner":"true",
-    "MediaPlaybackRequiresUserAction":"false",
-    "AllowInlineMediaPlayback":"false",
-    "OpenAllWhitelistURLsInWebView":"false",
-    "BackupWebStorage":"cloud"
-};
 
 module.exports = function ios_parser(project) {
     try {
@@ -64,26 +45,8 @@ module.exports = function ios_parser(project) {
 
 // Returns a promise.
 module.exports.check_requirements = function(project_root) {
-    events.emit('log', 'Checking iOS requirements...');
-    // Check xcode + version.
-    var command = 'xcodebuild -version';
-    events.emit('verbose', 'Running "' + command + '" (output to follow)');
-    var d = Q.defer();
-    child_process.exec(command, function(err, output, stderr) {
-        events.emit('verbose', output+stderr);
-        if (err) {
-            d.reject(new Error('Xcode is (probably) not installed, specifically the command `xcodebuild` is unavailable or erroring out. Output of `'+command+'` is: ' + output + stderr));
-        } else {
-            var xc_version = output.split('\n')[0].split(' ')[1];
-            if(xc_version.split('.').length === 2){
-                xc_version += '.0';
-            }
-            if (!semver.satisfies(xc_version, MIN_XCODE_VERSION)) {
-                d.reject(new Error('Xcode version installed is too old. Minimum: ' + MIN_XCODE_VERSION + ', yours: ' + xc_version));
-            } else d.resolve();
-        }
-    });
-    return d.promise;
+    // Rely on platform's bin/create script to check requirements.
+    return Q(true);
 };
 
 module.exports.prototype = {
@@ -103,7 +66,9 @@ module.exports.prototype = {
         infoPlist['CFBundleIdentifier'] = pkg;
 
         // Update version (bundle version)
-        infoPlist['CFBundleVersion'] = version;
+        infoPlist['CFBundleShortVersionString'] = version;
+        // TODO: add a way to update infoPlist['CFBundleVersion'].
+
         var info_contents = plist.build(infoPlist);
         info_contents = info_contents.replace(/<string>[\s\r\n]*<\/string>/g,'<string></string>');
         fs.writeFileSync(plistFile, info_contents, 'utf-8');

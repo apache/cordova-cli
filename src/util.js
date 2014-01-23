@@ -18,6 +18,7 @@
 */
 var fs            = require('fs'),
     path          = require('path'),
+    CordovaError  = require('./CordovaError'),
     shell         = require('shelljs');
 
 // Global configuration paths
@@ -26,35 +27,60 @@ var global_config_path = path.join(HOME, '.cordova');
 var lib_path = path.join(global_config_path, 'lib');
 shell.mkdir('-p', lib_path);
 
+function isRootDir(dir) {
+    if (fs.existsSync(path.join(dir, 'www'))) {
+        // For sure is.
+        if (fs.existsSync(path.join(dir, 'config.xml'))) {
+            return 2;
+        }
+        // Might be (or may be under platforms/).
+        if (fs.existsSync(path.join(dir, 'www', 'config.xml'))) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 exports = module.exports = {
     globalConfig:global_config_path,
     libDirectory:lib_path,
     // Runs up the directory chain looking for a .cordova directory.
     // IF it is found we are in a Cordova project.
-    // If not.. we're not. HOME directory doesnt count.
-    // HOMEDRIVE is used to catch when we've backed up to the root drive in windows (i.e C:\)
+    // Omit argument to use CWD.
     isCordova: function isCordova(dir) {
-        if (dir && dir != process.env['HOMEDRIVE'] + path.sep) {
-            if (dir == HOME) {
-                return false;
-            } else {
-                var contents = fs.readdirSync(dir);
-                if (contents && contents.length && (contents.indexOf('.cordova') > -1)) {
-                    return dir;
-                } else {
-                    var parent = path.join(dir, '..');
-                    if (parent && parent.length > 1) {
-                        return isCordova(parent);
-                    } else return false;
-                }
+        if (!dir) {
+            // Prefer PWD over cwd so that symlinked dirs within your PWD work correctly (CB-5687).
+            var pwd = process.env.PWD;
+            var cwd = process.cwd();
+            if (pwd && pwd != cwd) {
+                return this.isCordova(pwd) || this.isCordova(cwd);
             }
-        } else return false;
+            return this.isCordova(cwd);
+        }
+        var bestReturnValueSoFar = false;
+        for (var i = 0; i < 1000; ++i) {
+            var result = isRootDir(dir);
+            if (result === 2) {
+                return dir;
+            }
+            if (result === 1) {
+                bestReturnValueSoFar = dir;
+            }
+            var parentDir = path.normalize(path.join(dir, '..'));
+            // Detect fs root.
+            if (parentDir == dir) {
+                return bestReturnValueSoFar;
+            }
+            dir = parentDir;
+        }
+        console.error('Hit an unhandled case in util.isCordova');
+        return false;
     },
-    // Cd to project root dir and return its path. Throw if not in a Corodva project.
+    // Cd to project root dir and return its path. Throw CordovaError if not in a Corodva project.
     cdProjectRoot: function() {
-        var projectRoot = this.isCordova(process.cwd());
+        var projectRoot = this.isCordova();
         if (!projectRoot) {
-            throw new Error('Current working directory is not a Cordova-based project.');
+            throw new CordovaError('Current working directory is not a Cordova-based project.');
         }
         process.chdir(projectRoot);
         return projectRoot;
@@ -98,7 +124,14 @@ exports = module.exports = {
         return path.join(projectDir, 'www');
     },
     projectConfig: function(projectDir) {
-        return path.join(projectDir, 'www', 'config.xml');
+        var rootPath = path.join(projectDir, 'config.xml');
+        var wwwPath = path.join(projectDir, 'www', 'config.xml');
+        if (fs.existsSync(rootPath)) {
+            return rootPath;
+        } else if (fs.existsSync(wwwPath)) {
+            return wwwPath;
+        }
+        return rootPath;
     },
     preProcessOptions: function (inputOptions) {
         var DEFAULT_OPTIONS = {
@@ -107,14 +140,14 @@ exports = module.exports = {
                 options: []
             },
             result = inputOptions || DEFAULT_OPTIONS,
-            projectRoot = this.isCordova(process.cwd());
+            projectRoot = this.isCordova();
 
         if (!projectRoot) {
-            return new Error('Current working directory is not a Cordova-based project.');
+            throw new CordovaError('Current working directory is not a Cordova-based project.');
         }
         var projectPlatforms = this.listPlatforms(projectRoot);
         if (projectPlatforms.length === 0) {
-            return new Error('No platforms added to this project. Please use `cordova platform add <platform>`.');
+            throw new CordovaError('No platforms added to this project. Please use `cordova platform add <platform>`.');
         }
         /**
          * Current Desired Arguments

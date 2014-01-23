@@ -20,7 +20,7 @@ var lazy_load = require('../src/lazy_load'),
     config = require('../src/config'),
     util = require('../src/util'),
     shell = require('shelljs'),
-    npm = require('npm');
+    npmconf = require('npmconf');
     path = require('path'),
     hooker = require('../src/hooker'),
     request = require('request'),
@@ -55,12 +55,11 @@ describe('lazy_load module', function() {
     });
 
     describe('custom method (loads custom cordova libs)', function() {
-        var mkdir, exists, fire, rm, sym;
+        var exists, fire, rm;
         beforeEach(function() {
-            mkdir = spyOn(shell, 'mkdir');
+            spyOn(shell, 'mkdir');
             rm = spyOn(shell, 'rm');
             mv = spyOn(shell, 'mv');
-            sym = spyOn(fs, 'symlinkSync');
             exists = spyOn(fs, 'existsSync').andReturn(false);
             readdir = spyOn(fs, 'readdirSync').andReturn(['somefile.txt']);
             fire = spyOn(hooker, 'fire').andReturn(Q());
@@ -68,21 +67,23 @@ describe('lazy_load module', function() {
 
         it('should callback with no errors and not fire event hooks if library already exists', function(done) {
             exists.andReturn(true);
-            lazy_load.custom('some url', 'some id', 'platform X', 'three point five').then(function() {
+            lazy_load.custom('http://some remote url', 'some id', 'platform X', 'three point five').then(function() {
                 expect(fire).not.toHaveBeenCalled()
             }, function(err) {
                 expect(err).not.toBeDefined();
             }).fin(done);
         });
-        it('should fire a before_library_download event before it starts downloading a library', function(done) {
-            lazy_load.custom('some url', 'some id', 'platform X', 'three point five').then(function() {
-                expect(fire).toHaveBeenCalledWith('before_library_download', {platform:'platform X', url:'some url', id:'some id', version:'three point five'});
+        it('should callback with no errors and fire event hooks even if library already exists if the lib url is a local dir', function(done) {
+            exists.andReturn(true);
+            lazy_load.custom('some local dir', 'some id', 'platform X', 'three point six').then(function() {
+                expect(fire).not.toHaveBeenCalled()
             }, function(err) {
                 expect(err).not.toBeDefined();
             }).fin(done);
         });
 
         describe('remote URLs for libraries', function() {
+            var npmConfProxy;
             var req,
                 load_spy,
                 events = {},
@@ -94,6 +95,7 @@ describe('lazy_load module', function() {
                     pipe: jasmine.createSpy().andCallFake(function() { return fakeRequest; })
                 };
             beforeEach(function() {
+                npmConfProxy = null;
                 events = {};
                 fakeRequest.on.reset();
                 fakeRequest.pipe.reset();
@@ -104,8 +106,7 @@ describe('lazy_load module', function() {
                     }, 10);
                     return fakeRequest;
                 });
-                load_spy = spyOn(npm, 'load').andCallFake(function(cb) { cb(); });
-                npm.config.get = function() { return null; };
+                load_spy = spyOn(npmconf, 'load').andCallFake(function(cb) { cb(null, { get: function() { return npmConfProxy }}); });
             });
 
             it('should call request with appopriate url params', function(done) {
@@ -120,7 +121,7 @@ describe('lazy_load module', function() {
             });
             it('should take into account https-proxy npm configuration var if exists for https:// calls', function(done) {
                 var proxy = 'https://somelocalproxy.com';
-                npm.config.get = function() { return proxy; };
+                npmConfProxy = proxy;
                 var url = 'https://github.com/apache/someplugin';
                 lazy_load.custom(url, 'random', 'android', '1.0').then(function() {
                     expect(req).toHaveBeenCalledWith({
@@ -133,7 +134,7 @@ describe('lazy_load module', function() {
             });
             it('should take into account proxy npm config var if exists for http:// calls', function(done) {
                 var proxy = 'http://somelocalproxy.com';
-                npm.config.get = function() { return proxy; };
+                npmConfProxy = proxy;
                 var url = 'http://github.com/apache/someplugin';
                 lazy_load.custom(url, 'random', 'android', '1.0').then(function() {
                     expect(req).toHaveBeenCalledWith({
@@ -148,15 +149,15 @@ describe('lazy_load module', function() {
 
         describe('local paths for libraries', function() {
             it('should return the local path, no symlink', function(done) {
-                lazy_load.custom('/some/random/lib', 'id', 'X', 'three point five').then(function(dir) {
+                lazy_load.custom('/some/random/lib', 'id', 'X', 'three point eight').then(function(dir) {
                     expect(dir).toEqual('/some/random/lib');
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);
             });
-            it('should fire after hook once done', function(done) {
-                lazy_load.custom('/some/random/lib', 'id', 'X', 'three point five').then(function() {
-                    expect(fire).toHaveBeenCalledWith('after_library_download', {platform:'X',url:'/some/random/lib',id:'id',version:'three point five',path:'/some/random/lib', symlink:false});
+            it('should not file download hook', function(done) {
+                lazy_load.custom('/some/random/lib', 'id', 'X', 'three point nine').then(function() {
+                    expect(fire).not.toHaveBeenCalledWith('after_library_download', {platform:'X',url:'/some/random/lib',id:'id',version:'three point nine',path:'/some/random/lib', symlink:false});
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);

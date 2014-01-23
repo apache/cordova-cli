@@ -22,7 +22,16 @@ var et = require('elementtree'),
 
 function config_parser(path) {
     this.path = path;
-    this.doc = xml.parseElementtreeSync(path);
+    try {
+        this.doc = xml.parseElementtreeSync(path);
+    } catch (e) {
+        throw new Error("Parsing "+path+" failed:\n"+e.message);
+    }
+    var r = this.doc.getroot();
+    var xmlns ='http://www.w3.org/ns/widgets';
+    if((r.tag !== 'widget') || !r.attrib || (r.attrib.xmlns !== xmlns)) {
+        throw new Error("This file does not seem to be a cordova config.xml file: " + path);
+    }
     this.access = new access(this);
     this.preference = new preference(this);
 }
@@ -60,6 +69,22 @@ config_parser.prototype = {
                 this.update();
             }
             return content.attrib.src;
+        }
+    },
+    author: function (name) {
+        if (name) {
+            var author = this.doc.find('author');
+            if (!author) {
+                author = new et.Element('author');
+                this.doc.getroot().append(author);
+            }
+
+            author.text = name;
+            this.update();
+        }
+        else {
+            var author = this.doc.find('author');
+            return author ? author.text.trim() : '';
         }
     },
     update:function() {
@@ -113,17 +138,22 @@ config_parser.prototype = {
                                 query += "[@" + attribute + '="' + srcChild.attrib[attribute] + '"]';
                             });
                             foundChild = dest.find(query);
-                            if (foundChild) {
-                                //Don't add duplicates
+                            if (foundChild && textMatch(srcChild, foundChild)) {
+                                destChild = foundChild;
+                                dest.remove(0, destChild);
                                 shouldMerge = false;
                             }
                         }
 
-                        if (shouldMerge) {
-                            mergeXml(srcChild, destChild, platform, clobber);
-                            dest.append(destChild);
-                        }
+                        mergeXml(srcChild, destChild, platform, clobber && shouldMerge);
+                        dest.append(destChild);
                     }
+                }
+
+                function textMatch(elm1, elm2) {
+                    var text1 = elm1.text ? elm1.text.replace(/\s+/, "") : "",
+                        text2 = elm2.text ? elm2.text.replace(/\s+/, "") : "";
+                    return (text1 === "" || text1 === text2);
                 }
             }
         }

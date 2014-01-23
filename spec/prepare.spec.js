@@ -77,7 +77,7 @@ describe('prepare command', function() {
     describe('failure', function() {
         it('should not run outside of a cordova-based project by calling util.isCordova', function(done) {
             is_cordova.andReturn(false);
-            cordova.raw.prepare().then(function() {
+            Q().then(cordova.raw.prepare).then(function() {
                 expect('this call').toBe('fail');
             }, function(err) {
                 expect(err).toEqual(new Error('Current working directory is not a Cordova-based project.'));
@@ -85,7 +85,7 @@ describe('prepare command', function() {
         });
         it('should not run inside a cordova-based project with no platforms', function(done) {
             list_platforms.andReturn([]);
-            cordova.raw.prepare().then(function() {
+            Q().then(cordova.raw.prepare).then(function() {
                 expect('this call').toBe('fail');
             }, function(err) {
                 expect(err).toEqual(new Error('No platforms added to this project. Please use `cordova platform add <platform>`.'));
@@ -117,7 +117,7 @@ describe('prepare command', function() {
 
             cordova.raw.prepare().then(function() {
                 expect(before_prep).toBe(true);
-                expect(config_parser).toHaveBeenCalledWith(path.join(project_dir, 'www', 'config.xml'));
+                expect(config_parser).toHaveBeenCalledWith(path.join(project_dir, 'config.xml'));
             }, function(err) {
                 expect(err).toBeUndefined();
             }).fin(done);
@@ -164,7 +164,7 @@ describe('prepare command', function() {
                 cordova.raw.prepare().then(function() {
                     supported_platforms.forEach(function(p) {
                         var platform_path = path.join(project_dir, 'platforms', p);
-                        expect(add_plugin_changes).toHaveBeenCalledWith((p=='blackberry'?'blackberry10':p), platform_path, plugins_dir, 'testPlugin', 'plugin vars', true, false);
+                        expect(add_plugin_changes).toHaveBeenCalledWith((p=='blackberry'?'blackberry10':p), platform_path, plugins_dir, 'testPlugin', 'plugin vars', true, false, {});
                     });
                 }, function(err) {
                     expect(err).toBeUndefined();
@@ -207,7 +207,7 @@ describe('prepare command', function() {
                 list_platforms.andReturn([]);
             });
             it('should not fire the hooker', function(done) {
-                cordova.raw.prepare().then(function() {
+                Q().then(cordova.raw.prepare).then(function() {
                     expect('this call').toBe('fail');
                 }, function(err) {
                     expect(err).toEqual(jasmine.any(Error));

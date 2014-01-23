@@ -59,7 +59,7 @@ module.exports.check_requirements = function(project_root) {
     child_process.exec(command, function(err, output, stderr) {
         events.emit('verbose', output);
         if (err) {
-            d.reject(new Error('Error while checking requirements: ' + output + stderr));
+            d.reject(new Error('Requirements check failed: ' + output + stderr));
         } else {
             d.resolve();
         }
@@ -160,7 +160,7 @@ module.exports.prototype = {
 
     // Used for creating platform_www in projects created by older versions.
     cordovajs_path:function(libDir) {
-        var jsPath = path.join(libDir, 'common', 'www', 'cordova.js');
+        var jsPath = path.join(libDir, '..', 'common', 'www', 'cordova.js');
         return path.resolve(jsPath);
     },
 
@@ -182,7 +182,6 @@ module.exports.prototype = {
 
         // Copy over stock platform www assets (cordova.js)
         shell.cp('-rf', path.join(platform_www, '*'), this.www_dir());
-        this.update_csproj();
     },
 
     // updates the csproj file to explicitly list all www content.
@@ -219,25 +218,26 @@ module.exports.prototype = {
         // save file
         fs.writeFileSync(this.csproj_path, csproj_xml.write({indent:4}), 'utf-8');
     },
-    // Returns an array of all the files in the given directory with reletive paths
+    // Returns an array of all the files in the given directory with relative paths
     // - name     : the name of the top level directory (i.e all files will start with this in their path)
-    // - path     : the directory whos contents will be listed under 'name' directory
+    // - dir     : the directory whos contents will be listed under 'name' directory
     folder_contents:function(name, dir) {
         var results = [];
         var folder_dir = fs.readdirSync(dir);
         for(item in folder_dir) {
             var stat = fs.statSync(path.join(dir, folder_dir[item]));
-            // means its a folder?
-            if(stat.size == 0) {
+
+            if(stat.isDirectory()) {
                 var sub_dir = this.folder_contents(path.join(name, folder_dir[item]), path.join(dir, folder_dir[item]));
                 //Add all subfolder item paths
                 for(sub_item in sub_dir) {
                     results.push(sub_dir[sub_item]);
                 }
             }
-            else {
+            else if(stat.isFile()) {
                 results.push(path.join(name, folder_dir[item]));
             }
+            // else { it is a FIFO, or a Socket or something ... }
         }
         return results;
     },

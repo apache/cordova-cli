@@ -16,6 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
+
 var path          = require('path'),
     fs            = require('fs'),
     shell         = require('shelljs'),
@@ -25,6 +26,7 @@ var path          = require('path'),
     config        = require('./config'),
     lazy_load     = require('./lazy_load'),
     Q             = require('q'),
+    CordovaError  = require('./CordovaError'),
     util          = require('./util');
 
 var DEFAULT_NAME = "HelloCordova",
@@ -32,9 +34,9 @@ var DEFAULT_NAME = "HelloCordova",
 
 /**
  * Usage:
- * @dir - required, directory where the poroject will be created.
- * @id - app id.
- * @name - app name.
+ * @dir - directory where the project will be created. Required.
+ * @id - app id. Optional, default is DEFAULT_ID.
+ * @name - app name. Optional, default is DEFAULT_NAME.
  * @cfg - extra config to be saved in .cordova/config.json
  **/
 // Returns a promise.
@@ -44,71 +46,69 @@ module.exports = function create (dir, id, name, cfg) {
     }
 
     // Massage parameters
+    if (typeof cfg == 'string') {
+        cfg = JSON.parse(cfg);
+    }
     cfg = cfg || {};
     id = id || cfg.id || DEFAULT_ID;
     name = name || cfg.name || DEFAULT_NAME;
-    cfg.id = id;
-    cfg.name = name;
 
     // Make absolute.
     dir = path.resolve(dir);
 
     events.emit('log', 'Creating a new cordova project with name "' + name + '" and id "' + id + '" at location "' + dir + '"');
 
-    var dotCordova = path.join(dir, '.cordova');
     var www_dir = path.join(dir, 'www');
 
     // dir must be either empty or not exist at all.
-    if (fs.existsSync(dir) && fs.readdirSync(dir).length > 0) {
-        return Q.reject(new Error('Path already exists and is not empty: ' + dir));
+
+    // dir must be either empty except for .cordova config file or not exist at all..
+    var sanedircontents = function (d) {
+        var contents = fs.readdirSync(d);
+        if (contents.length == 0) {
+            return true;
+        } else if (contents.length == 1) {
+            if (contents[0] == '.cordova') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (fs.existsSync(dir) && !sanedircontents(dir)) {
+        return Q.reject(new CordovaError('Path already exists and is not empty: ' + dir));
     }
 
     // Create basic project structure.
-    shell.mkdir('-p', dotCordova);
     shell.mkdir('-p', path.join(dir, 'platforms'));
     shell.mkdir('-p', path.join(dir, 'merges'));
     shell.mkdir('-p', path.join(dir, 'plugins'));
-    shell.mkdir('-p', www_dir);
-    var hooks = path.join(dotCordova, 'hooks');
-    shell.mkdir('-p', hooks);
+    shell.mkdir('-p', path.join(dir, 'hooks'));
 
-    // Add directories for hooks
-    shell.mkdir(path.join(hooks, 'after_build'));
-    shell.mkdir(path.join(hooks, 'after_compile'));
-    shell.mkdir(path.join(hooks, 'after_docs'));
-    shell.mkdir(path.join(hooks, 'after_emulate'));
-    shell.mkdir(path.join(hooks, 'after_platform_add'));
-    shell.mkdir(path.join(hooks, 'after_platform_rm'));
-    shell.mkdir(path.join(hooks, 'after_platform_ls'));
-    shell.mkdir(path.join(hooks, 'after_plugin_add'));
-    shell.mkdir(path.join(hooks, 'after_plugin_ls'));
-    shell.mkdir(path.join(hooks, 'after_plugin_rm'));
-    shell.mkdir(path.join(hooks, 'after_prepare'));
-    shell.mkdir(path.join(hooks, 'after_run'));
-    shell.mkdir(path.join(hooks, 'before_build'));
-    shell.mkdir(path.join(hooks, 'before_compile'));
-    shell.mkdir(path.join(hooks, 'before_docs'));
-    shell.mkdir(path.join(hooks, 'before_emulate'));
-    shell.mkdir(path.join(hooks, 'before_platform_add'));
-    shell.mkdir(path.join(hooks, 'before_platform_rm'));
-    shell.mkdir(path.join(hooks, 'before_platform_ls'));
-    shell.mkdir(path.join(hooks, 'before_plugin_add'));
-    shell.mkdir(path.join(hooks, 'before_plugin_ls'));
-    shell.mkdir(path.join(hooks, 'before_plugin_rm'));
-    shell.mkdir(path.join(hooks, 'before_prepare'));
-    shell.mkdir(path.join(hooks, 'before_run'));
+    // Add hooks README.md
+    shell.cp(path.join(__dirname, '..', 'templates', 'hooks-README.md'), path.join(dir, 'hooks', 'README.md'));
 
-    // Write out .cordova/config.json file.
+    // Write out .cordova/config.json file if necessary.
     var config_json = config(dir, cfg);
 
     var p;
+    var symlink = false; // Whether to symlink the www dir instead of copying.
     if (config_json.lib && config_json.lib.www) {
-        events.emit('log', 'Using custom www assets ('+config_json.lib.www.id+').');
-        p = lazy_load.custom(config_json.lib.www.uri, config_json.lib.www.id, 'www', config_json.lib.www.version)
-        .then(function(dir) {
-            events.emit('verbose', 'Copying custom www assets into "' + www_dir + '"');
-            return dir;
-        });
+        events.emit('log', 'Using custom www assets from '+config_json.lib.www.uri);
+        // TODO (kamrik): extend lazy_load for retrieval without caching to allow net urls for --src.
+        var www_version = config_json.lib.www.version || 'not_versioned';
+        var www_id = config_json.lib.www.id || 'dummy_id';
+        symlink  = !!config_json.lib.www.link;
+        if(symlink) {
+            p = Q(config_json.lib.www.uri);
+            events.emit('verbose', 'Symlinking custom www assets into "' + www_dir + '"');
+        } else {
+            p = lazy_load.custom(config_json.lib.www.uri, www_id, 'www', www_version)
+            .then(function(dir) {
+                events.emit('verbose', 'Copying custom www assets into "' + www_dir + '"');
+                return dir;
+            });
+        }
     } else {
         // Nope, so use stock cordova-hello-world-app one.
         events.emit('verbose', 'Using stock cordova hello-world application.');
@@ -124,18 +124,21 @@ module.exports = function create (dir, id, name, cfg) {
         while (fs.existsSync(path.join(www_lib, 'www'))) {
             www_lib = path.join(www_lib, 'www');
         }
-
-        shell.cp('-rf', path.join(www_lib, '*'), www_dir);
+        if (symlink) {
+            fs.symlinkSync(www_lib, www_dir, 'dir');
+        } else {
+            shell.mkdir('-p', www_dir);
+            shell.cp('-rf', path.join(www_lib, '*'), www_dir);
+        }
         var configPath = util.projectConfig(dir);
         // Add template config.xml for apps that are missing it
         if (!fs.existsSync(configPath)) {
             var template_config_xml = path.join(__dirname, '..', 'templates', 'config.xml');
-            shell.cp(template_config_xml, www_dir);
+            shell.cp(template_config_xml, configPath);
+            // Write out id and name to config.xml
+            var config = new util.config_parser(configPath);
+            config.packageName(id);
+            config.name(name);
         }
-        // Write out id and name to config.xml
-        var config = new util.config_parser(configPath);
-        config.packageName(id);
-        config.name(name);
-        return Q();
     });
 };

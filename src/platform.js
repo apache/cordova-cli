@@ -25,9 +25,11 @@ var config            = require('./config'),
     hooker            = require('./hooker'),
     events            = require('./events'),
     lazy_load         = require('./lazy_load'),
+    CordovaError      = require('./CordovaError'),
     Q                 = require('q'),
     platforms         = require('../platforms'),
     child_process     = require('child_process'),
+    semver            = require('semver'),
     shell             = require('shelljs');
 
 // Returns a promise.
@@ -42,13 +44,13 @@ module.exports = function platform(command, targets) {
         var err;
         targets.forEach(function(t) {
             if (!(t in platforms)) {
-                err = new Error('Platform "' + t + '" not recognized as core cordova platform.');
+                err = new CordovaError('Platform "' + t + '" not recognized as a core cordova platform. See "platform list".');
             }
         });
         if (err) return Q.reject(err);
     } else {
         if (command == 'add' || command == 'rm') {
-            return Q.reject(new Error('You need to qualify `add` or `remove` with one or more platforms!'));
+            return Q.reject(new CordovaError('You need to qualify `add` or `remove` with one or more platforms!'));
         }
     }
 
@@ -60,6 +62,9 @@ module.exports = function platform(command, targets) {
 
     switch(command) {
         case 'add':
+            if (!targets || !targets.length) {
+                return Q.reject(new CordovaError('No platform specified. Please specify a platform to add. See "platform list".'));
+            }
             var config_json = config.read(projectRoot);
 
             return hooks.fire('before_platform_add', opts)
@@ -83,11 +88,13 @@ module.exports = function platform(command, targets) {
             break;
         case 'rm':
         case 'remove':
+            if (!targets || !targets.length) {
+                return Q.reject(new CordovaError('No platform[s] specified. Please specify platform[s] to remove. See "platform list".'));
+            }
             return hooks.fire('before_platform_rm', opts)
             .then(function() {
                 targets.forEach(function(target) {
                     shell.rm('-rf', path.join(projectRoot, 'platforms', target));
-                    shell.rm('-rf', path.join(cordova_util.appDir(projectRoot), 'merges', target));
                     var plugins_json = path.join(projectRoot, 'plugins', target + '.json');
                     if (fs.existsSync(plugins_json)) shell.rm(plugins_json);
                 });
@@ -100,28 +107,40 @@ module.exports = function platform(command, targets) {
         case 'up':
             // Shell out to the update script provided by the named platform.
             if (!targets || !targets.length) {
-                return Q.reject(new Error('No platform provided. Please specify a platform to update.'));
+                return Q.reject(new CordovaError('No platform specified. Please specify a platform to update. See "platform list".'));
             } else if (targets.length > 1) {
-                return Q.reject(new Error('Platform update can only be executed on one platform at a time.'));
+                return Q.reject(new CordovaError('Platform update can only be executed on one platform at a time.'));
             } else {
                 var plat = targets[0];
+                var platformPath = path.join(projectRoot, 'platforms', plat);
                 var installed_platforms = cordova_util.listPlatforms(projectRoot);
                 if (installed_platforms.indexOf(plat) < 0) {
-                    return Q.reject(new Error('Platform "' + plat + '" is not installed.'));
+                    return Q.reject(new CordovaError('Platform "' + plat + '" is not installed. See "platform list".'));
+                }
+
+                function copyCordovaJs() {
+                    var parser = new platforms[plat].parser(platformPath);
+                    var platform_www = path.join(platformPath, 'platform_www');
+                    shell.mkdir('-p', platform_www);
+                    shell.cp('-f', path.join(parser.www_dir(), 'cordova.js'), path.join(platform_www, 'cordova.js'));
                 }
 
                 // First, lazy_load the latest version.
-                var config_json = config.read(projectRoot);
                 return hooks.fire('before_platform_update', opts)
                 .then(function() {
                     return lazy_load.based_on_config(projectRoot, plat);
                 }).then(function(libDir) {
+                    // Call the platform's update script.
                     var script = path.join(libDir, 'bin', 'update');
                     var d = Q.defer();
-                    child_process.exec(script + ' "' + path.join(projectRoot, 'platforms', plat) + '"', function(err, stdout, stderr) {
+                    var cmd = '"' + script + '" "' + platformPath + '"';
+                    events.emit('verbose', 'Running command:' + cmd);
+                    child_process.exec(cmd, function(err, stdout, stderr) {
                         if (err) {
-                            d.reject(new Error('Error running update script: ' + err + stderr));
+                            d.reject(new Error('Update script failed: ' + err + stderr));
                         } else {
+                            // Copy the new cordova.js from www -> platform_www.
+                            copyCordovaJs();
                             events.emit('log', plat + ' updated to ' + platforms[plat].version);
                             d.resolve();
                         }
@@ -140,7 +159,7 @@ module.exports = function platform(command, targets) {
                 return Q.all(platforms_on_fs.map(function(p) {
                     var script = path.join(projectRoot, 'platforms', p, 'cordova', 'version');
                     var d = Q.defer();
-                    child_process.exec(script, function(err, stdout, stderr) {
+                    child_process.exec('"' + script + '"', function(err, stdout, stderr) {
                         if (err) d.resolve(p);
                         else {
                             if (stdout) d.resolve(p + ' ' + stdout.trim());
@@ -159,6 +178,8 @@ module.exports = function platform(command, targets) {
                     available.push('wp8');
                     available.push('windows8');
                 }
+                if (os.platform() === 'linux')
+                    available.push('ubuntu');
 
                 available = available.filter(function(p) {
                     return platforms_on_fs.indexOf(p) < 0; // Only those not already installed.
@@ -184,12 +205,12 @@ module.exports = function platform(command, targets) {
 
 module.exports.supports = function(project_root, name) {
     // required parameters
-    if (!name) return Q.reject(new Error('requires a platform name parameter'));
+    if (!name) return Q.reject(new CordovaError('requires a platform name parameter'));
 
     // check if platform exists
     var platform = platforms[name];
     if (!platform) {
-        return Q.reject(new Error(util.format('"%s" platform does not exist', name)));
+        return Q.reject(new CordovaError(util.format('"%s" platform does not exist', name)));
     }
 
     // look up platform meta-data parser
@@ -216,20 +237,27 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
 
     // Check if output directory already exists.
     if (fs.existsSync(output)) {
-        return Q.reject(new Error('Platform ' + target + ' already added'));
+        return Q.reject(new CordovaError('Platform ' + target + ' already added'));
     } else {
         // Make sure we have minimum requirements to work with specified platform
         events.emit('verbose', 'Checking if platform "' + target + '" passes minimum requirements...');
         return module.exports.supports(projectRoot, target)
         .then(function() {
-            // CB-5183 WP7/8 path is not correctly resolved by CLI
-            if (target == 'wp7' || target == 'wp8' || target == 'windows8') {
-                libDir =  path.join(libDir, target);
-            }            
             // Create a platform app using the ./bin/create scripts that exist in each repo.
-            // Run platform's create script
             var bin = path.join(libDir, 'bin', 'create');
-            var args = (target=='ios') ? '--arc' : '';
+            var args = '';
+            if (target == 'android') {
+                var platformVersion = fs.readFileSync(path.join(libDir, 'VERSION'), 'UTF-8').trim();
+                if (semver.gt(platformVersion, '3.3.0')) {
+                    args = '--cli';
+                }
+            } else if (target == 'ios') {
+                var platformVersion = fs.readFileSync(path.join(libDir, 'CordovaLib', 'VERSION'), 'UTF-8').trim();
+                args = '--arc';
+                if (semver.gt(platformVersion, '3.3.0')) {
+                    args += ' --cli';
+                }
+            }
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
             var name = cfg.name();
             var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, pkg, name);
@@ -239,6 +267,7 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
             events.emit('log', 'Creating ' + target + ' project...');
             events.emit('verbose', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
 
+            // Run platform's create script
             var d = Q.defer();
             child_process.exec(command, function(err, create_output, stderr) {
                 events.emit('verbose', create_output);
@@ -255,12 +284,15 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
                 var plugins = cordova_util.findPlugins(plugins_dir);
                 var parser = new platforms[target].parser(output);
                 if (!plugins) return Q();
-                var promises = plugins.map(function(plugin) {
-                    events.emit('verbose', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
-                    return require('plugman').install(target, output, path.basename(plugin), plugins_dir, { www_dir: parser.staging_dir() });
-                });
-                return promises.reduce(function(soFar, f) {
-                    return soFar.then(f);
+
+                var plugman = require('plugman');
+                var staging_dir = parser.staging_dir();
+                // Install them serially.
+                return plugins.reduce(function(soFar, plugin) {
+                    return soFar.then(function() {
+                        events.emit('verbose', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
+                        return plugman.raw.install(target, output, path.basename(plugin), plugins_dir, { www_dir: staging_dir});
+                    });
                 }, Q());
             });
         });

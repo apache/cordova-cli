@@ -60,30 +60,6 @@ describe('create command', function () {
     });
 
     describe('success', function() {
-        it('should create a default project if only directory is specified', function(done) {
-            cordova.raw.create(tempDir).then(function() {
-                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, '.cordova'));
-                expect(package).toHaveBeenCalledWith('io.cordova.hellocordova');
-                expect(name).toHaveBeenCalledWith('HelloCordova');
-                done();
-            });
-        });
-        it('should create a default project if only directory and id is specified', function(done) {
-            cordova.raw.create(tempDir, 'ca.filmaj.canucks').then(function() {
-                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, '.cordova'));
-                expect(package).toHaveBeenCalledWith('ca.filmaj.canucks');
-                expect(name).toHaveBeenCalledWith('HelloCordova');
-                done();
-            });
-        });
-        it('should create a project in specified directory with specified name and id', function(done) {
-            cordova.raw.create(tempDir, 'ca.filmaj.canucks', 'IHateTheBruins').then(function() {
-                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, '.cordova'));
-                expect(package).toHaveBeenCalledWith('ca.filmaj.canucks');
-                expect(name).toHaveBeenCalledWith('IHateTheBruins');
-                done();
-            });
-        });
         it('should create top-level directory structure appropriate for a cordova-cli project', function(done) {
             cordova.raw.create(tempDir).then(function() {
                 expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, 'platforms'));
@@ -93,34 +69,14 @@ describe('create command', function () {
                 done();
             });
         });
-        it('should create appropriate directories for hooks', function(done) {
-            var hooks_dir = path.join(tempDir, '.cordova', 'hooks');
+        it('should create hooks directory', function(done) {
+            var hooks_dir = path.join(tempDir, 'hooks');
             cordova.raw.create(tempDir).then(function() {
                 expect(mkdir).toHaveBeenCalledWith('-p', hooks_dir);
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_build')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_compile')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_docs')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_emulate')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_platform_add')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_platform_rm')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_platform_ls')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_plugin_add')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_plugin_ls')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_plugin_rm')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_prepare')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'after_run')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_build')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_compile')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_docs')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_emulate')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_platform_add')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_platform_rm')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_platform_ls')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_plugin_add')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_plugin_ls')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_plugin_rm')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_prepare')));
-                expect(mkdir).toHaveBeenCalledWith( (path.join(hooks_dir, 'before_run')));
+                expect(cp).toHaveBeenCalledWith(
+                    path.resolve(__dirname, '..', 'templates', 'hooks-README.md'),
+                    jasmine.any(String)
+                );
                 done();
             });
         });

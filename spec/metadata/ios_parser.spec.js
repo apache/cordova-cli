@@ -20,7 +20,7 @@ var platforms = require('../../platforms'),
     util = require('../../src/util'),
     path = require('path'),
     shell = require('shelljs'),
-    plist = require('plist'),
+    plist = require('plist-with-patches'),
     xcode = require('xcode'),
     ET = require('elementtree'),
     fs = require('fs'),
@@ -29,6 +29,9 @@ var platforms = require('../../platforms'),
     config = require('../../src/config'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
+
+// Create a real config object before mocking out everything.
+var cfg = new config_parser(path.join(__dirname, '..', 'test-config.xml'));
 
 describe('ios project parser', function () {
     var proj = path.join('some', 'path');
@@ -71,35 +74,6 @@ describe('ios project parser', function () {
             }).not.toThrow();
         });
     });
-    describe('check_requirements', function() {
-        it('should fire a callback if there is an error during shelling out', function(done) {
-            exec.andCallFake(function(cmd, opts, cb) {
-                if (!cb) cb = opts;
-                cb(50, 'there was an errorz!', '');
-            });
-            errorWrapper(platforms.ios.parser.check_requirements(proj), done, function(err) {
-                expect(err).toContain('there was an errorz!');
-            });
-        });
-        it('should fire a callback if the xcodebuild version is less than 4.5.x', function(done) {
-            exec.andCallFake(function(cmd, opts, cb) {
-                if (!cb) cb = opts;
-                cb(0, 'version 4.4.9', '');
-            });
-            errorWrapper(platforms.ios.parser.check_requirements(proj), done, function(err) {
-                expect(err).toEqual(new Error('Xcode version installed is too old. Minimum: >=4.5.x, yours: 4.4.9'));
-            });
-        });
-        it('should not return an error if the xcodebuild version 2 digits and not proper semver (eg: 5.0), but still satisfies the MIN_XCODE_VERSION', function(done) {
-            exec.andCallFake(function(cmd, opts, cb) {
-                if (!cb) cb = opts;
-                cb(0, 'version 5.0', '');
-            });
-            wrapper(platforms.ios.parser.check_requirements(proj), done, function() {
-                expect(1).toBe(1);
-            });
-        });
-    });
 
     describe('instance', function() {
         var p, cp, rm, mkdir, is_cordova, write, read;
@@ -116,7 +90,7 @@ describe('ios project parser', function () {
 
         describe('update_from_config method', function() {
             var et, xml, find, write_xml, root, mv;
-            var cfg, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
+            var find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
             var plist_parse, plist_build, xc;
             var update_name, xc_write;
             beforeEach(function() {
@@ -148,7 +122,6 @@ describe('ios project parser', function () {
                     updateProductName:update_name,
                     writeSync:xc_write
                 });
-                cfg = new config_parser();
                 cfg.name = function() { return 'testname' };
                 cfg.packageName = function() { return 'testpkg' };
                 cfg.version = function() { return 'one point oh' };
@@ -194,7 +167,7 @@ describe('ios project parser', function () {
             });
             it('should write out the app version to info plist as CFBundleVersion', function(done) {
                 wrapper(p.update_from_config(cfg), done, function() {
-                    expect(plist_build.mostRecentCall.args[0].CFBundleVersion).toEqual('one point oh');
+                    expect(plist_build.mostRecentCall.args[0].CFBundleShortVersionString).toEqual('one point oh');
                 });
             });
         });

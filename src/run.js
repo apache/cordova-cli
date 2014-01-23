@@ -85,9 +85,6 @@ module.exports = function run(options) {
     }
 
     options = cordova_util.preProcessOptions(options);
-    if (options.constructor.name === "Error") {
-        return Q.reject(options);
-    }
 
     hooks = new hooker(projectRoot);
     return hooks.fire('before_run', options)

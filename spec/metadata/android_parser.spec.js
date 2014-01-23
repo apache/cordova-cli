@@ -28,6 +28,9 @@ var platforms = require('../../platforms'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
 
+// Create a real config object before mocking out everything.
+var cfg = new config_parser(path.join(__dirname, '..', 'test-config.xml'));
+
 describe('android project parser', function() {
     var proj = path.join('some', 'path');
     var exists, exec, custom;
@@ -70,46 +73,6 @@ describe('android project parser', function() {
         });
     });
 
-    describe('check_requirements', function() {
-        it('should fire a callback if there is an error during shelling out', function(done) {
-            exec.andCallFake(function(cmd, opts, cb) {
-                if (!cb) cb = opts;
-                cb(50, 'there was an errorz!', '');
-            });
-            errorWrapper(platforms.android.parser.check_requirements(proj), done, function(err) {
-                expect(err).toContain('there was an errorz!');
-            });
-        });
-        it('should fire a callback if `android list target` does not return anything containing "android-17"', function(done) {
-            exec.andCallFake(function(cmd, opts, cb) {
-                if (!cb) cb = opts;
-                cb(0, 'android-15', '');
-            });
-            errorWrapper(platforms.android.parser.check_requirements(proj), done, function(err) {
-                expect(err).toEqual(new Error('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.'));
-            });
-        });
-        it('should check that `android` is on the path by calling `android list target`', function(done) {
-            wrapper(platforms.android.parser.check_requirements(proj), done, function() {
-                expect(exec).toHaveBeenCalledWith('android list target', jasmine.any(Function));
-            });
-        });
-        it('should check that we can update an android project by calling `android update project` on stock android path', function(done) {
-            wrapper(platforms.android.parser.check_requirements(proj), done, function() {
-                expect(exec.mostRecentCall.args[0]).toMatch(/^android update project -p .* -t android-17$/gi);
-                expect(exec.mostRecentCall.args[0]).toContain(util.libDirectory);
-            });
-        });
-        it('should check that we can update an android project by calling `android update project` on a custom path if it is so defined', function(done) {
-            var custom_path = path.join('some', 'custom', 'path', 'to', 'android', 'lib');
-            custom.andReturn(custom_path);
-            wrapper(platforms.android.parser.check_requirements(proj), done, function() {
-                expect(exec.mostRecentCall.args[0]).toMatch(/^android update project -p .* -t android-17$/gi);
-                expect(exec.mostRecentCall.args[0]).toContain(custom_path);
-            });
-        });
-    });
-
     describe('instance', function() {
         var p, cp, rm, mkdir, is_cordova, write, read;
         var android_proj = path.join(proj, 'platforms', 'android');
@@ -124,7 +87,7 @@ describe('android project parser', function() {
         });
 
         describe('update_from_config method', function() {
-            var et, xml, find, write_xml, root, cfg, readdir, cfg_parser, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
+            var et, xml, find, write_xml, root, readdir, cfg_parser, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
             beforeEach(function() {
                 find_obj = {
                     text:'hi'
@@ -144,7 +107,6 @@ describe('android project parser', function() {
                 });
                 xml = spyOn(ET, 'XML');
                 readdir = spyOn(fs, 'readdirSync').andReturn([path.join(proj, 'src', 'android_pkg', 'MyApp.java')]);
-                cfg = new config_parser();
                 cfg.name = function() { return 'testname' };
                 cfg.packageName = function() { return 'testpkg' };
                 cfg.version = function() { return 'one point oh' };

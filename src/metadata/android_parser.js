@@ -45,41 +45,8 @@ module.exports = function android_parser(project) {
 
 // Returns a promise.
 module.exports.check_requirements = function(project_root) {
-    events.emit('log', 'Checking Android requirements...');
-    var command = 'android list target';
-    events.emit('verbose', 'Running "' + command + '" (output to follow)');
-    var d = Q.defer();
-    child_process.exec(command, function(err, output, stderr) {
-        events.emit('verbose', output);
-        if (err) {
-            d.reject(new Error('The command `android` failed. Make sure you have the latest Android SDK installed, and the `android` command (inside the tools/ folder) added to your path. Output: ' + output));
-        } else {
-            if (output.indexOf('android-17') == -1) {
-                d.reject(new Error('Please install Android target 17 (the Android 4.2 SDK). Make sure you have the latest Android tools installed as well. Run `android` from your command-line to install/update any missing SDKs or tools.'));
-            } else {
-                var custom_path = project_config.has_custom_path(project_root, 'android');
-                var framework_path;
-                if (custom_path) {
-                    framework_path = path.resolve(path.join(custom_path, 'framework'));
-                } else {
-                    framework_path = path.join(util.libDirectory, 'android', 'cordova', require('../../platforms').android.version, 'framework');
-                }
-                var cmd = 'android update project -p "' + framework_path  + '" -t android-17';
-                events.emit('verbose', 'Running "' + cmd + '" (output to follow)...');
-                var d2 = Q.defer();
-                child_process.exec(cmd, function(err, output, stderr) {
-                    events.emit('verbose', output + stderr);
-                    if (err) {
-                        d2.reject(new Error('Error updating the Cordova library to work with your Android environment. Command run: "' + cmd + '", output: ' + output));
-                    } else {
-                        d2.resolve();
-                    }
-                });
-                d.resolve(d2.promise);
-            }
-        }
-    });
-    return d.promise;
+    // Rely on platform's bin/create script to check requirements.
+    return Q(true);
 };
 
 module.exports.prototype = {
@@ -187,11 +154,11 @@ module.exports.prototype = {
         var platformWww = path.join(this.path, 'assets');
         try {
             this.update_from_config(cfg);
+            this.update_overrides();
+            this.update_staging();
         } catch(e) {
             return Q.reject(e);
         }
-        this.update_overrides();
-        this.update_staging();
         // delete any .svn folders copied over
         util.deleteSvnFolders(platformWww);
         return Q();
