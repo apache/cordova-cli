@@ -141,8 +141,15 @@ module.exports = function platform(command, targets) {
                         } else {
                             // Copy the new cordova.js from www -> platform_www.
                             copyCordovaJs();
-                            events.emit('log', plat + ' updated to ' + platforms[plat].version);
-                            d.resolve();
+                            var script = path.join(projectRoot, 'platforms', plat, 'cordova', 'version');
+                            child_process.exec(script, function(err, stdout, stderr) {
+                                var version = platforms[plat].version;
+                                if (!err) {
+                                    version = stdout;
+                                }
+                                events.emit('log', plat + ' updated to ' + version);
+                                d.resolve();
+                            });
                         }
                     });
                     return d.promise;
