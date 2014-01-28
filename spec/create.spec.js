@@ -62,17 +62,17 @@ describe('create command', function () {
     describe('success', function() {
         it('should create top-level directory structure appropriate for a cordova-cli project', function(done) {
             cordova.raw.create(tempDir).then(function() {
-                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, 'platforms'));
-                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, 'merges'));
-                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, 'plugins'));
-                expect(mkdir).toHaveBeenCalledWith('-p', path.join(tempDir, 'www'));
+                expect(mkdir).toHaveBeenCalledWith(path.join(tempDir, 'platforms'));
+                expect(mkdir).toHaveBeenCalledWith(path.join(tempDir, 'merges'));
+                expect(mkdir).toHaveBeenCalledWith(path.join(tempDir, 'plugins'));
+                expect(mkdir).toHaveBeenCalledWith(path.join(tempDir, 'www'));
                 done();
             });
         });
         it('should create hooks directory', function(done) {
             var hooks_dir = path.join(tempDir, 'hooks');
             cordova.raw.create(tempDir).then(function() {
-                expect(mkdir).toHaveBeenCalledWith('-p', hooks_dir);
+                expect(mkdir).toHaveBeenCalledWith(hooks_dir);
                 expect(cp).toHaveBeenCalledWith(
                     path.resolve(__dirname, '..', 'templates', 'hooks-README.md'),
                     jasmine.any(String)
