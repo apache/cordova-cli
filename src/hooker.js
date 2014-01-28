@@ -110,13 +110,13 @@ function execute_scripts_serially(scripts, root, dir, opts) {
             events.emit('verbose', 'skipped directory "' + fullpath + '" within hook directory');
             return execute_scripts_serially(scripts, root, dir, opts); // skip directories if they're in there.
         } else {
-            var command = '"' + fullpath + '" "' + root + '"';
+            var cmd = '"' + fullpath + '" "' + root + '"';
             if (os.platform().slice(0, 3) == 'win') {
                 // TODO: Make shebang sniffing a setting (not everyone will want this).
                 var interpreter = extractSheBangInterpreter(fullpath);
                 // we have shebang, so try to run this script using correct interpreter
                 if (interpreter) {
-                    command = '"' + interpreter + '" ' + command;
+                    cmd = '"' + interpreter + '" ' + cmd;
                 }
             }
 
@@ -128,9 +128,9 @@ function execute_scripts_serially(scripts, root, dir, opts) {
             execOpts.env.CORDOVA_HOOK = fullpath;
             execOpts.env.CORDOVA_CMDLINE = process.argv.join(' ');
 
-            events.emit('verbose', 'Executing hook "' + command + '"');
+            events.emit('verbose', 'Executing hook "' + cmd + '"');
             var d = Q.defer();
-            child_process.exec(command, execOpts, function(err, stdout, stderr) {
+            child_process.exec(cmd, execOpts, function(err, stdout, stderr) {
                 // Don't treat non-executable files as errors. They could be READMEs, or Windows-only scripts.
                 if (!isWindows && err && err.code === 126) {
                     events.emit('verbose', 'skipped non-executable file: "' + fullpath);

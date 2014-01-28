@@ -38,7 +38,7 @@
     "tar": "0.1.x",
     "npmconf": "0.1.x",
     "q": "~0.9",
-    "optimist": "0.6.0",
+    "nopt": "1.0.x",
     "mime": "~1.2.11",
     "underscore":"1.4.4"
   },

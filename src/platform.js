@@ -33,41 +33,35 @@ var config            = require('./config'),
     shell             = require('shelljs');
 
 // Returns a promise.
-module.exports = function platform(command, targets) {
+module.exports = function platform(cmd, targets, command) {
     var projectRoot = cordova_util.cdProjectRoot();
 
     var hooks = new hooker(projectRoot);
 
-    if (arguments.length === 0) command = 'ls';
-    if (targets) {
-        if (!(targets instanceof Array)) targets = [targets];
-        var err;
-        targets.forEach(function(t) {
-            if (!(t in platforms)) {
-                err = new CordovaError('Platform "' + t + '" not recognized as a core cordova platform. See "platform list".');
-            }
-        });
-        if (err) return Q.reject(err);
-    } else {
-        if (command == 'add' || command == 'rm') {
-            return Q.reject(new CordovaError('You need to qualify `add` or `remove` with one or more platforms!'));
+    cmd = cmd || 'ls';
+    targets = targets || [];
+    if (!(targets instanceof Array)) targets = [targets];
+    var err;
+    targets.forEach(function(t) {
+        if (!(t in platforms)) {
+            err = new CordovaError('Platform "' + t + '" not recognized as a core cordova platform. See "platform list".');
         }
-    }
+    });
+    if (err) return Q.reject(err);
 
     var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new cordova_util.config_parser(xml);
-    var opts = {
-        platforms:targets
-    };
 
-    switch(command) {
+    command = cordova_util.preProcessOptions(command, true);
+
+    switch(cmd) {
         case 'add':
-            if (!targets || !targets.length) {
+            if (!targets.length) {
                 return Q.reject(new CordovaError('No platform specified. Please specify a platform to add. See "platform list".'));
             }
             var config_json = config.read(projectRoot);
 
-            return hooks.fire('before_platform_add', opts)
+            return hooks.fire('before_platform_add', command)
             .then(function() {
                 return targets.reduce(function(soFar, t) {
                     return soFar.then(function() {
@@ -82,16 +76,16 @@ module.exports = function platform(command, targets) {
                 }, Q());
             })
             .then(function() {
-                return hooks.fire('after_platform_add', opts);
+                return hooks.fire('after_platform_add', command);
             });
 
             break;
         case 'rm':
         case 'remove':
-            if (!targets || !targets.length) {
+            if (!targets.length) {
                 return Q.reject(new CordovaError('No platform[s] specified. Please specify platform[s] to remove. See "platform list".'));
             }
-            return hooks.fire('before_platform_rm', opts)
+            return hooks.fire('before_platform_rm', command)
             .then(function() {
                 targets.forEach(function(target) {
                     shell.rm('-rf', path.join(projectRoot, 'platforms', target));
@@ -99,14 +93,14 @@ module.exports = function platform(command, targets) {
                     if (fs.existsSync(plugins_json)) shell.rm(plugins_json);
                 });
             }).then(function() {
-                return hooks.fire('after_platform_rm', opts);
+                return hooks.fire('after_platform_rm', command);
             });
 
             break;
         case 'update':
         case 'up':
             // Shell out to the update script provided by the named platform.
-            if (!targets || !targets.length) {
+            if (!targets.length) {
                 return Q.reject(new CordovaError('No platform specified. Please specify a platform to update. See "platform list".'));
             } else if (targets.length > 1) {
                 return Q.reject(new CordovaError('Platform update can only be executed on one platform at a time.'));
@@ -126,7 +120,7 @@ module.exports = function platform(command, targets) {
                 }
 
                 // First, lazy_load the latest version.
-                return hooks.fire('before_platform_update', opts)
+                return hooks.fire('before_platform_update', command)
                 .then(function() {
                     return lazy_load.based_on_config(projectRoot, plat);
                 }).then(function(libDir) {
@@ -260,19 +254,19 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
             }
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
             var name = cfg.name();
-            var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, pkg, name);
+            var cmd = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, pkg, name);
             if (template_dir) {
-                command += ' "' + template_dir + '"';
+                cmd += ' "' + template_dir + '"';
             }
             events.emit('log', 'Creating ' + target + ' project...');
-            events.emit('verbose', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
+            events.emit('verbose', 'Running bin/create for platform "' + target + '" with command: "' + cmd + '" (output to follow)');
 
             // Run platform's create script
             var d = Q.defer();
-            child_process.exec(command, function(err, create_output, stderr) {
+            child_process.exec(cmd, function(err, create_output, stderr) {
                 events.emit('verbose', create_output);
                 if (err) {
-                    d.reject(new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output + '\n' + stderr));
+                    d.reject(new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output + '\n' +  stderr));
                 } else {
                     d.resolve(require('../cordova').raw.prepare(target));
                 }

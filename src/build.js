@@ -21,27 +21,19 @@ var cordova_util      = require('./util'),
     hooker            = require('./hooker');
 
 // Returns a promise.
-module.exports = function build(options) {
+module.exports = function build(command) {
     var projectRoot = cordova_util.cdProjectRoot();
 
-    if (!options) {
-        options = {
-            verbose: false,
-            platforms: [],
-            options: []
-        };
-    }
-
-    options = cordova_util.preProcessOptions(options);
+    command = cordova_util.preProcessOptions(command);
 
     // fire build hooks
     var hooks = new hooker(projectRoot);
-    return hooks.fire('before_build', options)
+    return hooks.fire('before_build', command)
     .then(function() {
-        return require('../cordova').raw.prepare(options);
+        return require('../cordova').raw.prepare(command);
     }).then(function() {
-        return require('../cordova').raw.compile(options);
+        return require('../cordova').raw.compile(command);
     }).then(function() {
-        return hooks.fire('after_build', options);
+        return hooks.fire('after_build', command);
     });
 };

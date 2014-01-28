@@ -31,34 +31,26 @@ var cordova_util      = require('./util'),
     util              = require('util');
 
 // Returns a promise.
-module.exports = function prepare(options) {
+module.exports = function prepare(command) {
     var projectRoot = cordova_util.cdProjectRoot();
 
-    if (!options) {
-        options = {
-            verbose: false,
-            platforms: [],
-            options: []
-        };
-    }
-
-    options = cordova_util.preProcessOptions(options);
+    command = cordova_util.preProcessOptions(command);
 
     var xml = cordova_util.projectConfig(projectRoot);
-    var paths = options.platforms.map(function(p) {
+    var paths = command.platforms.map(function(p) {
         var platform_path = path.join(projectRoot, 'platforms', p);
         var parser = (new platforms[p].parser(platform_path));
         return parser.www_dir();
     });
-    options.paths = paths;
+    command.paths = paths;
 
     var hooks = new hooker(projectRoot);
-    return hooks.fire('before_prepare', options)
+    return hooks.fire('before_prepare', command)
     .then(function() {
         var cfg = new cordova_util.config_parser(xml);
 
         // Iterate over each added platform
-        return Q.all(options.platforms.map(function(platform) {
+        return Q.all(command.platforms.map(function(platform) {
             var platformPath = path.join(projectRoot, 'platforms', platform);
             return lazy_load.based_on_config(projectRoot, platform)
             .then(function(libDir) {
@@ -131,7 +123,7 @@ module.exports = function prepare(options) {
                 console.error(e);
             });
         })).then(function() {
-            return hooks.fire('after_prepare', options);
+            return hooks.fire('after_prepare', command);
         });
     });
 };

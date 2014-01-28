@@ -47,10 +47,10 @@ module.exports = function android_parser(project) {
 // Returns a promise.
 module.exports.check_requirements = function(project_root) {
     events.emit('log', 'Checking Amazon FireOS requirements...');
-    var command = 'android list target';
-    events.emit('verbose', 'Running "' + command + '" (output to follow)');
+    var cmd = 'android list target';
+    events.emit('verbose', 'Running "' + cmd + '" (output to follow)');
     var d = Q.defer();
-    child_process.exec(command, function(err, output, stderr) {
+    child_process.exec(cmd, function(err, output, stderr) {
         events.emit('verbose', output);
         if (err) {
             d.reject(new Error('The command `android` failed. Make sure you have the latest Android SDK installed, and the `android` command (inside the tools/ folder) added to your path. Output: ' + output));

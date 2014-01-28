@@ -29,9 +29,9 @@ var cordova_util      = require('./util'),
     os                = require('os');
 
 // Returns a promise.
-function shell_out_to_build(projectRoot, platform, options) {
+function shell_out_to_build(projectRoot, platform, arguments) {
     var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'build'),
-        args = options.length ? options : [],
+        args = arguments.length ? arguments : [],
         d = Q.defer(),
         errors = "",
         child;
@@ -70,28 +70,20 @@ function shell_out_to_build(projectRoot, platform, options) {
 }
 
 // Returns a promise.
-module.exports = function compile(options) {
+module.exports = function compile(command) {
     var projectRoot = cordova_util.cdProjectRoot(),
         hooks;
 
-    if (!options) {
-        options = {
-            verbose: false,
-            platforms: [],
-            options: []
-        };
-    }
-
-    options = cordova_util.preProcessOptions(options);
+    command = cordova_util.preProcessOptions(command);
 
     hooks = new hooker(projectRoot);
-    return hooks.fire('before_compile', options)
+    return hooks.fire('before_compile', command)
     .then(function() {
         // Iterate over each added platform
-        return Q.all(options.platforms.map(function(platform) {
-            return shell_out_to_build(projectRoot, platform, options.options);
+        return Q.all(command.platforms.map(function(platform) {
+            return shell_out_to_build(projectRoot, platform, command.options);
         }));
     }).then(function() {
-        return hooks.fire('after_compile', options);
+        return hooks.fire('after_compile', command);
     });
 };

@@ -4,6 +4,7 @@ var helpers = require('./helpers'),
     fs = require('fs'),
     shell = require('shelljs'),
     Q = require('q'),
+    common = require('../spec/common'),	
     events = require('../src/events'),
     cordova = require('../cordova');
 
@@ -24,7 +25,7 @@ describe('plugin end-to-end', function() {
     });
 
     // The flow tested is: ls, add, ls, rm, ls.
-    // Plugin dependencies are not tested as that should be corvered in plugman tests.
+    // Plugin dependencies are not tested as that should be covered in plugman tests.
     // TODO (kamrik): Test the 'plugin search' command.
     it('should successfully run', function(done) {
         // cp then mv because we need to copy everything, but that means it'll copy the whole directory.

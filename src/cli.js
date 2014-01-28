@@ -19,12 +19,12 @@
 
 var path = require('path'),
     CordovaError = require('./CordovaError'),
-    optimist, // required in try-catch below to print a nice error message if it's not installed.
+    nopt, // required in try-catch below to print a nice error message if it's not installed.
     _;
 
 module.exports = function CLI(inputArgs) {
     try {
-        optimist = require('optimist');
+        nopt =  require('nopt');
         _ = require('underscore');
     } catch (e) {
         console.error("Please run npm install from this directory:\n\t" +
@@ -33,38 +33,60 @@ module.exports = function CLI(inputArgs) {
     }
     var cordova   = require('../cordova');
 
-    // If no inputArgs given, use process.argv.
-    var tokens;
-    if (inputArgs) {
-        tokens = inputArgs.slice(2);
-    } else {
-        tokens = process.argv.slice(2);
+    // TODO: use Cli from "cordova-lib" module?
+    var opts = {
+       'debug' : [Number, String],
+       'verbose' : Boolean,
+       'version' : Boolean,
+       'silent' : Boolean,
+       'source': path,
+       'link': String,
+       'searchpath' : [path, Array]
+    }, short = { 'src' : ['--source'], 'v': ['--version'], 'd': ['--debug'] };
+
+    var nopt = nopt(opts, short, inputArgs);
+
+    var command = {
+        flags: {},
+        arguments: [],
+        platforms: []
+    };
+    for (var opt in nopt) {
+        if (opt !== 'argv')
+            command.flags[opt] = nopt[opt];
+    }
+    var parsedArgs = nopt.argv.cooked;
+    for(var i in parsedArgs) {
+        if(parsedArgs[i].substr(0, 1) !== '-')
+            command.arguments.push(parsedArgs[i]);
     }
 
-    var args = optimist(tokens)
-        .boolean('d')
-        .boolean('verbose')
-        .boolean('v')
-        .boolean('version')
-        .boolean('silent')
-        .string('src')
-        .alias('src', 'source')
-        .string('link')
-        .string('searchpath')
-        .argv;
+    // when command.options is changed to {}
+    // change command.flag to command.options
+    // command.flags = command.options
 
-    if (args.v || args.version) {
+    if (command.flags.version) {
         return console.log(require('../package').version);
     }
 
-    var opts = {
-            platforms: [],
-            options: [],
-            verbose: (args.d || args.verbose),
-            silent: args.silent
-        };
+    if(command.flags.verbose) {
+        command.flags.debug = 7; // highest log level
+    } else if(command.flags.silent) {
+        command.flags.debug = 0;
+    }
 
-    // For CrodovaError print only the message without stack trace.
+    // TODO: map debug string to integer value
+    // Add alias of --debug  --> --loglevel
+    // ["silent","win","error","warn","info","verbose","silly"]
+
+    if(command.flags.debug >= 7)
+        command.flags.verbose = true;
+        
+    // For BC & tests? ideally verbose would means 'lots' of info
+    if(command.flags.debug >= 1)
+        command.flags.verbose = true;
+
+    // For CordovaError print only the message without stack trace.
     process.on('uncaughtException', function(err){
         if (err instanceof CordovaError) {
             console.error(err.message);
@@ -76,39 +98,26 @@ module.exports = function CLI(inputArgs) {
 
     cordova.on('results', console.log);
 
-    if (!opts.silent) {
+    if (command.flags.debug) {
         cordova.on('log', console.log);
         cordova.on('warn', console.warn);
         var plugman = require('plugman');
         plugman.on('log', console.log);
         plugman.on('results', console.log);
         plugman.on('warn', console.warn);
-    } else {
-        // Remove the token.
-        tokens.splice(tokens.indexOf('--silent'), 1);
     }
 
-
-    if (opts.verbose) {
+    if (command.flags.debug > 5) {
         // Add handlers for verbose logging.
         cordova.on('verbose', console.log);
         require('plugman').on('verbose', console.log);
-
-        //Remove the corresponding token
-        if(args.d && args.verbose) {
-            tokens.splice(Math.min(tokens.indexOf("-d"), tokens.indexOf("--verbose")), 1);
-        } else if (args.d) {
-            tokens.splice(tokens.indexOf("-d"), 1);
-        } else if (args.verbose) {
-            tokens.splice(tokens.indexOf("--verbose"), 1);
-        }
     }
 
-    var cmd = tokens && tokens.length ? tokens.splice(0,1) : undefined;
-    if (cmd === undefined) {
+    if (!command.arguments.length) {
         return cordova.help();
     }
 
+    var cmd = command.arguments[0];
     if (!cordova.hasOwnProperty(cmd)) {
         throw new CordovaError('Cordova does not know ' + cmd + '; try help for a list of all the available commands.');
     }
@@ -117,26 +126,51 @@ module.exports = function CLI(inputArgs) {
         return cordova.info();
     }
 
+    // Legacy... to remove eventually, options must never be an array
+    function legacyOptions(nopt){
+        var opt = [], arg;
+
+        for(var i in nopt.argv.cooked) {
+            arg = nopt.argv.cooked[i];
+            if(arg === '--debug' || arg === '--verbose' || arg === '--silent')
+                continue;
+ 
+             opt.push(arg);
+        }
+        return opt.slice(1);
+    }
+    command.options = legacyOptions(nopt);
+
+    var args = command.arguments;
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
-        // Filter all non-platforms into options
+        // Filter platforms from arguments
         var platforms = require("../platforms");
-        tokens.forEach(function(option, index) {
+        var otherArgs = [];
+        var otherOpts = [];
+        
+        command.options.forEach(function(option, index) {
             if (platforms.hasOwnProperty(option)) {
-                opts.platforms.push(option);
-            } else {
-                opts.options.push(option);
+                command.platforms.push(option);
+        } else {
+                otherOpts.push(option);
+                if(option[0] !== '-')
+                    otherArgs.push(option);
             }
         });
-        cordova.raw[cmd].call(this, opts).done();
+
+        command.arguments = [cmd].concat(otherArgs);
+        command.options = otherOpts;
+
+        cordova.raw[cmd].call(this, command).done();
     } else if (cmd == 'serve') {
-        cordova.raw[cmd].apply(this, tokens).done();
+        cordova.raw[cmd].apply(this, command).done();
     } else if (cmd == 'create') {
         var cfg = {};
         // If we got a forth parameter, consider it to be JSON to init the config.
-        if (args._[4]) {
-            cfg = JSON.parse(args._[4]);
+        if (cmds[4]) {
+            cfg = JSON.parse(args[4]);
         }
-        var customWww = args.src || args.link;
+        var customWww = command.flags.source || command.flags.link;
         if (customWww) {
             if (customWww.indexOf(':') != -1) {
                 throw new CordovaError('Only local paths for custom www assets are supported.');
@@ -146,18 +180,20 @@ module.exports = function CLI(inputArgs) {
             }
             customWww = path.resolve(customWww);
             var wwwCfg = {uri: customWww};
-            if (args.link) {
+            if (command.flags.link) {
                 wwwCfg.link = true;
             }
             cfg.lib = cfg.lib || {};
             cfg.lib.www = wwwCfg;
         }
         // create(dir, id, name, cfg)
-        cordova.raw[cmd].call(this, args._[1], args._[2], args._[3], cfg).done();
+        cordova.raw[cmd].call(this, args[1], args[2], args[3], cfg, command).done();
     } else {
         // platform/plugins add/rm [target(s)]
-        var subcommand = tokens[0]; // this has the sub-command, like "add", "ls", "rm" etc.
-        var targets = tokens.slice(1); // this should be an array of targets, be it platforms or plugins
-        cordova.raw[cmd].call(this, subcommand, targets, { searchpath: args.searchpath }).done();
+        var subcmd = args[1]; // this has the sub-command, like "add", "ls", "rm" etc.
+        var targets = args.slice(2); // this should be an array of targets, be it platforms or plugins
+        command.options = command.options.slice(1);
+
+        cordova.raw[cmd].call(this, subcmd, targets, command).done();
     }
 };

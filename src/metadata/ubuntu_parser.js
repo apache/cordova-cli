@@ -44,9 +44,9 @@ module.exports.check_requirements = function(project_root, callback) {
     var d = Q.defer();
 
     events.emit('log', 'Checking ubuntu requirements...');
-    command = "dpkg-query -Wf'${db:Status-abbrev}' cmake debhelper libx11-dev libicu-dev pkg-config qtbase5-dev qtchooser qtdeclarative5-dev qtfeedback5-dev qtlocation5-dev qtmultimedia5-dev qtpim5-dev qtsensors5-dev qtsystems5-dev 2>/dev/null | grep -q '^i'";
-    events.emit('log', 'Running "' + command + '" (output to follow)');
-    shell.exec(command, {silent:true, async:true}, function(code, output) {
+    var cmd = "dpkg-query -Wf'${db:Status-abbrev}' cmake debhelper libx11-dev libicu-dev pkg-config qtbase5-dev qtchooser qtdeclarative5-dev qtfeedback5-dev qtlocation5-dev qtmultimedia5-dev qtpim5-dev qtsensors5-dev qtsystems5-dev 2>/dev/null | grep -q '^i'";
+    events.emit('log', 'Running "' + cmd + '" (output to follow)');
+    shell.exec(cmd, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
         if (code != 0) {
             d.reject(new Error('Make sure you have the following packages installed: ' + output));

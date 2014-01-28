@@ -133,20 +133,20 @@ exports = module.exports = {
         }
         return rootPath;
     },
-    preProcessOptions: function (inputOptions) {
-        var DEFAULT_OPTIONS = {
+    preProcessOptions: function (inputOptions, platformOptional) {
+        var DEFAULT = {
                 verbose: false,
                 platforms: [],
                 options: []
             },
-            result = inputOptions || DEFAULT_OPTIONS,
+            result = inputOptions || DEFAULT,
             projectRoot = this.isCordova();
 
         if (!projectRoot) {
             throw new CordovaError('Current working directory is not a Cordova-based project.');
         }
         var projectPlatforms = this.listPlatforms(projectRoot);
-        if (projectPlatforms.length === 0) {
+        if (!platformOptional && projectPlatforms.length === 0) {
             throw new CordovaError('No platforms added to this project. Please use `cordova platform add <platform>`.');
         }
         /**

@@ -98,7 +98,7 @@ describe('create end-to-end', function() {
     var results;
     events.on('results', function(res) { results = res; });
 
-    it('should successfully run with regualr config', function(done) {
+    it('should successfully run with regular config', function(done) {
         // Call cordova create with no args, should return help.
         cordova.raw.create()
         .then(function() {

@@ -53,10 +53,10 @@ module.exports.check_requirements = function(project_root) {
     if (custom_path) {
         lib_path = path.join(custom_path, 'wp7');
     }
-    var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
-    events.emit('verbose', 'Running "' + command + '" (output to follow)');
+    var cmd = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
+    events.emit('verbose', 'Running "' + cmd + '" (output to follow)');
     var d = Q.defer();
-    child_process.exec(command, function(err, output, stderr) {
+    child_process.exec(cmd, function(err, output, stderr) {
         events.emit('verbose', output+stderr);
         if (err) {
             d.reject(new Error('Requirements check failed: ' + output + stderr));

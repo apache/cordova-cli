@@ -118,17 +118,16 @@ module.exports.prototype = {
     // Replace the www dir with contents of platform_www and app www.
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
-        var appPaths = plugman.app.getPaths(projectRoot);
-        
-        var platformWww = this.www_dir();
-        // remove stock platform assets
-        shell.rm('-rf', platformWww);
-        // copy over all app www assets
-        shell.cp('-rf', appPaths['www'], path.join(platformWww, '..'));
+        var app_www = util.projectWww(projectRoot);
+        var platform_www = path.join(this.path, 'platform_www');
 
-        // write out android lib's cordova.js
-        var jsPath = path.resolve(path.join(libDir, 'framework', 'assets', 'www', 'cordova.js'));
-        fs.writeFileSync(path.join(appPaths['js'], 'cordova.js'), fs.readFileSync(jsPath, 'utf-8'), 'utf-8');
+        // Clear the www dir
+        shell.rm('-rf', this.www_dir());
+        shell.mkdir(this.www_dir());
+        // Copy over all app www assets
+        shell.cp('-rf', path.join(app_www, '*'), this.www_dir());
+        // Copy over stock platform www assets (cordova.js)
+        shell.cp('-rf', path.join(platform_www, '*'), this.www_dir());
     },
 
     // update the overrides folder into the www folder

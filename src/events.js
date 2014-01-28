@@ -17,4 +17,4 @@
     under the License.
 */
 
-module.exports = require('plugman')._emitter;
+module.exports = new (require('events').EventEmitter)();
