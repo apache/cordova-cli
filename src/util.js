@@ -22,7 +22,7 @@ var fs            = require('fs'),
     shell         = require('shelljs');
 
 // Global configuration paths
-var HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+var HOME = process.env[(process.platform.slice(0, 3) == 'win') ? 'USERPROFILE' : 'HOME'];
 var global_config_path = path.join(HOME, '.cordova');
 var lib_path = path.join(global_config_path, 'lib');
 shell.mkdir('-p', lib_path);
