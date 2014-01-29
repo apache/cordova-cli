@@ -26,6 +26,9 @@ var fs = require('fs'),
     config = require('../config');
 
 module.exports = function firefoxos_parser(project) {
+    if (!fs.existsSync(path.join(project, 'www', 'manifest.webapp'))) {
+        throw new Error('The provided path "' + project + '" is not a Cordova FirefoxOS project.');
+    }
     this.path = project;
 };
 
