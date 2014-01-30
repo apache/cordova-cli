@@ -20,6 +20,8 @@
 -->
 # Cordova-cli Release Notes
 
+## 3.3.1-0.3.0 (Jan 30, 2015)
+
 ## 3.3.1-0.2.0 (Jan 15, 2014)
 * CB-5006 Add --searchpath to "plugin add" so that installing by ID will search local paths before hitting the registry.
 * CB-4153 Add --src & --link to cordova create.
