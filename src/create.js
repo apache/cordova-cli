@@ -90,6 +90,13 @@ module.exports = function create (dir, id, name, cfg) {
         var www_version = config_json.lib.www.version || 'not_versioned';
         var www_id = config_json.lib.www.id || 'dummy_id';
         symlink  = !!config_json.lib.www.link;
+        if ( www_dir.indexOf(path.resolve(config_json.lib.www.uri)) === 0 ) {
+            throw new CordovaError(
+                'Project must not be created inside the www assets dir.' +
+                '\n    project dir:\t' + dir +
+                '\n    www assets dir:\t' + config_json.lib.www.uri
+            );
+        }
         if(symlink) {
             p = Q(config_json.lib.www.uri);
             events.emit('verbose', 'Symlinking custom www assets into "' + www_dir + '"');
