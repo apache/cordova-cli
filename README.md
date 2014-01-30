@@ -18,6 +18,7 @@
 # under the License.
 #
 -->
+
 # cordova-cli
 
 > The command line tool to build, deploy and manage [Cordova](http://cordova.io)-based applications.
@@ -318,3 +319,7 @@ Amazon Fire OS does not include the ability to emulate. You are still able to us
 The initial release of cordova-ubuntu does not support building applications for armhf devices automatically. It is possible to produce applications and click packages in a few steps though.
 
 This bug report documents the issue and solutions for it: https://bugs.launchpad.net/ubuntu/+source/cordova-ubuntu/+bug/1260500 A future release will let developers cross-compile armhf click packages directly from an x86 desktop.
+
+## Firefox OS
+
+Firefox OS does not include the ability to emulate, run and serve. After building, you will have to open the firefoxos platform directory of your app in the App Manager that comes with every firefox browser. 
