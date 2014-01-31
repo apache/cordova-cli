@@ -113,7 +113,7 @@ module.exports.prototype = {
         }
     },
     config_xml:function(){
-        return path.join(this.path, 'www', 'config.xml');
+        return path.join(this.path, 'config.xml');
     },
 
     // Returns a promise.
