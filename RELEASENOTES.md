@@ -20,6 +20,11 @@
 -->
 # Cordova-cli Release Notes
 
+## 3.4.0-rc.1
+* updated to 3.4.0-rc.1
+* added firefoxos to readme
+* updated release notes
+
 ## 3.3.1-0.3.0 (Jan 30, 2015)
 * Setting version to 3.3.1-0.3.0; updated plugman reference to 0.19.0
 * CB-5913 Fail more gracefully on Windows when symlinks fail.
