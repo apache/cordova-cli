@@ -25,7 +25,7 @@
 * added firefoxos to readme
 * updated release notes
 
-## 3.3.1-0.3.0 (Jan 30, 2015)
+## 3.3.1-0.3.0 (Jan 30, 2014)
 * Setting version to 3.3.1-0.3.0; updated plugman reference to 0.19.0
 * CB-5913 Fail more gracefully on Windows when symlinks fail.
 * Fix isWindows check in util.js to support win64
