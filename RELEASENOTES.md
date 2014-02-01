@@ -20,10 +20,10 @@
 -->
 # Cordova-cli Release Notes
 
-## 3.3.1-0.3.1 (Jan 31, 2015)
+## 3.3.1-0.3.1 (Jan 31, 2014)
 * CB-4153 Rename --source and --link flags to --copy-from and --link-to
 
-## 3.3.1-0.3.0 (Jan 30, 2015)
+## 3.3.1-0.3.0 (Jan 30, 2014)
 * Updated plugman dependency to 0.19.0
 * CB-5913 Fail more gracefully on Windows when symlinks fail.
 * Fix isWindows check in util.js to support win64
