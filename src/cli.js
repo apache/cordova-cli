@@ -140,6 +140,7 @@ module.exports = function CLI(inputArgs) {
         return opt.slice(1);
     }
     command.options = legacyOptions(nopt);
+	command.name = cmd;
 
     var args = command.arguments;
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
@@ -167,7 +168,7 @@ module.exports = function CLI(inputArgs) {
     } else if (cmd == 'create') {
         var cfg = {};
         // If we got a forth parameter, consider it to be JSON to init the config.
-        if (cmds[4]) {
+        if (args[4]) {
             cfg = JSON.parse(args[4]);
         }
         var customWww = command.flags.source || command.flags.link;

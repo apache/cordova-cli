@@ -74,7 +74,7 @@ module.exports = function compile(command) {
     var projectRoot = cordova_util.cdProjectRoot(),
         hooks;
 
-    command = cordova_util.preProcessOptions(command);
+    command = cordova_util.checkCommand(command);
 
     hooks = new hooker(projectRoot);
     return hooks.fire('before_compile', command)

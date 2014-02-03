@@ -24,7 +24,7 @@ var cordova_util      = require('./util'),
 module.exports = function build(command) {
     var projectRoot = cordova_util.cdProjectRoot();
 
-    command = cordova_util.preProcessOptions(command);
+    command = cordova_util.checkCommand(command);
 
     // fire build hooks
     var hooks = new hooker(projectRoot);

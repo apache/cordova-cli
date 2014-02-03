@@ -154,7 +154,7 @@ module.exports.prototype = {
         try {
             this.update_from_config(cfg);
             this.update_overrides();
-            this.update_staging();
+            //this.update_staging();
         } catch(e) {
             return Q.reject(e);
         }

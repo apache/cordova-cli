@@ -48,7 +48,7 @@ module.exports = function plugin(cmd, targets, command) {
         targets = [targets];
     }
 
-    command = cordova_util.preProcessOptions(command);
+    command = cordova_util.checkCommand(command);
     command.plugins = targets;
 
     var options = command.flags || {};

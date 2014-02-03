@@ -34,7 +34,7 @@ var cordova_util      = require('./util'),
 module.exports = function prepare(command) {
     var projectRoot = cordova_util.cdProjectRoot();
 
-    command = cordova_util.preProcessOptions(command);
+    command = cordova_util.checkCommand(command);
 
     var xml = cordova_util.projectConfig(projectRoot);
     var paths = command.platforms.map(function(p) {
@@ -54,6 +54,7 @@ module.exports = function prepare(command) {
             var platformPath = path.join(projectRoot, 'platforms', platform);
             return lazy_load.based_on_config(projectRoot, platform)
             .then(function(libDir) {
+
                 var parser = new platforms[platform].parser(platformPath),
                     defaults_xml_path = path.join(platformPath, "cordova", "defaults.xml");
                 //If defaults.xml is present, overwrite platform config.xml with it
@@ -85,9 +86,11 @@ module.exports = function prepare(command) {
                 events.emit('verbose', 'Calling plugman.prepare for platform "' + platform + '"');
                 plugman.prepare(platformPath, platform, plugins_dir);
 
+
                 // Make sure that config changes for each existing plugin is in place
                 var plugins = cordova_util.findPlugins(plugins_dir),
                     platform_json = plugman.config_changes.get_platform_json(plugins_dir, platform);
+
                 if (plugins && Array.isArray(plugins)) {
                     var plugman_cache = {};
                     plugins.forEach(function(plugin_id) {
@@ -114,7 +117,7 @@ module.exports = function prepare(command) {
                     });
                 }
 
-                //Update platform config.xml based on top level config.xml
+                // Update platform config.xml based on top level config.xml
                 var platform_cfg = new cordova_util.config_parser(parser.config_xml());
                 platform_cfg.merge_with(cfg, platform, true);
 
