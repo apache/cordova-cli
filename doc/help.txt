@@ -9,8 +9,8 @@ Global Commands
                                                NAME is a human readable field
                                                CONFIG is a json string whose key/values will be included
                                                in [PATH]/.codova/config.json
-                  [--src|source=<PATH>] ...... use custom www assets instead of the stock Cordova hello-world.
-                  [--link=<PATH>] ............ symlink to custom www assets without creating a copy.
+                  [--copy-from|src=<PATH>] ... use custom www assets instead of the stock Cordova hello-world.
+                  [--link-to=<PATH>] ......... symlink to custom www assets without creating a copy.
 
     help ..................................... shows this syntax summary
 

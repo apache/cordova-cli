@@ -41,6 +41,7 @@ module.exports = function CLI(inputArgs) {
         tokens = process.argv.slice(2);
     }
 
+    // When changing command line arguments, update doc/help.txt accordingly.
     var args = optimist(tokens)
         .boolean('d')
         .boolean('verbose')
