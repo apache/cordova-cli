@@ -71,6 +71,18 @@ module.exports.prototype = {
         var orig_pkg = manifest.getroot().attrib.package;
         manifest.getroot().attrib.package = pkg;
 
+        // Set the orientation in the AndroidManifest
+        var preferences = config.preference.get();
+        var act = manifest.getroot().find('./application/activity');
+        delete act.attrib["android:screenOrientation"];
+        for (var i = 0, ii = preferences.length; i < ii; ++i) {
+            if (preferences[i].name.toLowerCase() === 'orientation' &&
+                preferences[i].value.toLowerCase() !== 'default')
+            {
+                act.attrib["android:screenOrientation"] = preferences[i].value;
+            }
+        }
+
         // Write out AndroidManifest.xml
         fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');
 
