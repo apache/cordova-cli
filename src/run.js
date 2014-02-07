@@ -32,7 +32,7 @@ var cordova_util      = require('./util'),
 // Returns a promise.
 function shell_out_to_run(projectRoot, platform, arguments) {
     var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'run'),
-        args = arguments.length ? DEFAULT_ARGS.concat(arguments) : DEFAULT_ARGS,
+        args = arguments || [],
         d = Q.defer(),
         errors = "",
         child;

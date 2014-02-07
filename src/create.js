@@ -79,16 +79,7 @@ module.exports = function create (dir, id, name, cfg, command) {
         return Q.reject(new CordovaError('Path already exists and is not empty: ' + dir));
     }
 
-    // Create basic project structure.
-    shell.mkdir('-p', path.join(dir, 'platforms'));
-    shell.mkdir('-p', path.join(dir, 'merges'));
-    shell.mkdir('-p', path.join(dir, 'plugins'));
-    shell.mkdir('-p', path.join(dir, 'hooks'));
-
-    // Add hooks README.md
-    shell.cp(path.join(__dirname, '..', 'templates', 'hooks-README.md'), path.join(dir, 'hooks', 'README.md'));
-
-    // Write out .cordova/config.json file if necessary.
+    // Read / Write .cordova/config.json file if necessary.
     var config_json = config(dir, cfg);
 
     var p;
@@ -99,23 +90,30 @@ module.exports = function create (dir, id, name, cfg, command) {
         var www_version = config_json.lib.www.version || 'not_versioned';
         var www_id = config_json.lib.www.id || 'dummy_id';
         symlink  = !!config_json.lib.www.link;
+        if ( www_dir.indexOf(path.resolve(config_json.lib.www.uri)) === 0 ) {
+            throw new CordovaError(
+                'Project must not be created inside the www assets dir.' +
+                '\n    project dir:\t' + dir +
+                '\n    www assets dir:\t' + config_json.lib.www.uri
+            );
+        }
         if(symlink) {
             p = Q(config_json.lib.www.uri);
             events.emit('verbose', 'Symlinking custom www assets into "' + www_dir + '"');
         } else {
             p = lazy_load.custom(config_json.lib.www.uri, www_id, 'www', www_version)
-            .then(function(dir) {
+            .then(function(d) {
                 events.emit('verbose', 'Copying custom www assets into "' + www_dir + '"');
-                return dir;
+                return d;
             });
         }
     } else {
         // Nope, so use stock cordova-hello-world-app one.
         events.emit('verbose', 'Using stock cordova hello-world application.');
         p = lazy_load.cordova('www')
-        .then(function(dir) {
+        .then(function(d) {
             events.emit('verbose', 'Copying stock Cordova www assets into "' + www_dir + '"');
-            return dir;
+            return d;
         });
     }
 
@@ -124,12 +122,37 @@ module.exports = function create (dir, id, name, cfg, command) {
         while (fs.existsSync(path.join(www_lib, 'www'))) {
             www_lib = path.join(www_lib, 'www');
         }
+
+        var dirAlreadyExisted = fs.existsSync(dir);
+        if (!dirAlreadyExisted) {
+            shell.mkdir(dir);
+        }
         if (symlink) {
-            fs.symlinkSync(www_lib, www_dir, 'dir');
+            try {
+                fs.symlinkSync(www_lib, www_dir, 'dir');
+            } catch (e) {
+                if (!dirAlreadyExisted) {
+                    fs.rmdirSync(dir);
+                }
+                if (process.platform.slice(0, 3) == 'win' && e.code == 'EPERM')  {
+                    throw new CordovaError('Symlinks on Windows require Administrator privileges');
+                }
+                throw e;
+            }
         } else {
-            shell.mkdir('-p', www_dir);
+            shell.mkdir(www_dir);
             shell.cp('-rf', path.join(www_lib, '*'), www_dir);
         }
+
+        // Create basic project structure.
+        shell.mkdir(path.join(dir, 'platforms'));
+        shell.mkdir(path.join(dir, 'merges'));
+        shell.mkdir(path.join(dir, 'plugins'));
+        shell.mkdir(path.join(dir, 'hooks'));
+
+        // Add hooks README.md
+        shell.cp(path.join(__dirname, '..', 'templates', 'hooks-README.md'), path.join(dir, 'hooks', 'README.md'));
+
         var configPath = util.projectConfig(dir);
         // Add template config.xml for apps that are missing it
         if (!fs.existsSync(configPath)) {

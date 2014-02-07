@@ -97,10 +97,10 @@ describe('run command', function() {
             cordova.raw.run(['android','ios']).then(function() {
                 expect(prepare_spy).toHaveBeenCalledWith(['android', 'ios']);
 
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'android', 'cordova', 'run'), ['--device']);
+                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'android', 'cordova', 'run'), []);
                 expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
 
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), ['--device']);
+                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), []);
                 expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
 
             }, function(err) {
@@ -111,7 +111,7 @@ describe('run command', function() {
             cordova.raw.run({platforms: ['blackberry10'], options:['--password', '1q1q']}).then(function() {
                 expect(prepare_spy).toHaveBeenCalledWith(['blackberry10']);
 
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'run'), ['--device', '--password', '1q1q']);
+                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'run'), ['--password', '1q1q']);
                 expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
             }, function(err) {
                 expect(err).toBeUndefined();

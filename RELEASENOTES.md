@@ -20,6 +20,26 @@
 -->
 # Cordova-cli Release Notes
 
+## 3.3.1-0.3.1 (Jan 31, 2014)
+* CB-4153 Rename --source and --link flags to --copy-from and --link-to
+
+## 3.3.1-0.3.0 (Jan 30, 2014)
+* Updated plugman dependency to 0.19.0
+* CB-5913 Fail more gracefully on Windows when symlinks fail.
+* Fix isWindows check in util.js to support win64
+* CB-5907 Make `cordova update` get version from platform's version script
+* CB-3612 Don't pass --device to "run" command by default.
+* CB-5493 lazy_load now downloads to a temp dir and then moves.
+* CB-5782 Hide stack trace for explicitly handled error conditions
+* CB-5590 Have config.xml version map to CFBundleShortVersionString instead of CFBundleVersion
+* CB-5299 Cache pbxproj to avoid re-parsing it for each plugin.
+* CB-5813 Fix missing quotes on update and ls commands
+* CB-5808 Fix lazy_load stripping off windows drive letters
+* Expose util.isCordova as cordova.findProjectRoot()
+* Allow lazy_load libs to work without an id and version for local paths.
+* Add an option to config.js to not write config.json during create.
+* Update node-xcode dependency to 0.6.6
+
 ## 3.3.1-0.2.0 (Jan 15, 2014)
 * CB-5006 Add --searchpath to "plugin add" so that installing by ID will search local paths before hitting the registry.
 * CB-4153 Add --src & --link to cordova create.

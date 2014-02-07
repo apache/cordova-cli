@@ -39,10 +39,10 @@ module.exports = function CLI(inputArgs) {
        'verbose' : Boolean,
        'version' : Boolean,
        'silent' : Boolean,
-       'source': path,
-       'link': String,
+       'copy-from': path,
+       'link-to': String,
        'searchpath' : [path, Array]
-    }, short = { 'src' : ['--source'], 'v': ['--version'], 'd': ['--debug'] };
+    }, short = { 'src' : ['--copy-from'], 'v': ['--version'], 'd': ['--debug'] };
 
     var nopt = nopt(opts, short, inputArgs);
 
@@ -81,7 +81,7 @@ module.exports = function CLI(inputArgs) {
 
     if(command.flags.debug >= 7)
         command.flags.verbose = true;
-        
+
     // For BC & tests? ideally verbose would means 'lots' of info
     if(command.flags.debug >= 1)
         command.flags.verbose = true;
@@ -134,13 +134,13 @@ module.exports = function CLI(inputArgs) {
             arg = nopt.argv.cooked[i];
             if(arg === '--debug' || arg === '--verbose' || arg === '--silent')
                 continue;
- 
+
              opt.push(arg);
         }
         return opt.slice(1);
     }
     command.options = legacyOptions(nopt);
-	command.name = cmd;
+    command.name = cmd;
 
     var args = command.arguments;
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
@@ -148,7 +148,7 @@ module.exports = function CLI(inputArgs) {
         var platforms = require("../platforms");
         var otherArgs = [];
         var otherOpts = [];
-        
+
         command.options.forEach(function(option, index) {
             if (platforms.hasOwnProperty(option)) {
                 command.platforms.push(option);
@@ -171,7 +171,7 @@ module.exports = function CLI(inputArgs) {
         if (args[4]) {
             cfg = JSON.parse(args[4]);
         }
-        var customWww = command.flags.source || command.flags.link;
+        var customWww = command.flags['copy-from'] || command.flags['link-to'];
         if (customWww) {
             if (customWww.indexOf(':') != -1) {
                 throw new CordovaError('Only local paths for custom www assets are supported.');
@@ -181,7 +181,7 @@ module.exports = function CLI(inputArgs) {
             }
             customWww = path.resolve(customWww);
             var wwwCfg = {uri: customWww};
-            if (command.flags.link) {
+            if (command.flags['link-to']) {
                 wwwCfg.link = true;
             }
             cfg.lib = cfg.lib || {};
