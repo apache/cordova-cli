@@ -63,6 +63,8 @@ module.exports.prototype = {
         var icons = config.icon.get();
         // if there are icon elements in config.xml
         if (icons) {
+          var haveSeenDefaultIcon = false;
+          var iconCount = 0;
           for (var i=0; i<icons.length; i++) {
             var icon = icons[i];
             var iconplatform = icon["cdv:platform"];
@@ -71,19 +73,27 @@ module.exports.prototype = {
               var density = icon["cdv:density"];
               var projectRoot = util.isCordova(this.path);
               //var app_www = util.projectWww(projectRoot);
-              // icons live in projectRoot/res/icon/android/
-              var srcfilepath = path.join(projectRoot, "res", "icon", "android", icon.src);
+              // icon live in projectRoot/<icon.src>
+              var srcfilepath = path.join(projectRoot, icon.src);
               var destfilepath;
               // the target icon is always named icon.png or we would need to patch AndroidManifest.xml too
               if (density) {
                 destfilepath = path.join(this.path, 'res', 'drawable-'+density, 'icon.png');
               } else {
+                if (haveSeenDefaultIcon) {
+                  events.emit('verbose', 'Found multiple default icons. Please add cdv:density and cdv:platform to icon element in config.xml: ' + srcfilepath + ' -> ' + destfilepath);
+                }
+                haveSeenDefaultIcon = true;
                 destfilepath = path.join(this.path, 'res', 'drawable', 'icon.png');
               }
               shell.cp('-f', srcfilepath, destfilepath);
               events.emit('verbose', 'Copied icon from ' + srcfilepath + ' to ' + destfilepath);
+              iconCount++;
             } else {
               events.emit('verbose', 'Ignoring icon ' + icon.src + '; Platform=' + iconplatform);
+            }
+            if (iconCount === 0) {
+              events.emit('verbose', 'no icons found for platform android. Missing e.g. cdv:platform="android" cdv:density="hdpi"? ');
             }
           }
         }
