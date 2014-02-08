@@ -69,7 +69,7 @@ module.exports.prototype = {
             // if the icon is for the firefoxos platform
             if (!iconplatform || (iconplatform === "firefoxos")) {
               var projectRoot = util.isCordova(this.path);
-              var srcfilepath = path.join(projectRoot, "res", "icon", "firefoxos", icon.src);
+              var srcfilepath = path.join(projectRoot, icon.src);
               var destfilepath = null;
               var iconwidth = icon["width"];
               var iconheight = icon["height"];
