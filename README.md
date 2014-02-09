@@ -25,7 +25,7 @@
 
 [Apache Cordova](http://cordova.io) allows for building native mobile applications using HTML, CSS and JavaScript. This tool helps with management of multi-platform Cordova applications as well as Cordova plugin integration.
 
-Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/guide_getting-started_index.md.html#Getting%20Started%20Guides) for more details on how to work with Cordova sub-projects.
+Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/) for more details on how to work with Cordova sub-projects.
 
 # Supported Cordova Platforms
 
