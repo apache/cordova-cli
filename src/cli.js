@@ -19,13 +19,11 @@
 
 var path = require('path'),
     CordovaError = require('./CordovaError'),
-    nopt, // required in try-catch below to print a nice error message if it's not installed.
-    _;
+    nopt; // required in try-catch below to print a nice error message if it's not installed.
 
 module.exports = function CLI(inputArgs) {
     try {
         nopt =  require('nopt');
-        _ = require('underscore');
     } catch (e) {
         console.error("Please run npm install from this directory:\n\t" +
                       path.dirname(__dirname));
@@ -140,7 +138,6 @@ module.exports = function CLI(inputArgs) {
         return opt.slice(1);
     }
     command.options = legacyOptions(nopt);
-    command.name = cmd;
 
     var args = command.arguments;
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
@@ -177,7 +174,7 @@ module.exports = function CLI(inputArgs) {
                 throw new CordovaError('Only local paths for custom www assets are supported.');
             }
             if (customWww.substr(0,1) === '~') {  // resolve tilde in a naive way.
-                customWww = path.join(process.env.HOME,  customWww.substr(1));
+                customWww = path.join(process.env.HOME, customWww.substr(1));
             }
             customWww = path.resolve(customWww);
             var wwwCfg = {uri: customWww};

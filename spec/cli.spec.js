@@ -57,34 +57,34 @@ describe("cordova cli", function () {
 
         it("will call command with all arguments passed through", function () {
             new CLI(["node", "cordova", "build", "blackberry10", "-k", "abcd1234"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({ flag : { k: 'abcd1234' }, arguments : ['build', 'abcd1234'], platforms: [ 'blackberry10' ], options : [ '-k', 'abcd1234' ] });
+            expect(cordova.raw.build).toHaveBeenCalledWith({ flags : { k: 'abcd1234' }, arguments : ['build', 'abcd1234'], platforms: [ 'blackberry10' ], options : [ '-k', 'abcd1234' ] });
         });
 
         // TODO: should -d mean verbose == true? 
         // ideally -d 7 or -d verbose (same as verbose = true)
         it("will consume the first instance of -d", function () {
             new CLI(["node", "cordova", "-d", "build", "blackberry10", "-k", "abcd1234", "-d"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({ flag : { debug : 1, k :  'abcd1234', verbose: true }, arguments : [ 'build', 'abcd1234' ], platforms : [ 'blackberry10' ], options : [ '-k', 'abcd1234' ]});
+            expect(cordova.raw.build).toHaveBeenCalledWith({ flags : { debug : 1, k :  'abcd1234', verbose: true }, arguments : [ 'build', 'abcd1234' ], platforms : [ 'blackberry10' ], options : [ '-k', 'abcd1234' ]});
         });
 
         it("will consume the first instance of --verbose", function () {
             new CLI(["node", "cordova", "--verbose", "build", "blackberry10", "-k", "abcd1234", "--verbose"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({ flag : { verbose : true, k : 'abcd1234', debug : 7 }, arguments : [ 'build', 'abcd1234' ], platforms : [ 'blackberry10' ], options : [  '-k', 'abcd1234' ] } );
+            expect(cordova.raw.build).toHaveBeenCalledWith({ flags : { verbose : true, k : 'abcd1234', debug : 7 }, arguments : [ 'build', 'abcd1234' ], platforms : [ 'blackberry10' ], options : [  '-k', 'abcd1234' ] } );
         });
 
         it("will consume the first instance of either --verbose of -d", function () {
             new CLI(["node", "cordova", "--verbose", "build", "blackberry10", "-k", "abcd1234", "-d"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({ flag : { verbose : true, k : 'abcd1234', debug : 7 }, arguments : [ 'build', 'abcd1234' ], platforms : [ 'blackberry10' ], options : [  '-k', 'abcd1234' ] });
+            expect(cordova.raw.build).toHaveBeenCalledWith({ flags : { verbose : true, k : 'abcd1234', debug : 7 }, arguments : [ 'build', 'abcd1234' ], platforms : [ 'blackberry10' ], options : [  '-k', 'abcd1234' ] });
         });
 
         it("will consume the first instance of either --verbose of -d", function () {
             new CLI(["node", "cordova", "-d", "build", "blackberry10", "-k", "abcd1234", "--verbose"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({ flag : { debug : 7, k : 'abcd1234', verbose : true }, arguments : [ 'build', 'abcd1234' ], platforms : [ 'blackberry10' ], options : [  '-k', 'abcd1234' ]  });
+            expect(cordova.raw.build).toHaveBeenCalledWith({ flags : { debug : 7, k : 'abcd1234', verbose : true }, arguments : [ 'build', 'abcd1234' ], platforms : [ 'blackberry10' ], options : [  '-k', 'abcd1234' ]  });
         });
 
         it("will consume the first instance of --silent", function () {
             new CLI(["node", "cordova", "--silent", "build", "blackberry10", "-k", "abcd1234", "--silent"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({ flag : { silent : true, k : 'abcd1234', debug : 0 }, arguments : [ 'build', 'abcd1234' ], platforms : [ 'blackberry10' ], options : [  '-k', 'abcd1234' ]  });
+            expect(cordova.raw.build).toHaveBeenCalledWith({ flags : { silent : true, k : 'abcd1234', debug : 0 }, arguments : [ 'build', 'abcd1234' ], platforms : [ 'blackberry10' ], options : [  '-k', 'abcd1234' ]  });
         });
     });
 
@@ -99,8 +99,11 @@ describe("cordova cli", function () {
 
         it("will call command with all arguments passed through", function () {
             new CLI(["node", "cordova", "plugin", "add", "facebook", "--variable", "FOO=foo"]);
-            expect(cordova.raw.plugin).toHaveBeenCalledWith("add", { flag : { variable : 'FOO=foo' }, arguments : [ 'plugin', 'add', 'facebook', 'FOO=foo'], platforms : [  ], options: ['facebook', 'FOO=foo'] });
-
+            expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                "add", 
+                [ 'facebook', 'FOO=foo' ], 
+                { flags : { variable : 'FOO=foo' }, arguments : [ 'plugin', 'add', 'facebook', 'FOO=foo'], platforms : [  ], options : [ 'facebook', '--variable', 'FOO=foo' ] }
+            );
         });
     });
 });

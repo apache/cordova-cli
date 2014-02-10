@@ -19,21 +19,13 @@
 var events = require('./src/events');
 var util = require('./src/util');
 
-var off = function() {
-    events.removeListener.apply(events, arguments);
-};
-
-var emit = function() {
-    events.emit.apply(events, arguments);
-};
-
 exports = module.exports = {
-    on:                  function() { events.on.apply(events, arguments); },
-    off:                 off,
-    removeListener:      off,
-    removeAllListeners:  function() { events.removeAllListeners.apply(events, arguments); },
-    emit:                emit,
-    trigger:             emit,
+    on:                  events.on.bind(events),
+    off:                 events.removeListener.bind(events),
+    removeListener:      exports.off,
+    removeAllListeners:  events.removeAllListeners.bind(events),
+    emit:                events.emit.bind(events),
+    trigger:             exports.emit,
     raw: {}
 };
 

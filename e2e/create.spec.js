@@ -110,7 +110,6 @@ describe('create end-to-end', function() {
         })
         .then(checkProject)
         .fail(function(err) {
-            console.log(err);
             expect(err).toBeUndefined();
         })
         .fin(done);
@@ -125,8 +124,12 @@ describe('create end-to-end', function() {
             expect(fs.lstatSync(path.join(project, 'www')).isSymbolicLink()).toBe(true);
         })
         .fail(function(err) {
-            console.log(err);
-            expect(err).toBeUndefined();
+            if(process.platform.slice(0, 3) == 'win') {
+                // Allow symlink error if not in admin mode
+                expect(err.message).toBe("Symlinks on Windows require Administrator privileges");
+            } else {
+                expect(err).toBeUndefined();
+            }
         })
         .fin(done);
     });

@@ -138,7 +138,7 @@ exports = module.exports = {
         return rootPath;
     },
 
-    checkCommand: function (input) {
+    checkCommand: function (input, context) {
         var DEFAULT_COMMAND = {
                 verbose: false,
                 platforms: [],
@@ -173,7 +173,7 @@ exports = module.exports = {
         }
 
         var projectPlatforms = this.listPlatforms(projectRoot);
-        if (command.name != 'platform' && projectPlatforms.length === 0) {
+        if (context !== 'platform' && projectPlatforms.length === 0) {
             throw new CordovaError('No platforms added to this project. Please use `cordova platform add <platform>`.');
         }
 

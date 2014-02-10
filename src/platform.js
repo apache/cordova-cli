@@ -52,7 +52,9 @@ module.exports = function platform(cmd, targets, command) {
     var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new cordova_util.config_parser(xml);
 
-    command = cordova_util.checkCommand(command);
+    command = cordova_util.checkCommand(command, 'platform');
+	if(targets.length)
+		command.platforms = targets;
 
     switch(cmd) {
         case 'add':

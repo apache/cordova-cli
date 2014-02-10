@@ -314,22 +314,30 @@ describe('platform command', function() {
             });
         });
         describe('remove (rm) hooks', function() {
-            it('should fire before hooks through the hooker module', function(done) {
+            it('should fire hooks through the hooker module', function(done) {
                 cordova.raw.platform('rm', 'android').then(function() {
-                    expect(fire).toHaveBeenCalledWith('before_platform_rm', {platforms:['android']});
-                }, fail).fin(done);
-            });
-            it('should fire after hooks through the hooker module', function(done) {
-                cordova.raw.platform('rm', 'android').then(function() {
-                    expect(fire).toHaveBeenCalledWith('after_platform_rm', {platforms:['android']});
+
+                    expect(fire.calls.length).toBe(2);
+                    expect(fire.calls[0].args[0]).toBe('before_platform_rm');
+                    expect(fire.calls[0].args[1].platforms).toEqual(['android']);
+
+                    expect(fire.calls[1].args[0]).toBe('after_platform_rm');
+                    expect(fire.calls[1].args[1].platforms).toEqual(['android']);
+                    
                 }, fail).fin(done);
             });
         });
         describe('add hooks', function() {
             it('should fire before and after hooks through the hooker module', function(done) {
                 cordova.raw.platform('add', 'android').then(function() {
-                    expect(fire).toHaveBeenCalledWith('before_platform_add', {platforms:['android']});
-                    expect(fire).toHaveBeenCalledWith('after_platform_add', {platforms:['android']});
+
+                    expect(fire.calls.length).toBe(2);
+                    expect(fire.calls[0].args[0]).toBe('before_platform_add');
+                    expect(fire.calls[0].args[1].platforms).toEqual(['android']);
+
+                    expect(fire.calls[1].args[0]).toBe('after_platform_add');
+                    expect(fire.calls[1].args[1].platforms).toEqual(['android']);																	
+
                 }, fail).fin(done);
             });
         });
