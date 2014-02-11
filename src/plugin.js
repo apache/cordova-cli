@@ -102,25 +102,20 @@ module.exports = function plugin(cmd, targets, command) {
                     .fail(function(err) {
                         return Q.reject(new Error('Fetching plugin failed: ' + err));
                     })
-                    .then(function(plugin_install_dir) {
+                    .then(function(plugin_source_dir) {
                         // Iterate (in serial!) over all platforms in the project and install the plugin.
-
                         return platformList.reduce(function(soFar, platform) {
                             return soFar.then(function() {
                                 var platforms = require('../platforms');
                                 var platformRoot = path.join(projectRoot, 'platforms', platform),
-                                    parser = new platforms[platform].parser(platformRoot),
-                                    tokens,
-                                    plugin_id = path.basename(plugin_install_dir),
-                                    key,
-                                    i;
+                                    parser = new platforms[platform].parser(platformRoot);
 
-                                var opts = plugman.cloneOptions(options, {						   
+                                var opts = plugman.cloneOptions(options, {
                                     www_dir: parser.staging_dir()
                                 });
 
-                                events.emit('verbose', 'Calling plugman.install on plugin "' + plugin_install_dir + '" for platform "' + platform + '" with options "' + JSON.stringify(command.options)  + '"');
-                                return plugman.raw.install(platform, platformRoot, plugin_id, pluginPath, opts);
+                                events.emit('verbose', 'Calling plugman.install on plugin "' + plugin_source_dir + '" for platform "' + platform + '" with options "' + JSON.stringify(command.options)  + '"');
+                                return plugman.raw.install(platform, platformRoot, plugin_source_dir, pluginPath, opts);
                             });
                         }, Q());
                     });
@@ -159,7 +154,7 @@ module.exports = function plugin(cmd, targets, command) {
                             var parser = new platforms[platform].parser(platformRoot);
                             events.emit('verbose', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
                             
-                            var opts = plugman.cloneOptions(options, {						   
+                            var opts = plugman.cloneOptions(options, {
                                 www_dir: parser.staging_dir()
                             });
 
