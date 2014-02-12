@@ -25,7 +25,9 @@ module.exports = function plugin(cmd, targets, command) {
         config        = require('./config'),
         Q             = require('q'),
         CordovaError  = require('./CordovaError'),
-        events        = require('./events');
+        events        = require('./events'),
+        underscore    = require('underscore')
+        ;
 
     var projectRoot = cordova_util.cdProjectRoot(),
         err;
@@ -92,7 +94,7 @@ module.exports = function plugin(cmd, targets, command) {
                             target = target.substring(0, target.length - 1);
                         }
 
-                        var opts = plugman.cloneOptions(options);
+                        var opts = underscore.extend({}, options);
 
                         // Fetch the plugin first.
                         events.emit('verbose', 'Calling plugman.fetch on plugin "' + target + '"');
@@ -110,7 +112,7 @@ module.exports = function plugin(cmd, targets, command) {
                                 var platformRoot = path.join(projectRoot, 'platforms', platform),
                                     parser = new platforms[platform].parser(platformRoot);
 
-                                var opts = plugman.cloneOptions(options, {
+                                var opts = underscore.extend({}, options, {
                                     www_dir: parser.staging_dir()
                                 });
 
@@ -153,8 +155,8 @@ module.exports = function plugin(cmd, targets, command) {
                             var platforms = require('../platforms');
                             var parser = new platforms[platform].parser(platformRoot);
                             events.emit('verbose', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
-                            
-                            var opts = plugman.cloneOptions(options, {
+
+                            var opts = underscore.extend({}, options, {
                                 www_dir: parser.staging_dir()
                             });
 
