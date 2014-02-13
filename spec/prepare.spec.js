@@ -152,27 +152,8 @@ describe('prepare command', function() {
                     expect(err).toBeUndefined();
                 }).fin(done);
             });
-            it('should invoke add_plugin_changes for any added plugins to verify configuration changes for plugins are in place', function(done) {
-                var plugins_dir = path.join(project_dir, 'plugins');
-                find_plugins.andReturn(['testPlugin']);
-                plugman_get_json.andReturn({
-                    installed_plugins:{
-                        'testPlugin':'plugin vars'
-                    }
-                });
-                var add_plugin_changes = spyOn(plugman.config_changes, 'add_plugin_changes');
-                prepare().then(function() {
-                    supported_platforms.forEach(function(p) {
-                        var platform_path = path.join(project_dir, 'platforms', p);
-                        expect(add_plugin_changes).toHaveBeenCalledWith((p=='blackberry'?'blackberry10':p), platform_path, plugins_dir, 'testPlugin', 'plugin vars', true, false);
-                    });
-                }, function(err) {
-                    expect(err).toBeUndefined();
-                }).fin(done);
-            });
         });
     });
-
 
     describe('hooks', function() {
         describe('when platforms are added', function() {

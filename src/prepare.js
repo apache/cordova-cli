@@ -95,30 +95,9 @@ exports = module.exports = function prepare(options) {
                 plugman.prepare(platformPath, platform, plugins_dir);
 
                 // Make sure that config changes for each existing plugin is in place
-                var plugins = cordova_util.findPlugins(plugins_dir),
-                    platform_json = plugman.config_changes.get_platform_json(plugins_dir, platform);
-                if (plugins && Array.isArray(plugins)) {
-                    plugins.forEach(function(plugin_id) {
-                        if (platform_json.installed_plugins[plugin_id]) {
-                            events.emit('verbose', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
-                            plugman.config_changes.add_plugin_changes(
-                                platform, platformPath, plugins_dir, plugin_id,
-                                /* variables for plugin */ platform_json.installed_plugins[plugin_id],
-                                /* top level plugin? */ true,
-                                /* should increment config munge? cordova-cli never should, only plugman */ false
-                            );
-                        } else if (platform_json.dependent_plugins[plugin_id]) {
-                            events.emit('verbose', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
-                            plugman.config_changes.add_plugin_changes(
-                                platform, platformPath, plugins_dir, plugin_id,
-                                /* variables for plugin */ platform_json.dependent_plugins[plugin_id],
-                                /* top level plugin? */ false,
-                                /* should increment config munge? cordova-cli never should, only plugman */ false
-                            );
-                        }
-                        events.emit('verbose', 'Plugin "' + plugin_id + '" is good to go.');
-                    });
-                }
+                var munger = new plugman.config_changes.PlatformMunger(platform, platformPath, plugins_dir);
+                munger.reapply_global_munge();
+                munger.save_all();
 
                 // Update platform config.xml based on top level config.xml
                 var platform_cfg = new ConfigParser(parser.config_xml());
