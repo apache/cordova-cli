@@ -155,10 +155,16 @@ function launchServer(projectRoot, port) {
                 return do404();
             }
         });
-
-    }).listen(port, undefined, undefined, function (listeningEvent) {
+    }).on('listening', function () {
         console.log("Static file server running on port " + port + " (i.e. http://localhost:" + port + ")\nCTRL + C to shut down");
-    });
+    }).on('error', function (e) {
+        if (e && e.toString().indexOf('EADDRINUSE') !== -1) {
+            port++;
+            server.listen(port);
+        } else {
+            console.log("An error occured starting static file server: " + e);
+        }
+    }).listen(port);
     return server;
 }
 
