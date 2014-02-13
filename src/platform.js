@@ -185,6 +185,9 @@ module.exports = function platform(command, targets) {
                 if (platformsText) {
                     results = platformsText.filter(function (p) {return !!p}).join('\n');
                 }
+                if (!results) {
+                    results = 'All platforms are up-to-date.';
+                }
 
                 events.emit('results', results);
             }).then(function() {
