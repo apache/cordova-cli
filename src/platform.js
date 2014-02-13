@@ -156,6 +156,42 @@ module.exports = function platform(command, targets) {
                 });
             }
             break;
+        case 'check':
+            var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
+            return hooks.fire('before_platform_ls')
+            .then(function() {
+                // Acquire the version number of each platform we have installed, and output that too.
+                return Q.all(platforms_on_fs.map(function(p) {
+                    var script = path.join(projectRoot, 'platforms', p, 'cordova', 'version');
+                    var d = Q.defer();
+                    child_process.exec(script, function(err, stdout, stderr) {
+                        if (err || !stdout) {
+                            d.resolve(null);
+                        }
+                        if (stdout) {
+                            var avail = platforms[p].version;
+                            var cur = stdout.trim();
+                            var out = '';
+                            if (semver.gt(avail, cur)) {
+                                out += p + ' @ ' + cur + ' could be updated to: ' + avail;
+                            }
+                            d.resolve(out);
+                        }
+                    });
+                    return d.promise;
+                }));
+            }).then(function(platformsText) {
+                var results = '';
+                if (platformsText) {
+                    results = platformsText.filter(function (p) {return !!p}).join('\n');
+                }
+
+                events.emit('results', results);
+            }).then(function() {
+                return hooks.fire('after_platform_ls');
+            });
+
+            break;
         case 'ls':
         case 'list':
         default:

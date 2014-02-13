@@ -17,6 +17,7 @@
     under the License.
 */
 var cordova = require('../cordova'),
+    events = require('../src/events'),
     path = require('path'),
     shell = require('shelljs'),
     child_process = require('child_process'),
@@ -298,6 +299,69 @@ describe('platform command', function() {
                     });
                 });
             }
+        });
+        describe('`check`', function() {
+            var real_platforms_data = {},
+            synthetic_platforms_data = {
+                current: {
+                    uri: "https://localhost",
+                    version: "3.3.0",
+                    parser: undefined
+                },
+                stale: {
+                    uri: "https://localhost",
+                    version: "3.3.0",
+                    parser: undefined
+                },
+                newer: {
+                    uri: "https://localhost",
+                    version: "3.3.0",
+                    parser: undefined
+                }
+            };
+            beforeEach(function() {
+                list_platforms.andReturn(['current', 'stale', 'newer']);
+                Object.keys(platforms).forEach(function (k) {
+                    real_platforms_data[k] = platforms[k];
+                    delete platforms[k];
+                });
+                Object.keys(synthetic_platforms_data).forEach(function (k) {
+                    platforms[k] = synthetic_platforms_data[k];
+                });
+            });
+            afterEach(function() {
+                list_platforms.andReturn(['current', 'stale', 'newer']);
+                Object.keys(platforms).forEach(function (k) {
+                    delete platforms[k];
+                });
+                Object.keys(real_platforms_data).forEach(function (k) {
+                    platforms[k] = real_platforms_data[k];
+                });
+            });
+            it('check platforms current, stale, newer', function() {
+                exec.andCallFake(function(cmd, opts, cb) {
+                    var out = '';
+                    if (!cb) cb = opts;
+                    if (/current/.test(cmd)) {
+                        out = '3.3.0';
+                    } else if (/stale/.test(cmd)) {
+                        out = '3.2.0';
+                    } else if (/newer/.test(cmd)) {
+                        out = '3.4.0';
+                    }
+                    cb(null, out, '');
+                });
+                var results;
+                events.on('results', function(res) { results = res; });
+
+                cordova.raw.platform('check');
+                waitsFor(function() {
+                    return results;
+                }, 'promise never resolved', 500);
+                runs(function() {
+                    expect(results).toEqual("stale @ 3.2.0 could be updated to: 3.3.0");
+                });
+            });
         });
     });
     describe('hooks', function() {
