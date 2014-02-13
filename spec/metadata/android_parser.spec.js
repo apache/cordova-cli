@@ -88,13 +88,19 @@ describe('android project parser', function() {
 
         describe('update_from_config method', function() {
             var et, xml, find, write_xml, root, readdir, cfg_parser, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
+            var activity_obj;
             beforeEach(function() {
                 find_obj = {
                     text:'hi'
                 };
+                activity_obj = { attrib: {'android:screenOrientation':'VAL'} };
                 root_obj = {
                     attrib:{
                         package:'android_pkg'
+                    },
+                    find: function(n) {
+                        if (n == './application/activity') { return activity_obj };
+                        throw new Error('unexpected call to mocked find()');
                     }
                 };
                 find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
@@ -134,6 +140,25 @@ describe('android project parser', function() {
                 });
             });
 
+            it('should handle no orientation', function() {
+                p.update_from_config(cfg);
+                expect(activity_obj.attrib['android:screenOrientation']).toEqual('VAL');
+            });
+            it('should handle default orientation', function() {
+                cfg.preference.get = function() { return [{name:'Orientation', value:'Portrait'},{name:'Orientation', value:'Default'}] };
+                p.update_from_config(cfg);
+                expect(activity_obj.attrib['android:screenOrientation']).toBeUndefined();
+            });
+            it('should handle portrait orientation', function() {
+                cfg.preference.get = function() { return [{name:'Orientation', value:'Portrait'}] };
+                p.update_from_config(cfg);
+                expect(activity_obj.attrib['android:screenOrientation']).toEqual('userPortrait');
+            });
+            it('should handle invalid orientation', function() {
+                cfg.preference.get = function() { return [{name:'Orientation', value:'Prtrait'}] };
+                p.update_from_config(cfg);
+                expect(activity_obj.attrib['android:screenOrientation']).toEqual('VAL');
+            });
             it('should write out the app name to strings.xml', function() {
                 p.update_from_config(cfg);
                 expect(find_obj.text).toEqual('testname');
