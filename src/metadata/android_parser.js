@@ -50,6 +50,25 @@ module.exports.check_requirements = function(project_root) {
 };
 
 module.exports.prototype = {
+    findOrientationPreference: function(config) {
+        var ret = null;
+        var preferences = config.preference.get();
+        for (var i = 0, ii = preferences.length; i < ii; ++i) {
+            if (preferences[i].name.toLowerCase() === 'orientation') {
+                if (ret) {
+                    events.emit('warn', 'Multiple orientation preferences encountered. Ignoring all but the last.');
+                }
+                ret = preferences[i].value.toLowerCase();
+            }
+        }
+        if (ret && ret != 'default' && ret != 'portrait' && ret != 'landscape') {
+            events.emit('warn', 'Unknown value for orientation preference: ' + ret);
+            ret = null;
+        }
+
+        return ret;
+    },
+
     update_from_config:function(config) {
         if (config instanceof config_parser) {
         } else throw new Error('update_from_config requires a config_parser object');
@@ -71,6 +90,22 @@ module.exports.prototype = {
         pkg = pkg.replace(/-/g, '_'); // Java packages cannot support dashes
         var orig_pkg = manifest.getroot().attrib.package;
         manifest.getroot().attrib.package = pkg;
+
+        // Set the orientation in the AndroidManifest
+        var orientationPref = this.findOrientationPreference(config);
+        if (orientationPref) {
+            var act = manifest.getroot().find('./application/activity');
+            switch (orientationPref) {
+                case 'default':
+                    delete act.attrib["android:screenOrientation"];
+                    break;
+                case 'portrait':
+                    act.attrib["android:screenOrientation"] = 'userPortrait';
+                    break;
+                case 'landscape':
+                    act.attrib["android:screenOrientation"] = 'userLandscape';
+            }
+        }
 
         // Write out AndroidManifest.xml
         fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');

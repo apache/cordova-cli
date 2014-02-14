@@ -20,7 +20,7 @@
 -->
 # Cordova Hooks
 
-This directory may contains scripts used to customize cordova commands. This
+This directory may contain scripts used to customize cordova commands. This
 directory used to exist at `.cordova/hooks`, but has now been moved to the
 project root. Any scripts you add to these directories will be executed before
 and after the commands corresponding to the directory name. Useful for

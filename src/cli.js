@@ -120,10 +120,6 @@ module.exports = function CLI(inputArgs) {
         throw new CordovaError('Cordova does not know ' + cmd + '; try help for a list of all the available commands.');
     }
 
-    if (cmd === "info") {
-        return cordova.info();
-    }
-
     // Legacy... to remove eventually, options must never be an array
     function legacyOptions(nopt){
         var opt = [], arg;
