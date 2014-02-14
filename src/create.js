@@ -40,7 +40,7 @@ var DEFAULT_NAME = "HelloCordova",
  * @cfg - extra config to be saved in .cordova/config.json
  **/
 // Returns a promise.
-module.exports = function create (dir, id, name, cfg) {
+module.exports = function create (dir, id, name, cfg, command) {
     if (!dir ) {
         return Q(help());
     }

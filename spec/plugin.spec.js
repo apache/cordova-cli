@@ -22,6 +22,7 @@ var cordova = require('../cordova'),
     child_process = require('child_process'),
     plugman = require('plugman'),
     fs = require('fs'),
+    common = require('./common'),
     util = require('../src/util'),
     config = require('../src/config'),
     hooker = require('../src/hooker'),
@@ -49,7 +50,8 @@ describe('plugin command', function() {
         plugman_fetch,
         parsers = {},
         uninstallPlatform,
-        uninstallPlugin;
+        uninstallPlugin,
+        expected = [];
 
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
@@ -76,7 +78,16 @@ describe('plugin command', function() {
         plugman_search = spyOn(plugman.raw, 'search').andReturn(Q());
         uninstallPlatform = spyOn(plugman.raw.uninstall, 'uninstallPlatform').andReturn(Q());
         uninstallPlugin = spyOn(plugman.raw.uninstall, 'uninstallPlugin').andReturn(Q());
+        expected = []
     });
+
+    function results(spy){
+        var results = [];
+        for(var i in spy.calls) {
+            result.push(spy.calls[i].args);
+        }
+        return results;
+    }
 
     describe('failure', function() {
         function expectFailure(p, done, post) {
@@ -142,30 +153,42 @@ describe('plugin command', function() {
         });
         describe('`add`', function() {
             it('should call plugman.fetch for each plugin', function(done) {
-                cordova.raw.plugin('add', sample_plugins).then(function() {
+
+                cordova.raw.plugin('add', sample_plugins).then(function(done) {
+
                     sample_plugins.forEach(function(p) {
-                        expect(plugman_fetch).toHaveBeenCalledWith(p, plugins_dir, {});
+                        expected.push([p, plugins_dir, {}]);
                     });
+
+                    expect( results(plugman_fetch) ).toEqual(expected);
+                    
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);
             });
             it('should call plugman.install, for each plugin, for every platform', function(done) {
                 cordova.raw.plugin('add', sample_plugins).then(function(err) {
+
                     sample_plugins.forEach(function(plug) {
-                        supported_platforms.forEach(function(plat) {
-                            expect(plugman_install).toHaveBeenCalledWith((plat=='blackberry'?'blackberry10':plat), path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object));
-                        });
+                        expected.push( [(plat=='blackberry'?'blackberry10':plat), path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object)] );
                     });
+
+                    expect( results(plugman_install) ).toEqual(expected);
+                    
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);
             });
             it('should pass down variables into plugman', function(done) {
+                                                                   
                 cordova.raw.plugin('add', "one", "--variable", "foo=bar").then(function() {
-                    supported_platforms.forEach(function(plat) {
-                        expect(plugman_install).toHaveBeenCalledWith((plat=='blackberry'?'blackberry10':plat), path.join(project_dir, 'platforms', plat), "one", plugins_dir, {www_dir: jasmine.any(String), cli_variables: { FOO: "bar"}});
+                                                                                                                                                        
+                    supported_platforms.forEach(function(plug) {
+                        expected.push( [(plat=='blackberry'?'blackberry10':plat), path.join(project_dir, 'platforms', plat), "one", plugins_dir, {www_dir: jasmine.any(String), cli_variables: { FOO: "bar"}}] );
                     });
+
+                    expect( results(plugman_install) ).toEqual(expected);
+
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);
@@ -207,9 +230,12 @@ describe('plugin command', function() {
                 cordova.raw.plugin('rm', sample_plugins).then(function() {
                     sample_plugins.forEach(function(plug) {
                         subset.forEach(function(plat) {
-                            expect(uninstallPlatform).toHaveBeenCalledWith(plat, path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object));
+                            expected.push( [plat, path.join(project_dir, 'platforms', plat), plug, plugins_dir, jasmine.any(Object)] );
                         });
                     });
+
+                    expect( results(uninstallPlatform) ).toEqual(expected);
+
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);
@@ -257,14 +283,26 @@ describe('plugin command', function() {
         describe('remove (rm) hooks', function() {
             it('should fire before hooks through the hooker module', function(done) {
                 cordova.raw.plugin('rm', 'two').then(function() {
-                    expect(fire).toHaveBeenCalledWith('before_plugin_rm', {plugins:['two'], options: []});
+                    var hook = fire.calls[0].args[0];
+                    var command = fire.calls[0].args[1];
+
+                    expect(hook).toBe("before_plugin_rm");
+                    expect(command.options).toEqual([]);
+                    expect(command.plugins).toEqual(['two']);
+
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);
             });
             it('should fire after hooks through the hooker module', function(done) {
                 cordova.raw.plugin('rm', 'one').then(function() {
-                    expect(fire).toHaveBeenCalledWith('after_plugin_rm', {plugins:['one'], options:[]});
+                    var hook = fire.mostRecentCall.args[0];
+                    var command = fire.mostRecentCall.args[1];
+                    
+                    expect(hook).toBe("after_plugin_rm");
+                    expect(command.options).toEqual([]);
+                    expect(command.plugins).toEqual(['one']);
+
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);
@@ -273,8 +311,17 @@ describe('plugin command', function() {
         describe('add hooks', function() {
             it('should fire before and after hooks through the hooker module', function(done) {
                 cordova.raw.plugin('add', 'android').then(function() {
-                    expect(fire).toHaveBeenCalledWith('before_plugin_add', {plugins:['android'], options: []});
-                    expect(fire).toHaveBeenCalledWith('after_plugin_add', {plugins:['android'], options: []});
+                                                                                                           
+                    var results = [
+                        [fire.calls[0].args[0]         , 'before_plugin_add'],
+                        [fire.calls[0].args[1].plugins , ['android']],
+                        [fire.calls[1].args[0]         , 'after_plugin_add'],
+                        [fire.calls[1].args[1].plugins , ['android']]
+                    ];
+    
+                    for(var i in results)
+                         expect(results[i][0]).toEqual(results[i][1]);
+
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);

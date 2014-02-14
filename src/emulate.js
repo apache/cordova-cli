@@ -26,13 +26,13 @@ var cordova_util      = require('./util'),
     events            = require('./events'),
     hooker            = require('./hooker'),
     Q                 = require('q'),
-    DEFAULT_OPTIONS   = ["--emulator"],
+    DEFAULT_ARGS      = ["--emulator"],
     os                = require('os');
 
 // Returns a promise.
-function shell_out_to_emulate(projectRoot, platform, options) {
+function shell_out_to_emulate(projectRoot, platform, arguments) {
     var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'run'),
-        args = options.length ? DEFAULT_OPTIONS.concat(options) : DEFAULT_OPTIONS,
+        args = arguments.length ? DEFAULT_ARGS.concat(arguments) : DEFAULT_ARGS,
         d = Q.defer(),
         errors = "",
         child;
@@ -72,30 +72,22 @@ function shell_out_to_emulate(projectRoot, platform, options) {
 }
 
 // Returns a promise.
-module.exports = function emulate(options) {
+module.exports = function emulate(command) {
     var projectRoot = cordova_util.cdProjectRoot(),
         hooks;
 
-    if (!options) {
-        options = {
-            verbose: false,
-            platforms: [],
-            options: []
-        };
-    }
-
-    options = cordova_util.preProcessOptions(options);
+    command = cordova_util.checkCommand(command);
 
     hooks = new hooker(projectRoot);
-    return hooks.fire('before_emulate', options)
+    return hooks.fire('before_emulate', command)
     .then(function() {
         // Run a prepare first!
-        return require('../cordova').raw.prepare(options.platforms);
+        return require('../cordova').raw.prepare(command.platforms);
     }).then(function() {
-        return Q.all(options.platforms.map(function(platform) {
-            return shell_out_to_emulate(projectRoot, platform, options.options);
+        return Q.all(command.platforms.map(function(platform) {
+            return shell_out_to_emulate(projectRoot, platform, command.options);
         }));
     }).then(function() {
-        return hooks.fire('after_emulate', options);
+        return hooks.fire('after_emulate', command);
     });
 };

@@ -201,9 +201,11 @@ function processAddRequest(request, response, platformId, projectRoot) {
     response.end();
 }
 
-module.exports = function server(port) {
+module.exports = function server(command) {
     var projectRoot = cordova_util.cdProjectRoot();
-    port = +port || 8000;
+
+    // serve --port 7000 | serve 7000
+    var port = command.flags.port || parseInt(command.arguments[0]) || 8000;
 
     var hooks = new hooker(projectRoot);
     return hooks.fire('before_serve')

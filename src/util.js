@@ -137,22 +137,20 @@ exports = module.exports = {
         }
         return rootPath;
     },
-    preProcessOptions: function (inputOptions) {
-        var DEFAULT_OPTIONS = {
+
+    checkCommand: function (input, context) {
+        var DEFAULT_COMMAND = {
                 verbose: false,
                 platforms: [],
                 options: []
             },
-            result = inputOptions || DEFAULT_OPTIONS,
+            command = input || DEFAULT_COMMAND,
             projectRoot = this.isCordova();
 
         if (!projectRoot) {
             throw new CordovaError('Current working directory is not a Cordova-based project.');
         }
-        var projectPlatforms = this.listPlatforms(projectRoot);
-        if (projectPlatforms.length === 0) {
-            throw new CordovaError('No platforms added to this project. Please use `cordova platform add <platform>`.');
-        }
+
         /**
          * Current Desired Arguments
          * options: {verbose: boolean, platforms: [String], options: [String]}
@@ -160,23 +158,29 @@ exports = module.exports = {
          * platformList: [String] -- assume just a list of platforms
          * platform: String -- assume this is a platform
          */
-        if (Array.isArray(inputOptions)) {
-            result = {
+        if (Array.isArray(input)) {
+            command = {
                 verbose: false,
-                platforms: inputOptions,
+                platforms: input,
                 options: []
             };
-        } else if (typeof inputOptions === 'string') {
-            result = {
+        } else if (typeof input === 'string') {
+            command = {
                 verbose: false,
-                platforms: [inputOptions],
+                platforms: [input],
                 options: []
             };
         }
-        if (!result.platforms || (result.platforms && result.platforms.length === 0) ) {
-            result.platforms = projectPlatforms;
+
+        var projectPlatforms = this.listPlatforms(projectRoot);
+        if (context !== 'platform' && projectPlatforms.length === 0) {
+            throw new CordovaError('No platforms added to this project. Please use `cordova platform add <platform>`.');
         }
-        return result;
+
+        if (!command.platforms || (command.platforms && command.platforms.length === 0) ) {
+            command.platforms = projectPlatforms;
+        }
+        return command;
     }
 };
 

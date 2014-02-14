@@ -16,36 +16,24 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova_events = require('./src/events');
-var cordova_util = require('./src/util');
-
-var off = function() {
-    cordova_events.removeListener.apply(cordova_events, arguments);
-};
-
-var emit = function() {
-    cordova_events.emit.apply(cordova_events, arguments);
-};
+var events = require('./src/events');
+var util = require('./src/util');
 
 exports = module.exports = {
-    on:        function() {
-        cordova_events.on.apply(cordova_events, arguments);
-    },
-    off:       off,
-    removeListener:off,
-    removeAllListeners:function() {
-        cordova_events.removeAllListeners.apply(cordova_events, arguments);
-    },
-    emit:      emit,
-    trigger:   emit,
+    on:                  events.on.bind(events),
+    off:                 events.removeListener.bind(events),
+    removeListener:      exports.off,
+    removeAllListeners:  events.removeAllListeners.bind(events),
+    emit:                events.emit.bind(events),
+    trigger:             exports.emit,
     raw: {}
 };
 
 exports.findProjectRoot = function(opt_startDir) {
-    return cordova_util.isCordova(opt_startDir);
+    return util.isCordova(opt_startDir);
 }
 
-var addModuleProperty = cordova_util.addModuleProperty;
+var addModuleProperty = util.addModuleProperty;
 addModuleProperty(module, 'prepare', './src/prepare', true);
 addModuleProperty(module, 'build', './src/build', true);
 addModuleProperty(module, 'help', './src/help');

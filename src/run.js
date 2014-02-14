@@ -26,12 +26,13 @@ var cordova_util      = require('./util'),
     events            = require('./events'),
     Q                 = require('q'),
     child_process     = require('child_process'),
+    DEFAULT_ARGS      = ["--device"],
     os                = require('os');
 
 // Returns a promise.
-function shell_out_to_run(projectRoot, platform, options) {
+function shell_out_to_run(projectRoot, platform, arguments) {
     var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'run'),
-        args = options || [],
+        args = arguments || [],
         d = Q.defer(),
         errors = "",
         child;
@@ -71,31 +72,23 @@ function shell_out_to_run(projectRoot, platform, options) {
 }
 
 // Returns a promise.
-module.exports = function run(options) {
+module.exports = function run(command) {
     var projectRoot = cordova_util.cdProjectRoot(),
         hooks;
 
-    if (!options) {
-        options = {
-            verbose: false,
-            platforms: [],
-            options: []
-        };
-    }
-
-    options = cordova_util.preProcessOptions(options);
+    command = cordova_util.checkCommand(command);
 
     hooks = new hooker(projectRoot);
-    return hooks.fire('before_run', options)
+    return hooks.fire('before_run', command)
     .then(function() {
         // Run a prepare first, then shell out to run
-        return require('../cordova').raw.prepare(options.platforms)
+        return require('../cordova').raw.prepare(command.platforms)
         .then(function() {
-            return Q.all(options.platforms.map(function(platform) {
-                return shell_out_to_run(projectRoot, platform, options.options);
+            return Q.all(command.platforms.map(function(platform) {
+                return shell_out_to_run(projectRoot, platform, command.options);
             }));
         }).then(function() {
-            return hooks.fire('after_run', options);
+            return hooks.fire('after_run', command);
         });
     });
 };
