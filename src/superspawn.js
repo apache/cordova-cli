@@ -62,8 +62,6 @@ exports.spawn = function(cmd, args, opts) {
         }
     }
 
-    events.emit(opts.printCommand ? 'log' : 'verbose', 'Running command: ' + cmd + ' Args: ' + args);
-
     var spawnOpts = {};
     if (opts.stdio == 'ignore') {
         spawnOpts.stdio = 'ignore';
@@ -76,6 +74,8 @@ exports.spawn = function(cmd, args, opts) {
     if (opts.env) {
         spawnOpts.env = _.extend(_.extend({}, process.env), opts.env);
     }
+
+    events.emit(opts.printCommand ? 'log' : 'verbose', 'Running command: ' + cmd + ' args=' + JSON.stringify(args));
 
     var child = child_process.spawn(cmd, args, spawnOpts);
     var capturedOut = '';
@@ -93,14 +93,26 @@ exports.spawn = function(cmd, args, opts) {
         });
     }
 
-    child.on('close', function(code) {
+    child.on('close', whenDone);
+    child.on('error', whenDone);
+    function whenDone(arg) {
+        child.removeListener('close', whenDone);
+        child.removeListener('error', whenDone);
+        var code = typeof arg == 'number' ? arg : arg && arg.code;
+
         events.emit('verbose', 'Command finished with error code ' + code + ': ' + cmd + ' ' + args);
         if (code === 0) {
             d.resolve(capturedOut.trim());
         } else {
-            d.reject(new Error(capturedErr.trim()));
+            var errMsg = cmd + ': Command failed with exit code ' + code;
+            if (capturedErr) {
+                errMsg += ' Error output:\n' + capturedErr.trim();
+            }
+            var err = new Error(errMsg);
+            err.code = code;
+            d.reject(err);
         }
-    });
+    }
 
     return d.promise;
 };
