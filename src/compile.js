@@ -23,19 +23,11 @@
 var path              = require('path'),
     cordova_util      = require('./util'),
     hooker            = require('./hooker'),
-    superspawn        = require('./superspawn'),
-    events            = require('./events');
+    superspawn        = require('./superspawn');
 
 // Returns a promise.
 module.exports = function compile(options) {
     var projectRoot = cordova_util.cdProjectRoot();
-
-    options = options || {
-        verbose: false,
-        platforms: [],
-        options: []
-    };
-
     options = cordova_util.preProcessOptions(options);
 
     var hooks = new hooker(projectRoot);
@@ -43,12 +35,7 @@ module.exports = function compile(options) {
     options.platforms.forEach(function(platform) {
         ret = ret.then(function() {
             var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'build');
-
-            events.emit('log', 'Compiling ' + platform + ' project');
-            return superspawn.spawn(cmd, options.options, { stdio: 'inherit' })
-            .then(function() {
-                events.emit('log', 'Platform "' + platform + '" compiled successfully.');
-            });
+            return superspawn.spawn(cmd, options.options, { stdio: 'inherit', printCommand: true });
         });
     });
     ret = ret.then(function() {
