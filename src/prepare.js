@@ -97,7 +97,6 @@ module.exports = function prepare(options) {
                 var plugins = cordova_util.findPlugins(plugins_dir),
                     platform_json = plugman.config_changes.get_platform_json(plugins_dir, platform);
                 if (plugins && Array.isArray(plugins)) {
-                    var plugman_cache = {};
                     plugins.forEach(function(plugin_id) {
                         if (platform_json.installed_plugins[plugin_id]) {
                             events.emit('verbose', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
@@ -105,8 +104,7 @@ module.exports = function prepare(options) {
                                 platform, platformPath, plugins_dir, plugin_id,
                                 /* variables for plugin */ platform_json.installed_plugins[plugin_id],
                                 /* top level plugin? */ true,
-                                /* should increment config munge? cordova-cli never should, only plugman */ false,
-                                plugman_cache
+                                /* should increment config munge? cordova-cli never should, only plugman */ false
                             );
                         } else if (platform_json.dependent_plugins[plugin_id]) {
                             events.emit('verbose', 'Ensuring plugin "' + plugin_id + '" is installed correctly...');
@@ -114,8 +112,7 @@ module.exports = function prepare(options) {
                                 platform, platformPath, plugins_dir, plugin_id,
                                 /* variables for plugin */ platform_json.dependent_plugins[plugin_id],
                                 /* top level plugin? */ false,
-                                /* should increment config munge? cordova-cli never should, only plugman */ false,
-                                plugman_cache
+                                /* should increment config munge? cordova-cli never should, only plugman */ false
                             );
                         }
                         events.emit('verbose', 'Plugin "' + plugin_id + '" is good to go.');
