@@ -21,7 +21,6 @@ var fs = require('fs'),
     shell = require('shelljs'),
     util = require('../util'),
     Q = require('q'),
-    child_process = require('child_process'),
     config_parser = require('../config_parser'),
     config = require('../config');
 

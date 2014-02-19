@@ -25,7 +25,6 @@ var platforms = require('../../platforms'),
     ET = require('elementtree'),
     fs = require('fs'),
     Q = require('q'),
-    child_process = require('child_process'),
     config = require('../../src/config'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
@@ -35,12 +34,8 @@ var cfg = new config_parser(path.join(__dirname, '..', 'test-config.xml'));
 
 describe('ios project parser', function () {
     var proj = path.join('some', 'path');
-    var exec, custom, readdir, cfg_parser;
+    var custom, readdir, cfg_parser;
     beforeEach(function() {
-        exec = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
-            if (!cb) cb = opts;
-            cb(null, '', '');
-        });
         custom = spyOn(config, 'has_custom_path').andReturn(false);
         readdir = spyOn(fs, 'readdirSync').andReturn(['test.xcodeproj']);
         cfg_parser = spyOn(util, 'config_parser');

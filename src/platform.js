@@ -20,7 +20,6 @@ var config            = require('./config'),
     cordova_util      = require('./util'),
     util              = require('util'),
     fs                = require('fs'),
-    os                = require('os'),
     path              = require('path'),
     hooker            = require('./hooker'),
     events            = require('./events'),
@@ -28,9 +27,17 @@ var config            = require('./config'),
     CordovaError      = require('./CordovaError'),
     Q                 = require('q'),
     platforms         = require('../platforms'),
-    child_process     = require('child_process'),
+    superspawn        = require('./superspawn'),
     semver            = require('semver'),
     shell             = require('shelljs');
+
+function getVersionFromScript(script, defaultValue) {
+    var versionPromise = Q(defaultValue);
+    if (fs.existsSync(script)) {
+        versionPromise = superspawn.spawn(script);
+    }
+    return versionPromise;
+}
 
 // Returns a promise.
 module.exports = function platform(command, targets) {
@@ -132,27 +139,12 @@ module.exports = function platform(command, targets) {
                 }).then(function(libDir) {
                     // Call the platform's update script.
                     var script = path.join(libDir, 'bin', 'update');
-                    var d = Q.defer();
-                    var cmd = '"' + script + '" "' + platformPath + '"';
-                    events.emit('verbose', 'Running command:' + cmd);
-                    child_process.exec(cmd, function(err, stdout, stderr) {
-                        if (err) {
-                            d.reject(new Error('Update script failed: ' + err + stderr));
-                        } else {
-                            // Copy the new cordova.js from www -> platform_www.
-                            copyCordovaJs();
-                            var script = path.join(projectRoot, 'platforms', plat, 'cordova', 'version');
-                            child_process.exec(script, function(err, stdout, stderr) {
-                                var version = platforms[plat].version;
-                                if (!err) {
-                                    version = stdout;
-                                }
-                                events.emit('log', plat + ' updated to ' + version);
-                                d.resolve();
-                            });
-                        }
+                    return superspawn.spawn(script, [platformPath], { stdio: 'inherit' })
+                    .then(function() {
+                        // Copy the new cordova.js from www -> platform_www.
+                        copyCordovaJs();
+                        // Leave it to the update script to log out "updated to v FOO".
                     });
-                    return d.promise;
                 });
             }
             break;
@@ -162,23 +154,17 @@ module.exports = function platform(command, targets) {
             .then(function() {
                 // Acquire the version number of each platform we have installed, and output that too.
                 return Q.all(platforms_on_fs.map(function(p) {
-                    var script = path.join(projectRoot, 'platforms', p, 'cordova', 'version');
-                    var d = Q.defer();
-                    child_process.exec(script, function(err, stdout, stderr) {
-                        if (err || !stdout) {
-                            d.resolve(null);
+                    return getVersionFromScript(path.join(projectRoot, 'platforms', p, 'cordova', 'version'), null)
+                    .then(function(v) {
+                        if (!v) {
+                            return null;
                         }
-                        if (stdout) {
-                            var avail = platforms[p].version;
-                            var cur = stdout.trim();
-                            var out = '';
-                            if (semver.gt(avail, cur)) {
-                                out += p + ' @ ' + cur + ' could be updated to: ' + avail;
-                            }
-                            d.resolve(out);
+                        var avail = platforms[p].version;
+                        if (semver.gt(avail, v)) {
+                            return p + ' @ ' + v + ' could be updated to: ' + avail;
                         }
+                        return '';
                     });
-                    return d.promise;
                 }));
             }).then(function(platformsText) {
                 var results = '';
@@ -203,28 +189,23 @@ module.exports = function platform(command, targets) {
             .then(function() {
                 // Acquire the version number of each platform we have installed, and output that too.
                 return Q.all(platforms_on_fs.map(function(p) {
-                    var script = path.join(projectRoot, 'platforms', p, 'cordova', 'version');
-                    var d = Q.defer();
-                    child_process.exec('"' + script + '"', function(err, stdout, stderr) {
-                        if (err) d.resolve(p);
-                        else {
-                            if (stdout) d.resolve(p + ' ' + stdout.trim());
-                            else d.resolve(p);
-                        }
+                    return getVersionFromScript(path.join(projectRoot, 'platforms', p, 'cordova', 'version'), null)
+                    .then(function(v) {
+                        if (!v) return p;
+                        return p + ' ' + v;
                     });
-                    return d.promise;
                 }));
             }).then(function(platformsText) {
                 var results = 'Installed platforms: ' + platformsText.join(', ') + '\n';
                 var available = ['android', 'blackberry10', 'firefoxos'];
-                if (os.platform() === 'darwin')
+                if (process.platform === 'darwin')
                     available.push('ios');
-                if (os.platform() === 'win32') {
+                if (process.platform.slice(0, 3) === 'win') {
                     available.push('wp7');
                     available.push('wp8');
                     available.push('windows8');
                 }
-                if (os.platform() === 'linux')
+                if (process.platform === 'linux')
                     available.push('ubuntu');
 
                 available = available.filter(function(p) {
@@ -289,41 +270,33 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
         events.emit('verbose', 'Checking if platform "' + target + '" passes minimum requirements...');
         return module.exports.supports(projectRoot, target)
         .then(function() {
-            // Create a platform app using the ./bin/create scripts that exist in each repo.
+            events.emit('log', 'Creating ' + target + ' project...');
             var bin = path.join(libDir, 'bin', 'create');
-            var args = '';
+            var args = [];
             if (target == 'android') {
                 var platformVersion = fs.readFileSync(path.join(libDir, 'VERSION'), 'UTF-8').trim();
                 if (semver.gt(platformVersion, '3.3.0')) {
-                    args = '--cli';
+                    args.push('--cli');
                 }
             } else if (target == 'ios') {
                 var platformVersion = fs.readFileSync(path.join(libDir, 'CordovaLib', 'VERSION'), 'UTF-8').trim();
-                args = '--arc';
+                args.push('--arc');
                 if (semver.gt(platformVersion, '3.3.0')) {
-                    args += ' --cli';
+                    args.push('--cli');
                 }
             }
+
             var pkg = cfg.packageName().replace(/[^\w.]/g,'_');
             var name = cfg.name();
-            var command = util.format('"%s" %s "%s" "%s" "%s"', bin, args, output, pkg, name);
+            args.push(output, pkg, name);
             if (template_dir) {
-                command += ' "' + template_dir + '"';
+                args.push(template_dir);
             }
-            events.emit('log', 'Creating ' + target + ' project...');
-            events.emit('verbose', 'Running bin/create for platform "' + target + '" with command: "' + command + '" (output to follow)');
-
-            // Run platform's create script
-            var d = Q.defer();
-            child_process.exec(command, function(err, create_output, stderr) {
-                events.emit('verbose', create_output);
-                if (err) {
-                    d.reject(new Error('An error occured during creation of ' + target + ' sub-project. ' + create_output + '\n' + stderr));
-                } else {
-                    d.resolve(require('../cordova').raw.prepare(target));
-                }
-            });
-            return d.promise.then(function() {
+            return superspawn.spawn(bin, args, { stdio: 'inherit' })
+            .then(function() {
+                return require('../cordova').raw.prepare(target);
+            })
+            .then(function() {
                 createOverrides(projectRoot, target);
                 // Install all currently installed plugins into this new platform.
                 var plugins_dir = path.join(projectRoot, 'plugins');

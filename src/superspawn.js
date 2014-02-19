@@ -51,6 +51,7 @@ function resolvePath(cmd) {
 // Returns a promise that succeeds only for return code = 0.
 exports.spawn = function(cmd, args, opts) {
     args = args || [];
+    opts = opts || {};
     var d = Q.defer();
     if (process.platform.slice(0, 3) == 'win') {
         cmd = resolvePath(cmd);

@@ -23,7 +23,6 @@ var platforms = require('../../platforms'),
     fs = require('fs'),
     ET = require('elementtree'),
     Q = require('q'),
-    child_process = require('child_process'),
     config = require('../../src/config'),
     config_parser = require('../../src/config_parser'),
     cordova = require('../../cordova');
@@ -33,13 +32,9 @@ var cfg = new config_parser(path.join(__dirname, '..', 'test-config.xml'));
 
 describe('android project parser', function() {
     var proj = path.join('some', 'path');
-    var exists, exec, custom;
+    var exists, custom;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
-        exec = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
-            if (!cb) cb = opts;
-            cb(null, 'android-17', '');
-        });
         custom = spyOn(config, 'has_custom_path').andReturn(false);
     });
 
