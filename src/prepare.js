@@ -69,7 +69,7 @@ module.exports = function prepare(options) {
                 //or copy project config into platform if none exists
                 if (fs.existsSync(defaults_xml_path)) {
                     shell.cp("-f", defaults_xml_path, parser.config_xml());
-                    events.emit('log', 'Generating config.xml from defaults for platform "' + platform + '"');
+                    events.emit('verbose', 'Generating config.xml from defaults for platform "' + platform + '"');
                 } else {
                     if(fs.existsSync(parser.config_xml())){
                         shell.cp("-f", parser.config_xml(), defaults_xml_path);
