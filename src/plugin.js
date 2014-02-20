@@ -101,9 +101,6 @@ module.exports = function plugin(command, targets, opts) {
                         var plugman = require('plugman');
                         return plugman.raw.fetch(target, pluginsDir, { searchpath: searchPath});
                     })
-                    .fail(function(err) {
-                        return Q.reject(new Error('Fetching plugin failed: ' + err));
-                    })
                     .then(function(dir) {
                         // Iterate (in serial!) over all platforms in the project and install the plugin.
                         return platformList.reduce(function(soFar, platform) {
