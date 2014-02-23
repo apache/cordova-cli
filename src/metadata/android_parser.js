@@ -65,37 +65,75 @@ module.exports.prototype = {
         if (icons) {
           var haveSeenDefaultIcon = false;
           var iconCount = 0;
+          var android_icons = {};
+          var projectRoot = util.isCordova(this.path);
+          var default_icon;
+          var max_size;
+          var max_density;
+          var densities = {
+            "ldpi" : 36,
+            "mdpi" : 48,
+            "hdpi" : 72,
+            "xhdpi" : 96
+          };
           for (var i=0; i<icons.length; i++) {
             var icon = icons[i];
-            var iconplatform = icon["cdv:platform"];
-            // if the icon is for the Android platform
-            if (!iconplatform || (iconplatform === "android")) {
-              var density = icon["cdv:density"];
-              var projectRoot = util.isCordova(this.path);
-              //var app_www = util.projectWww(projectRoot);
-              // icon live in projectRoot/<icon.src>
-              var srcfilepath = path.join(projectRoot, icon.src);
-              var destfilepath;
-              // the target icon is always named icon.png or we would need to patch AndroidManifest.xml too
-              if (density) {
-                destfilepath = path.join(this.path, 'res', 'drawable-'+density, 'icon.png');
+            var destfilepath;
+            var size = icon.width;
+            if (!size) {
+              size = icon.height;
+            }
+            if (!size) {
+              if (default_icon) {
+                  events.emit('verbose', "more than one default icon: " + icon); 
               } else {
-                if (haveSeenDefaultIcon) {
-                  events.emit('verbose', 'Found multiple default icons. Please add cdv:density and cdv:platform to icon element in config.xml: ' + srcfilepath + ' -> ' + destfilepath);
-                }
-                haveSeenDefaultIcon = true;
-                destfilepath = path.join(this.path, 'res', 'drawable', 'icon.png');
+                  default_icon = icon;
               }
-              shell.cp('-f', srcfilepath, destfilepath);
-              events.emit('verbose', 'Copied icon from ' + srcfilepath + ' to ' + destfilepath);
-              iconCount++;
             } else {
-              events.emit('verbose', 'Ignoring icon ' + icon.src + '; Platform=' + iconplatform);
-            }
-            if (iconCount === 0) {
-              events.emit('verbose', 'no icons found for platform android. Missing e.g. cdv:platform="android" cdv:density="hdpi"? ');
-            }
+              var parseIcon = function(icon, icon_size, size, density) {
+                var i = parseInt(icon_size);
+                if (size == parseInt(icon_size)) {
+                  android_icons[density] = icon;
+                  if (!max_size) {
+                    max_size = size;
+                    max_density = density;
+                  } else {
+                    if (max_size < size) {
+                      max_size = size
+                      max_density = density;
+                    }
+                  }
+                }
+              };
+              for (var density in densities) {
+                parseIcon(icon, size, densities[density], density);
+              }
+            } 
           }
+
+          var copyIcon = function(density) {
+            var srcfilepath;
+            var destfilepath = path.join(this.path, 'res', 'drawable-'+density, 'icon.png');
+            if (android_icons[density]) {
+              srcfilepath = path.join(projectRoot, android_icons[density].src);
+            } else {
+              if (default_icon) {
+                srcfilepath = path.join(projectRoot, default_icon.src);
+              } else {
+                if (max_density) {
+                  srcfilepath = path.join(projectRoot, android_icons[max_density].src);
+                } else {
+                  events.emit('verbose', 'no icon found matching Android typical densities');
+                }
+              }
+            }
+            shell.cp('-f', srcfilepath, destfilepath);
+            events.emit('verbose', 'Copied icon from ' + srcfilepath + ' to ' + destfilepath);
+          }.bind(this);
+          for (var density in densities) {
+            copyIcon(density);
+          }
+
         }
 
         var manifest = xml.parseElementtreeSync(this.manifest);
