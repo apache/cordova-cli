@@ -21,21 +21,34 @@ var platforms = require('../../platforms'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
-    ET = require('elementtree'),
+    et = require('elementtree'),
+    xmlHelpers = require('../../src/xml-helpers'),
     Q = require('q'),
     config = require('../../src/config'),
-    config_parser = require('../../src/config_parser'),
+    ConfigParser = require('../../src/ConfigParser'),
     cordova = require('../../cordova');
 
 // Create a real config object before mocking out everything.
-var cfg = new config_parser(path.join(__dirname, '..', 'test-config.xml'));
+var cfg = new ConfigParser(path.join(__dirname, '..', 'test-config.xml'));
+
+var STRINGS_XML = '<resources> <string name="app_name">mobilespec</string> </resources>';
+var MANIFEST_XML = '<manifest android:versionCode="1" android:versionName="0.0.1" package="org.apache.mobilespec">\n' +
+    '<application android:hardwareAccelerated="true" android:icon="@drawable/icon" android:label="@string/app_name">\n' +
+    '    <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" android:label="@string/app_name" android:name="mobilespec" android:screenOrientation="VAL">\n' +
+    '        <intent-filter>\n' +
+    '            <action android:name="android.intent.action.MAIN" />\n' +
+    '            <category android:name="android.intent.category.LAUNCHER" />\n' +
+    '        </intent-filter>\n' +
+    '    </activity>\n' +
+    '</application>\n' +
+    '</manifest>\n';
 
 describe('android project parser', function() {
     var proj = path.join('some', 'path');
-    var exists, custom;
+    var exists;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
-        custom = spyOn(config, 'has_custom_path').andReturn(false);
+        spyOn(config, 'has_custom_path').andReturn(false);
     });
 
     function wrapper(p, done, post) {
@@ -71,7 +84,11 @@ describe('android project parser', function() {
     describe('instance', function() {
         var p, cp, rm, mkdir, is_cordova, write, read;
         var android_proj = path.join(proj, 'platforms', 'android');
+        var stringsRoot;
+        var manifestRoot;
         beforeEach(function() {
+            stringsRoot = null;
+            manifestRoot = null;
             p = new platforms.android.parser(android_proj);
             cp = spyOn(shell, 'cp');
             rm = spyOn(shell, 'rm');
@@ -79,92 +96,55 @@ describe('android project parser', function() {
             write = spyOn(fs, 'writeFileSync');
             read = spyOn(fs, 'readFileSync');
             mkdir = spyOn(shell, 'mkdir');
+            spyOn(xmlHelpers, 'parseElementtreeSync').andCallFake(function(path) {
+                if (/strings/.exec(path)) {
+                    return stringsRoot = new et.ElementTree(et.XML(STRINGS_XML));
+                } else if (/AndroidManifest/.exec(path)) {
+                    return manifestRoot = new et.ElementTree(et.XML(MANIFEST_XML));
+                }
+            });
         });
 
         describe('update_from_config method', function() {
-            var et, xml, find, write_xml, root, readdir, cfg_parser, find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
-            var activity_obj;
             beforeEach(function() {
-                find_obj = {
-                    text:'hi'
-                };
-                activity_obj = { attrib: {'android:screenOrientation':'VAL'} };
-                root_obj = {
-                    attrib:{
-                        package:'android_pkg'
-                    },
-                    find: function(n) {
-                        if (n == './application/activity') { return activity_obj };
-                        throw new Error('unexpected call to mocked find()');
-                    }
-                };
-                find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
-                write_xml = jasmine.createSpy('ElementTree write');
-                root = jasmine.createSpy('ElementTree getroot').andReturn(root_obj);
-                et = spyOn(ET, 'ElementTree').andReturn({
-                    find:find,
-                    write:write_xml,
-                    getroot:root
-                });
-                xml = spyOn(ET, 'XML');
-                readdir = spyOn(fs, 'readdirSync').andReturn([path.join(proj, 'src', 'android_pkg', 'MyApp.java')]);
+                spyOn(fs, 'readdirSync').andReturn([path.join(proj, 'src', 'android_pkg', 'MyApp.java')]);
                 cfg.name = function() { return 'testname' };
                 cfg.packageName = function() { return 'testpkg' };
                 cfg.version = function() { return 'one point oh' };
-                cfg.access.get = function() { return [] };
-                cfg.preference.get = function() { return [] };
-                cfg.content = function() { return 'index.html' };
                 read.andReturn('package org.cordova.somepackage; public class MyApp extends CordovaActivity { }');
-                cfg_access_add = jasmine.createSpy('config_parser access add');
-                cfg_access_rm = jasmine.createSpy('config_parser access rm');
-                cfg_pref_rm = jasmine.createSpy('config_parser pref rm');
-                cfg_pref_add = jasmine.createSpy('config_parser pref add');
-                cfg_content = jasmine.createSpy('config_parser content');
-                cfg_parser = spyOn(util, 'config_parser').andReturn({
-                    access:{
-                        remove:cfg_access_rm,
-                        get:function(){},
-                        add:cfg_access_add
-                    },
-                    preference:{
-                        remove:cfg_pref_rm,
-                        get:function(){},
-                        add:cfg_pref_add
-                    },
-                    content:cfg_content
-                });
             });
 
             it('should handle no orientation', function() {
+                cfg.getPreference = function() { return null; };
                 p.update_from_config(cfg);
-                expect(activity_obj.attrib['android:screenOrientation']).toEqual('VAL');
+                expect(manifestRoot.getroot().find('./application/activity').attrib['android:screenOrientation']).toEqual('VAL');
             });
             it('should handle default orientation', function() {
-                cfg.preference.get = function() { return [{name:'Orientation', value:'Portrait'},{name:'Orientation', value:'Default'}] };
+                cfg.getPreference = function() { return 'default'; };
                 p.update_from_config(cfg);
-                expect(activity_obj.attrib['android:screenOrientation']).toBeUndefined();
+                expect(manifestRoot.getroot().find('./application/activity').attrib['android:screenOrientation']).toBeUndefined();
             });
             it('should handle portrait orientation', function() {
-                cfg.preference.get = function() { return [{name:'Orientation', value:'Portrait'}] };
+                cfg.getPreference = function() { return 'portrait'; };
                 p.update_from_config(cfg);
-                expect(activity_obj.attrib['android:screenOrientation']).toEqual('userPortrait');
+                expect(manifestRoot.getroot().find('./application/activity').attrib['android:screenOrientation']).toEqual('userPortrait');
             });
             it('should handle invalid orientation', function() {
-                cfg.preference.get = function() { return [{name:'Orientation', value:'Prtrait'}] };
+                cfg.getPreference = function() { return 'prtrait'; };
                 p.update_from_config(cfg);
-                expect(activity_obj.attrib['android:screenOrientation']).toEqual('VAL');
+                expect(manifestRoot.getroot().find('./application/activity').attrib['android:screenOrientation']).toEqual('VAL');
             });
             it('should write out the app name to strings.xml', function() {
                 p.update_from_config(cfg);
-                expect(find_obj.text).toEqual('testname');
+                expect(stringsRoot.getroot().find('string').text).toEqual('testname');
             });
             it('should write out the app id to androidmanifest.xml and update the cordova-android entry Java class', function() {
                 p.update_from_config(cfg);
-                expect(root_obj.attrib.package).toEqual('testpkg');
+                expect(manifestRoot.getroot().attrib.package).toEqual('testpkg');
             });
             it('should write out the app version to androidmanifest.xml', function() {
                 p.update_from_config(cfg);
-                expect(root_obj.attrib['android:versionName']).toEqual('one point oh');
+                expect(manifestRoot.getroot().attrib['android:versionName']).toEqual('one point oh');
             });
         });
         describe('www_dir method', function() {

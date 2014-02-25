@@ -18,6 +18,7 @@
 */
 var config            = require('./config'),
     cordova_util      = require('./util'),
+    ConfigParser     = require('./ConfigParser'),
     util              = require('util'),
     fs                = require('fs'),
     path              = require('path'),
@@ -62,7 +63,7 @@ module.exports = function platform(command, targets) {
     }
 
     var xml = cordova_util.projectConfig(projectRoot);
-    var cfg = new cordova_util.config_parser(xml);
+    var cfg = new ConfigParser(xml);
     var opts = {
         platforms:targets
     };

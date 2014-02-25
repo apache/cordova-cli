@@ -17,6 +17,7 @@
     under the License.
 */
 var cordova_util      = require('./util'),
+    ConfigParser = require('./ConfigParser'),
     path              = require('path'),
     platforms         = require('../platforms'),
     platform          = require('./platform'),
@@ -31,7 +32,7 @@ var cordova_util      = require('./util'),
     util              = require('util');
 
 // Returns a promise.
-module.exports = function prepare(options) {
+exports = module.exports = function prepare(options) {
     var projectRoot = cordova_util.cdProjectRoot();
 
     if (!options) {
@@ -55,7 +56,7 @@ module.exports = function prepare(options) {
     var hooks = new hooker(projectRoot);
     return hooks.fire('before_prepare', options)
     .then(function() {
-        var cfg = new cordova_util.config_parser(xml);
+        var cfg = new ConfigParser(xml);
 
         // Iterate over each added platform
         return Q.all(options.platforms.map(function(platform) {
@@ -119,9 +120,10 @@ module.exports = function prepare(options) {
                     });
                 }
 
-                //Update platform config.xml based on top level config.xml
-                var platform_cfg = new cordova_util.config_parser(parser.config_xml());
-                platform_cfg.merge_with(cfg, platform, true);
+                // Update platform config.xml based on top level config.xml
+                var platform_cfg = new ConfigParser(parser.config_xml());
+                exports._mergeXml(cfg.doc.getroot(), platform_cfg.doc.getroot(), platform, true);
+                platform_cfg.write();
 
                 return parser.update_project(cfg);
             }).fail(function(e) {
@@ -132,3 +134,71 @@ module.exports = function prepare(options) {
         });
     });
 };
+
+var BLACKLIST = ["platform"];
+var SINGLETONS = ["content", "author"];
+function mergeXml(src, dest, platform, clobber) {
+    if (BLACKLIST.indexOf(src.tag) === -1) {
+        //Handle attributes
+        Object.getOwnPropertyNames(src.attrib).forEach(function (attribute) {
+            if (clobber || !dest.attrib[attribute]) {
+                dest.attrib[attribute] = src.attrib[attribute];
+            }
+        });
+        //Handle text
+        if (src.text && (clobber || !dest.text)) {
+            dest.text = src.text;
+        }
+        //Handle platform
+        if (platform) {
+            src.findall('platform[@name="' + platform + '"]').forEach(function (platformElement) {
+                platformElement.getchildren().forEach(mergeChild);
+            });
+        }
+
+        //Handle children
+        src.getchildren().forEach(mergeChild);
+
+        function mergeChild (srcChild) {
+            var srcTag = srcChild.tag,
+                destChild = new et.Element(srcTag),
+                foundChild,
+                query = srcTag + "",
+                shouldMerge = true;
+
+            if (BLACKLIST.indexOf(srcTag) === -1) {
+                if (SINGLETONS.indexOf(srcTag) !== -1) {
+                    foundChild = dest.find(query);
+                    if (foundChild) {
+                        destChild = foundChild;
+                        dest.remove(0, destChild);
+                    }
+                } else {
+                    //Check for an exact match and if you find one don't add
+                    Object.getOwnPropertyNames(srcChild.attrib).forEach(function (attribute) {
+                        query += "[@" + attribute + '="' + srcChild.attrib[attribute] + '"]';
+                    });
+                    foundChild = dest.find(query);
+                    if (foundChild && textMatch(srcChild, foundChild)) {
+                        destChild = foundChild;
+                        dest.remove(0, destChild);
+                        shouldMerge = false;
+                    }
+                }
+
+                mergeXml(srcChild, destChild, platform, clobber && shouldMerge);
+                dest.append(destChild);
+            }
+        }
+
+        function textMatch(elm1, elm2) {
+            var text1 = elm1.text ? elm1.text.replace(/\s+/, "") : "",
+                text2 = elm2.text ? elm2.text.replace(/\s+/, "") : "";
+            return (text1 === "" || text1 === text2);
+        }
+    }
+}
+
+// Expose for testing.
+exports._mergeXml = mergeXml;
+

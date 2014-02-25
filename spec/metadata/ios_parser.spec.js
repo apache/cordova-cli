@@ -22,23 +22,22 @@ var platforms = require('../../platforms'),
     shell = require('shelljs'),
     plist = require('plist-with-patches'),
     xcode = require('xcode'),
-    ET = require('elementtree'),
+    et = require('elementtree'),
     fs = require('fs'),
     Q = require('q'),
     config = require('../../src/config'),
-    config_parser = require('../../src/config_parser'),
+    ConfigParser = require('../../src/ConfigParser'),
     cordova = require('../../cordova');
 
 // Create a real config object before mocking out everything.
-var cfg = new config_parser(path.join(__dirname, '..', 'test-config.xml'));
+var cfg = new ConfigParser(path.join(__dirname, '..', 'test-config.xml'));
 
 describe('ios project parser', function () {
     var proj = path.join('some', 'path');
-    var custom, readdir, cfg_parser;
+    var custom, readdir;
     beforeEach(function() {
         custom = spyOn(config, 'has_custom_path').andReturn(false);
         readdir = spyOn(fs, 'readdirSync').andReturn(['test.xcodeproj']);
-        cfg_parser = spyOn(util, 'config_parser');
     });
 
     function wrapper(p, done, post) {
@@ -84,29 +83,12 @@ describe('ios project parser', function () {
         });
 
         describe('update_from_config method', function() {
-            var et, xml, find, write_xml, root, mv;
-            var find_obj, root_obj, cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
+            var mv;
+            var cfg_access_add, cfg_access_rm, cfg_pref_add, cfg_pref_rm, cfg_content;
             var plist_parse, plist_build, xc;
             var update_name, xc_write;
             beforeEach(function() {
                 mv = spyOn(shell, 'mv');
-                find_obj = {
-                    text:'hi'
-                };
-                root_obj = {
-                    attrib:{
-                        package:'android_pkg'
-                    }
-                };
-                find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
-                write_xml = jasmine.createSpy('ElementTree write');
-                root = jasmine.createSpy('ElementTree getroot').andReturn(root_obj);
-                et = spyOn(ET, 'ElementTree').andReturn({
-                    find:find,
-                    write:write_xml,
-                    getroot:root
-                });
-                xml = spyOn(ET, 'XML');
                 plist_parse = spyOn(plist, 'parseFileSync').andReturn({
                 });
                 plist_build = spyOn(plist, 'build').andReturn('');
@@ -120,27 +102,6 @@ describe('ios project parser', function () {
                 cfg.name = function() { return 'testname' };
                 cfg.packageName = function() { return 'testpkg' };
                 cfg.version = function() { return 'one point oh' };
-                cfg.access.get = function() { return [] };
-                cfg.preference.get = function() { return [] };
-                cfg.content = function() { return 'index.html'; };
-                cfg_access_add = jasmine.createSpy('config_parser access add');
-                cfg_access_rm = jasmine.createSpy('config_parser access rm');
-                cfg_pref_rm = jasmine.createSpy('config_parser pref rm');
-                cfg_pref_add = jasmine.createSpy('config_parser pref add');
-                cfg_content = jasmine.createSpy('config_parser content');
-                cfg_parser.andReturn({
-                    access:{
-                        remove:cfg_access_rm,
-                        get:function(){},
-                        add:cfg_access_add
-                    },
-                    preference:{
-                        remove:cfg_pref_rm,
-                        get:function(){},
-                        add:cfg_pref_add
-                    },
-                    content:cfg_content
-                });
                 p = new platforms.ios.parser(ios_proj);
             });
 

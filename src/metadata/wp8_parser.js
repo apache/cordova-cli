@@ -24,7 +24,7 @@ var fs            = require('fs'),
     shell         = require('shelljs'),
     child_process = require('child_process'),
     Q             = require('q'),
-    config_parser = require('../config_parser'),
+    ConfigParser = require('../ConfigParser'),
     xml           = require('../xml-helpers'),
     config        = require('../config'),
     hooker        = require('../hooker');
@@ -41,8 +41,6 @@ module.exports = function wp8_parser(project) {
         throw new Error('The provided path "' + project + '" is not a Windows Phone 8 project. ' + e);
     }
     this.manifest_path  = path.join(this.wp8_proj_dir, 'Properties', 'WMAppManifest.xml');
-    this.config_path = path.join(this.wp8_proj_dir, 'config.xml');
-    this.config = new util.config_parser(this.config_path);
 };
 
 // Returns a promise.
@@ -70,8 +68,8 @@ module.exports.check_requirements = function(project_root) {
 module.exports.prototype = {
     update_from_config:function(config) {
         //check config parser
-        if (config instanceof config_parser) {
-        } else throw new Error('update_from_config requires a config_parser object');
+        if (config instanceof ConfigParser) {
+        } else throw new Error('update_from_config requires a ConfigParser object');
 
         //Get manifest file
         var manifest = xml.parseElementtreeSync(this.manifest_path);
@@ -147,7 +145,7 @@ module.exports.prototype = {
         return path.join(this.wp8_proj_dir, 'www');
     },
     config_xml:function() {
-        return this.config_path;
+        return path.join(this.wp8_proj_dir, 'config.xml');
     },
     // copy files from merges directory to actual www dir
     copy_merges:function(merges_sub_path) {

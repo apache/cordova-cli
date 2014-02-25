@@ -24,7 +24,7 @@ var fs            = require('fs'),
     shell         = require('shelljs'),
     plist         = require('plist-with-patches'),
     Q             = require('q'),
-    config_parser = require('../config_parser'),
+    ConfigParser = require('../ConfigParser'),
     config        = require('../config');
 
 module.exports = function ios_parser(project) {
@@ -40,7 +40,6 @@ module.exports = function ios_parser(project) {
     this.path = project;
     this.pbxproj = path.join(this.xcodeproj, 'project.pbxproj');
     this.config_path = path.join(this.cordovaproj, 'config.xml');
-    this.config = new util.config_parser(this.config_path);
 };
 
 // Returns a promise.
@@ -52,9 +51,9 @@ module.exports.check_requirements = function(project_root) {
 module.exports.prototype = {
     // Returns a promise.
     update_from_config:function(config) {
-        if (config instanceof config_parser) {
+        if (config instanceof ConfigParser) {
         } else {
-            return Q.reject(new Error('update_from_config requires a config_parser object'));
+            return Q.reject(new Error('update_from_config requires a ConfigParser object'));
         }
         var name = config.name();
         var pkg = config.packageName();

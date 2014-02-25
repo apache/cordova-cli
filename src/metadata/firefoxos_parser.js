@@ -21,7 +21,7 @@ var fs = require('fs'),
     shell = require('shelljs'),
     util = require('../util'),
     Q = require('q'),
-    config_parser = require('../config_parser'),
+    ConfigParser = require('../ConfigParser'),
     config = require('../config');
 
 module.exports = function firefoxos_parser(project) {
@@ -36,8 +36,8 @@ module.exports.check_requirements = function(project_root) {
 module.exports.prototype = {
     // Returns a promise.
     update_from_config: function(config) {
-        if (!(config instanceof config_parser)) {
-            return Q.reject(new Error('update_from_config requires a config_parser object'));
+        if (!(config instanceof ConfigParser)) {
+            return Q.reject(new Error('update_from_config requires a ConfigParser object'));
         }
 
         var name = config.name();

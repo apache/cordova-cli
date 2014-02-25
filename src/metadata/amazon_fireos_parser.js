@@ -24,7 +24,7 @@ var fs            = require('fs'),
     shell         = require('shelljs'),
     project_config= require('../config'),
     Q             = require('q'),
-    config_parser = require('../config_parser');
+    ConfigParser = require('../ConfigParser');
 
 var awv_interface='awv_interface.jar';
 
@@ -52,8 +52,8 @@ module.exports.check_requirements = function(project_root) {
 
 module.exports.prototype = {
     update_from_config:function(config) {
-        if (config instanceof config_parser) {
-        } else throw new Error('update_from_config requires a config_parser object');
+        if (config instanceof ConfigParser) {
+        } else throw new Error('update_from_config requires a ConfigParser object');
 
         // Update app name by editing res/values/strings.xml
         var name = config.name();

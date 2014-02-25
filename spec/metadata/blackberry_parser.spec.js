@@ -22,22 +22,46 @@ var platforms = require('../../platforms'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
-    ET = require('elementtree'),
+    et = require('elementtree'),
+    xmlHelpers = require('../../src/xml-helpers'),
     Q = require('q'),
     child_process = require('child_process'),
     config = require('../../src/config'),
-    config_parser = require('../../src/config_parser'),
+    ConfigParser = require('../../src/ConfigParser'),
     cordova = require('../../cordova');
+
+var cfg = new ConfigParser(path.join(__dirname, '..', 'test-config.xml'));
+
+var TEST_XML = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<widget xmlns     = "http://www.w3.org/ns/widgets"\n' +
+    '        xmlns:cdv = "http://cordova.apache.org/ns/1.0"\n' +
+    '        id        = "io.cordova.hellocordova"\n' +
+    '        version   = "0.0.1">\n' +
+    '    <name>Hello Cordova</name>\n' +
+    '    <description>\n' +
+    '        A sample Apache Cordova application that responds to the deviceready event.\n' +
+    '    </description>\n' +
+    '    <author href="http://cordova.io" email="dev@cordova.apache.org">\n' +
+    '        Apache Cordova Team\n' +
+    '    </author>\n' +
+    '    <content src="index.html" />\n' +
+    '    <access origin="*" />\n' +
+    '    <preference name="fullscreen" value="true" />\n' +
+    '    <preference name="webviewbounce" value="true" />\n' +
+    '</widget>\n';
 
 describe('blackberry10 project parser', function() {
     var proj = '/some/path';
-    var exists, custom, config_p, sh;
+    var exists, custom, sh;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
         custom = spyOn(config, 'has_custom_path').andReturn(false);
-        config_p = spyOn(util, 'config_parser');
         sh = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
             (cb || opts)(0, '', '');
+        });
+        spyOn(ConfigParser.prototype, 'write');
+        spyOn(xmlHelpers, 'parseElementtreeSync').andCallFake(function() {
+            return new et.ElementTree(et.XML(TEST_XML));
         });
     });
 
@@ -98,7 +122,6 @@ describe('blackberry10 project parser', function() {
         });
 
         describe('update_from_config method', function() {
-            var et, xml, find, write_xml, root, cfg, find_obj, root_obj;
             var xml_name, xml_pkg, xml_version, xml_access_rm, xml_update, xml_append, xml_content;
             beforeEach(function() {
                 xml_content = jasmine.createSpy('xml content');
@@ -127,32 +150,9 @@ describe('blackberry10 project parser', function() {
                     add: xml_preference_add,
                     remove: xml_preference_remove
                 };
-                find_obj = {
-                    text:'hi'
-                };
-                root_obj = {
-                    attrib:{
-                        package:'bb_pkg'
-                    }
-                };
-                find = jasmine.createSpy('ElementTree find').andReturn(find_obj);
-                write_xml = jasmine.createSpy('ElementTree write');
-                root = jasmine.createSpy('ElementTree getroot').andReturn(root_obj);
-                et = spyOn(ET, 'ElementTree').andReturn({
-                    find:find,
-                    write:write_xml,
-                    getroot:root
-                });
-                xml = spyOn(ET, 'XML');
-                cfg = new config_parser();
                 cfg.name = function() { return 'testname'; };
-                cfg.content = function() { return 'index.html'; };
                 cfg.packageName = function() { return 'testpkg'; };
                 cfg.version = function() { return 'one point oh'; };
-                cfg.access = {};
-                cfg.access.getAttributes = function() { return []; };
-                cfg.access.remove = function() { };
-                cfg.preference.get = function() { return []; };
             });
         });
         describe('www_dir method', function() {
@@ -171,19 +171,11 @@ describe('blackberry10 project parser', function() {
             });
         });
         describe('update_www method', function() {
-            var backup_cfg_parser;
-            beforeEach(function () {
-                backup_cfg_parser = {
-                    update: jasmine.createSpy("backup_cfg_parser update")
-                };
-                config_p.andReturn(backup_cfg_parser);
-            });
 
             it('should rm project-level www and cp in platform agnostic www', function() {
                 p.update_www();
                 expect(rm).toHaveBeenCalled();
                 expect(cp).toHaveBeenCalled();
-                expect(backup_cfg_parser.update).toHaveBeenCalled();
             });
         });
         describe('update_overrides method', function() {

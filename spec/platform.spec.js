@@ -21,6 +21,8 @@ var cordova = require('../cordova'),
     path = require('path'),
     shell = require('shelljs'),
     superspawn = require('../src/superspawn'),
+    xmlHelpers = require('../src/xml-helpers'),
+    et = require('elementtree'),
     plugman = require('plugman'),
     fs = require('fs'),
     util = require('../src/util'),
@@ -35,6 +37,13 @@ var cwd = process.cwd();
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
 var project_dir = path.join('some', 'path');
 
+var TEST_XML = '<widget xmlns     = "http://www.w3.org/ns/widgets"\n' +
+    '        xmlns:cdv = "http://cordova.apache.org/ns/1.0"\n' +
+    '        id        = "io.cordova.hellocordova"\n' +
+    '        version   = "0.0.1">\n' +
+    '    <name>Hello Cordova</name>\n' +
+    '</widget>\n';
+
 function fail(e) {
   expect('Got Error: ' + e).toBe('');
 }
@@ -45,7 +54,6 @@ describe('platform command', function() {
         cp,
         list_platforms,
         fire,
-        config_parser,
         find_plugins,
         config_read,
         load,
@@ -54,8 +62,6 @@ describe('platform command', function() {
         mkdir,
         existsSync,
         supports,
-        pkg,
-        name,
         spawn,
         prep_spy,
         plugman_install,
@@ -70,11 +76,8 @@ describe('platform command', function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
         cd_project_root = spyOn(util, 'cdProjectRoot').andReturn(project_dir);
         fire = spyOn(hooker.prototype, 'fire').andReturn(Q());
-        name = jasmine.createSpy('config name').andReturn('magical mystery tour');
-        pkg = jasmine.createSpy('config packageName').andReturn('ca.filmaj.id');
-        config_parser = spyOn(util, 'config_parser').andReturn({
-            packageName:pkg,
-            name:name
+        spyOn(xmlHelpers, 'parseElementtreeSync').andCallFake(function() {
+            return new et.ElementTree(et.XML(TEST_XML));
         });
         find_plugins = spyOn(util, 'findPlugins').andReturn([]);
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);

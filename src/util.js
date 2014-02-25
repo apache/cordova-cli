@@ -204,7 +204,6 @@ function addModuleProperty(module, symbol, modulePath, opt_wrap, opt_obj) {
     }
 }
 
-addModuleProperty(module, 'config_parser', './config_parser');
 addModuleProperty(module, 'plugin_parser', './plugin_parser');
 
 exports.addModuleProperty = addModuleProperty;
