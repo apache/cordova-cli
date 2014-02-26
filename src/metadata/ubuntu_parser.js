@@ -131,10 +131,6 @@ module.exports.prototype = {
         return path.join(this.path, 'www');
     },
 
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
-    },
-
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
         var www = util.projectWww(projectRoot);
@@ -152,17 +148,6 @@ module.exports.prototype = {
         }
     },
 
-    update_staging:function() {
-        var projectRoot = util.isCordova(this.path);
-        var stagingDir = path.join(this.path, '.staging', 'www');
-
-        if(fs.existsSync(stagingDir)) {
-            shell.cp('-rf',
-                     path.join(stagingDir, '*'),
-                     this.www_dir());
-        }
-    },
-
     // Returns a promise.
     update_project:function(cfg) {
         var self = this;
@@ -170,7 +155,6 @@ module.exports.prototype = {
         return this.update_from_config(cfg)
         .then(function() {
             self.update_overrides();
-            self.update_staging();
             util.deleteSvnFolders(self.www_dir());
         });
     }

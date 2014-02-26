@@ -306,12 +306,11 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
                 if (!plugins) return Q();
 
                 var plugman = require('plugman');
-                var staging_dir = parser.staging_dir();
                 // Install them serially.
                 return plugins.reduce(function(soFar, plugin) {
                     return soFar.then(function() {
                         events.emit('verbose', 'Installing plugin "' + plugin + '" following successful platform add of ' + target);
-                        return plugman.raw.install(target, output, path.basename(plugin), plugins_dir, { www_dir: staging_dir});
+                        return plugman.raw.install(target, output, path.basename(plugin), plugins_dir);
                     });
                 }, Q());
             });

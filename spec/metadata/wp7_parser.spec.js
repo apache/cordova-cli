@@ -155,11 +155,6 @@ describe('wp7 project parser', function() {
                 expect(p.www_dir()).toEqual(path.join(wp7_proj, 'www'));
             });
         });
-        describe('staging_dir method', function() {
-            it('should return .staging/www', function() {
-                expect(p.staging_dir()).toEqual(path.join(wp7_proj, '.staging', 'www'));
-            });
-        });
         describe('config_xml method', function() {
             it('should return the location of the config.xml', function() {
                 expect(p.config_xml()).toEqual(path.join(wp7_proj, 'config.xml'));
@@ -176,23 +171,11 @@ describe('wp7 project parser', function() {
                 expect(cp).toHaveBeenCalled();
             });
         });
-        describe('update_staging method', function() {
-            it('should do nothing if staging dir does not exist', function() {
-                exists.andReturn(false);
-                p.update_staging();
-                expect(cp).not.toHaveBeenCalled();
-            });
-            it('should copy the staging dir into www if staging dir exists', function() {
-                p.update_staging();
-                expect(cp).toHaveBeenCalled();
-            });
-        });
         describe('update_project method', function() {
-            var config, www, overrides, staging, svn, cfg, csproj;
+            var config, www, overrides, svn, cfg, csproj;
             beforeEach(function() {
                 config = spyOn(p, 'update_from_config');
                 www = spyOn(p, 'update_www');
-                staging = spyOn(p, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
                 csproj = spyOn(p, 'update_csproj');
                 exists.andReturn(false);
@@ -212,11 +195,6 @@ describe('wp7 project parser', function() {
             it('should call update_www', function(done) {
                 wrapper(p.update_project(), done, function() {
                     expect(www).not.toHaveBeenCalled();
-                });
-            });
-            it('should call update_staging', function(done) {
-                wrapper(p.update_project(), done, function() {
-                    expect(staging).toHaveBeenCalled();
                 });
             });
             it('should call deleteSvnFolders', function(done) {

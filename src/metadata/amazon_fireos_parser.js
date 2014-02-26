@@ -102,10 +102,6 @@ module.exports.prototype = {
         return path.join(this.path, 'assets', 'www');
     },
 
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
-    },
-
     config_xml:function(){
         return this.android_config;
     },
@@ -115,7 +111,7 @@ module.exports.prototype = {
         var jsPath = path.join(libDir, 'framework', 'assets', 'www', 'cordova.js');
         return path.resolve(jsPath);
     },
-    
+
     // Replace the www dir with contents of platform_www and app www.
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
@@ -141,13 +137,6 @@ module.exports.prototype = {
         }
     },
 
-    // update the overrides folder into the www folder
-    update_staging:function() {
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
-        }
-    },
 
     // Returns a promise.
     update_project:function(cfg) {
@@ -158,7 +147,6 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         this.update_overrides();
-        this.update_staging();
         // delete any .svn folders copied over
         util.deleteSvnFolders(platformWww);
         return Q();

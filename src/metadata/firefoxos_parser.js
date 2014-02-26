@@ -98,19 +98,7 @@ module.exports.prototype = {
             shell.cp('-rf', overrides, this.www_dir());
         }
     },
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
-    },
-    update_staging: function() {
-        var projectRoot = util.isCordova(this.path);
-        var stagingDir = path.join(this.path, '.staging', 'www');
 
-        if(fs.existsSync(stagingDir)) {
-            shell.cp('-rf',
-                     path.join(stagingDir, '*'),
-                     this.www_dir());
-        }
-    },
     config_xml:function(){
         return path.join(this.path, 'config.xml');
     },
@@ -120,7 +108,6 @@ module.exports.prototype = {
         return this.update_from_config(cfg)
         .then(function(){
             this.update_overrides();
-            this.update_staging();
             util.deleteSvnFolders(this.www_dir());
         }.bind(this));
     }

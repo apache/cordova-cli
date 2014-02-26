@@ -222,7 +222,7 @@ module.exports.prototype = {
         var folder_dir = fs.readdirSync(dir);
         for(item in folder_dir) {
             var stat = fs.statSync(path.join(dir, folder_dir[item]));
- 
+
             if(stat.isDirectory()) {
                 var sub_dir = this.folder_contents(path.join(name, folder_dir[item]), path.join(dir, folder_dir[item]));
                 //Add all subfolder item paths
@@ -233,20 +233,9 @@ module.exports.prototype = {
             else if(stat.isFile()) {
                 results.push(path.join(name, folder_dir[item]));
             }
-            // else { it is a FIFO, or a Socket or something ... } 
+            // else { it is a FIFO, or a Socket or something ... }
         }
         return results;
-    },
-    staging_dir: function() {
-        return path.join(this.wp7_proj_dir, '.staging', 'www');
-    },
-
-    update_staging: function() {
-        var projectRoot = util.isCordova(this.wp7_proj_dir);
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
-        }
     },
 
     // calls the nessesary functions to update the wp7 project
@@ -266,7 +255,6 @@ module.exports.prototype = {
         .then(function() {
             that.update_csproj();
             // TODO: Add overrides support? Why is this missing?
-            that.update_staging();
             util.deleteSvnFolders(that.www_dir());
         });
     }
