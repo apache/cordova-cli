@@ -125,10 +125,6 @@ module.exports.prototype = {
         return path.join(this.path, 'assets', 'www');
     },
 
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
-    },
-
     config_xml:function(){
         return this.android_config;
     },
@@ -164,21 +160,12 @@ module.exports.prototype = {
         }
     },
 
-    // update the overrides folder into the www folder
-    update_staging:function() {
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
-        }
-    },
-
     // Returns a promise.
     update_project:function(cfg) {
         var platformWww = path.join(this.path, 'assets');
         try {
             this.update_from_config(cfg);
             this.update_overrides();
-            this.update_staging();
         } catch(e) {
             return Q.reject(e);
         }
@@ -187,4 +174,3 @@ module.exports.prototype = {
         return Q();
     }
 };
-

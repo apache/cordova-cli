@@ -239,17 +239,6 @@ module.exports.prototype = {
         }
         return results;
     },
-    staging_dir: function() {
-        return path.join(this.wp8_proj_dir, '.staging', 'www');
-    },
-
-    update_staging: function() {
-        var projectRoot = util.isCordova(this.wp8_proj_dir);
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
-        }
-    },
 
     // calls the nessesary functions to update the wp8 project
     // Returns a promise.
@@ -268,7 +257,6 @@ module.exports.prototype = {
         return hooks.fire('pre_package', { wwwPath:this.www_dir() })
         .then(function() {
             that.update_csproj();
-            that.update_staging();
             util.deleteSvnFolders(that.www_dir());
         });
     }

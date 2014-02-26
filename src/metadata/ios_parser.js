@@ -113,10 +113,6 @@ module.exports.prototype = {
         return path.join(this.path, 'www');
     },
 
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
-    },
-
     config_xml:function(){
         return this.config_path;
     },
@@ -152,22 +148,12 @@ module.exports.prototype = {
         }
     },
 
-    // update the overrides folder into the www folder
-    update_staging:function() {
-        var projectRoot = util.isCordova(this.path);
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
-        }
-    },
-
     // Returns a promise.
     update_project:function(cfg) {
         var self = this;
         return this.update_from_config(cfg)
         .then(function() {
             self.update_overrides();
-            self.update_staging();
             util.deleteSvnFolders(self.www_dir());
         });
     }

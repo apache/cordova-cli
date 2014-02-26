@@ -160,11 +160,6 @@ describe('blackberry10 project parser', function() {
                 expect(p.www_dir()).toEqual(path.join(bb_proj, 'www'));
             });
         });
-        describe('staging_dir method', function() {
-            it('should return .staging/www', function() {
-                expect(p.staging_dir()).toEqual(path.join(bb_proj, '.staging', 'www'));
-            });
-        });
         describe('config_xml method', function() {
             it('should return the location of the config.xml', function() {
                 expect(p.config_xml()).toEqual(path.join(proj, 'platforms', 'blackberry10', 'www', 'config.xml'));
@@ -189,24 +184,12 @@ describe('blackberry10 project parser', function() {
                 expect(cp).toHaveBeenCalledWith('-rf', path.join(proj, 'merges', 'blackberry10', '*'), path.join(proj, 'platforms', 'blackberry10', 'www'));
             });
         });
-        describe('update_staging method', function() {
-            it('should do nothing if staging dir does not exist', function() {
-                exists.andReturn(false);
-                p.update_staging();
-                expect(cp).not.toHaveBeenCalled();
-            });
-            it('should copy the staging dir into www if staging dir exists', function() {
-                p.update_staging();
-                expect(cp).toHaveBeenCalledWith('-rf', path.join(proj, 'platforms', 'blackberry10', '.staging', 'www', '*'), path.join(proj, 'platforms', 'blackberry10', 'www'));
-            });
-        });
         describe('update_project method', function() {
-            var config, www, overrides, staging, svn, parse, get_env, write_env;
+            var config, www, overrides, svn, parse, get_env, write_env;
             beforeEach(function() {
                 config = spyOn(p, 'update_from_config');
                 www = spyOn(p, 'update_www');
                 overrides = spyOn(p, 'update_overrides');
-                staging = spyOn(p, 'update_staging');
                 svn = spyOn(util, 'deleteSvnFolders');
                 parse = spyOn(JSON, 'parse').andReturn({blackberry:{qnx:{}}});
             });
@@ -230,11 +213,6 @@ describe('blackberry10 project parser', function() {
             it('should call update_overrides', function(done) {
                 wrapper(p.update_project(), done, function() {
                     expect(overrides).toHaveBeenCalled();
-                });
-            });
-            it('should call update_staging', function(done) {
-                wrapper(p.update_project(), done, function() {
-                    expect(staging).toHaveBeenCalled();
                 });
             });
             it('should call deleteSvnFolders', function(done) {
