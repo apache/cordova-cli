@@ -18,50 +18,19 @@
 */
 var cordova = require('../cordova'),
     platforms = require('../platforms'),
-    child_process = require('child_process'),
+    superspawn = require('../src/superspawn'),
     path = require('path'),
     fs = require('fs'),
     hooker = require('../src/hooker'),
     Q = require('q'),
-    util = require('../src/util'),
-    os = require('os');
+    util = require('../src/util');
 
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
 
 describe('run command', function() {
-    var is_cordova, cd_project_root, list_platforms, fire, child, spawn_wrap;
+    var is_cordova, cd_project_root, list_platforms, fire;
     var project_dir = '/some/path';
     var prepare_spy;
-    child = {
-        on: function(child_event,cb){
-            if(child_event === 'close'){
-                cb(0);
-            }
-        },
-        stdout: {
-            setEncoding: function(){},
-            on: function(){}
-        },
-        stderr: {
-            setEncoding: function(){},
-            on: function(){}
-        }
-    };
-    spawn_wrap = function(cmd,args,options){
-        var _cmd = cmd,
-            _args = args;
-
-        if (os.platform() === 'win32') {
-            _args = ['/c',_cmd].concat(_args);
-            _cmd = 'cmd';
-        }
-
-        return {
-                    "cmd": _cmd,
-                    "args": _args,
-                    "options": options
-                };
-    };
 
     beforeEach(function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
@@ -69,7 +38,7 @@ describe('run command', function() {
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
         fire = spyOn(hooker.prototype, 'fire').andReturn(Q());
         prepare_spy = spyOn(cordova.raw, 'prepare').andReturn(Q());
-        spyOn(child_process, 'spawn').andReturn(child);
+        spyOn(superspawn, 'spawn').andReturn(Q);
     });
     describe('failure', function() {
         it('should not run inside a Cordova-based project with no added platforms by calling util.listPlatforms', function(done) {
@@ -96,13 +65,8 @@ describe('run command', function() {
         it('should run inside a Cordova-based project with at least one added platform and call prepare and shell out to the run script', function(done) {
             cordova.raw.run(['android','ios']).then(function() {
                 expect(prepare_spy).toHaveBeenCalledWith(['android', 'ios']);
-
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'android', 'cordova', 'run'), []);
-                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
-
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), []);
-                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
-
+                expect(superspawn.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'android', 'cordova', 'run'), [], jasmine.any(Object));
+                expect(superspawn.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'ios', 'cordova', 'run'), [], jasmine.any(Object));
             }, function(err) {
                 expect(err).toBeUndefined();
             }).fin(done);
@@ -110,9 +74,7 @@ describe('run command', function() {
         it('should pass down parameters', function(done) {
             cordova.raw.run({platforms: ['blackberry10'], options:['--password', '1q1q']}).then(function() {
                 expect(prepare_spy).toHaveBeenCalledWith(['blackberry10']);
-
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'run'), ['--password', '1q1q']);
-                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
+                expect(superspawn.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'run'), ['--password', '1q1q'], jasmine.any(Object));
             }, function(err) {
                 expect(err).toBeUndefined();
             }).fin(done);

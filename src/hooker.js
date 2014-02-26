@@ -20,7 +20,8 @@ var util  = require('./util'),
     fs    = require('fs'),
     os    = require('os'),
     events= require('./events'),
-    child_process = require('child_process'),
+    superspawn = require('./superspawn'),
+    CordovaError = require('./CordovaError'),
     Q     = require('q'),
     path  = require('path'),
     _ = require('underscore');
@@ -110,41 +111,37 @@ function execute_scripts_serially(scripts, root, dir, opts) {
             events.emit('verbose', 'skipped directory "' + fullpath + '" within hook directory');
             return execute_scripts_serially(scripts, root, dir, opts); // skip directories if they're in there.
         } else {
-            var command = '"' + fullpath + '" "' + root + '"';
+            var command = fullpath;
+            var args = [root];
             if (os.platform().slice(0, 3) == 'win') {
                 // TODO: Make shebang sniffing a setting (not everyone will want this).
                 var interpreter = extractSheBangInterpreter(fullpath);
                 // we have shebang, so try to run this script using correct interpreter
                 if (interpreter) {
-                    command = '"' + interpreter + '" ' + command;
+                    args.unshift(command);
+                    command = interpreter;
                 }
             }
 
-            var execOpts = {cwd: root};
-            execOpts.env = _.extend({}, process.env);
+            var execOpts = {cwd: root, printCommand: true, stdio: 'inherit'};
+            execOpts.env = {};
             execOpts.env.CORDOVA_VERSION = require('../package').version;
             execOpts.env.CORDOVA_PLATFORMS = opts.platforms ? opts.platforms.join() : '';
             execOpts.env.CORDOVA_PLUGINS = opts.plugins?opts.plugins.join():'';
             execOpts.env.CORDOVA_HOOK = fullpath;
             execOpts.env.CORDOVA_CMDLINE = process.argv.join(' ');
 
-            events.emit('verbose', 'Executing hook "' + command + '"');
-            var d = Q.defer();
-            child_process.exec(command, execOpts, function(err, stdout, stderr) {
+            return superspawn.spawn(command, args, execOpts)
+            .catch(function(err) {
                 // Don't treat non-executable files as errors. They could be READMEs, or Windows-only scripts.
-                if (!isWindows && err && err.code === 126) {
-                    events.emit('verbose', 'skipped non-executable file: "' + fullpath);
-                    d.resolve(execute_scripts_serially(scripts, root, dir, opts));
+                if (!isWindows && err.code == 'EACCES') {
+                    events.emit('verbose', 'skipped non-executable file: ' + fullpath);
                 } else {
-                    events.emit('verbose', stdout, stderr);
-                    if (err) {
-                        d.reject(new Error('Script "' + fullpath + '" exited with status code ' + err.code + '. Aborting. Output: \n' + stdout + '\n' + stderr));
-                    } else {
-                        d.resolve(execute_scripts_serially(scripts, root, dir, opts));
-                    }
+                    throw new CordovaError('Hook failed with error code ' + err.code + ': ' + command);
                 }
+            }).then(function() {
+                return execute_scripts_serially(scripts, root, dir, opts);
             });
-            return d.promise;
         }
     } else {
         return Q(); // Nothing to do.

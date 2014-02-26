@@ -22,10 +22,9 @@ var fs            = require('fs'),
     util          = require('../util'),
     events        = require('../events'),
     shell         = require('shelljs'),
-    child_process = require('child_process'),
     project_config= require('../config'),
     Q             = require('q'),
-    config_parser = require('../config_parser');
+    ConfigParser = require('../ConfigParser');
 
 var default_prefs = {
     "useBrowserHistory":"true",
@@ -49,9 +48,19 @@ module.exports.check_requirements = function(project_root) {
 };
 
 module.exports.prototype = {
+    findOrientationPreference: function(config) {
+        var ret = config.getPreference('orientation');
+        if (ret && ret != 'default' && ret != 'portrait' && ret != 'landscape') {
+            events.emit('warn', 'Unknown value for orientation preference: ' + ret);
+            ret = null;
+        }
+
+        return ret;
+    },
+
     update_from_config:function(config) {
-        if (config instanceof config_parser) {
-        } else throw new Error('update_from_config requires a config_parser object');
+        if (config instanceof ConfigParser) {
+        } else throw new Error('update_from_config requires a ConfigParser object');
 
         // Update app name by editing res/values/strings.xml
         var name = config.name();
@@ -70,6 +79,22 @@ module.exports.prototype = {
         pkg = pkg.replace(/-/g, '_'); // Java packages cannot support dashes
         var orig_pkg = manifest.getroot().attrib.package;
         manifest.getroot().attrib.package = pkg;
+
+        // Set the orientation in the AndroidManifest
+        var orientationPref = this.findOrientationPreference(config);
+        if (orientationPref) {
+            var act = manifest.getroot().find('./application/activity');
+            switch (orientationPref) {
+                case 'default':
+                    delete act.attrib["android:screenOrientation"];
+                    break;
+                case 'portrait':
+                    act.attrib["android:screenOrientation"] = 'userPortrait';
+                    break;
+                case 'landscape':
+                    act.attrib["android:screenOrientation"] = 'userLandscape';
+            }
+        }
 
         // Write out AndroidManifest.xml
         fs.writeFileSync(this.manifest, manifest.write({indent: 4}), 'utf-8');
@@ -98,10 +123,6 @@ module.exports.prototype = {
     // Returns the platform-specific www directory.
     www_dir:function() {
         return path.join(this.path, 'assets', 'www');
-    },
-
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
     },
 
     config_xml:function(){
@@ -139,21 +160,12 @@ module.exports.prototype = {
         }
     },
 
-    // update the overrides folder into the www folder
-    update_staging:function() {
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
-        }
-    },
-
     // Returns a promise.
     update_project:function(cfg) {
         var platformWww = path.join(this.path, 'assets');
         try {
             this.update_from_config(cfg);
             this.update_overrides();
-            this.update_staging();
         } catch(e) {
             return Q.reject(e);
         }
@@ -162,4 +174,3 @@ module.exports.prototype = {
         return Q();
     }
 };
-
