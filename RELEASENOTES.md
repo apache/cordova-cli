@@ -20,6 +20,24 @@
 -->
 # Cordova-cli Release Notes
 
+### 3.4.0-0.1.1 (Feb 26, 2014)
+* Update to plugman v0.20.0
+* CB-5647 Remove concept of .staging dir. Install directly to www/
+* CB-5299 Speed up prepare by using plugman's new reapply_global_munge()
+* Refactored config_parser.js to simply both it and its tests.
+* CB-6076 Make "Generating config.xml from defaults" a verbose log
+* CB-5181 Use spawn helper for all sub-shelling.
+* CB-6049, CB-5181 Enable stdio for build sub-commands and hooks
+
+## 3.4.0-0.1.0 (Feb 14, 2014)
+* CB-5638 Clean-up: remove unreachable info case from function
+* CB-5937 Add "platform check" command: Shows platforms that are out of date
+* CB-5634 Minor refactoring + tests for Android's orientation preference.
+* CB-5634 Set Android orientation from config.xml
+* Upleveled amazon_fireos_parser. Making it at par with android_parser.js
+* CB-5947 Throw when trying to create project inside custom www.
+* CB-4153 Update help.txt about --source -> --copy-from
+
 ## 3.3.1-0.3.1 (Jan 31, 2014)
 * CB-4153 Rename --source and --link flags to --copy-from and --link-to
 

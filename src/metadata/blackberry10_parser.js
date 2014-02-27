@@ -22,7 +22,7 @@ var fs            = require('fs'),
     util          = require('../util'),
     Q             = require('q'),
     child_process = require('child_process'),
-    config_parser = require('../config_parser'),
+    ConfigParser = require('../ConfigParser'),
     events        = require('../events'),
     config        = require('../config');
 
@@ -32,7 +32,7 @@ module.exports = function blackberry_parser(project) {
     }
     this.path = project;
     this.config_path = path.join(this.path, 'www', 'config.xml');
-    this.xml = new util.config_parser(this.config_path);
+    this.xml = new ConfigParser(this.config_path);
 };
 
 // Returns a promise.
@@ -57,8 +57,8 @@ module.exports.check_requirements = function(project_root) {
 
 module.exports.prototype = {
     update_from_config:function(config) {
-        if (config instanceof config_parser) {
-        } else throw new Error('update_from_config requires a config_parser object');
+        if (config instanceof ConfigParser) {
+        } else throw new Error('update_from_config requires a ConfigParser object');
     },
 
     // Returns a promise.
@@ -71,7 +71,6 @@ module.exports.prototype = {
             return Q.reject(e);
         }
         self.update_overrides();
-        self.update_staging();
         util.deleteSvnFolders(this.www_dir());
         return Q();
     },
@@ -79,10 +78,6 @@ module.exports.prototype = {
     // Returns the platform-specific www directory.
     www_dir:function() {
         return path.join(this.path, 'www');
-    },
-
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
     },
 
     config_xml:function(){
@@ -100,7 +95,7 @@ module.exports.prototype = {
         var projectRoot = util.isCordova(this.path);
         var app_www = util.projectWww(projectRoot);
         var platform_www = path.join(this.path, 'platform_www');
-        var platform_cfg_backup = new util.config_parser(this.config_path);
+        var platform_cfg_backup = new ConfigParser(this.config_path);
 
         // Clear the www dir
         shell.rm('-rf', this.www_dir());
@@ -110,7 +105,7 @@ module.exports.prototype = {
         // Copy over stock platform www assets (cordova.js)
         shell.cp('-rf', path.join(platform_www, '*'), this.www_dir());
         //Re-Write config.xml
-        platform_cfg_backup.update();
+        platform_cfg_backup.write();
     },
 
     // update the overrides folder into the www folder
@@ -122,13 +117,4 @@ module.exports.prototype = {
             shell.cp('-rf', overrides, this.www_dir());
         }
     },
-
-    // update the overrides folder into the www folder
-    update_staging:function() {
-        var projectRoot = util.isCordova(this.path);
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
-        }
-    }
 };

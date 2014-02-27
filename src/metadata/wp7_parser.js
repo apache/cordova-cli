@@ -25,7 +25,7 @@ var fs            = require('fs'),
     shell         = require('shelljs'),
     child_process = require('child_process'),
     Q             = require('q'),
-    config_parser = require('../config_parser'),
+    ConfigParser = require('../ConfigParser'),
     config        = require('../config'),
     hooker        = require('../hooker');
 
@@ -41,8 +41,6 @@ module.exports = function wp7_parser(project) {
         throw new Error('The provided path "' + project + '" is not a Windows Phone 7 project. ' + e);
     }
     this.manifest_path  = path.join(this.wp7_proj_dir, 'Properties', 'WMAppManifest.xml');
-    this.config_path = path.join(this.wp7_proj_dir, 'config.xml');
-    this.config = new util.config_parser(this.config_path);
 };
 
 // Returns a promise.
@@ -70,8 +68,8 @@ module.exports.check_requirements = function(project_root) {
 module.exports.prototype = {
     update_from_config:function(config) {
         //check config parser
-        if (config instanceof config_parser) {
-        } else throw new Error('update_from_config requires a config_parser object');
+        if (config instanceof ConfigParser) {
+        } else throw new Error('update_from_config requires a ConfigParser object');
 
         //Get manifest file
         var manifest = xml.parseElementtreeSync(this.manifest_path);
@@ -146,7 +144,7 @@ module.exports.prototype = {
         return path.join(this.wp7_proj_dir, 'www');
     },
     config_xml:function() {
-        return this.config_path;
+        return path.join(this.wp7_proj_dir, 'config.xml');
     },
     // copy files from merges directory to actual www dir
     copy_merges:function(merges_sub_path) {
@@ -224,7 +222,7 @@ module.exports.prototype = {
         var folder_dir = fs.readdirSync(dir);
         for(item in folder_dir) {
             var stat = fs.statSync(path.join(dir, folder_dir[item]));
- 
+
             if(stat.isDirectory()) {
                 var sub_dir = this.folder_contents(path.join(name, folder_dir[item]), path.join(dir, folder_dir[item]));
                 //Add all subfolder item paths
@@ -235,20 +233,9 @@ module.exports.prototype = {
             else if(stat.isFile()) {
                 results.push(path.join(name, folder_dir[item]));
             }
-            // else { it is a FIFO, or a Socket or something ... } 
+            // else { it is a FIFO, or a Socket or something ... }
         }
         return results;
-    },
-    staging_dir: function() {
-        return path.join(this.wp7_proj_dir, '.staging', 'www');
-    },
-
-    update_staging: function() {
-        var projectRoot = util.isCordova(this.wp7_proj_dir);
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
-        }
     },
 
     // calls the nessesary functions to update the wp7 project
@@ -268,7 +255,6 @@ module.exports.prototype = {
         .then(function() {
             that.update_csproj();
             // TODO: Add overrides support? Why is this missing?
-            that.update_staging();
             util.deleteSvnFolders(that.www_dir());
         });
     }

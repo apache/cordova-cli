@@ -20,14 +20,35 @@ var cordova = require('../cordova'),
     path    = require('path'),
     shell   = require('shelljs'),
     fs      = require('fs'),
+    et = require('elementtree'),
+    ConfigParser = require('../src/ConfigParser'),
     util    = require('../src/util'),
     config    = require('../src/config'),
     lazy_load = require('../src/lazy_load'),
+    xmlHelpers = require('../src/xml-helpers'),
     Q = require('q'),
     tempDir = path.join(__dirname, '..', 'temp');
 
+var TEST_XML = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<widget xmlns     = "http://www.w3.org/ns/widgets"\n' +
+    '        xmlns:cdv = "http://cordova.apache.org/ns/1.0"\n' +
+    '        id        = "io.cordova.hellocordova"\n' +
+    '        version   = "0.0.1">\n' +
+    '    <name>Hello Cordova</name>\n' +
+    '    <description>\n' +
+    '        A sample Apache Cordova application that responds to the deviceready event.\n' +
+    '    </description>\n' +
+    '    <author href="http://cordova.io" email="dev@cordova.apache.org">\n' +
+    '        Apache Cordova Team\n' +
+    '    </author>\n' +
+    '    <content src="index.html" />\n' +
+    '    <access origin="*" />\n' +
+    '    <preference name="fullscreen" value="true" />\n' +
+    '    <preference name="webviewbounce" value="true" />\n' +
+    '</widget>\n';
+
 describe('create command', function () {
-    var mkdir, cp, config_spy, load_cordova, load_custom, exists, config_read, config_write, parser, package, name;
+    var mkdir, cp, config_spy, load_cordova, load_custom, exists, config_read, config_write;
     beforeEach(function() {
         shell.rm('-rf', tempDir);
         mkdir = spyOn(shell, 'mkdir');
@@ -38,11 +59,9 @@ describe('create command', function () {
         exists = spyOn(fs, 'existsSync').andReturn(false);
         load_cordova = spyOn(lazy_load, 'cordova').andReturn(Q(path.join('lib','dir')));
         load_custom = spyOn(lazy_load, 'custom').andReturn(Q(path.join('lib','dir')));
-        package = jasmine.createSpy('config.packageName');
-        name = jasmine.createSpy('config.name');
-        parser = spyOn(util, 'config_parser').andReturn({
-            packageName:package,
-            name:name
+        spyOn(ConfigParser.prototype, 'write');
+        spyOn(xmlHelpers, 'parseElementtreeSync').andCallFake(function() {
+            return new et.ElementTree(et.XML(TEST_XML));
         });
     });
 
