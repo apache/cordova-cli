@@ -165,6 +165,9 @@ module.exports = function platform(command, targets) {
                             return p + ' @ ' + v + ' could be updated to: ' + avail;
                         }
                         return '';
+                    }, function(v) {
+                        var avail = platforms[p].version;
+                        return p + ' @ broken could be updated to: ' + avail
                     });
                 }));
             }).then(function(platformsText) {
@@ -194,6 +197,8 @@ module.exports = function platform(command, targets) {
                     .then(function(v) {
                         if (!v) return p;
                         return p + ' ' + v;
+                    }, function(v) {
+                        return p + ' broken';
                     });
                 }));
             }).then(function(platformsText) {
