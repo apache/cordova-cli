@@ -74,6 +74,28 @@ module.exports.prototype = {
         events.emit('verbose', 'Wrote out iOS Bundle Identifier to "' + pkg + '"');
         events.emit('verbose', 'Wrote out iOS Bundle Version to "' + version + '"');
 
+        var xcconfig_path = path.join(this.path, 'cordova', 'build.xcconfig');
+        var xcconfig = fs.readFileSync(xcconfig_path, 'utf-8').split('\n');
+
+        // default is to target iphone/ipod and ipad
+        var device_family = '1,2';
+
+        // other supported values
+        var device_map = {
+            'handset': '1', // iphone/ipod
+            'tablet': '2', // ipad
+            'universal': '1,2'
+        };
+
+        device_family = device_map[config.getPreference('targetdevice')] || '1,2'
+        events.emit('verbose', 'Targeted device families "' + device_family + '"');
+
+        xcconfig.push('');
+        xcconfig.push('// iphone only');
+        xcconfig.push('TARGETED_DEVICE_FAMILY = ' + device_family);
+
+        fs.writeFileSync(xcconfig_path, xcconfig.join('\n'));
+
         if (name != this.originalName) {
             // Update product name inside pbxproj file
             var proj = new xcode.project(this.pbxproj);

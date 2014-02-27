@@ -85,7 +85,7 @@ ConfigParser.prototype = {
         for (var i = 0, ii = preferences.length; i < ii; ++i) {
             // Take the last one that matches.
             if (preferences[i].attrib.name.toLowerCase() === name) {
-                ret = a.attrib.value;
+                ret = preferences[i].attrib.value;
             }
         }
         return ret;
