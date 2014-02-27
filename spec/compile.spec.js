@@ -18,12 +18,12 @@
 */
 var cordova = require('../cordova'),
     platforms = require('../platforms'),
-    child_process = require('child_process'),
     path = require('path'),
     fs = require('fs'),
     hooker = require('../src/hooker'),
-    Q = require('q'),
+    superspawn = require('../src/superspawn'),
     util = require('../src/util'),
+    Q = require('q'),
     os = require('os');
 
 
@@ -31,38 +31,8 @@ var supported_platforms = Object.keys(platforms).filter(function(p) { return p !
 
 
 describe('compile command', function() {
-    var is_cordova, list_platforms, fire, result, child, spawn_wrap, cd_project_root;
+    var is_cordova, list_platforms, fire, result, cd_project_root;
     var project_dir = '/some/path';
-    child = {
-        on: function(child_event,cb){
-            if(child_event === 'close'){
-                cb(0);
-            }
-        },
-        stdout: {
-            setEncoding: function(){},
-            on: function(){}
-        },
-        stderr: {
-            setEncoding: function(){},
-            on: function(){}
-        }
-    };
-    spawn_wrap = function(cmd,args,options){
-        var _cmd = cmd,
-            _args = args;
-
-        if (os.platform() === 'win32') {
-            _args = ['/c',_cmd].concat(_args);
-            _cmd = 'cmd';
-        }
-
-        return {
-                    "cmd": _cmd,
-                    "args": _args,
-                    "options": options
-                };
-    };
 
     function wrapper(f, post) {
         runs(function() {
@@ -76,7 +46,7 @@ describe('compile command', function() {
         cd_project_root = spyOn(util, 'cdProjectRoot').andReturn(project_dir);
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
         fire = spyOn(hooker.prototype, 'fire').andReturn(Q());
-        spyOn(child_process, 'spawn').andReturn(child);
+        spyOn(superspawn, 'spawn').andCallFake(function() { return Q() });
     });
     describe('failure', function() {
         it('should not run inside a Cordova-based project with no added platforms by calling util.listPlatforms', function() {
@@ -94,24 +64,17 @@ describe('compile command', function() {
     });
 
     describe('success', function() {
-        var spawn_call;
         it('should run inside a Cordova-based project with at least one added platform and shell out to build', function(done) {
             cordova.raw.compile(['android','ios']).then(function() {
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'android', 'cordova', 'build'),[]);
-                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
-
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'ios', 'cordova', 'build'),[]);
-                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
-
+                expect(superspawn.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'android', 'cordova', 'build'), [], jasmine.any(Object));
+                expect(superspawn.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'ios', 'cordova', 'build'), [], jasmine.any(Object));
                 done();
             });
         });
 
         it('should pass down optional parameters', function (done) {
             cordova.raw.compile({platforms:["blackberry10"], options:["--release"]}).then(function () {
-                spawn_call = spawn_wrap(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'build'),['--release']);
-                expect(child_process.spawn).toHaveBeenCalledWith(spawn_call.cmd, spawn_call.args);
-
+                expect(superspawn.spawn).toHaveBeenCalledWith(path.join(project_dir, 'platforms', 'blackberry10', 'cordova', 'build'), ['--release'], jasmine.any(Object));
                 done();
             });
         });

@@ -27,6 +27,7 @@ var path          = require('path'),
     lazy_load     = require('./lazy_load'),
     Q             = require('q'),
     CordovaError  = require('./CordovaError'),
+    ConfigParser = require('./ConfigParser'),
     util          = require('./util');
 
 var DEFAULT_NAME = "HelloCordova",
@@ -159,9 +160,10 @@ module.exports = function create (dir, id, name, cfg) {
             var template_config_xml = path.join(__dirname, '..', 'templates', 'config.xml');
             shell.cp(template_config_xml, configPath);
             // Write out id and name to config.xml
-            var config = new util.config_parser(configPath);
-            config.packageName(id);
-            config.name(name);
+            var config = new ConfigParser(configPath);
+            config.setPackageName(id);
+            config.setName(name);
+            config.write();
         }
     });
 };

@@ -21,8 +21,7 @@ var fs = require('fs'),
     shell = require('shelljs'),
     util = require('../util'),
     Q = require('q'),
-    child_process = require('child_process'),
-    config_parser = require('../config_parser'),
+    ConfigParser = require('../ConfigParser'),
     config = require('../config');
 
 module.exports = function firefoxos_parser(project) {
@@ -37,8 +36,8 @@ module.exports.check_requirements = function(project_root) {
 module.exports.prototype = {
     // Returns a promise.
     update_from_config: function(config) {
-        if (!(config instanceof config_parser)) {
-            return Q.reject(new Error('update_from_config requires a config_parser object'));
+        if (!(config instanceof ConfigParser)) {
+            return Q.reject(new Error('update_from_config requires a ConfigParser object'));
         }
 
         var name = config.name();
@@ -99,19 +98,7 @@ module.exports.prototype = {
             shell.cp('-rf', overrides, this.www_dir());
         }
     },
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
-    },
-    update_staging: function() {
-        var projectRoot = util.isCordova(this.path);
-        var stagingDir = path.join(this.path, '.staging', 'www');
 
-        if(fs.existsSync(stagingDir)) {
-            shell.cp('-rf',
-                     path.join(stagingDir, '*'),
-                     this.www_dir());
-        }
-    },
     config_xml:function(){
         return path.join(this.path, 'config.xml');
     },
@@ -121,7 +108,6 @@ module.exports.prototype = {
         return this.update_from_config(cfg)
         .then(function(){
             this.update_overrides();
-            this.update_staging();
             util.deleteSvnFolders(this.www_dir());
         }.bind(this));
     }
