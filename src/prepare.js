@@ -79,6 +79,12 @@ exports = module.exports = function prepare(options) {
                     }
                 }
 
+                var stagingPath = path.join(platformPath, '.staging');
+                if (fs.existsSync(stagingPath)) {
+                    events.emit('log', 'Deleting now-obsolete intermediate directory: ' + stagingPath);
+                    shell.rm('-rf', stagingPath);
+                }
+
                 var platform_www = path.join(platformPath, 'platform_www');
                 // Create platfom_www if project was created with older version.
                 if (!fs.existsSync(platform_www)) {
