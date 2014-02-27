@@ -20,6 +20,15 @@
 -->
 # Cordova-cli Release Notes
 
+### 3.4.0-0.1.1 (Feb 26, 2014)
+* Update to plugman v0.20.0
+* CB-5647 Remove concept of .staging dir. Install directly to www/
+* CB-5299 Speed up prepare by using plugman's new reapply_global_munge()
+* Refactored config_parser.js to simply both it and its tests.
+* CB-6076 Make "Generating config.xml from defaults" a verbose log
+* CB-5181 Use spawn helper for all sub-shelling.
+* CB-6049, CB-5181 Enable stdio for build sub-commands and hooks
+
 ## 3.4.0-0.1.0 (Feb 14, 2014)
 * CB-5638 Clean-up: remove unreachable info case from function
 * CB-5937 Add "platform check" command: Shows platforms that are out of date
@@ -231,3 +240,4 @@ Important note: This version targets Cordova version 3.1.0-rc1.
 
 - Plugins are now installed serially across all installed platforms, rather than in parallel. This avoids race conditions in dependency installation. [CB-4184](https://issues.apache.org/jira/browse/CB-4184)
 - (WP8) All files from project www dir are now copied into the binary, not the top-level www. This means merges and plugin assets are correctly handled.
+
