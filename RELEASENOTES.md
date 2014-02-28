@@ -20,6 +20,9 @@
 -->
 # Cordova-cli Release Notes
 
+### 3.4.0-0.1.2 (Feb 28, 2014)
+* Update to plugman v0.20.1
+
 ### 3.4.0-0.1.1 (Feb 26, 2014)
 * Update to plugman v0.20.0
 * CB-5647 Remove concept of .staging dir. Install directly to www/
