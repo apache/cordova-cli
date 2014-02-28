@@ -25,6 +25,7 @@ var helpers = require('./helpers'),
     config = require('../src/config'),
     events = require('../src/events'),
     util = require('../src/util'),
+    ConfigParser = require('../src/ConfigParser'),
     cordova = require('../cordova');
 
 // A utility function to generate all combinations of elements from 2 arrays.
@@ -88,7 +89,7 @@ describe('create end-to-end', function() {
         expect(path.join(project, 'www', 'index.html')).toExist();
 
         // Check that www/config.xml was updated.
-        var configXml = new util.config_parser(path.join(project, 'www', 'config.xml'));
+        var configXml = new ConfigParser(path.join(project, 'www', 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
 
         // TODO (kamrik): check somehow that we got the right config.xml from the fixture and not some place else.
@@ -98,7 +99,7 @@ describe('create end-to-end', function() {
     var results;
     events.on('results', function(res) { results = res; });
 
-    it('should successfully run with regualr config', function(done) {
+    it('should successfully run with regular config', function(done) {
         // Call cordova create with no args, should return help.
         cordova.raw.create()
         .then(function() {
@@ -125,8 +126,12 @@ describe('create end-to-end', function() {
             expect(fs.lstatSync(path.join(project, 'www')).isSymbolicLink()).toBe(true);
         })
         .fail(function(err) {
-            console.log(err);
-            expect(err).toBeUndefined();
+            if(process.platform.slice(0, 3) == 'win') {
+                // Allow symlink error if not in admin mode
+                expect(err.message).toBe("Symlinks on Windows require Administrator privileges");
+            } else {
+                expect(err).toBeUndefined();
+            }
         })
         .fin(done);
     });

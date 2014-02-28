@@ -27,11 +27,11 @@ var fs            = require('fs'),
     project_config= require('../config'),
     Q             = require('q'),
     os             = require('os'),
-    config_parser = require('../config_parser');
+    ConfigParser = require('../ConfigParser');
 
 module.exports = function(project) {
     this.path = project;
-    this.config = new util.config_parser(this.config_xml());
+    this.config = new ConfigParser(this.config_xml());
     this.update_manifest();
 };
 
@@ -61,18 +61,18 @@ module.exports.check_requirements = function(project_root, callback) {
 module.exports.prototype = {
     // Returns a promise.
     update_from_config:function(config) {
-        if (config instanceof config_parser) {
+        if (config instanceof ConfigParser) {
         } else {
-            return Q.reject(new Error('update_from_config requires a config_parser object'));
+            return Q.reject(new Error('update_from_config requires a ConfigParser object'));
         }
 
-        this.config = new util.config_parser(this.config_xml());
-        this.config.name(config.name());
-        this.config.version(config.version());
-        this.config.packageName(config.packageName());
+        this.config = new ConfigParser(this.config_xml());
+        this.config.setName(config.name());
+        this.config.setVersion(config.version());
+        this.config.setPackageName(config.packageName());
+        this.config.setDescription(config.description());
 
-        this.config.doc.find('description').text = config.doc.find('description').text;
-        this.config.update();
+        this.config.write();
 
         return this.update_manifest();
     },
@@ -92,7 +92,7 @@ module.exports.prototype = {
         else
             return Q.reject(new Error('unknown cpu arch'));
 
-        if (!this.config.doc.find('author') || !this.config.doc.find('author').text.length)
+        if (!this.config.author())
             return Q.reject(new Error('config.xml should contain author'));
 
         var manifest = { name: this.config.packageName(),
@@ -101,9 +101,9 @@ module.exports.prototype = {
                          hooks: { cordova: { desktop: "cordova.desktop",
                                              apparmor: "apparmor.json" } },
                          framework: "ubuntu-sdk-13.10",
-                         maintainer: sanitize(this.config.doc.find('author').text),
+                         maintainer: sanitize(this.config.author()),
                          architecture: arch,
-                         description: sanitize(this.config.doc.find('description').text) };
+                         description: sanitize(this.config.description()) };
         fs.writeFileSync(path.join(this.path, 'manifest.json'), JSON.stringify(manifest));
 
         var name = this.config.name().replace(/\n/g, ' '); //FIXME: escaping
@@ -131,10 +131,6 @@ module.exports.prototype = {
         return path.join(this.path, 'www');
     },
 
-    staging_dir: function() {
-        return path.join(this.path, '.staging', 'www');
-    },
-
     update_www:function() {
         var projectRoot = util.isCordova(this.path);
         var www = util.projectWww(projectRoot);
@@ -152,17 +148,6 @@ module.exports.prototype = {
         }
     },
 
-    update_staging:function() {
-        var projectRoot = util.isCordova(this.path);
-        var stagingDir = path.join(this.path, '.staging', 'www');
-
-        if(fs.existsSync(stagingDir)) {
-            shell.cp('-rf',
-                     path.join(stagingDir, '*'),
-                     this.www_dir());
-        }
-    },
-
     // Returns a promise.
     update_project:function(cfg) {
         var self = this;
@@ -170,7 +155,6 @@ module.exports.prototype = {
         return this.update_from_config(cfg)
         .then(function() {
             self.update_overrides();
-            self.update_staging();
             util.deleteSvnFolders(self.www_dir());
         });
     }
