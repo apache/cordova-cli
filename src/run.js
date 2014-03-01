@@ -23,79 +23,26 @@
 var cordova_util      = require('./util'),
     path              = require('path'),
     hooker            = require('./hooker'),
-    events            = require('./events'),
-    Q                 = require('q'),
-    child_process     = require('child_process'),
-    os                = require('os');
-
-// Returns a promise.
-function shell_out_to_run(projectRoot, platform, options) {
-    var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'run'),
-        args = options || [],
-        d = Q.defer(),
-        errors = "",
-        child;
-
-    if (os.platform() === 'win32') {
-        args = ['/c',cmd].concat(args);
-        cmd = 'cmd';
-    }
-
-    events.emit('log', 'Running app on platform "' + platform + '" via command "' + cmd + '" ' + args.join(" "));
-
-    //using spawn instead of exec to avoid errors with stdout on maxBuffer
-    child = child_process.spawn(cmd, args);
-
-    child.stdout.setEncoding('utf8');
-    child.stdout.on('data', function (data) {
-        events.emit('verbose', data);
-    });
-
-    child.stderr.setEncoding('utf8');
-    child.stderr.on('data', function (data) {
-        events.emit('verbose', data);
-        errors = errors + data;
-    });
-
-    child.on('close', function (code) {
-        events.emit('verbose', "child_process.spawn(" + cmd + "," + "[" + args.join(", ") + "]) = " + code);
-        if (code === 0) {
-            events.emit('log', 'Platform "' + platform + '" ran successfully.');
-            d.resolve();
-        } else {
-            d.reject(new Error('An error occurred while running the ' + platform + ' project.' + errors));
-        }
-    });
-
-    return d.promise;
-}
+    superspawn        = require('./superspawn'),
+    Q                 = require('q');
 
 // Returns a promise.
 module.exports = function run(options) {
     var projectRoot = cordova_util.cdProjectRoot(),
-        hooks;
-
-    if (!options) {
-        options = {
-            verbose: false,
-            platforms: [],
-            options: []
-        };
-    }
-
     options = cordova_util.preProcessOptions(options);
 
-    hooks = new hooker(projectRoot);
+    var hooks = new hooker(projectRoot);
     return hooks.fire('before_run', options)
     .then(function() {
         // Run a prepare first, then shell out to run
         return require('../cordova').raw.prepare(options.platforms)
-        .then(function() {
-            return Q.all(options.platforms.map(function(platform) {
-                return shell_out_to_run(projectRoot, platform, options.options);
-            }));
-        }).then(function() {
-            return hooks.fire('after_run', options);
-        });
+    }).then(function() {
+        // Deploy in parallel (output gets intermixed though...)
+        return Q.all(options.platforms.map(function(platform) {
+            var cmd = path.join(projectRoot, 'platforms', platform, 'cordova', 'run');
+            return superspawn.spawn(cmd, options.options, { printCommand: true, stdio: 'inherit' });
+        }));
+    }).then(function() {
+        return hooks.fire('after_run', options);
     });
 };

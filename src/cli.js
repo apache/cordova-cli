@@ -114,10 +114,6 @@ module.exports = function CLI(inputArgs) {
         throw new CordovaError('Cordova does not know ' + cmd + '; try help for a list of all the available commands.');
     }
 
-    if (cmd === "info") {
-        return cordova.info();
-    }
-
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
         // Filter all non-platforms into options
         var platforms = require("../platforms");

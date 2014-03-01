@@ -101,9 +101,6 @@ module.exports = function plugin(command, targets, opts) {
                         var plugman = require('plugman');
                         return plugman.raw.fetch(target, pluginsDir, { searchpath: searchPath});
                     })
-                    .fail(function(err) {
-                        return Q.reject(new Error('Fetching plugin failed: ' + err));
-                    })
                     .then(function(dir) {
                         // Iterate (in serial!) over all platforms in the project and install the plugin.
                         return platformList.reduce(function(soFar, platform) {
@@ -112,7 +109,6 @@ module.exports = function plugin(command, targets, opts) {
                                 var platformRoot = path.join(projectRoot, 'platforms', platform),
                                     parser = new platforms[platform].parser(platformRoot),
                                     options = {
-                                        www_dir: parser.staging_dir(),
                                         cli_variables: {},
                                         searchpath: searchPath
                                     },
@@ -165,7 +161,7 @@ module.exports = function plugin(command, targets, opts) {
                             var platforms = require('../platforms');
                             var parser = new platforms[platform].parser(platformRoot);
                             events.emit('verbose', 'Calling plugman.uninstall on plugin "' + target + '" for platform "' + platform + '"');
-                            return plugman.raw.uninstall.uninstallPlatform(platform, platformRoot, target, path.join(projectRoot, 'plugins'), { www_dir: parser.staging_dir() });
+                            return plugman.raw.uninstall.uninstallPlatform(platform, platformRoot, target, path.join(projectRoot, 'plugins'));
                         });
                     }, Q())
                     .then(function() {

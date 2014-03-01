@@ -21,21 +21,20 @@ var platforms = require('../../platforms'),
     path = require('path'),
     shell = require('shelljs'),
     fs = require('fs'),
-    ET = require('elementtree'),
     config = require('../../src/config'),
-    config_parser = require('../../src/config_parser'),
+    ConfigParser = require('../../src/ConfigParser'),
     cordova = require('../../cordova');
 
+var cfg = new ConfigParser(path.join(__dirname, '..', 'test-config.xml'));
 describe('firefoxos project parser', function() {
     var proj = path.join('some', 'path');
-    var exists, exec, custom, cfg_parser;
+    var exists, exec, custom;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
         exec = spyOn(shell, 'exec').andCallFake(function(cmd, opts, cb) {
             cb(0, '');
         });
         custom = spyOn(config, 'has_custom_path').andReturn(false);
-        cfg_parser = spyOn(util, 'config_parser');
     });
 
     describe('constructions', function() {
@@ -60,33 +59,10 @@ describe('firefoxos project parser', function() {
         });
 
         describe('update_from_config method', function() {
-            var cfg, cfg_access_add, cfg_access_rm,
-                cfg_pref_rm, cfg_pref_add, cfg_content;
-
             beforeEach(function() {
-                cfg = new config_parser();
                 cfg.name = function() { return 'testname'; };
                 cfg.packageName = function() { return 'testpkg'; };
                 cfg.version = function() { return '1.0'; };
-
-                cfg_access_add = jasmine.createSpy('config_parser access add');
-                cfg_access_rm = jasmine.createSpy('config_parser access rm');
-                cfg_pref_rm = jasmine.createSpy('config_parser pref rm');
-                cfg_pref_add = jasmine.createSpy('config_parser pref add');
-                cfg_content = jasmine.createSpy('config_parser content');
-                cfg_parser = spyOn(util, 'config_parser').andReturn({
-                    access:{
-                        remove:cfg_access_rm,
-                        get:function(){},
-                        add:cfg_access_add
-                    },
-                    preference:{
-                        remove:cfg_pref_rm,
-                        get:function(){},
-                        add:cfg_pref_add
-                    },
-                    content:cfg_content
-                });
             });
 
           /*  it('should write manifest.webapp', function() {
