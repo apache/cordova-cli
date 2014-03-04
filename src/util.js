@@ -183,7 +183,7 @@ function addModuleProperty(module, symbol, modulePath, opt_wrap, opt_obj) {
                 // If args exist and the last one is a function, it's the callback.
                 var args = Array.prototype.slice.call(arguments);
                 var cb = args.pop();
-                val.apply(module.exports, args).done(cb, cb);
+                val.apply(module.exports, args).done(function(result) {cb(undefined, result)}, cb);
             } else {
                 val.apply(module.exports, arguments).done(null, function(err) { throw err; });
             }
