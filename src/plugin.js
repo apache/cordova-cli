@@ -85,7 +85,12 @@ module.exports = function plugin(command, targets, opts) {
             }
 
             var config_json = config(projectRoot, {});
-            var searchPath = opts.searchpath || config_json.plugin_search_path;
+            var searchPath = config_json.plugin_search_path || [];
+            if (typeof opts.searchpath == 'string') {
+                searchPath = opts.searchpath.split(path.delimiter).concat(searchPath);
+            } else if (opts.searchpath) {
+                searchPath = opts.searchpath.concat(searchPath);
+            }
 
             return hooks.fire('before_plugin_add', opts)
             .then(function() {
