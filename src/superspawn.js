@@ -53,6 +53,7 @@ exports.spawn = function(cmd, args, opts) {
     args = args || [];
     opts = opts || {};
     var d = Q.defer();
+
     if (process.platform.slice(0, 3) == 'win') {
         cmd = resolvePath(cmd);
         // If we couldn't find the file, likely we'll end up failing,
@@ -76,7 +77,7 @@ exports.spawn = function(cmd, args, opts) {
         spawnOpts.env = _.extend(_.extend({}, process.env), opts.env);
     }
 
-    events.emit(opts.printCommand ? 'log' : 'verbose', 'Running command: ' + cmd + ' args=' + JSON.stringify(args));
+    events.emit(opts.printCommand ? 'log' : 'verbose', 'Running command: "' + cmd + ' '+ args.join(" ") + '"');
 
     var child = child_process.spawn(cmd, args, spawnOpts);
     var capturedOut = '';
