@@ -91,6 +91,10 @@ module.exports = function plugin(command, targets, opts) {
             } else if (opts.searchpath) {
                 searchPath = opts.searchpath.concat(searchPath);
             }
+            // Blank it out to appease unit tests.
+            if (searchPath.length === 0) {
+                searchPath = undefined;
+            }
 
             return hooks.fire('before_plugin_add', opts)
             .then(function() {
