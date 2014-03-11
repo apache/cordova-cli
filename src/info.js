@@ -39,7 +39,7 @@ module.exports = function info() {
 
     output = raw.map(function(line) {
         if(line.match('    %') ) {
-            var type = line.substr(5),
+            var type = (line.substr(5)).replace("\r",""),
                 out = "";
 
             switch(type) {
@@ -100,7 +100,7 @@ function doPlatforms( projectRoot ){
         for(i=0; i<platforms.length; i++){
             output += raw.map(function(line) {
                 if(line.match('    %') ) {
-                    var type = line.substr(5),
+                    var type = (line.substr(5)).replace("\r",""),
                         out = "";
 
                     switch(type) {
