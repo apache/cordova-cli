@@ -82,12 +82,12 @@ ConfigParser.prototype = {
     getPreference: function(name) {
         var preferences = this.doc.findall('preference');
         var ret = null;
-        for (var i = 0, ii = preferences.length; i < ii; ++i) {
+        preferences.forEach(function (preference) {
             // Take the last one that matches.
-            if (preferences[i].attrib.name.toLowerCase() === name) {
-                ret = a.attrib.value;
+            if (preference.attrib.name.toLowerCase() === name) {
+                ret = preference.attrib.value;
             }
-        }
+        });
         return ret;
     },
     write:function() {

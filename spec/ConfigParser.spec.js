@@ -72,5 +72,13 @@ describe('config.xml parser', function () {
                 expect(cfg.name()).toEqual('this.is.bat.country');
             });
         });
+        describe('preference', function() {
+            it('should get value of existing preference', function() {
+                expect(cfg.getPreference('fullscreen')).toEqual('true');
+            });
+            it('should get undefined as non existing preference', function() {
+                expect(cfg.getPreference('zimzooo!')).toEqual(undefined);
+            });
+        });
     });
 });
