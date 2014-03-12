@@ -111,8 +111,6 @@ exports = module.exports = function prepare(options) {
                 platform_cfg.write();
 
                 return parser.update_project(cfg);
-            }).fail(function(e) {
-                console.error(e);
             });
         })).then(function() {
             return hooks.fire('after_prepare', options);
