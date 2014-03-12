@@ -112,7 +112,7 @@ exports = module.exports = function prepare(options) {
 
                 return parser.update_project(cfg);
             }).fail(function(e) {
-                console.error(e);
+                console.error(e.stack || e);
             });
         })).then(function() {
             return hooks.fire('after_prepare', options);
