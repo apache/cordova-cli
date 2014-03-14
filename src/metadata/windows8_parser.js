@@ -85,6 +85,11 @@ module.exports.prototype = {
         var pkgName = config.packageName();
         var author = config.author();
 
+        var startPage = config.startPage();
+        if (!startPage.match('^https?://')) { // if local uri
+            startPage = 'www/' + startPage;
+        }
+
         var identityNode = manifest.find('.//Identity');
         if(identityNode) {
             // Update app name in identity
@@ -109,6 +114,8 @@ module.exports.prototype = {
             if (appId != pkgName) {
                 app['attrib']['Id'] = pkgName;
             }
+
+            app['attrib']['StartPage'] = startPage;
 
             var visualElems = manifest.find('.//VisualElements');
 
