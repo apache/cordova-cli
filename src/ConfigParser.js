@@ -90,6 +90,16 @@ ConfigParser.prototype = {
         });
         return ret;
     },
+    accessRules: function() {
+        var rules = this.doc.getroot().findall('access');
+        var ret = [];
+        rules.forEach(function (rule) {
+            if (rule.attrib.origin) {
+                ret.push(rule.attrib.origin);
+            }
+        });
+        return ret;
+    },
     write:function() {
         fs.writeFileSync(this.path, this.doc.write({indent: 4}), 'utf-8');
     }
