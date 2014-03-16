@@ -4,7 +4,7 @@ var helpers = require('./helpers'),
     fs = require('fs'),
     shell = require('shelljs'),
     platforms = require('../platforms'),
-    child_process = require('child_process'),
+    superspawn = require('../src/superspawn'),
     config = require('../src/config'),
     Q = require('q'),
     events = require('../src/events'),
@@ -62,25 +62,16 @@ describe('platform end-to-end', function() {
 
         // The config.json in the fixture project points at fake "local" paths.
         // Since it's not a URL, the lazy-loader will just return the junk path.
-        // The platform logic will call the platformParser.check_requirements, which we mock,
-        // and then call the bin/check_reqs and bin/create scripts from it.
-        // We're mocking out shell.exec() as well, to capture that.
-        var check_reqs = spyOn(platformParser, 'check_requirements').andReturn(Q());
-        var exec = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
-            if (!cb) cb = opts;
-
-            if (cmd.match(/^"[^"]*create"/)) {
+        spyOn(superspawn, 'spawn').andCallFake(function(cmd, args) {
+            if (cmd.match(/create\b/)) {
                 // This is a call to the bin/create script, so do the copy ourselves.
                 shell.cp('-R', path.join(__dirname, 'fixtures', 'platforms', 'android'), path.join(project, 'platforms'));
-                cb(null, '', '');
-            } else if(cmd.match(/^"[^"]*version"/)) {
-                cb(null, 'dev', '');
+            } else if(cmd.match(/version\b/)) {
+                return Q('3.3.0');
             } else if(cmd.match(/update\b/)) {
                 fs.writeFileSync(path.join(project, 'platforms', helpers.testPlatform, 'updated'), 'I was updated!', 'utf-8');
-                cb(null, '', '');
-            } else {
-                cb(null, '', '');
             }
+            return Q();
         });
 
         events.on('results', function(res) { results = res; });

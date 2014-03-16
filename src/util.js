@@ -138,13 +138,24 @@ exports = module.exports = {
         return rootPath;
     },
     preProcessOptions: function (inputOptions) {
-        var DEFAULT_OPTIONS = {
-                verbose: false,
-                platforms: [],
-                options: []
-            },
-            result = inputOptions || DEFAULT_OPTIONS,
-            projectRoot = this.isCordova();
+        /**
+         * Current Desired Arguments
+         * options: {verbose: boolean, platforms: [String], options: [String]}
+         * Accepted Arguments
+         * platformList: [String] -- assume just a list of platforms
+         * platform: String -- assume this is a platform
+         */
+        var result = inputOptions || {};
+        if (Array.isArray(inputOptions)) {
+            result = { platforms: inputOptions };
+        } else if (typeof inputOptions === 'string') {
+            result = { platforms: [inputOptions] };
+        }
+        result.verbose = result.verbose || false;
+        result.platforms = result.platforms || [];
+        result.options = result.options || [];
+
+        var projectRoot = this.isCordova();
 
         if (!projectRoot) {
             throw new CordovaError('Current working directory is not a Cordova-based project.');
@@ -153,29 +164,10 @@ exports = module.exports = {
         if (projectPlatforms.length === 0) {
             throw new CordovaError('No platforms added to this project. Please use `cordova platform add <platform>`.');
         }
-        /**
-         * Current Desired Arguments
-         * options: {verbose: boolean, platforms: [String], options: [String]}
-         * Accepted Arguments
-         * platformList: [String] -- assume just a list of platforms
-         * platform: String -- assume this is a platform
-         */
-        if (Array.isArray(inputOptions)) {
-            result = {
-                verbose: false,
-                platforms: inputOptions,
-                options: []
-            };
-        } else if (typeof inputOptions === 'string') {
-            result = {
-                verbose: false,
-                platforms: [inputOptions],
-                options: []
-            };
-        }
-        if (!result.platforms || (result.platforms && result.platforms.length === 0) ) {
+        if (result.platforms.length === 0) {
             result.platforms = projectPlatforms;
         }
+
         return result;
     }
 };
@@ -191,7 +183,7 @@ function addModuleProperty(module, symbol, modulePath, opt_wrap, opt_obj) {
                 // If args exist and the last one is a function, it's the callback.
                 var args = Array.prototype.slice.call(arguments);
                 var cb = args.pop();
-                val.apply(module.exports, args).done(cb, cb);
+                val.apply(module.exports, args).done(function(result) {cb(undefined, result)}, cb);
             } else {
                 val.apply(module.exports, arguments).done(null, function(err) { throw err; });
             }
@@ -212,7 +204,6 @@ function addModuleProperty(module, symbol, modulePath, opt_wrap, opt_obj) {
     }
 }
 
-addModuleProperty(module, 'config_parser', './config_parser');
 addModuleProperty(module, 'plugin_parser', './plugin_parser');
 
 exports.addModuleProperty = addModuleProperty;

@@ -89,8 +89,9 @@ describe('build command', function() {
         });
         it('should pass down options', function(done) {
             cordova.raw.build({platforms: ['android'], options: ['--release']}).then(function() {
-                expect(prepare_spy).toHaveBeenCalledWith({platforms: ['android'], options: ["--release"]});
-                expect(compile_spy).toHaveBeenCalledWith({platforms: ['android'], options: ["--release"]});
+                var opts = {platforms: ['android'], options: ["--release"], verbose: false};
+                expect(prepare_spy).toHaveBeenCalledWith(opts);
+                expect(compile_spy).toHaveBeenCalledWith(opts);
                 done();
             });
         });

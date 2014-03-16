@@ -25,7 +25,7 @@ var fs            = require('fs'),
     events        = require('../events'),
     Q             = require('q'),
     child_process = require('child_process'),
-    config_parser = require('../config_parser'),
+    ConfigParser = require('../ConfigParser'),
     xml           = require('../xml-helpers'),
     config        = require('../config'),
     hooker        = require('../hooker');
@@ -42,8 +42,6 @@ module.exports = function windows8_parser(project) {
         throw new Error('The provided path "' + project + '" is not a Windows 8 project. ' + e);
     }
     this.manifest_path  = path.join(this.windows8_proj_dir, 'package.appxmanifest');
-    this.config_path = this.config_xml();
-    this.config = new util.config_parser(this.config_path);
 };
 
 // Returns a promise
@@ -59,7 +57,7 @@ module.exports.check_requirements = function(project_root) {
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
     events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
-    
+
     child_process.exec(command, function(err, output, stderr) {
         events.emit('verbose', output);
         if (err) {
@@ -76,8 +74,8 @@ module.exports.prototype = {
     update_from_config:function(config) {
 
         //check config parser
-        if (config instanceof config_parser) {
-        } else throw new Error('update_from_config requires a config_parser object');
+        if (config instanceof ConfigParser) {
+        } else throw new Error('update_from_config requires a ConfigParser object');
 
         //Get manifest file
         var manifest = xml.parseElementtreeSync(this.manifest_path);
@@ -158,9 +156,6 @@ module.exports.prototype = {
         capabilities.forEach(function(elem){
             capabilitiesRoot.append(elem);
         });
-
-        // Update content (start page) element
-        this.config.content(config.content());
 
         //Write out manifest
         fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
@@ -261,20 +256,9 @@ module.exports.prototype = {
             else if(stat.isFile()) {
                 results.push(path.join(name, folder_dir[item]));
             }
-            // else { it is a FIFO, or a Socket, Symbolic Link or something ... } 
+            // else { it is a FIFO, or a Socket, Symbolic Link or something ... }
         }
         return results;
-    },
-    staging_dir: function() {
-        return path.join(this.windows8_proj_dir, '.staging', 'www');
-    },
-
-    update_staging: function() {
-        var projectRoot = util.isCordova(this.windows8_proj_dir);
-        if (fs.existsSync(this.staging_dir())) {
-            var staging = path.join(this.staging_dir(), '*');
-            shell.cp('-rf', staging, this.www_dir());
-        }
     },
 
     // calls the nessesary functions to update the windows8 project
@@ -295,7 +279,6 @@ module.exports.prototype = {
         .then(function() {
             // overrides (merges) are handled in update_www()
             that.update_jsproj();
-            that.update_staging();
             //that.add_bom();
 
             util.deleteSvnFolders(that.www_dir());

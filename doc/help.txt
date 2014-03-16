@@ -24,8 +24,16 @@ Project-Level Commands
                 [{list|ls}] ................... list all installed and available platforms
                 [{update|up} <PLATFORM>] ...... update the version of Cordova used for a specific
                                                 PLATFORM; use after updating the CLI.
+                [check] ....................... list platforms which can be updated by `platform update`
 
-    plugin(s) [{add|remove|rm} <PATH|URI>] .... add or remove a plugin from the specified PATH or URI, OR
+    plugin add <SPEC1> [<SPEC2> ...] .......... SPEC can be a plugin ID, a local path, or a git URL.
+               [--searchpath <directory>] ..... When looking up plugins by ID, look in this directory and
+                                                each of its subdirectories for the plugin before hitting the registry.
+                                                Multiple search paths can be used by either specifying the flag multiple
+                                                times, or by separating paths with a delimiter (: on 'nix, ; on Windows).
+
+    plugin(s) rm <plugin_id1> [<plugin_id2>] .. remove a plugin with the given IDs.
+
               [{ls|list}] ..................... list all currently installed plugins
               [search <keyword1 keyword2...>] . search the plugin registry for plugins matching the keywords
 

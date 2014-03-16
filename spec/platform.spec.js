@@ -17,9 +17,12 @@
     under the License.
 */
 var cordova = require('../cordova'),
+    events = require('../src/events'),
     path = require('path'),
     shell = require('shelljs'),
-    child_process = require('child_process'),
+    superspawn = require('../src/superspawn'),
+    xmlHelpers = require('../src/xml-helpers'),
+    et = require('elementtree'),
     plugman = require('plugman'),
     fs = require('fs'),
     util = require('../src/util'),
@@ -34,6 +37,13 @@ var cwd = process.cwd();
 var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
 var project_dir = path.join('some', 'path');
 
+var TEST_XML = '<widget xmlns     = "http://www.w3.org/ns/widgets"\n' +
+    '        xmlns:cdv = "http://cordova.apache.org/ns/1.0"\n' +
+    '        id        = "io.cordova.hellocordova"\n' +
+    '        version   = "0.0.1">\n' +
+    '    <name>Hello Cordova</name>\n' +
+    '</widget>\n';
+
 function fail(e) {
   expect('Got Error: ' + e).toBe('');
 }
@@ -44,7 +54,6 @@ describe('platform command', function() {
         cp,
         list_platforms,
         fire,
-        config_parser,
         find_plugins,
         config_read,
         load,
@@ -53,9 +62,7 @@ describe('platform command', function() {
         mkdir,
         existsSync,
         supports,
-        pkg,
-        name,
-        exec,
+        spawn,
         prep_spy,
         plugman_install,
         parsers = {};
@@ -69,11 +76,8 @@ describe('platform command', function() {
         is_cordova = spyOn(util, 'isCordova').andReturn(project_dir);
         cd_project_root = spyOn(util, 'cdProjectRoot').andReturn(project_dir);
         fire = spyOn(hooker.prototype, 'fire').andReturn(Q());
-        name = jasmine.createSpy('config name').andReturn('magical mystery tour');
-        pkg = jasmine.createSpy('config packageName').andReturn('ca.filmaj.id');
-        config_parser = spyOn(util, 'config_parser').andReturn({
-            packageName:pkg,
-            name:name
+        spyOn(xmlHelpers, 'parseElementtreeSync').andCallFake(function() {
+            return new et.ElementTree(et.XML(TEST_XML));
         });
         find_plugins = spyOn(util, 'findPlugins').andReturn([]);
         list_platforms = spyOn(util, 'listPlatforms').andReturn(supported_platforms);
@@ -107,10 +111,7 @@ describe('platform command', function() {
             return origReadFile.apply(this, arguments);
         });
         supports = spyOn(platform, 'supports').andReturn(Q());
-        exec = spyOn(child_process, 'exec').andCallFake(function(cmd, opts, cb) {
-            if (!cb) cb = opts;
-            cb(null, '', '');
-        });
+        spawn = spyOn(superspawn, 'spawn').andCallFake(function() { return Q('3.4.0') });
         prep_spy = spyOn(cordova.raw, 'prepare').andReturn(Q());
         plugman_install = spyOn(plugman, 'install').andReturn(Q());
     });
@@ -173,23 +174,23 @@ describe('platform command', function() {
         describe('`add`', function() {
             it('should shell out to specified platform\'s bin/create, using the version that is specified in platforms manifest', function(done) {
                 cordova.raw.platform('add', 'android').then(function() {
-                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.android.cordova.\d.\d.\d[\d\-\w]*.bin.create/gi);
-                    expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+                    expect(spawn.mostRecentCall.args.join()).toMatch(/lib.android.cordova.\d.\d.\d[\d\-\w]*.bin.create/gi);
+                    expect(spawn.mostRecentCall.args.join()).toContain(project_dir);
                 }).then(function() {
                     return cordova.raw.platform('add', 'wp7');
                 }).then(function() {
-                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w\-]*.wp7.*.bin.create/gi);
-                    expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+                    expect(spawn.mostRecentCall.args.join()).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w\-]*.wp7.*.bin.create/gi);
+                    expect(spawn.mostRecentCall.args.join()).toContain(project_dir);
                 }).then(function() {
                     return cordova.raw.platform('add', 'wp8');
                 }).then(function() {
-                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w\-]*.wp8.*.bin.create/gi);
-                    expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+                    expect(spawn.mostRecentCall.args.join()).toMatch(/lib.wp.cordova.\d.\d.\d[\d\w\-]*.wp8.*.bin.create/gi);
+                    expect(spawn.mostRecentCall.args.join()).toContain(project_dir);
                 }).then(function(){
                     return cordova.raw.platform('add', 'windows8');
                 }).then(function(){
-                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.windows8.cordova.\d.\d.\d[\d\w\-]*.windows8.*.bin.create/gi);
-                    expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+                    expect(spawn.mostRecentCall.args.join()).toMatch(/lib.windows8.cordova.\d.\d.\d[\d\w\-]*.windows8.*.bin.create/gi);
+                    expect(spawn.mostRecentCall.args.join()).toContain(project_dir);
                 }, fail).fin(done);
             });
             it('should call into lazy_load.custom if there is a user-specified configruation for consuming custom libraries', function(done) {
@@ -205,8 +206,8 @@ describe('platform command', function() {
                 });
                 cordova.raw.platform('add', 'wp8').then(function() {
                     expect(load_custom).toHaveBeenCalledWith('haha', 'phonegap', 'wp8', 'bleeding edge');
-                    expect(exec.mostRecentCall.args[0]).toMatch(/lib.wp.phonegap.bleeding edge.wp8.*.bin.create/gi);
-                    expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+                    expect(spawn.mostRecentCall.args.join()).toMatch(/lib.wp.phonegap.bleeding edge.wp8.*.bin.create/gi);
+                    expect(spawn.mostRecentCall.args.join()).toContain(project_dir);
                 }, fail).fin(done);
             });
             it('should use a custom template directory if there is one specified in the configuration', function(done) {
@@ -223,9 +224,8 @@ describe('platform command', function() {
                     }
                 });
                 cordova.raw.platform('add', 'android').then(function() {
-                    expect(exec.mostRecentCall.args[0]).toMatch(/^"[^ ]*" +"[^"]*" +"[^"]*" +"[^"]*" +"[^"]*"$/g);
-                    expect(exec.mostRecentCall.args[0]).toContain(project_dir);
-                    expect(exec.mostRecentCall.args[0]).toContain(template_dir);
+                    expect(spawn.mostRecentCall.args.join()).toContain(project_dir);
+                    expect(spawn.mostRecentCall.args.join()).toContain(template_dir);
                 }, fail).fin(done);
             });
             it('should not use a custom template directory if there is not one specified in the configuration', function(done) {
@@ -240,14 +240,12 @@ describe('platform command', function() {
                     }
                 });
                 cordova.raw.platform('add', 'android').then(function() {
-                    expect(exec.mostRecentCall.args[0]).toMatch(/^"[^ ]*" +"[^"]*" +"[^"]*" +"[^"]*"$/g);
-                    expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+                    expect(spawn.mostRecentCall.args.join()).toContain(project_dir);
                 }, fail).fin(done);
             });
             it('should not use a custom template directory if there is no user-defined configuration', function(done) {
                 cordova.raw.platform('add', 'android').then(function() {
-                    expect(exec.mostRecentCall.args[0]).toMatch(/^"[^ ]*" +"[^"]*" +"[^"]*" +"[^"]*"$/g);
-                    expect(exec.mostRecentCall.args[0]).toContain(project_dir);
+                    expect(spawn.mostRecentCall.args.join()).toContain(project_dir);
                 }, fail).fin(done);
             });
         });
@@ -298,6 +296,69 @@ describe('platform command', function() {
                     });
                 });
             }
+        });
+        describe('`check`', function() {
+            var real_platforms_data = {},
+            synthetic_platforms_data = {
+                current: {
+                    uri: "https://localhost",
+                    version: "3.3.0",
+                    parser: undefined
+                },
+                stale: {
+                    uri: "https://localhost",
+                    version: "3.3.0",
+                    parser: undefined
+                },
+                newer: {
+                    uri: "https://localhost",
+                    version: "3.3.0",
+                    parser: undefined
+                }
+            };
+            beforeEach(function() {
+                list_platforms.andReturn(['current', 'stale', 'newer']);
+                Object.keys(platforms).forEach(function (k) {
+                    real_platforms_data[k] = platforms[k];
+                    delete platforms[k];
+                });
+                Object.keys(synthetic_platforms_data).forEach(function (k) {
+                    platforms[k] = synthetic_platforms_data[k];
+                });
+            });
+            afterEach(function() {
+                list_platforms.andReturn(['current', 'stale', 'newer']);
+                Object.keys(platforms).forEach(function (k) {
+                    delete platforms[k];
+                });
+                Object.keys(real_platforms_data).forEach(function (k) {
+                    platforms[k] = real_platforms_data[k];
+                });
+            });
+            it('check platforms current, stale, newer', function() {
+                existsSync.andReturn(true);
+                spawn.andCallFake(function(cmd) {
+                    var out;
+                    if (/current/.test(cmd)) {
+                        out = '3.3.0';
+                    } else if (/stale/.test(cmd)) {
+                        out = '3.2.0';
+                    } else {
+                        out = '3.4.0';
+                    }
+                    return Q(out);
+                });
+                var results;
+                events.on('results', function(res) { results = res; });
+
+                cordova.raw.platform('check');
+                waitsFor(function() {
+                    return results;
+                }, 'promise never resolved', 500);
+                runs(function() {
+                    expect(results).toEqual("stale @ 3.2.0 could be updated to: 3.3.0");
+                });
+            });
         });
     });
     describe('hooks', function() {
