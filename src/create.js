@@ -123,7 +123,7 @@ module.exports = function create (dir, id, name, cfg, callback) {
         });
     }
 
-    return p.then(function(www_lib) {
+    ret = p.then(function(www_lib) {
         // Keep going into child "www" folder if exists in stock app package.
         while (fs.existsSync(path.join(www_lib, 'www'))) {
             www_lib = path.join(www_lib, 'www');
@@ -171,4 +171,10 @@ module.exports = function create (dir, id, name, cfg, callback) {
             config.write();
         }
     });
+
+    if (callback) {
+        return null;
+    }
+
+    return ret;
 };
