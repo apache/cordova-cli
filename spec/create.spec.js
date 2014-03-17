@@ -65,6 +65,35 @@ describe('create command', function () {
         });
     });
 
+    describe('callback', function() {
+        var promise,
+            callback,
+            flag = false;
+
+        beforeEach(function() {
+            callback = function (err) {
+                flag = true;
+            };
+
+            runs(function(){
+                promise = cordova.raw.create(tempDir, 'org.foo', foobar, {}, callback);
+            });
+
+            waitsFor(function(){
+                return flag;
+            });
+        });
+        
+        it('should return null if a callback parameter is used', function() {
+            expect(promise).toBe(null);
+        });
+
+        it('should call the callback function if callback parameter is used', function() {
+            expect(flag).toBe(true);
+        });
+
+    });
+
     describe('failure', function() {
         it('should return a help message if incorrect number of parameters is used', function(done) {
             this.after(function() {
