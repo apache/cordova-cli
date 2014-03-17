@@ -61,6 +61,37 @@ describe('run command', function() {
         });
     });
 
+    describe('callback support', function() {
+        var callback,
+            promise,
+            asyncTimeOut = 5000,
+            flag = false;
+
+        beforeEach(function() {
+            callback = function() {
+                flag = true;
+            }
+
+            runs( function() {
+                promise = cordova.raw.run(['android'], callback);
+            });
+            
+            waitsFor( function () {
+                return flag;
+            }, asyncTimeOut);
+
+        });
+
+        it('should return null if a callback is provided', function() {
+            expect(promise).toBe(null);
+        });
+
+        it('should call us back if a callback parameter is provided', function () {
+            expect(flag).toBe(true);
+        });
+
+    });
+
     describe('success', function() {
         it('should run inside a Cordova-based project with at least one added platform and call prepare and shell out to the run script', function(done) {
             cordova.raw.run(['android','ios']).then(function() {
