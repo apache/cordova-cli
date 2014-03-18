@@ -52,18 +52,19 @@ function resolvePath(cmd) {
 exports.spawn = function(cmd, args, opts) {
     args = args || [];
     opts = opts || {};
+    var spawnOpts = {};
     var d = Q.defer();
     if (process.platform.slice(0, 3) == 'win') {
         cmd = resolvePath(cmd);
         // If we couldn't find the file, likely we'll end up failing,
         // but for things like "del", cmd will do the trick.
         if (!fs.exists(cmd)) {
-            args = ['/c', cmd].concat(args);
+            args = [['/s', '/c', '"'+[cmd].concat(args).map(function(a){if (/^[^"].* .*[^"]/.test(a)) return '"'+a+'"'; return a;}).join(" ")+'"'].join(" ")];
             cmd = 'cmd';
         }
+        spawnOpts.windowsVerbatimArguments = true;
     }
 
-    var spawnOpts = {};
     if (opts.stdio == 'ignore') {
         spawnOpts.stdio = 'ignore';
     } else if (opts.stdio == 'inherit') {
