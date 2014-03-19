@@ -27,12 +27,13 @@ var cordova_util      = require('./util'),
     Q                 = require('q');
 
 // Returns a promise.
-module.exports = function run(options) {
+module.exports = function run(options, callback) {
     var projectRoot = cordova_util.cdProjectRoot(),
-    options = cordova_util.preProcessOptions(options);
+        options = cordova_util.preProcessOptions(options),
+        ret = null;
 
     var hooks = new hooker(projectRoot);
-    return hooks.fire('before_run', options)
+    ret = hooks.fire('before_run', options)
     .then(function() {
         // Run a prepare first, then shell out to run
         return require('../cordova').raw.prepare(options.platforms)
@@ -44,5 +45,15 @@ module.exports = function run(options) {
         }));
     }).then(function() {
         return hooks.fire('after_run', options);
+    }).then(function() {
+        if (callback) {
+            callback();
+        }
     });
+    // returns null if callback is a valid parameter
+    if (callback) {
+        return null;
+    }
+
+    return ret;
 };
