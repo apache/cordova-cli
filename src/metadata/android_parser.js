@@ -69,7 +69,7 @@ module.exports.prototype = {
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
         events.emit('verbose', 'Wrote out Android application name to "' + name + '"');
 
-        var icons = config.icon.get();
+        var icons = config.getAllIcons();
         // if there are icon elements in config.xml
         if (icons) {
           var haveSeenDefaultIcon = false;

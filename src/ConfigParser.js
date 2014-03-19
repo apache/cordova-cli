@@ -90,6 +90,18 @@ ConfigParser.prototype = {
         });
         return ret;
     },
+    getAllIcons: function() {
+        var elts = this.doc.findall('icon');
+        var ret = [];
+        elts.forEach(function (elt) {
+          var icon = {};
+          icon.src = elt.attrib.src;
+          icon.width = elt.attrib.width;
+          icon.height = elt.attrib.height;
+          ret.push(icon);
+        });
+        return ret;
+    },
     write:function() {
         fs.writeFileSync(this.path, this.doc.write({indent: 4}), 'utf-8');
     }
