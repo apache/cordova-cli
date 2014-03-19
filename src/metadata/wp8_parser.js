@@ -109,10 +109,10 @@ module.exports.prototype = {
          *  - App.xaml
          *  - App.xaml.cs
          */
-         var pkg = config.packageName();
-         var csproj = xml.parseElementtreeSync(this.csproj_path);
-         prev_name = csproj.find('.//RootNamespace').text;
-         if(prev_name != pkg) {
+        var pkg = config.packageName();
+        var csproj = xml.parseElementtreeSync(this.csproj_path);
+        prev_name = csproj.find('.//RootNamespace').text;
+        if(prev_name != pkg) {
             //console.log("Updating package name from " + prev_name + " to " + pkg);
             //CordovaAppProj.csproj
             csproj.find('.//RootNamespace').text = pkg;
@@ -135,7 +135,17 @@ module.exports.prototype = {
             //App.xaml.cs
             var appCS = fs.readFileSync(path.join(this.wp8_proj_dir, 'App.xaml.cs'), 'utf-8');
             fs.writeFileSync(path.join(this.wp8_proj_dir, 'App.xaml.cs'), appCS.replace(namespaceRegEx, 'namespace ' + pkg), 'utf-8');
-         }
+        }
+
+        // Update splash screen and icons
+        var splashScreen = config.getPreference('splashscreen', 'wp8');
+        if (splashScreen != null) {
+            events.emit('verbose', 'Update splash screen image with ' + splashScreen);
+            // Default splash screen image is named SplashScreenImage.jpg
+            // http://msdn.microsoft.com/en-us/library/windowsphone/develop/ff769511%28v=vs.105%29.aspx
+            shell.cp('-f', splashScreen, path.join(this.wp8_proj_dir, 'SplashScreenImage.jpg'));
+
+        }
 
          //Write out manifest
          fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
