@@ -79,8 +79,11 @@ ConfigParser.prototype = {
     author: function() {
         return getNodeTextSafe(this.doc.find('author'));
     },
-    getPreference: function(name) {
+    getPreference: function(name, platform) {
         var preferences = this.doc.findall('preference');
+        if (platform) { // if specified, we search for platform specfic preferences also
+            preferences = preferences.concat(this.doc.findall('platform[@name=\'' + platform + '\']/preference'));
+        }
         var ret = null;
         preferences.forEach(function (preference) {
             // Take the last one that matches.
