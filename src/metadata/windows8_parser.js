@@ -157,6 +157,16 @@ module.exports.prototype = {
             capabilitiesRoot.append(elem);
         });
 
+        // Update splash screen and icons
+        var splashScreen = config.getPreference('splashscreen', 'windows8');
+        if (splashScreen != null) {
+            events.emit('verbose', 'Update splash screen image with ' + splashScreen);
+            // Default splash screen is stored as 'images\splashscreen.png'
+            // http://msdn.microsoft.com/en-us/library/windows/apps/hh465346.aspx
+            shell.cp('-f', splashScreen, path.join(this.windows8_proj_dir, 'images/splashscreen.png'));
+
+        }
+
         //Write out manifest
         fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
 
