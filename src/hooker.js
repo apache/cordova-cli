@@ -137,7 +137,7 @@ function execute_scripts_serially(scripts, root, dir, opts) {
                 if (!isWindows && err.code == 'EACCES') {
                     events.emit('verbose', 'skipped non-executable file: ' + fullpath);
                 } else {
-                    throw new CordovaError('Hook failed with error code ' + err.code + ': ' + command);
+                    throw new CordovaError('Hook failed with error code ' + err.code + ': ' + fullpath);
                 }
             }).then(function() {
                 return execute_scripts_serially(scripts, root, dir, opts);
