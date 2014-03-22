@@ -19,20 +19,25 @@
 
 var child_process = require('child_process');
 var fs = require('fs');
+var path = require('path');
 var _ = require('underscore');
 var Q = require('q');
 var shell = require('shelljs');
 var events = require('./events');
 
 // On Windows, spawn() for batch files requires absolute path & having the extension.
-function resolvePath(cmd) {
-    if (fs.exists(cmd)) {
+function resolveWindowsExe(cmd) {
+    var winExtensions = ['.exe', '.cmd', '.bat', '.js', '.vbs'];
+    function isValidExe(c) {
+        return winExtensions.indexOf(path.extname(cmd)) !== -1 && fs.existsSync(cmd);
+    }
+    if (isValidExe(cmd)) {
         return cmd;
     }
     cmd = shell.which(cmd) || cmd;
-    if (!fs.exists(cmd)) {
-        ['.cmd', '.bat', '.js'].some(function(ext) {
-            if (fs.exists(cmd + ext)) {
+    if (!isValidExe(cmd)) {
+        winExtensions.some(function(ext) {
+            if (fs.existsSync(cmd + ext)) {
                 cmd = cmd + ext;
                 return true;
             }
@@ -55,10 +60,10 @@ exports.spawn = function(cmd, args, opts) {
     var spawnOpts = {};
     var d = Q.defer();
     if (process.platform.slice(0, 3) == 'win') {
-        cmd = resolvePath(cmd);
+        cmd = resolveWindowsExe(cmd);
         // If we couldn't find the file, likely we'll end up failing,
         // but for things like "del", cmd will do the trick.
-        if (!fs.exists(cmd)) {
+        if (!fs.existsSync(cmd)) {
             args = [['/s', '/c', '"'+[cmd].concat(args).map(function(a){if (/^[^"].* .*[^"]/.test(a)) return '"'+a+'"'; return a;}).join(" ")+'"'].join(" ")];
             cmd = 'cmd';
         }
