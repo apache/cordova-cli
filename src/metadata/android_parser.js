@@ -72,7 +72,9 @@ module.exports.prototype = {
         var manifest = xml.parseElementtreeSync(this.manifest);
         // Update the version by changing the AndroidManifest android:versionName
         var version = config.version();
+        var versionCode = config.versionCode() || 1;
         manifest.getroot().attrib["android:versionName"] = version;
+        manifest.getroot().attrib["android:versionCode"] = versionCode;
 
         // Update package name by changing the AndroidManifest id and moving the entry class around to the proper package directory
         var pkg = config.packageName();

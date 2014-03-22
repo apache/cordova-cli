@@ -76,6 +76,9 @@ ConfigParser.prototype = {
     setVersion: function(value) {
         this.doc.getroot().attrib['version'] = value;
     },
+    versionCode: function() {
+        return this.doc.getroot().attrib['versionCode'];
+    },
     author: function() {
         return getNodeTextSafe(this.doc.find('author'));
     },
