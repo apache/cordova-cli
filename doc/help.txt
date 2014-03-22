@@ -8,7 +8,7 @@ Global Commands
                                                ID reverse-domain-style package name - used in <widget id>
                                                NAME is a human readable field
                                                CONFIG is a json string whose key/values will be included
-                                               in [PATH]/.codova/config.json
+                                               in [PATH]/.cordova/config.json
                   [--copy-from|src=<PATH>] ... use custom www assets instead of the stock Cordova hello-world.
                   [--link-to=<PATH>] ......... symlink to custom www assets without creating a copy.
 
