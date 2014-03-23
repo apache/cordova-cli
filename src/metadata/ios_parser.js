@@ -66,7 +66,7 @@ module.exports.prototype = {
 
         // Update version (bundle version)
         infoPlist['CFBundleShortVersionString'] = version;
-        // TODO: add a way to update infoPlist['CFBundleVersion'].
+        infoPlist['CFBundleVersion'] = config.versionCode();
 
         var info_contents = plist.build(infoPlist);
         info_contents = info_contents.replace(/<string>[\s\r\n]*<\/string>/g,'<string></string>');
