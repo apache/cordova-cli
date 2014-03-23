@@ -29,7 +29,7 @@ var events = require('./events');
 function resolveWindowsExe(cmd) {
     var winExtensions = ['.exe', '.cmd', '.bat', '.js', '.vbs'];
     function isValidExe(c) {
-        return winExtensions.indexOf(path.extname(cmd)) !== -1 && fs.existsSync(cmd);
+        return winExtensions.indexOf(path.extname(c)) !== -1 && fs.existsSync(c);
     }
     if (isValidExe(cmd)) {
         return cmd;
