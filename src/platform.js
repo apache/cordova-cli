@@ -246,7 +246,7 @@ module.exports = function platform(command, targets) {
  *
  */
 
-module.exports.supports = function(project_root, name) {
+function supports(project_root, name) {
     // required parameters
     if (!name) return Q.reject(new CordovaError('requires a platform name parameter'));
 
@@ -284,6 +284,7 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
     } else {
         // Make sure we have minimum requirements to work with specified platform
         events.emit('verbose', 'Checking if platform "' + target + '" passes minimum requirements...');
+        /* XXX this is calling the public symbol so that Jasmine Spy can attack it */
         return module.exports.supports(projectRoot, target)
         .then(function() {
             events.emit('log', 'Creating ' + target + ' project...');
@@ -332,3 +333,10 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
         });
     }
 }
+
+module.exports.add = add;
+module.exports.remove = remove;
+module.exports.update = update;
+module.exports.check = check;
+module.exports.list = list;
+module.exports.supports = supports;
