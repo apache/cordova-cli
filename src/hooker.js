@@ -28,7 +28,7 @@ var util  = require('./util'),
 
 module.exports = function hooker(root) {
     var r = util.isCordova(root);
-    if (!r) throw new Error('Not a Cordova project, can\'t use hooks.');
+    if (!r) throw new CordovaError('Not a Cordova project ("'+root+'"), can\'t use hooks.');
     else this.root = r;
 };
 
