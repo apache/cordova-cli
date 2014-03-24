@@ -49,7 +49,7 @@ module.exports.check_requirements = function(project_root, callback) {
     shell.exec(command, {silent:true, async:true}, function(code, output) {
         events.emit('log', output);
         if (code != 0) {
-            d.reject(new Error('Make sure you have the following packages installed: ' + output));
+            d.reject(new CordovaError('Make sure you have the following packages installed: ' + output));
         } else {
             d.resolve();
         }

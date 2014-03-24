@@ -30,12 +30,12 @@ var fs            = require('fs'),
 module.exports = function ios_parser(project) {
     try {
         var xcodeproj_dir = fs.readdirSync(project).filter(function(e) { return e.match(/\.xcodeproj$/i); })[0];
-        if (!xcodeproj_dir) throw new Error('The provided path "' + project + '" is not a Cordova iOS project.');
+        if (!xcodeproj_dir) throw new CordovaError('The provided path "' + project + '" is not a Cordova iOS project.');
         this.xcodeproj = path.join(project, xcodeproj_dir);
         this.originalName = this.xcodeproj.substring(this.xcodeproj.lastIndexOf(path.sep)+1, this.xcodeproj.indexOf('.xcodeproj'));
         this.cordovaproj = path.join(project, this.originalName);
     } catch(e) {
-        throw new Error('The provided path is not a Cordova iOS project.');
+        throw new CordovaError('The provided path "'+project+'" is not a Cordova iOS project.');
     }
     this.path = project;
     this.pbxproj = path.join(this.xcodeproj, 'project.pbxproj');

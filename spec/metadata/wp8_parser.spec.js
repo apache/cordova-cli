@@ -53,7 +53,7 @@ describe('wp8 project parser', function() {
             } else if (/xaml$/.exec(path)) {
                 return new et.ElementTree(et.XML('<foo><App Title="s"><PrimaryToken /><RootNamespace/><SilverlightAppEntry/><XapFilename/><AssemblyName/></App></foo>'));
             } else {
-                throw new Error('Unexpected parseElementtreeSync: ' + path);
+                throw new CordovaError('Unexpected parseElementtreeSync: ' + path);
             }
         });
     });
