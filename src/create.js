@@ -124,6 +124,9 @@ module.exports = function create (dir, id, name, cfg, callback) {
     }
 
     ret = p.then(function(www_lib) {
+        if (!fs.existsSync(www_lib)) {
+            throw new CordovaError('Could not find directory: '+www_lib);
+        }
         // Keep going into child "www" folder if exists in stock app package.
         while (fs.existsSync(path.join(www_lib, 'www'))) {
             www_lib = path.join(www_lib, 'www');
