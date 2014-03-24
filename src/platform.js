@@ -40,36 +40,9 @@ function getVersionFromScript(script, defaultValue) {
     return versionPromise;
 }
 
-// Returns a promise.
-module.exports = function platform(command, targets) {
-    var projectRoot = cordova_util.cdProjectRoot();
-
-    var hooks = new hooker(projectRoot);
-
-    if (arguments.length === 0) command = 'ls';
-    if (targets) {
-        if (!(targets instanceof Array)) targets = [targets];
-        var err;
-        targets.forEach(function(t) {
-            if (!(t in platforms)) {
-                err = new CordovaError('Platform "' + t + '" not recognized as a core cordova platform. See "platform list".');
-            }
-        });
-        if (err) return Q.reject(err);
-    } else {
-        if (command == 'add' || command == 'rm') {
-            return Q.reject(new CordovaError('You need to qualify `add` or `remove` with one or more platforms!'));
-        }
-    }
-
+function add(hooks, projectRoot, targets, opts) {
     var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new ConfigParser(xml);
-    var opts = {
-        platforms:targets
-    };
-
-    switch(command) {
-        case 'add':
             if (!targets || !targets.length) {
                 return Q.reject(new CordovaError('No platform specified. Please specify a platform to add. See "platform list".'));
             }
@@ -92,10 +65,9 @@ module.exports = function platform(command, targets) {
             .then(function() {
                 return hooks.fire('after_platform_add', opts);
             });
+};
 
-            break;
-        case 'rm':
-        case 'remove':
+function remove(hooks, projectRoot, targets, opts) {
             if (!targets || !targets.length) {
                 return Q.reject(new CordovaError('No platform[s] specified. Please specify platform[s] to remove. See "platform list".'));
             }
@@ -109,10 +81,9 @@ module.exports = function platform(command, targets) {
             }).then(function() {
                 return hooks.fire('after_platform_rm', opts);
             });
+}
 
-            break;
-        case 'update':
-        case 'up':
+function update(hooks, projectRoot, targets, opts) {
             // Shell out to the update script provided by the named platform.
             if (!targets || !targets.length) {
                 return Q.reject(new CordovaError('No platform specified. Please specify a platform to update. See "platform list".'));
@@ -148,8 +119,9 @@ module.exports = function platform(command, targets) {
                     });
                 });
             }
-            break;
-        case 'check':
+}
+
+function check(hooks, projectRoot) {
             var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
             return hooks.fire('before_platform_ls')
             .then(function() {
@@ -183,11 +155,9 @@ module.exports = function platform(command, targets) {
             }).then(function() {
                 return hooks.fire('after_platform_ls');
             });
+}
 
-            break;
-        case 'ls':
-        case 'list':
-        default:
+function list(hooks, projectRoot) {
             var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
             return hooks.fire('before_platform_ls')
             .then(function() {
@@ -223,8 +193,48 @@ module.exports = function platform(command, targets) {
             }).then(function() {
                 return hooks.fire('after_platform_ls');
             });
+}
 
-            break;
+// Returns a promise.
+module.exports = function platform(command, targets) {
+    var projectRoot = cordova_util.cdProjectRoot();
+
+    var hooks = new hooker(projectRoot);
+
+    if (arguments.length === 0) command = 'ls';
+    if (targets) {
+        if (!(targets instanceof Array)) targets = [targets];
+        var err;
+        targets.forEach(function(t) {
+            if (!(t in platforms)) {
+                err = new CordovaError('Platform "' + t + '" not recognized as a core cordova platform. See "platform list".');
+            }
+        });
+        if (err) return Q.reject(err);
+    } else {
+        if (command == 'add' || command == 'rm') {
+            return Q.reject(new CordovaError('You need to qualify `add` or `remove` with one or more platforms!'));
+        }
+    }
+
+    var opts = {
+        platforms:targets
+    };
+    switch(command) {
+        case 'add':
+            return add(hooks, projectRoot, targets, opts);
+        case 'rm':
+        case 'remove':
+            return remove(hooks, projectRoot, targets, opts);
+        case 'update':
+        case 'up':
+            return update(hooks, projectRoot, targets, opts);
+        case 'check':
+            return check(hooks, projectRoot);
+        case 'ls':
+        case 'list':
+        default:
+            return list(hooks, projectRoot);
     }
 };
 
