@@ -28,7 +28,7 @@ var fs            = require('fs'),
 
 module.exports = function blackberry_parser(project) {
     if (!fs.existsSync(path.join(project, 'www'))) {
-        throw new Error('The provided path "' + project + '" is not a Cordova BlackBerry10 project.');
+        throw new CordovaError('The provided path "' + project + '" is not a Cordova BlackBerry10 project.');
     }
     this.path = project;
     this.config_path = path.join(this.path, 'www', 'config.xml');
@@ -47,7 +47,7 @@ module.exports.check_requirements = function(project_root) {
     var d = Q.defer();
     child_process.exec("\"" + path.join(lib_path, 'bin', 'check_reqs') + "\"", function(err, output, stderr) {
         if (err) {
-            d.reject(new Error('Requirements check failed: ' + output + stderr));
+            d.reject(new CordovaError('Requirements check failed: ' + output + stderr));
         } else {
             d.resolve();
         }

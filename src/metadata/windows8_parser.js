@@ -34,12 +34,12 @@ module.exports = function windows8_parser(project) {
     try {
         // TODO : Check that it's not a windows8 project?
         var jsproj_file   = fs.readdirSync(project).filter(function(e) { return e.match(/\.jsproj$/i); })[0];
-        if (!jsproj_file) throw new Error('No .jsproj file.');
+        if (!jsproj_file) throw new CordovaError('No .jsproj file in "'+project+'"');
         this.windows8_proj_dir = project;
         this.jsproj_path  = path.join(this.windows8_proj_dir, jsproj_file);
         this.sln_path     = path.join(this.windows8_proj_dir, jsproj_file.replace(/\.jsproj/, '.sln'));
     } catch(e) {
-        throw new Error('The provided path "' + project + '" is not a Windows 8 project. ' + e);
+        throw new CordovaError('The provided path "' + project + '" is not a Windows 8 project. ' + e);
     }
     this.manifest_path  = path.join(this.windows8_proj_dir, 'package.appxmanifest');
 };
@@ -61,7 +61,7 @@ module.exports.check_requirements = function(project_root) {
     child_process.exec(command, function(err, output, stderr) {
         events.emit('verbose', output);
         if (err) {
-            d.reject(new Error('Requirements check failed: ' + output + stderr));
+            d.reject(new CordovaError('Requirements check failed: ' + output + stderr));
         } else {
             d.resolve();
         }

@@ -84,7 +84,7 @@ module.exports = function platform(command, targets) {
                             var template = config_json.lib && config_json.lib[t] && config_json.lib[t].template || null;
                             return call_into_create(t, projectRoot, cfg, libDir, template);
                         }, function(err) {
-                            throw new Error('Unable to fetch platform ' + t + ': ' + err);
+                            throw new CordovaError('Unable to fetch platform ' + t + ': ' + err);
                         });
                     });
                 }, Q());
