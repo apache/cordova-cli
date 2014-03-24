@@ -117,6 +117,10 @@ module.exports.prototype = {
                 if(displayName != name) {
                     visualElems['attrib']['DisplayName'] = name;
                 }
+                var bgColor = config.getPreference('backgroundcolor');
+                if (bgColor) {
+                    visualElems.attrib.BackgroundColor = bgColor;
+                }
             }
             else {
                 throw new Error('update_from_config expected a valid package.appxmanifest' +
