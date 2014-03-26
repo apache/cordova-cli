@@ -56,7 +56,10 @@ describe('create command', function () {
         config_spy = spyOn(cordova, 'config');
         config_read = spyOn(config, 'read').andReturn({});
         config_write = spyOn(config, 'write').andReturn({});
-        exists = spyOn(fs, 'existsSync').andReturn(false);
+        exists = spyOn(fs, 'existsSync').andCallFake(function(p) {
+            if (p == 'lib/dir') return true;
+            return false;
+        });
         load_cordova = spyOn(lazy_load, 'cordova').andReturn(Q(path.join('lib','dir')));
         load_custom = spyOn(lazy_load, 'custom').andReturn(Q(path.join('lib','dir')));
         spyOn(ConfigParser.prototype, 'write');
@@ -162,6 +165,7 @@ describe('create command', function () {
         });
         it('should not replace an existing www/config.xml', function(done) {
             exists.andCallFake(function(p) {
+                if (p == 'lib/dir') return true;
                 if (p.indexOf('config.xml') > -1) return true;
                 return false;
             });
