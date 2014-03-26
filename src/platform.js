@@ -17,10 +17,12 @@
     under the License.
 */
 var config            = require('./config'),
+    cordova           = require('../cordova'),
     cordova_util      = require('./util'),
     ConfigParser     = require('./ConfigParser'),
     util              = require('util'),
     fs                = require('fs'),
+    os                = require('os'),
     path              = require('path'),
     hooker            = require('./hooker'),
     events            = require('./events'),
@@ -126,39 +128,78 @@ function update(hooks, projectRoot, targets, opts) {
 }
 
 function check(hooks, projectRoot) {
-            var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
-            return hooks.fire('before_platform_ls')
-            .then(function() {
-                // Acquire the version number of each platform we have installed, and output that too.
-                return Q.all(platforms_on_fs.map(function(p) {
-                    return getVersionFromScript(path.join(projectRoot, 'platforms', p, 'cordova', 'version'), null)
-                    .then(function(v) {
-                        if (!v) {
-                            return null;
+        var platformsText = [],
+            platforms_on_fs = cordova_util.listPlatforms(projectRoot),
+            scratch = path.join(os.tmpdir(), "cordova-platform-check-"+Date.now()),
+            listeners = events._events;
+            events._events = {};
+        var result = Q.defer();
+        cordova.raw.create(scratch)
+        .then(function () {
+            var h = new hooker(scratch);
+            // Acquire the version number of each platform we have installed, and output that too.
+            Q.all(platforms_on_fs.map(function(p) {
+                var d = Q.defer();
+                add(h, scratch, [p], {spawnoutput: {stdio: 'ignore'}})
+                .catch(function () {
+                    /* If a platform doesn't install, then we can't realistically suggest updating */
+                    d.resolve();
+                }).then(function() {
+                    var d_avail = Q.defer(),
+                        d_cur = Q.defer();
+                    getVersionFromScript(path.join(scratch, 'platforms', p, 'cordova', 'version'), null)
+                    .catch(function () {
+                        /* Platform version script failed, we can't work with this */
+                        d_avail.resolve('');
+                    })
+                    .then(function(avail) {
+                        if (!avail) {
+                            /* Platform version script was silent, we can't work with this */
+                            d_avail.resolve('');
+                        } else {
+                            d_avail.resolve(avail);
                         }
-                        var avail = platforms[p].version;
-                        if (semver.gt(avail, v)) {
-                            return p + ' @ ' + v + ' could be updated to: ' + avail;
-                        }
-                        return '';
-                    }, function(v) {
-                        var avail = platforms[p].version;
-                        return p + ' @ broken could be updated to: ' + avail
                     });
-                }));
-            }).then(function(platformsText) {
+                    getVersionFromScript(path.join(projectRoot, 'platforms', p, 'cordova', 'version'), null)
+                    .catch(function () {
+                        d_cur.resolve('broken');
+                    }).then(function(v) {
+                        d_cur.resolve(v || '');
+                    });
+                    Q.all([d_avail.promise, d_cur.promise]).spread(function (avail, v) {
+                        var m;
+                        if (avail && (!v || v == 'broken' || semver.gt(avail, v))) {
+                            m = p + ' @ ' + (v || 'unknown') + ' could be updated to: ' + avail;
+                            platformsText.push(m);
+                        }
+                        d.resolve(m);
+                    })
+                    .catch(function () {
+                        return '?';
+                    })
+                    .done();
+                });
+                return d.promise;
+            })).then(function() {
                 var results = '';
+                events._events = listeners;
+                shell.rm('-rf', scratch);
                 if (platformsText) {
                     results = platformsText.filter(function (p) {return !!p}).join('\n');
                 }
                 if (!results) {
                     results = 'All platforms are up-to-date.';
                 }
-
                 events.emit('results', results);
-            }).then(function() {
-                return hooks.fire('after_platform_ls');
-            });
+                result.resolve();
+            })
+            .done();
+        }).catch(function (){
+            events._events = listeners;
+            shell.rm('-rf', scratch);
+        })
+        .done();
+        return result.promise;
 }
 
 function list(hooks, projectRoot) {
