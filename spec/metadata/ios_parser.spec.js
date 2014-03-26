@@ -57,7 +57,7 @@ describe('ios project parser', function () {
             readdir.andReturn(['noxcodehere']);
             expect(function() {
                 new platforms.ios.parser(proj);
-            }).toThrow('The provided path is not a Cordova iOS project.');
+            }).toThrow();
         });
         it('should create an instance with path, pbxproj, xcodeproj, originalName and cordovaproj properties', function() {
             expect(function() {
