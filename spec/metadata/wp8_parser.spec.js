@@ -28,6 +28,7 @@ var platforms = require('../../platforms'),
     child_process = require('child_process'),
     config = require('../../src/config'),
     ConfigParser = require('../../src/ConfigParser'),
+    CordovaError = require('../../src/CordovaError'),
     cordova = require('../../cordova');
 
 // Create a real config object before mocking out everything.
@@ -75,7 +76,7 @@ describe('wp8 project parser', function() {
             readdir.andReturn([]);
             expect(function() {
                 new platforms.wp8.parser(proj);
-            }).toThrow('The provided path "' + proj + '" is not a Windows Phone 8 project. Error: No .csproj file.');
+            }).toThrow();
         });
         it('should create an instance with path, manifest properties', function() {
             expect(function() {

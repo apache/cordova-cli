@@ -25,7 +25,8 @@ var fs            = require('fs'),
     shell         = require('shelljs'),
     child_process = require('child_process'),
     Q             = require('q'),
-    ConfigParser = require('../ConfigParser'),
+    ConfigParser  = require('../ConfigParser'),
+    CordovaError  = require('../CordovaError'),
     config        = require('../config'),
     hooker        = require('../hooker');
 

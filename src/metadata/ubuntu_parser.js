@@ -26,8 +26,9 @@ var fs            = require('fs'),
     shell         = require('shelljs'),
     project_config= require('../config'),
     Q             = require('q'),
-    os             = require('os'),
-    ConfigParser = require('../ConfigParser');
+    os            = require('os'),
+    ConfigParser  = require('../ConfigParser'),
+    CordovaError  = require('../CordovaError');
 
 module.exports = function(project) {
     this.path = project;

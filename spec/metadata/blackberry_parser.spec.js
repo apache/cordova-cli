@@ -82,7 +82,7 @@ describe('blackberry10 project parser', function() {
             exists.andReturn(false);
             expect(function() {
                 new platforms.blackberry10.parser(proj);
-            }).toThrow('The provided path "/some/path" is not a Cordova BlackBerry10 project.');
+            }).toThrow();
         });
         it('should accept a proper native blackberry project path as construction parameter', function() {
             var project;

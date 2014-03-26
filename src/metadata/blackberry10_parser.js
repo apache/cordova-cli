@@ -22,7 +22,8 @@ var fs            = require('fs'),
     util          = require('../util'),
     Q             = require('q'),
     child_process = require('child_process'),
-    ConfigParser = require('../ConfigParser'),
+    ConfigParser  = require('../ConfigParser'),
+    CordovaError  = require('../CordovaError'),
     events        = require('../events'),
     config        = require('../config');
 

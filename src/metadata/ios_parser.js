@@ -24,7 +24,8 @@ var fs            = require('fs'),
     shell         = require('shelljs'),
     plist         = require('plist-with-patches'),
     Q             = require('q'),
-    ConfigParser = require('../ConfigParser'),
+    ConfigParser  = require('../ConfigParser'),
+    CordovaError  = require('../CordovaError'),
     config        = require('../config');
 
 module.exports = function ios_parser(project) {
