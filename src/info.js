@@ -1,138 +1,112 @@
 /**
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
+	Licensed to the Apache Software Foundation (ASF) under one
+	or more contributor license agreements.  See the NOTICE file
+	distributed with this work for additional information
+	regarding copyright ownership.  The ASF licenses this file
+	to you under the Apache License, Version 2.0 (the
+	"License"); you may not use this file except in compliance
+	with the License.  You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the License is distributed on an
+	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	KIND, either express or implied.  See the License for the
+	specific language governing permissions and limitations
+	under the License.
 */
 var cordova_util  = require('./util'),
-    shell         = require('shelljs'),
-    path          = require('path'),
-    fs            = require('fs'),
-    Q             = require('q'),
-    events        = require('./events');
+path          = require('path'),
+fs            = require('fs'),
+Q             = require('q'),
+info_utils 	  = require('./info-utils');
 
 /*
-    A utility funciton to help output the information needed
-    when submitting a help request.
+	A utility funciton to help output the information needed
+	when submitting a help request.
 
-    Outputs to a file
+	Outputs to a file
 */
 module.exports = function info() {
+	//Get projectRoot 
+	var projectRoot = cordova_util.cdProjectRoot(),
+	output;
+	
+	delLog(projectRoot);
+	//Get Node info
+	info_utils.getNodeInfo(function (result){
+		if( result ){
+			print_SaveMsg(projectRoot, "Node version: "+ result);
+			//Get Cordova version
+			info_utils.getCordovaInfo(function (result){
+				if( result ){print_SaveMsg(projectRoot,"Cordova version: "+ result );
+					// Get config.xml file
+					fs.readFile(cordova_util.projectConfig(projectRoot) , 'utf-8' , function ( err , result ){
+						if(err) {print_SaveMsg(projectRoot,"Error reading config.xml file"+ err);}
+						print_SaveMsg(projectRoot,'Config.xml File: \r'+ result +'\r\r\r');
+						print_SaveMsg(projectRoot,'Plugins: \r' + doPlugins( projectRoot ) +'\r\r\r');
+						//Get platforms info
+						doPlatforms(projectRoot, function (result){
+							if( result ){
+								print_SaveMsg(projectRoot,result);
+							}
+						});
+					});
+				}
+			});
+		}
+	});
 
-    //Get the template
-    var projectRoot = cordova_util.cdProjectRoot();
-
-    var raw = fs.readFileSync(path.join(__dirname, '..', 'doc', 'info.txt'), 'utf-8').split("\n"),
-        output;
-
-    output = raw.map(function(line) {
-        if(line.match('    %') ) {
-            var type = (line.substr(5)).replace("\r",""),
-                out = "";
-
-            switch(type) {
-            case "Node":
-                out = shell.exec('node --version',{silent:true}).output;
-                break;
-            case "Cordova":
-                out = require('../package').version;
-                break;
-            case "Config":
-                out = fs.readFileSync( cordova_util.projectConfig(projectRoot) );
-                break;
-            case "Platforms":
-                out = doPlatforms( projectRoot );
-                break;
-            case "Plugins":
-                out = doPlugins( projectRoot );
-                break;
-            default:
-                break;
-            }
-            return line.replace( "%"+type, out );
-        } else {
-            return line;
-        }
-    }).join("\n");
-
-    // /*
-    //     Write to File;
-    // */
-    events.emit('results', output);
-    fs.writeFileSync('info.txt', output );
-    return Q();
+	return Q();
 };
 
-function doPlatform( currentPlatform ) {
-    var output = "";
-    switch( currentPlatform ){
-    case "ios":
-        output = shell.exec('xcodebuild -version',{silent:true} ).output;
-        break;
-    case "android":
-        output = shell.exec('android list target',{silent:true} ).output;
-    }
+function delLog(projectRoot){
+	fs.unlink(path.join(projectRoot,'info.txt'), function (err) {
+		if (err) throw err;
+		writeLog(projectRoot, '');
+	});
+}
+function writeLog (projectRoot, data){
+	//Successfully deleted, writing new one
+	fs.writeFile(path.join(projectRoot,'info.txt'), data, 'utf-8', function (err) {
+		if (err) throw err;
+	});
+}
+function print_SaveMsg(projectRoot, data){
+	console.log(data);
+	appendLog(projectRoot,data)
+	
+}
+function appendLog(projectRoot, data){
 
-    return output;
+	fs.appendFile(path.join(projectRoot,'info.txt'), data, 'utf-8', function (err) {
+		if (err) throw err;
+	});
+
 }
 
-function doPlatforms( projectRoot ){
-    var platforms = cordova_util.listPlatforms(projectRoot);
-
-    if( platforms.length ) {
-
-        var raw = fs.readFileSync(path.join(__dirname, '..', 'doc', 'platforms.txt')).toString('utf8').split("\n"),
-            output = "",
-            i;
-
-        for(i=0; i<platforms.length; i++){
-            output += raw.map(function(line) {
-                if(line.match('    %') ) {
-                    var type = (line.substr(5)).replace("\r",""),
-                        out = "";
-
-                    switch(type) {
-                    case "OtherGoodies":
-                        out = doPlatform( platforms[ i ] );
-                        break;
-                    case "Platform":
-                        out = platforms[ i ];
-                        break;
-                    default:
-                        break;
-                    }
-                        return line.replace( "%"+type, out );
-                    } else {
-                        return line.magenta;
-                }
-            }).join("\n");
-        }
-
-        return output;
-    } else {
-        return "No Platforms Currently Installed";
-    }
+function doPlatforms( projectRoot, result){
+	var platforms = cordova_util.listPlatforms(projectRoot);
+	if( platforms.length ) {
+		for(var i=0; i<platforms.length; i++){
+			info_utils.getPlatformInfo( platforms[ i ], projectRoot, function(callback){
+				result(callback);
+			});
+		}
+	}
+	else {
+		result("No Platforms Currently Installed");
+	}
 }
 
 function doPlugins( projectRoot ){
-    var pluginPath = path.join(projectRoot, 'plugins'),
-        plugins = cordova_util.findPlugins(pluginPath);
+	var pluginPath = path.join(projectRoot, 'plugins'),
+	plugins = cordova_util.findPlugins(pluginPath);
 
-    if( !plugins.length ) {
-        return "No Plugins Currently Installed";
-    } else {
-        return plugins;
-    }
+	if( !plugins.length ) {
+		return "No Plugins Currently Installed";
+	} else {
+		return plugins;
+	}
 }
