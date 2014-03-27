@@ -45,199 +45,199 @@ function getVersionFromScript(script, defaultValue) {
 function add(hooks, projectRoot, targets, opts) {
     var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new ConfigParser(xml);
-            if (!targets || !targets.length) {
-                return Q.reject(new CordovaError('No platform specified. Please specify a platform to add. See "platform list".'));
-            }
-            var config_json = config.read(projectRoot);
+    if (!targets || !targets.length) {
+        return Q.reject(new CordovaError('No platform specified. Please specify a platform to add. See "platform list".'));
+    }
+    var config_json = config.read(projectRoot);
 
-            return hooks.fire('before_platform_add', opts)
-            .then(function() {
-                return targets.reduce(function(soFar, t) {
-                    return soFar.then(function() {
-                        return lazy_load.based_on_config(projectRoot, t)
-                        .then(function(libDir) {
-                            var template = config_json.lib && config_json.lib[t] && config_json.lib[t].template || null;
-                            var copts = null;
-                            if ('spawnoutput' in opts) {
-                                copts = opts.spawnoutput;
-                            }
-                            return call_into_create(t, projectRoot, cfg, libDir, template, copts);
-                        }, function(err) {
-                            throw new CordovaError('Unable to fetch platform ' + t + ': ' + err);
-                        });
-                    });
-                }, Q());
-            })
-            .then(function() {
-                return hooks.fire('after_platform_add', opts);
+    return hooks.fire('before_platform_add', opts)
+    .then(function() {
+        return targets.reduce(function(soFar, t) {
+            return soFar.then(function() {
+                return lazy_load.based_on_config(projectRoot, t)
+                .then(function(libDir) {
+                    var template = config_json.lib && config_json.lib[t] && config_json.lib[t].template || null;
+                    var copts = null;
+                    if ('spawnoutput' in opts) {
+                        copts = opts.spawnoutput;
+                    }
+                    return call_into_create(t, projectRoot, cfg, libDir, template, copts);
+                }, function(err) {
+                    throw new CordovaError('Unable to fetch platform ' + t + ': ' + err);
+                });
             });
+        }, Q());
+    })
+    .then(function() {
+        return hooks.fire('after_platform_add', opts);
+    });
 };
 
 function remove(hooks, projectRoot, targets, opts) {
-            if (!targets || !targets.length) {
-                return Q.reject(new CordovaError('No platform[s] specified. Please specify platform[s] to remove. See "platform list".'));
-            }
-            return hooks.fire('before_platform_rm', opts)
-            .then(function() {
-                targets.forEach(function(target) {
-                    shell.rm('-rf', path.join(projectRoot, 'platforms', target));
-                    var plugins_json = path.join(projectRoot, 'plugins', target + '.json');
-                    if (fs.existsSync(plugins_json)) shell.rm(plugins_json);
-                });
-            }).then(function() {
-                return hooks.fire('after_platform_rm', opts);
-            });
+    if (!targets || !targets.length) {
+        return Q.reject(new CordovaError('No platform[s] specified. Please specify platform[s] to remove. See "platform list".'));
+    }
+    return hooks.fire('before_platform_rm', opts)
+    .then(function() {
+        targets.forEach(function(target) {
+            shell.rm('-rf', path.join(projectRoot, 'platforms', target));
+            var plugins_json = path.join(projectRoot, 'plugins', target + '.json');
+            if (fs.existsSync(plugins_json)) shell.rm(plugins_json);
+        });
+    }).then(function() {
+        return hooks.fire('after_platform_rm', opts);
+    });
 }
 
 function update(hooks, projectRoot, targets, opts) {
-            // Shell out to the update script provided by the named platform.
-            if (!targets || !targets.length) {
-                return Q.reject(new CordovaError('No platform specified. Please specify a platform to update. See "platform list".'));
-            } else if (targets.length > 1) {
-                return Q.reject(new CordovaError('Platform update can only be executed on one platform at a time.'));
-            } else {
-                var plat = targets[0];
-                var platformPath = path.join(projectRoot, 'platforms', plat);
-                var installed_platforms = cordova_util.listPlatforms(projectRoot);
-                if (installed_platforms.indexOf(plat) < 0) {
-                    return Q.reject(new CordovaError('Platform "' + plat + '" is not installed. See "platform list".'));
-                }
+    // Shell out to the update script provided by the named platform.
+    if (!targets || !targets.length) {
+        return Q.reject(new CordovaError('No platform specified. Please specify a platform to update. See "platform list".'));
+    } else if (targets.length > 1) {
+        return Q.reject(new CordovaError('Platform update can only be executed on one platform at a time.'));
+    } else {
+        var plat = targets[0];
+        var platformPath = path.join(projectRoot, 'platforms', plat);
+        var installed_platforms = cordova_util.listPlatforms(projectRoot);
+        if (installed_platforms.indexOf(plat) < 0) {
+            return Q.reject(new CordovaError('Platform "' + plat + '" is not installed. See "platform list".'));
+        }
 
-                function copyCordovaJs() {
-                    var parser = new platforms[plat].parser(platformPath);
-                    var platform_www = path.join(platformPath, 'platform_www');
-                    shell.mkdir('-p', platform_www);
-                    shell.cp('-f', path.join(parser.www_dir(), 'cordova.js'), path.join(platform_www, 'cordova.js'));
-                }
+        function copyCordovaJs() {
+            var parser = new platforms[plat].parser(platformPath);
+            var platform_www = path.join(platformPath, 'platform_www');
+            shell.mkdir('-p', platform_www);
+            shell.cp('-f', path.join(parser.www_dir(), 'cordova.js'), path.join(platform_www, 'cordova.js'));
+        }
 
-                // First, lazy_load the latest version.
-                return hooks.fire('before_platform_update', opts)
-                .then(function() {
-                    return lazy_load.based_on_config(projectRoot, plat);
-                }).then(function(libDir) {
-                    // Call the platform's update script.
-                    var script = path.join(libDir, 'bin', 'update');
-                    return superspawn.spawn(script, [platformPath], { stdio: 'inherit' })
-                    .then(function() {
-                        // Copy the new cordova.js from www -> platform_www.
-                        copyCordovaJs();
-                        // Leave it to the update script to log out "updated to v FOO".
-                    });
-                });
-            }
+        // First, lazy_load the latest version.
+        return hooks.fire('before_platform_update', opts)
+        .then(function() {
+            return lazy_load.based_on_config(projectRoot, plat);
+        }).then(function(libDir) {
+            // Call the platform's update script.
+            var script = path.join(libDir, 'bin', 'update');
+            return superspawn.spawn(script, [platformPath], { stdio: 'inherit' })
+            .then(function() {
+                // Copy the new cordova.js from www -> platform_www.
+                copyCordovaJs();
+                // Leave it to the update script to log out "updated to v FOO".
+            });
+        });
+    }
 }
 
 function check(hooks, projectRoot) {
-        var platformsText = [],
-            platforms_on_fs = cordova_util.listPlatforms(projectRoot),
-            scratch = path.join(os.tmpdir(), "cordova-platform-check-"+Date.now()),
-            listeners = events._events;
-            events._events = {};
-        var result = Q.defer();
-        cordova.raw.create(scratch)
-        .then(function () {
-            var h = new hooker(scratch);
-            // Acquire the version number of each platform we have installed, and output that too.
-            Q.all(platforms_on_fs.map(function(p) {
-                var d = Q.defer();
-                add(h, scratch, [p], {spawnoutput: {stdio: 'ignore'}})
+    var platformsText = [],
+        platforms_on_fs = cordova_util.listPlatforms(projectRoot),
+        scratch = path.join(os.tmpdir(), "cordova-platform-check-"+Date.now()),
+        listeners = events._events;
+        events._events = {};
+    var result = Q.defer();
+    cordova.raw.create(scratch)
+    .then(function () {
+        var h = new hooker(scratch);
+        // Acquire the version number of each platform we have installed, and output that too.
+        Q.all(platforms_on_fs.map(function(p) {
+            var d = Q.defer();
+            add(h, scratch, [p], {spawnoutput: {stdio: 'ignore'}})
+            .catch(function () {
+                /* If a platform doesn't install, then we can't realistically suggest updating */
+                d.resolve();
+            }).then(function() {
+                var d_avail = Q.defer(),
+                    d_cur = Q.defer();
+                getVersionFromScript(path.join(scratch, 'platforms', p, 'cordova', 'version'), null)
                 .catch(function () {
-                    /* If a platform doesn't install, then we can't realistically suggest updating */
-                    d.resolve();
-                }).then(function() {
-                    var d_avail = Q.defer(),
-                        d_cur = Q.defer();
-                    getVersionFromScript(path.join(scratch, 'platforms', p, 'cordova', 'version'), null)
-                    .catch(function () {
-                        /* Platform version script failed, we can't work with this */
+                    /* Platform version script failed, we can't work with this */
+                    d_avail.resolve('');
+                })
+                .then(function(avail) {
+                    if (!avail) {
+                        /* Platform version script was silent, we can't work with this */
                         d_avail.resolve('');
-                    })
-                    .then(function(avail) {
-                        if (!avail) {
-                            /* Platform version script was silent, we can't work with this */
-                            d_avail.resolve('');
-                        } else {
-                            d_avail.resolve(avail);
-                        }
-                    });
-                    getVersionFromScript(path.join(projectRoot, 'platforms', p, 'cordova', 'version'), null)
-                    .catch(function () {
-                        d_cur.resolve('broken');
-                    }).then(function(v) {
-                        d_cur.resolve(v || '');
-                    });
-                    Q.all([d_avail.promise, d_cur.promise]).spread(function (avail, v) {
-                        var m;
-                        if (avail && (!v || v == 'broken' || semver.gt(avail, v))) {
-                            m = p + ' @ ' + (v || 'unknown') + ' could be updated to: ' + avail;
-                            platformsText.push(m);
-                        }
-                        d.resolve(m);
-                    })
-                    .catch(function () {
-                        return '?';
-                    })
-                    .done();
+                    } else {
+                        d_avail.resolve(avail);
+                    }
                 });
-                return d.promise;
-            })).then(function() {
-                var results = '';
-                events._events = listeners;
-                shell.rm('-rf', scratch);
-                if (platformsText) {
-                    results = platformsText.filter(function (p) {return !!p}).sort().join('\n');
-                }
-                if (!results) {
-                    results = 'All platforms are up-to-date.';
-                }
-                events.emit('results', results);
-                result.resolve();
-            })
-            .done();
-        }).catch(function (){
+                getVersionFromScript(path.join(projectRoot, 'platforms', p, 'cordova', 'version'), null)
+                .catch(function () {
+                    d_cur.resolve('broken');
+                }).then(function(v) {
+                    d_cur.resolve(v || '');
+                });
+                Q.all([d_avail.promise, d_cur.promise]).spread(function (avail, v) {
+                    var m;
+                    if (avail && (!v || v == 'broken' || semver.gt(avail, v))) {
+                        m = p + ' @ ' + (v || 'unknown') + ' could be updated to: ' + avail;
+                        platformsText.push(m);
+                    }
+                    d.resolve(m);
+                })
+                .catch(function () {
+                    return '?';
+                })
+                .done();
+            });
+            return d.promise;
+        })).then(function() {
+            var results = '';
             events._events = listeners;
             shell.rm('-rf', scratch);
+            if (platformsText) {
+                results = platformsText.filter(function (p) {return !!p}).sort().join('\n');
+            }
+            if (!results) {
+                results = 'All platforms are up-to-date.';
+            }
+            events.emit('results', results);
+            result.resolve();
         })
         .done();
-        return result.promise;
+    }).catch(function (){
+        events._events = listeners;
+        shell.rm('-rf', scratch);
+    })
+    .done();
+    return result.promise;
 }
 
 function list(hooks, projectRoot) {
-            var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
-            return hooks.fire('before_platform_ls')
-            .then(function() {
-                // Acquire the version number of each platform we have installed, and output that too.
-                return Q.all(platforms_on_fs.map(function(p) {
-                    return getVersionFromScript(path.join(projectRoot, 'platforms', p, 'cordova', 'version'), null)
-                    .then(function(v) {
-                        if (!v) return p;
-                        return p + ' ' + v;
-                    }, function(v) {
-                        return p + ' broken';
-                    });
-                }));
-            }).then(function(platformsText) {
-                var results = 'Installed platforms: ' + platformsText.join(', ') + '\n';
-                var available = ['android', 'blackberry10', 'firefoxos'];
-                if (process.platform === 'darwin')
-                    available.push('ios');
-                if (process.platform.slice(0, 3) === 'win') {
-                    available.push('wp7');
-                    available.push('wp8');
-                    available.push('windows8');
-                }
-                if (process.platform === 'linux')
-                    available.push('ubuntu');
-
-                available = available.filter(function(p) {
-                    return platforms_on_fs.indexOf(p) < 0; // Only those not already installed.
-                });
-                results += 'Available platforms: ' + available.join(', ');
-
-                events.emit('results', results);
-            }).then(function() {
-                return hooks.fire('after_platform_ls');
+    var platforms_on_fs = cordova_util.listPlatforms(projectRoot);
+    return hooks.fire('before_platform_ls')
+    .then(function() {
+        // Acquire the version number of each platform we have installed, and output that too.
+        return Q.all(platforms_on_fs.map(function(p) {
+            return getVersionFromScript(path.join(projectRoot, 'platforms', p, 'cordova', 'version'), null)
+            .then(function(v) {
+                if (!v) return p;
+                return p + ' ' + v;
+            }, function(v) {
+                return p + ' broken';
             });
+        }));
+    }).then(function(platformsText) {
+        var results = 'Installed platforms: ' + platformsText.join(', ') + '\n';
+        var available = ['android', 'blackberry10', 'firefoxos'];
+        if (process.platform === 'darwin')
+            available.push('ios');
+        if (process.platform.slice(0, 3) === 'win') {
+            available.push('wp7');
+            available.push('wp8');
+            available.push('windows8');
+        }
+        if (process.platform === 'linux')
+            available.push('ubuntu');
+
+        available = available.filter(function(p) {
+            return platforms_on_fs.indexOf(p) < 0; // Only those not already installed.
+        });
+        results += 'Available platforms: ' + available.join(', ');
+
+        events.emit('results', results);
+    }).then(function() {
+        return hooks.fire('after_platform_ls');
+    });
 }
 
 // Returns a promise.
