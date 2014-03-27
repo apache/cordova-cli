@@ -69,7 +69,7 @@ describe('windows8 project parser', function() {
             readdir.andReturn([]);
             expect(function() {
                 new platforms.windows8.parser(proj);
-            }).toThrow('The provided path "' + proj + '" is not a Windows 8 project. Error: No .jsproj file.');
+            }).toThrow();
         });
         it('should create an instance with path, manifest properties', function() {
             expect(function() {

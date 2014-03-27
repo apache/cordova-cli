@@ -68,7 +68,7 @@ describe('android project parser', function() {
             exists.andReturn(false);
             expect(function() {
                 new platforms.android.parser(proj);
-            }).toThrow('The provided path "' + proj + '" is not an Android project.');
+            }).toThrow();
         });
         it('should create an instance with path, strings, manifest and android_config properties', function() {
             expect(function() {
