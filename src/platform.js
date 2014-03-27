@@ -38,6 +38,9 @@ function getVersionFromScript(script, defaultValue) {
     var versionPromise = Q(defaultValue);
     if (fs.existsSync(script)) {
         versionPromise = superspawn.spawn(script);
+    } else {
+        /* if you are here, it's probably because you're in Jasmine: fix your existsSync stub */
+        versionPromise = Q(defaultValue);
     }
     return versionPromise;
 }
@@ -141,17 +144,10 @@ function check(hooks, projectRoot) {
         Q.all(platforms_on_fs.map(function(p) {
             var d = Q.defer();
             add(h, scratch, [p], {spawnoutput: {stdio: 'ignore'}})
-            .catch(function () {
-                /* If a platform doesn't install, then we can't realistically suggest updating */
-                d.resolve();
-            }).then(function() {
+            .then(function() {
                 var d_avail = Q.defer(),
                     d_cur = Q.defer();
                 getVersionFromScript(path.join(scratch, 'platforms', p, 'cordova', 'version'), null)
-                .catch(function () {
-                    /* Platform version script failed, we can't work with this */
-                    d_avail.resolve('');
-                })
                 .then(function(avail) {
                     if (!avail) {
                         /* Platform version script was silent, we can't work with this */
@@ -159,6 +155,10 @@ function check(hooks, projectRoot) {
                     } else {
                         d_avail.resolve(avail);
                     }
+                })
+                .catch(function () {
+                    /* Platform version script failed, we can't work with this */
+                    d_avail.resolve('');
                 });
                 getVersionFromScript(path.join(projectRoot, 'platforms', p, 'cordova', 'version'), null)
                 .catch(function () {
@@ -178,6 +178,10 @@ function check(hooks, projectRoot) {
                     return '?';
                 })
                 .done();
+            })
+            .catch(function () {
+                /* If a platform doesn't install, then we can't realistically suggest updating */
+                d.resolve();
             });
             return d.promise;
         })).then(function() {
