@@ -185,7 +185,7 @@ function check(hooks, projectRoot) {
                 events._events = listeners;
                 shell.rm('-rf', scratch);
                 if (platformsText) {
-                    results = platformsText.filter(function (p) {return !!p}).join('\n');
+                    results = platformsText.filter(function (p) {return !!p}).sort().join('\n');
                 }
                 if (!results) {
                     results = 'All platforms are up-to-date.';
