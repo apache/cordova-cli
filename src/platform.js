@@ -55,7 +55,11 @@ function add(hooks, projectRoot, targets, opts) {
                         return lazy_load.based_on_config(projectRoot, t)
                         .then(function(libDir) {
                             var template = config_json.lib && config_json.lib[t] && config_json.lib[t].template || null;
-                            return call_into_create(t, projectRoot, cfg, libDir, template);
+                            var copts = null;
+                            if ('spawnoutput' in opts) {
+                                copts = opts.spawnoutput;
+                            }
+                            return call_into_create(t, projectRoot, cfg, libDir, template, copts);
                         }, function(err) {
                             throw new CordovaError('Unable to fetch platform ' + t + ': ' + err);
                         });
@@ -275,7 +279,7 @@ function createOverrides(projectRoot, target) {
 };
 
 // Returns a promise.
-function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
+function call_into_create(target, projectRoot, cfg, libDir, template_dir, opts) {
     var output = path.join(projectRoot, 'platforms', target);
 
     // Check if output directory already exists.
@@ -309,7 +313,7 @@ function call_into_create(target, projectRoot, cfg, libDir, template_dir) {
             if (template_dir) {
                 args.push(template_dir);
             }
-            return superspawn.spawn(bin, args, { stdio: 'inherit' })
+            return superspawn.spawn(bin, args, opts || { stdio: 'inherit' })
             .then(function() {
                 return require('../cordova').raw.prepare(target);
             })
