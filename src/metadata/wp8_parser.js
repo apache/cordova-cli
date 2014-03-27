@@ -139,6 +139,29 @@ module.exports.prototype = {
 
          //Write out manifest
          fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
+
+        // Update icons
+        var icons = config.getAllIcons();
+        var platformRoot = this.windows8_proj_dir;
+        var appRoot = util.isCordova(platformRoot);
+
+        // icons, that should be added to platform
+        // @param dest {string} Path to copy icon to, relative to platform root
+        var knownIconSizes = [
+            {dest: "applicationicon.png", width: 99, height: 99},
+            {dest: "background.png", width: 159, height: 159},
+        ];
+
+        knownIconSizes.forEach(function (known) {
+            icon = icons.getIconBySize(known.width, known.height);
+            if (icon){
+                var src = path.join(appRoot, icon.src),
+                    dest = path.join(platformRoot, known.dest);
+                events.emit('verbose', 'Copying icon from ' + src + ' to ' + dest);
+                shell.cp('-f', src, dest);
+            }
+        });
+
     },
     // Returns the platform-specific www directory.
     www_dir:function() {

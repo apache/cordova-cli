@@ -93,6 +93,21 @@ ConfigParser.prototype = {
     getAllIcons: function() {
         var elts = this.doc.findall('icon');
         var ret = [];
+
+        /**
+         * Returns icon with specified width and height
+         * @param  {number} w  Width of icon
+         * @param  {number} h  Height of icon
+         * @return {Icon}      Icon object or null if not found
+         */
+        ret.getIconBySize = function(w, h){
+            for (var idx in this) {
+                var icon = this[idx];
+                if (w == icon.width && h == icon.width) return icon;
+            }
+            return null;
+        };
+
         elts.forEach(function (elt) {
           var icon = {};
           icon.src = elt.attrib.src;
