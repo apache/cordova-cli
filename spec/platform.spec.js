@@ -172,6 +172,12 @@ describe('platform command', function() {
             });
         });
         describe('`add`', function() {
+            beforeEach(function() {
+                supported_platforms.forEach(function(p) {
+                    platforms[p].parser.check_requirements = function(){return Q();};
+                });
+            });
+
             it('should shell out to specified platform\'s bin/create, using the version that is specified in platforms manifest', function(done) {
                 cordova.raw.platform('add', 'android').then(function() {
                     expect(spawn.mostRecentCall.args.join()).toMatch(/lib.android.cordova.\d.\d.\d[\d\-\w]*.bin.create/gi);
@@ -303,17 +309,17 @@ describe('platform command', function() {
                 current: {
                     uri: "https://localhost",
                     version: "3.3.0",
-                    parser: undefined
+                    parser: function(){}
                 },
                 stale: {
                     uri: "https://localhost",
                     version: "3.3.0",
-                    parser: undefined
+                    parser: function(){}
                 },
                 newer: {
                     uri: "https://localhost",
                     version: "3.3.0",
-                    parser: undefined
+                    parser: function(){}
                 }
             };
             beforeEach(function() {
@@ -336,10 +342,22 @@ describe('platform command', function() {
                 });
             });
             it('check platforms current, stale, newer', function() {
-                existsSync.andReturn(true);
+                existsSync.andCallFake(function(dir) {
+                    if (/cordova-platform-check.*version/.test(dir)) {
+                        return true;
+                    }
+                    if (/cordova-platform-check/.test(dir)) {
+                        return false;
+                    }
+                    return true;
+                });
+                var create = spyOn(cordova.raw, 'create').andCallFake(function() { return Q() });
+
                 spawn.andCallFake(function(cmd) {
                     var out;
-                    if (/current/.test(cmd)) {
+                    if (/cordova-platform-check/.test(cmd)) {
+                        out = '3.3.0';
+                    } else if (/current/.test(cmd)) {
                         out = '3.3.0';
                     } else if (/stale/.test(cmd)) {
                         out = '3.2.0';
@@ -387,6 +405,12 @@ describe('platform command', function() {
             });
         });
         describe('add hooks', function() {
+            beforeEach(function() {
+                supported_platforms.forEach(function(p) {
+                    platforms[p].parser.check_requirements = function(){return Q();};
+                });
+            });
+
             it('should fire before and after hooks through the hooker module', function(done) {
                 cordova.raw.platform('add', 'android').then(function() {
                     expect(fire).toHaveBeenCalledWith('before_platform_add', {platforms:['android']});
