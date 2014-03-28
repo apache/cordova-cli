@@ -142,7 +142,7 @@ module.exports.prototype = {
 
         // Update icons
         var icons = config.getAllIcons();
-        var platformRoot = this.windows8_proj_dir;
+        var platformRoot = this.wp8_proj_dir;
         var appRoot = util.isCordova(platformRoot);
 
         // icons, that should be added to platform
