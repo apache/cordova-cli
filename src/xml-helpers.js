@@ -110,7 +110,7 @@ module.exports = {
     parseElementtreeSync: function (filename) {
         var contents = fs.readFileSync(filename, 'utf-8');
         if(contents) {
-            contents = contents.replace(/^\uFEFF/, ''); //Windows is the BOM
+            contents = contents.substring(contents.indexOf("<")); //Windows is the BOM
         }
         return new et.ElementTree(et.XML(contents));
     }
