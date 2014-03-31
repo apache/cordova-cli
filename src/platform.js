@@ -221,7 +221,7 @@ function list(hooks, projectRoot) {
             });
         }));
     }).then(function(platformsText) {
-        var results = 'Installed platforms: ' + platformsText.join(', ') + '\n';
+        var results = 'Installed platforms: ' + platformsText.sort().join(', ') + '\n';
         var available = Object.getOwnPropertyNames(platforms).filter(function(p) {
             var platform = platforms[p] || {},
                 hostos = platform.hostos || null;
