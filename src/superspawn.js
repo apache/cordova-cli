@@ -60,11 +60,12 @@ exports.spawn = function(cmd, args, opts) {
     var spawnOpts = {};
     var d = Q.defer();
 
-    if (process.platform.slice(0, 3) == 'win') {
+    if (process.platform == 'win32') {
         cmd = resolveWindowsExe(cmd);
         // If we couldn't find the file, likely we'll end up failing,
         // but for things like "del", cmd will do the trick.
-        if (!fs.existsSync(cmd)) {
+        if (path.extname(cmd) !== '.exe' || !fs.existsSync(cmd)) {
+            // We need to use /s to ensure that spaces are parsed properly with cmd spawned content
             args = [['/s', '/c', '"'+[cmd].concat(args).map(function(a){if (/^[^"].* .*[^"]/.test(a)) return '"'+a+'"'; return a;}).join(" ")+'"'].join(" ")];
             cmd = 'cmd';
         }
