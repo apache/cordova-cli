@@ -59,6 +59,6 @@ addModuleProperty(module, 'platform', './src/platform', true);
 addModuleProperty(module, 'platforms', './src/platform', true);
 addModuleProperty(module, 'compile', './src/compile', true);
 addModuleProperty(module, 'run', './src/run', true);
-addModuleProperty(module, 'info', './src/info');
+addModuleProperty(module, 'info', './src/info', true);
 
 
