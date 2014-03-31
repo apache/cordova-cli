@@ -21,10 +21,8 @@ var cordova_util      = require('./util'),
     hooker            = require('./hooker');
 
 // Returns a promise.
-module.exports = function build(options, callback) {
-    var projectRoot = cordova_util.cdProjectRoot(),
-        cbmode = callback ? true : false,
-        ret = null;
+module.exports = function build(options) {
+    var projectRoot = cordova_util.cdProjectRoot();
 
     if (!options) {
         options = {
@@ -33,26 +31,17 @@ module.exports = function build(options, callback) {
             options: []
         };
     }
-    
+
     options = cordova_util.preProcessOptions(options);
 
     // fire build hooks
     var hooks = new hooker(projectRoot);
-    ret = hooks.fire('before_build', options)
+    return hooks.fire('before_build', options)
     .then(function() {
         return require('../cordova').raw.prepare(options);
     }).then(function() {
         return require('../cordova').raw.compile(options);
     }).then(function() {
         return hooks.fire('after_build', options);
-    }).then(function() {
-        if(callback) {
-            callback();
-        }
     });
-    // if we received a callback, returns null 
-    if (callback) { 
-        ret = null; 
-    }
-    return ret;
 };

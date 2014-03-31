@@ -41,7 +41,7 @@ var DEFAULT_NAME = "HelloCordova",
  * @cfg - extra config to be saved in .cordova/config.json
  **/
 // Returns a promise.
-module.exports = function create (dir, id, name, cfg, callback) {
+module.exports = function create (dir, id, name, cfg) {
     if (!dir ) {
         return Q(help());
     }
@@ -77,12 +77,7 @@ module.exports = function create (dir, id, name, cfg, callback) {
     }
 
     if (fs.existsSync(dir) && !sanedircontents(dir)) {
-        var err = new CordovaError('Path already exists and is not empty: ' + dir);
-        if (callback) {
-            callback(err);
-            return null;
-        }
-        return Q.reject(err);
+        return Q.reject(new CordovaError('Path already exists and is not empty: ' + dir));
     }
 
     // Read / Write .cordova/config.json file if necessary.
@@ -123,7 +118,7 @@ module.exports = function create (dir, id, name, cfg, callback) {
         });
     }
 
-    ret = p.then(function(www_lib) {
+    return p.then(function(www_lib) {
         if (!fs.existsSync(www_lib)) {
             throw new CordovaError('Could not find directory: '+www_lib);
         }
@@ -174,10 +169,4 @@ module.exports = function create (dir, id, name, cfg, callback) {
             config.write();
         }
     });
-
-    if (callback) {
-        return null;
-    }
-
-    return ret;
 };
