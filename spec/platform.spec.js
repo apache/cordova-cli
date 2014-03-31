@@ -165,7 +165,7 @@ describe('platform command', function() {
             });
             it('should list out added platforms in a project', function(done) {
                 cordova.on('results', function(res) {
-                    expect(res).toMatch(/^Installed platforms: ios, android, ubuntu, amazon-fireos, wp7, wp8, blackberry10, firefoxos, windows8\s*Available platforms:\s*$/);
+                    expect(res).toMatch(RegExp("^Installed platforms: "+supported_platforms.sort().join(", ")+"\\s*Available platforms:\\s*$"));
                     done();
                 });
                 cordova.raw.platform('list');
