@@ -45,6 +45,10 @@ exports.findProjectRoot = function(opt_startDir) {
     return cordova_util.isCordova(opt_startDir);
 }
 
+// Each of these APIs takes a final parameter that is a callback function.
+// The callback is passed the error object upon failure, or undefined upon success.
+// To use a promise instead, call the APIs via cordova.raw.FOO(), which returns
+// a promise instead of using a final-parameter-callback.
 var addModuleProperty = cordova_util.addModuleProperty;
 addModuleProperty(module, 'prepare', './src/prepare', true);
 addModuleProperty(module, 'build', './src/build', true);
