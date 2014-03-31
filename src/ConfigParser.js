@@ -101,9 +101,12 @@ ConfigParser.prototype = {
          * @return {Icon}      Icon object or null if not found
          */
         ret.getIconBySize = function(w, h){
+            // If only one of width and height is given
+            // then we assume that they are equal.
+            var width = w || h, height = h || w;
             for (var idx in this) {
                 var icon = this[idx];
-                if (w == icon.width && h == icon.width) return icon;
+                if (width == icon.width && height == icon.width) return icon;
             }
             return null;
         };
@@ -113,6 +116,9 @@ ConfigParser.prototype = {
           icon.src = elt.attrib.src;
           icon.width = elt.attrib.width;
           icon.height = elt.attrib.height;
+          // If one of width or Height is undefined, assume they are equal.
+          icon.width = icon.width || icon.height;
+          icon.height = icon.height || icon.width;
           ret.push(icon);
         });
         return ret;
