@@ -84,7 +84,12 @@ describe('prepare command', function() {
         });
         plugman_prepare = spyOn(plugman, 'prepare').andReturn(Q());
         find_plugins = spyOn(util, 'findPlugins').andReturn([]);
-        plugman_get_json = spyOn(plugman.config_changes, 'get_platform_json').andReturn({});
+        plugman_get_json = spyOn(plugman.config_changes, 'get_platform_json').andReturn({
+            prepare_queue:{installed:[], uninstalled:[]},
+            config_munge:{},
+            installed_plugins:{},
+            dependent_plugins:{}
+        });
         load = spyOn(lazy_load, 'based_on_config').andReturn(Q());
         cp = spyOn(shell, 'cp').andReturn(true);
         mkdir = spyOn(shell, 'mkdir');
