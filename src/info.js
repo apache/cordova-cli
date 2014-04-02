@@ -84,15 +84,16 @@ module.exports = function info() {
         fs.appendFile(path.join(projectRoot,'info.txt'), data, 'utf-8', function (err) {
             if (err) throw err;
         });
-
     }
 
     function doPlatforms( projectRoot, result){
-        var platforms = cordova_util.listPlatforms(projectRoot);
+        var platforms = cordova_util.listPlatforms(projectRoot), summary = "", t=0;
         if( platforms.length ) {
             for(var i=0; i<platforms.length; i++){
                 info_utils.getPlatformInfo( platforms[ i ], projectRoot, function(callback){
-                    result(callback);
+                    summary += callback;
+                    t++;
+                    if(t === platforms.length){result(summary);}
                 });
             }
         }
