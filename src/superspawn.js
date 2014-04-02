@@ -83,7 +83,7 @@ exports.spawn = function(cmd, args, opts) {
         spawnOpts.env = _.extend(_.extend({}, process.env), opts.env);
     }
 
-    events.emit(opts.printCommand ? 'log' : 'verbose', 'Running command: "' + cmd + ' '+ args.join(" ") + '"');
+    events.emit(opts.printCommand ? 'log' : 'verbose', 'Running command: ' + cmd + ' ' + args.join(" "));
 
     var child = child_process.spawn(cmd, args, spawnOpts);
     var capturedOut = '';
