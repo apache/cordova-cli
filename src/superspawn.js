@@ -64,11 +64,11 @@ exports.spawn = function(cmd, args, opts) {
         cmd = resolveWindowsExe(cmd);
         // If we couldn't find the file, likely we'll end up failing,
         // but for things like "del", cmd will do the trick.
-        if (path.extname(cmd) !== 'exe' || !fs.existsSync(cmd)) {
+        if (!fs.existsSync(cmd)) {
+            // We need to use /s to ensure that spaces are parsed properly with cmd spawned content
             args = [['/s', '/c', '"'+[cmd].concat(args).map(function(a){if (/^[^"].* .*[^"]/.test(a)) return '"'+a+'"'; return a;}).join(" ")+'"'].join(" ")];
             cmd = 'cmd';
         }
-        spawnOpts.windowsVerbatimArguments = true;
     }
 
     if (opts.stdio == 'ignore') {
