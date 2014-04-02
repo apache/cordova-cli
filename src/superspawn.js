@@ -46,6 +46,13 @@ function resolveWindowsExe(cmd) {
     return cmd;
 }
 
+function maybeQuote(a) {
+    if (a.indexOf(' ') != -1) {
+        a = '"' + a + '"';
+    }
+    return a;
+}
+
 // opts:
 //   printCommand: Whether to log the command (default: false)
 //   stdio: 'default' is to capture output and returning it as a string to success (same as exec)
@@ -66,7 +73,7 @@ exports.spawn = function(cmd, args, opts) {
         // but for things like "del", cmd will do the trick.
         if (!fs.existsSync(cmd)) {
             // We need to use /s to ensure that spaces are parsed properly with cmd spawned content
-            args = [['/s', '/c', '"'+[cmd].concat(args).map(function(a){if (/^[^"].* .*[^"]/.test(a)) return '"'+a+'"'; return a;}).join(" ")+'"'].join(" ")];
+            args = ['/s', '/c', cmd].concat(args);
             cmd = 'cmd';
         }
     }
@@ -83,7 +90,7 @@ exports.spawn = function(cmd, args, opts) {
         spawnOpts.env = _.extend(_.extend({}, process.env), opts.env);
     }
 
-    events.emit(opts.printCommand ? 'log' : 'verbose', 'Running command: ' + cmd + ' ' + args.join(" "));
+    events.emit(opts.printCommand ? 'log' : 'verbose', 'Running command: ' + maybeQuote(cmd) + ' ' + args.map(maybeQuote).join(' '));
 
     var child = child_process.spawn(cmd, args, spawnOpts);
     var capturedOut = '';
