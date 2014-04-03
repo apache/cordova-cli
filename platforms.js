@@ -22,7 +22,7 @@ module.exports = {
         hostos : ['darwin'],
         parser : './src/metadata/ios_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-ios.git',
-        version: '3.4.0'
+        version: '3.4.1'
     }, 
     'android' : {
         parser : './src/metadata/android_parser',
