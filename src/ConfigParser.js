@@ -93,17 +93,16 @@ ConfigParser.prototype = {
     /**
      * Returns all icons for the platform specified.
      * @param  {String} platform The platform.
-     * @return {Array} Icons for the platform or all icons if platform is null or undefined.
+     * @return {Array} Icons for the platform specified.
      */
     getIcons: function(platform) {
         var elts = this.doc.findall('icon');
+        if (platform) {
+            elts = elts.concat(this.doc.findall('platform[@name=\'' + platform + '\']/icon'));
+        }
         var ret = [];
 
         elts.forEach(function (elt) {
-          var iconPlatform = elt.attrib['platform'] || elt.attrib['cdv:platform'] || elt.attrib['gap:platform'];
-          if (platform && iconPlatform && platform != iconPlatform) {
-            return; // skip <icon> element since it does not belong to the platform specified
-          }
           var icon = {};
           icon.src = elt.attrib.src;
           icon.density = elt.attrib['density'] || elt.attrib['cdv:density'] || elt.attrib['gap:density'];
