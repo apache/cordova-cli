@@ -69,7 +69,7 @@ module.exports.prototype = {
         fs.writeFileSync(this.strings, strings.write({indent: 4}), 'utf-8');
         events.emit('verbose', 'Wrote out Android application name to "' + name + '"');
 
-        var icons = config.getAllIcons();
+        var icons = config.getIcons('android');
         // if there are icon elements in config.xml
         if (icons) {
           var haveSeenDefaultIcon = false;
@@ -79,6 +79,7 @@ module.exports.prototype = {
           var default_icon;
           var max_size;
           var max_density;
+          // http://developer.android.com/design/style/iconography.html
           var densities = {
             "ldpi" : 36,
             "mdpi" : 48,
@@ -92,14 +93,20 @@ module.exports.prototype = {
             if (!size) {
               size = icon.height;
             }
-            if (!size) {
+            if (!size && !icon.density) {
               if (default_icon) {
-                  events.emit('verbose', "more than one default icon: " + icon); 
+                  events.emit('verbose', "more than one default icon: " + JSON.stringify(icon)); 
               } else {
                   default_icon = icon;
               }
             } else {
               var parseIcon = function(icon, icon_size, size, density) {
+                // if density is explicitly defined, no need to calculate it from width/height
+                if (icon.density) {
+                    android_icons[icon.density] = icon;
+                    return;
+                }
+
                 var i = parseInt(icon_size);
                 if (size == parseInt(icon_size)) {
                   android_icons[density] = icon;
@@ -136,8 +143,8 @@ module.exports.prototype = {
                 }
               }
             }
+            events.emit('verbose', 'Copying icon from ' + srcfilepath + ' to ' + destfilepath);
             shell.cp('-f', srcfilepath, destfilepath);
-            events.emit('verbose', 'Copied icon from ' + srcfilepath + ' to ' + destfilepath);
           }.bind(this);
           for (var density in densities) {
             copyIcon(density);

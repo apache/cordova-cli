@@ -58,57 +58,25 @@ module.exports.prototype = {
             };
         }
 
-        manifest.icons = {};
-        var icons = config.icon.get();
-        // if there are icon elements in config.xml
-        if (icons) {
-          for (var i=0; i<icons.length; i++) {
-            var icon = icons[i];
-            var iconplatform = icon["cdv:platform"];
-            // if the icon is for the firefoxos platform
-            if (!iconplatform || (iconplatform === "firefoxos")) {
-              var projectRoot = util.isCordova(this.path);
-              var srcfilepath = path.join(projectRoot, icon.src);
-              var destfilepath = null;
-              var iconwidth = icon["width"];
-              var iconheight = icon["height"];
-              events.emit('verbose', 'icon iconwidth=' + iconwidth + ' iconheight=' + iconheight);
-              var size = null;
-              if (iconwidth && iconheight && iconwidth === iconheight) {
-                size = iconwidth;
-              } else if (iconwidth == undefined && iconheight) {
-                size = iconheight;
-              } else if (iconheight == undefined && iconwidth) {
-                size = iconwidth;
-              } 
-              if (size != null && fs.existsSync(srcfilepath)) {
-                manifest.icons[size] = icon.src;
-                destfilepath = path.join(this.path, 'www', icon.src);
-                shell.cp('-f', srcfilepath, destfilepath);
-                events.emit('verbose', 'Copied icon from ' + srcfilepath + ' to ' + destfilepath);
-              } else {
-                events.emit('verbose', 'Ignoring icon ' + icon.src + '; width=' + iconwidth + ' height=' + iconheight);
-              }
-            } else {
-              events.emit('verbose', 'Ignoring icon ' + icon.src + '; Platform=' + iconplatform);
+        // Update icons
+        var icons = config.getIcons('firefoxos');
+        var platformRoot = this.path;
+        var appRoot = util.isCordova(platformRoot);
+
+        // http://www.mozilla.org/en-US/styleguide/products/firefox-os/icons/
+        var platformIcons = [
+            {dest: "www/img/logo.png", width: 60, height: 60}
+        ];
+
+        platformIcons.forEach(function (item) {
+            icon = icons.getIconBySize(item.width, item.height) || icons.getDefault();
+            if (icon){
+                var src = path.join(appRoot, icon.src),
+                    dest = path.join(platformRoot, item.dest);
+                events.emit('verbose', 'Copying icon from ' + src + ' to ' + dest);
+                shell.cp('-f', src, dest);
             }
-          }
-        }
-
-        var author = config.author();
-        if (author) {
-          manifest.developer = {};
-          manifest.developer.name = author;
-        }
-
-        var content = config.content();
-        if (content) {
-          if (content.indexOf('/') !== 0) {
-            // on firefoxos urls must start with /
-            content = '/' + content;
-          }
-          manifest.launch_path = content;
-        }
+        });
 
         manifest.version = version;
         manifest.name = name;
