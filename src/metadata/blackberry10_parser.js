@@ -72,13 +72,17 @@ module.exports.prototype = {
         icons = config.getIcons('blackberry10');
         if (icons) {
             for (i = 0; i < icons.length; i++) {
-                shell.cp(
-                    '-f', 
-                    path.join(projectRoot, icons[i].src), 
-                    path.join(this.path, 'platform_www', icons[i].src));
+                var src = path.join(projectRoot, icons[i].src),
+                    dest = path.join(this.path, 'platform_www', icons[i].src),
+                    destFolder = path.join(dest, '..');
+                
+                if (!fs.existsSync(destFolder)) {
+                    shell.mkdir(destFolder); // make sure target dir exists
+                }
+                events.emit('verbose', 'Copying icon from ' + src + ' to ' + dest);
+                shell.cp('-f', src, dest);
             }
         }
-
     },
 
     // Returns a promise.
