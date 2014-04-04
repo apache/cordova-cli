@@ -78,37 +78,9 @@ describe('build command', function() {
         });
     });
 
-    describe('callback',function() {
-        var tag = false,
-            promise,
-            callback;
-
-        beforeEach(function () {
-            callback = function() {
-                tag = true;
-            }
-        });
-
-        it('should return null if a callback argument is supplied',function(){
-            var promise;
-           
-             promise = cordova.raw.build(['android','ios'], callback);
-             expect(promise).toBe(null);
-        });
-
-        it('should call the supplied callback if supplied', function() {
-            runs(function(){
-                cordova.raw.build(['android','ios'],callback);
-            });
-            waitsFor(function(){
-                return tag;
-            },10000);
-        });
-    });
-
     describe('success', function() {
         it('should run inside a Cordova-based project with at least one added platform and call both prepare and compile', function(done) {
-           cordova.raw.build(['android','ios']).then(function() {
+            cordova.raw.build(['android','ios']).then(function() {
                 var opts = {verbose: false, platforms: ['android', 'ios'], options: []};
                 expect(prepare_spy).toHaveBeenCalledWith(opts);
                 expect(compile_spy).toHaveBeenCalledWith(opts);
@@ -123,10 +95,6 @@ describe('build command', function() {
                 done();
             });
         });
-    });
-
-    describe('',function(){
-
     });
 
     describe('hooks', function() {

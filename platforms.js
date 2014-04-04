@@ -19,9 +19,10 @@
 
 module.exports = {
     'ios' : {
+        hostos : ['darwin'],
         parser : './src/metadata/ios_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-ios.git',
-        version: '3.4.0'
+        version: '3.4.1'
     }, 
     'android' : {
         parser : './src/metadata/android_parser',
@@ -29,6 +30,7 @@ module.exports = {
         version: '3.4.0'
     }, 
     'ubuntu' : {
+        hostos : ['linux'],
         parser : './src/metadata/ubuntu_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-ubuntu.git',
         version: '3.4.0'
@@ -39,12 +41,14 @@ module.exports = {
         version: '3.4.0'
     },
     'wp7' : {
+        hostos : ['win32'],
         parser : './src/metadata/wp7_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
         version: '3.4.0',
         subdirectory: 'wp7'
     },
     'wp8' : {
+        hostos : ['win32'],
         parser : './src/metadata/wp8_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
         version: '3.4.0',
@@ -57,6 +61,7 @@ module.exports = {
         subdirectory: 'blackberry10'
     },
     'www':{
+        hostos : [],
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-app-hello-world.git',
         version: '3.4.0'
     },
@@ -66,6 +71,7 @@ module.exports = {
         version: '3.4.0'
     },
     'windows8':{
+        hostos : ['win32'],
         parser: './src/metadata/windows8_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-windows.git',
         version: '3.4.0',

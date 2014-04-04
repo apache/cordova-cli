@@ -221,22 +221,23 @@ function list(hooks, projectRoot) {
             });
         }));
     }).then(function(platformsText) {
-        var results = 'Installed platforms: ' + platformsText.join(', ') + '\n';
-        var available = ['android', 'blackberry10', 'firefoxos'];
-        if (process.platform === 'darwin')
-            available.push('ios');
-        if (process.platform.slice(0, 3) === 'win') {
-            available.push('wp7');
-            available.push('wp8');
-            available.push('windows8');
-        }
-        if (process.platform === 'linux')
-            available.push('ubuntu');
+        var results = 'Installed platforms: ' + platformsText.sort().join(', ') + '\n';
+        var available = Object.getOwnPropertyNames(platforms).filter(function(p) {
+            var platform = platforms[p] || {},
+                hostos = platform.hostos || null;
+            if (!hostos)
+                return true;
+            if (hostos.indexOf('*') >= 0)
+                return true;
+            if (hostos.indexOf(process.platform) >= 0)
+                return true;
+            return false;
+        });
 
         available = available.filter(function(p) {
             return platforms_on_fs.indexOf(p) < 0; // Only those not already installed.
         });
-        results += 'Available platforms: ' + available.join(', ');
+        results += 'Available platforms: ' + available.sort().join(', ');
 
         events.emit('results', results);
     }).then(function() {
@@ -389,3 +390,4 @@ module.exports.update = update;
 module.exports.check = check;
 module.exports.list = list;
 module.exports.supports = supports;
+
