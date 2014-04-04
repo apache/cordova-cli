@@ -110,6 +110,15 @@ module.exports.prototype = {
 
                 var i = parseInt(icon_size);
                 if (size == parseInt(icon_size)) {
+                  var previous = android_icons[density];
+                  if (previous) {
+                    // already have that density. platform rules
+                    if (!previous.platform) {
+                      android_icons[density] = icon;
+                    } // else already have a platform icon of that density
+                  } else {
+                    android_icons[density] = icon;
+                  }
                   android_icons[density] = icon;
                   if (!max_size) {
                     max_size = size;
