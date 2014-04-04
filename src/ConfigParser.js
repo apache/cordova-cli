@@ -93,32 +93,37 @@ ConfigParser.prototype = {
     /**
      * Returns all icons for the platform specified.
      * @param  {String} platform The platform.
-     * @return {Array} Icons for the platform or all icons if platform is null or undefined.
+     * @return {Array} Icons for the platform specified.
      */
     getIcons: function(platform) {
-        var elts = this.doc.findall('icon');
         var ret = [];
+            iconElements = [];
 
-        elts.forEach(function (elt) {
-          var iconPlatform = elt.attrib['platform'] || elt.attrib['cdv:platform'] || elt.attrib['gap:platform'];
-          if (platform && iconPlatform && platform != iconPlatform) {
-            return; // skip <icon> element since it does not belong to the platform specified
-          }
-          var icon = {};
-          icon.src = elt.attrib.src;
-          icon.density = elt.attrib['density'] || elt.attrib['cdv:density'] || elt.attrib['gap:density'];
-          icon.width = elt.attrib.width;
-          icon.height = elt.attrib.height;
-          // If one of width or Height is undefined, assume they are equal.
-          icon.width = icon.width || icon.height;
-          icon.height = icon.height || icon.width;
+        if (platform) { // platform specific icons
+            this.doc.findall('platform[@name=\'' + platform + '\']/icon').forEach(function(elt){
+                elt.platform = platform; // mark as platform specific icon
+                iconElements.push(elt)
+            });
+        }
+        // root level icons
+        iconElements = iconElements.concat(this.doc.findall('icon'));
+        // parse icon elements
+        iconElements.forEach(function (elt) {
+            var icon = {};
+            icon.src = elt.attrib.src;
+            icon.density = elt.attrib['density'] || elt.attrib['cdv:density'] || elt.attrib['gap:density'];
+            icon.platform = elt.platform || null; // null means icon represents default icon (shared between platforms)
+            icon.width = elt.attrib.width;
+            icon.height = elt.attrib.height;
+            // If one of width or Height is undefined, assume they are equal.
+            icon.width = icon.width || icon.height;
+            icon.height = icon.height || icon.width;
 
-          // default icon
-          if (!icon.width && !icon.height && !icon.density) {
-            ret.defaultIcon = icon;  
-          }
-
-          ret.push(icon);
+            // default icon
+            if (!icon.width && !icon.height && !icon.density) {
+                ret.defaultIcon = icon;  
+            }
+            ret.push(icon);
         });
 
         /**
@@ -137,7 +142,7 @@ ConfigParser.prototype = {
             }
             return null;
         };
-
+        /** Returns default icons */
         ret.getDefault = function() {
             return ret.defaultIcon;
         }
