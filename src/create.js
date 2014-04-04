@@ -170,4 +170,3 @@ module.exports = function create (dir, id, name, cfg) {
         }
     });
 };
-
