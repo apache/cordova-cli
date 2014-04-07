@@ -133,6 +133,32 @@ module.exports.prototype = {
                             ' with a <Application> node');
         }
 
+        // Update WhiteListing rules
+        //<ApplicationContentUriRules>
+        //    <Rule Match="https://www.example.com" Type="include"/>
+        //</ApplicationContentUriRules>
+        var accessRules = config.accessRules();
+        var appUriRules = app.find('ApplicationContentUriRules');
+
+        if (accessRules.length ==0 || accessRules[0] == '*') { // not defined or allow any
+            // remove ApplicationContentUriRules section
+            if (appUriRules) {
+                app.remove(null, appUriRules);
+            }
+        } else { // there are rules defined
+            if (!appUriRules) { // create section if it does not exist
+                appUriRules = et.Element('ApplicationContentUriRules');
+                app.append(appUriRules);
+            }
+            appUriRules.clear();
+            accessRules.forEach(function(rule) {
+                var el = et.Element('Rule')
+                el.attrib.Match = rule;
+                el.attrib.Type = 'include';
+                appUriRules.append(el);
+            });
+        }
+
         // Update properties
         var properties = manifest.find('.//Properties');
         if (properties && properties.find) {
