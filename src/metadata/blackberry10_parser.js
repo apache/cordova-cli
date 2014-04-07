@@ -58,8 +58,32 @@ module.exports.check_requirements = function(project_root) {
 
 module.exports.prototype = {
     update_from_config:function(config) {
-        if (config instanceof ConfigParser) {
-        } else throw new Error('update_from_config requires a ConfigParser object');
+        var projectRoot = util.isCordova(this.path),
+            resDir = path.join(this.path, 'platform_www', 'res'),
+            icons,
+            i;
+
+        if (!config instanceof ConfigParser) {
+            throw new Error('update_from_config requires a ConfigParser object');
+        }
+
+        shell.rm('-rf', resDir);
+        shell.mkdir(resDir);
+
+        icons = config.getIcons('blackberry10');
+        if (icons) {
+            for (i = 0; i < icons.length; i++) {
+                var src = path.join(projectRoot, icons[i].src),
+                    dest = path.join(this.path, 'platform_www', icons[i].src),
+                    destFolder = path.join(dest, '..');
+                
+                if (!fs.existsSync(destFolder)) {
+                    shell.mkdir(destFolder); // make sure target dir exists
+                }
+                events.emit('verbose', 'Copying icon from ' + src + ' to ' + dest);
+                shell.cp('-f', src, dest);
+            }
+        }
     },
 
     // Returns a promise.

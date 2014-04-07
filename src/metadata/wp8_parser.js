@@ -140,6 +140,29 @@ module.exports.prototype = {
 
          //Write out manifest
          fs.writeFileSync(this.manifest_path, manifest.write({indent: 4}), 'utf-8');
+
+        // Update icons
+        var icons = config.getIcons('wp8');
+        var platformRoot = this.wp8_proj_dir;
+        var appRoot = util.isCordova(platformRoot);
+
+        // icons, that should be added to platform
+        // @param dest {string} Path to copy icon to, relative to platform root
+        var platformIcons = [
+            {dest: "ApplicationIcon.png", width: 99, height: 99},
+            {dest: "Background.png", width: 159, height: 159},
+        ];
+
+        platformIcons.forEach(function (item) {
+            icon = icons.getIconBySize(item.width, item.height) || icons.getDefault();
+            if (icon){
+                var src = path.join(appRoot, icon.src),
+                    dest = path.join(platformRoot, item.dest);
+                events.emit('verbose', 'Copying icon from ' + src + ' to ' + dest);
+                shell.cp('-f', src, dest);
+            }
+        });
+
     },
     // Returns the platform-specific www directory.
     www_dir:function() {

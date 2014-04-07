@@ -96,6 +96,65 @@ ConfigParser.prototype = {
         });
         return ret;
     },
+    /**
+     * Returns all icons for the platform specified.
+     * @param  {String} platform The platform.
+     * @return {Array} Icons for the platform specified.
+     */
+    getIcons: function(platform) {
+        var ret = [];
+            iconElements = [];
+
+        if (platform) { // platform specific icons
+            this.doc.findall('platform[@name=\'' + platform + '\']/icon').forEach(function(elt){
+                elt.platform = platform; // mark as platform specific icon
+                iconElements.push(elt)
+            });
+        }
+        // root level icons
+        iconElements = iconElements.concat(this.doc.findall('icon'));
+        // parse icon elements
+        iconElements.forEach(function (elt) {
+            var icon = {};
+            icon.src = elt.attrib.src;
+            icon.density = elt.attrib['density'] || elt.attrib['cdv:density'] || elt.attrib['gap:density'];
+            icon.platform = elt.platform || null; // null means icon represents default icon (shared between platforms)
+            icon.width = elt.attrib.width;
+            icon.height = elt.attrib.height;
+            // If one of width or Height is undefined, assume they are equal.
+            icon.width = icon.width || icon.height;
+            icon.height = icon.height || icon.width;
+
+            // default icon
+            if (!icon.width && !icon.height && !icon.density) {
+                ret.defaultIcon = icon;  
+            }
+            ret.push(icon);
+        });
+
+        /**
+         * Returns icon with specified width and height
+         * @param  {number} w  Width of icon
+         * @param  {number} h  Height of icon
+         * @return {Icon}      Icon object or null if not found
+         */
+        ret.getIconBySize = function(w, h){
+            // If only one of width and height is given
+            // then we assume that they are equal.
+            var width = w || h, height = h || w;
+            for (var idx in this) {
+                var icon = this[idx];
+                if (width == icon.width && height == icon.width) return icon;
+            }
+            return null;
+        };
+        /** Returns default icons */
+        ret.getDefault = function() {
+            return ret.defaultIcon;
+        }
+
+        return ret;
+    },
     write:function() {
         fs.writeFileSync(this.path, this.doc.write({indent: 4}), 'utf-8');
     }
