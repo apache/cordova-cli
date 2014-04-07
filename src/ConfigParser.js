@@ -90,6 +90,18 @@ ConfigParser.prototype = {
         });
         return ret;
     },
+    startPage: function() {
+        var el  = this.doc.getroot().find('content');
+        if (el && el.attrib['src']) {
+            return el.attrib['src'];
+        }
+        // default value
+        return 'index.html';
+    },
+    setStartPage: function(uri) {
+        var el = findOrCreate(this.doc.getroot(), 'content');
+        el.attrib['src'] = uri;
+    },
     write:function() {
         fs.writeFileSync(this.path, this.doc.write({indent: 4}), 'utf-8');
     }
