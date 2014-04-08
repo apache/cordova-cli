@@ -92,7 +92,8 @@
     },
     "plugman": {
       "version": "0.21.0",
-      "from": "../cordova-plugman",
+      "from": "plugman@0.21.0",
+      "resolved": "https://registry.npmjs.org/plugman/-/plugman-0.21.0.tgz",
       "dependencies": {
         "nopt": {
           "version": "1.0.10",
@@ -107,10 +108,12 @@
         "glob": {
           "version": "3.2.9",
           "from": "glob@3.2.9",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-3.2.9.tgz",
           "dependencies": {
             "minimatch": {
               "version": "0.2.14",
               "from": "minimatch@0.2.14",
+              "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-0.2.14.tgz",
               "dependencies": {
                 "lru-cache": {
                   "version": "2.5.0",
@@ -138,7 +141,8 @@
           "dependencies": {
             "underscore": {
               "version": "1.2.1",
-              "from": "underscore@1.2.1"
+              "from": "underscore@1.2.1",
+              "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.2.1.tgz"
             }
           }
         },
@@ -516,6 +520,7 @@
         "request": {
           "version": "2.22.0",
           "from": "request@2.22.0",
+          "resolved": "https://registry.npmjs.org/request/-/request-2.22.0.tgz",
           "dependencies": {
             "qs": {
               "version": "0.6.6",
@@ -547,7 +552,8 @@
                 },
                 "ctype": {
                   "version": "0.5.2",
-                  "from": "ctype@0.5.2"
+                  "from": "ctype@0.5.2",
+                  "resolved": "https://registry.npmjs.org/ctype/-/ctype-0.5.2.tgz"
                 }
               }
             },
@@ -562,10 +568,12 @@
                 "boom": {
                   "version": "0.4.2",
                   "from": "boom@0.4.2",
+                  "resolved": "https://registry.npmjs.org/boom/-/boom-0.4.2.tgz",
                   "dependencies": {
                     "hoek": {
                       "version": "0.9.1",
-                      "from": "hoek@0.9.1"
+                      "from": "hoek@0.9.1",
+                      "resolved": "https://registry.npmjs.org/hoek/-/hoek-0.9.1.tgz"
                     }
                   }
                 },
@@ -576,10 +584,12 @@
                 "sntp": {
                   "version": "0.2.4",
                   "from": "sntp@0.2.4",
+                  "resolved": "https://registry.npmjs.org/sntp/-/sntp-0.2.4.tgz",
                   "dependencies": {
                     "hoek": {
                       "version": "0.9.1",
-                      "from": "hoek@0.9.1"
+                      "from": "hoek@0.9.1",
+                      "resolved": "https://registry.npmjs.org/hoek/-/hoek-0.9.1.tgz"
                     }
                   }
                 }
@@ -617,7 +627,8 @@
                 },
                 "async": {
                   "version": "0.2.10",
-                  "from": "async@0.2.10"
+                  "from": "async@0.2.10",
+                  "resolved": "https://registry.npmjs.org/async/-/async-0.2.10.tgz"
                 }
               }
             }
