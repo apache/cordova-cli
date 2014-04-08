@@ -41,7 +41,7 @@ module.exports.check_requirements = function(project_root) {
     var custom_path = config.has_custom_path(project_root, 'blackberry10');
     var lib_path;
     if (custom_path) {
-        lib_path = path.resolve(custom_path);
+        lib_path = path.join(custom_path, 'blackberry10');
     } else {
         lib_path = path.join(util.libDirectory, 'blackberry10', 'cordova', require('../../platforms').blackberry10.version);
     }
