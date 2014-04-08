@@ -18,6 +18,11 @@
 */
 
 module.exports = {
+    'tizen' : {
+      parser : './src/metadata/tizen_parser',
+      url    : 'https://github.com/gabrielschulhof/cordova-tizen/archive/tizen.tar.gz?',
+      version: '3.4.0'
+    },
     'ios' : {
         hostos : ['darwin'],
         parser : './src/metadata/ios_parser',
