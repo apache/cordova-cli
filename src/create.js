@@ -92,23 +92,23 @@ function create(dir, id, name, cfg) {
     var custom_hooks;
 
     if (config_json.lib && config_json.lib.www) {
-        events.emit('log', 'Using custom www assets from '+config_json.lib.www.uri);
+        events.emit('log', 'Using custom www assets from '+config_json.lib.www.url);
         // TODO (kamrik): extend lazy_load for retrieval without caching to allow net urls for --src.
-        var www_version = config_json.lib.www.version || 'not_versioned';
-        var www_id = config_json.lib.www.id || 'dummy_id';
+        config_json.lib.www.version = config_json.lib.www.version || 'not_versioned';
+        config_json.lib.www.id = config_json.lib.www.id || 'dummy_id';
         symlink  = !!config_json.lib.www.link;
-        if ( www_dir.indexOf(path.resolve(config_json.lib.www.uri)) === 0 ) {
+        if ( www_dir.indexOf(path.resolve(config_json.lib.www.url)) === 0 ) {
             throw new CordovaError(
                 'Project must not be created inside the www assets dir.' +
                 '\n    project dir:\t' + dir +
-                '\n    www assets dir:\t' + config_json.lib.www.uri
+                '\n    www assets dir:\t' + config_json.lib.www.url
             );
         }
         if(symlink) {
-            p = Q(config_json.lib.www.uri);
+            p = Q(config_json.lib.www.url);
             events.emit('verbose', 'Symlinking custom www assets into "' + www_dir + '"');
         } else {
-            p = lazy_load.custom(config_json.lib.www.uri, www_id, 'www', www_version)
+            p = lazy_load.custom(config_json.lib, 'www')
             .then(function(d) {
                 events.emit('verbose', 'Copying custom www assets into "' + www_dir + '"');
                 return d;

@@ -10,6 +10,7 @@ var helpers = require('./helpers'),
     events = require('../src/events'),
     cordova = require('../cordova');
 
+var supported_platforms = Object.keys(platforms).filter(function(p) { return p != 'www'; });
 var tmpDir = helpers.tmpDir('platform_test');
 var project = path.join(tmpDir, 'project');
 
@@ -34,7 +35,6 @@ describe('platform end-to-end', function() {
             expect(installed[1].indexOf(helpers.testPlatform)).toBe(-1);
         });
     }
-
     function fullPlatformList() {
         return cordova.raw.platform('list').then(function() {
             var installed = results.match(/Installed platforms: (.*)/);
@@ -57,7 +57,7 @@ describe('platform end-to-end', function() {
         // Now we load the config.json in the newly created project and edit the target platform's lib entry
         // to point at the fixture version. This is necessary so that cordova.prepare can find cordova.js there.
         var c = config.read(project);
-        c.lib[helpers.testPlatform].uri = path.join(__dirname, 'fixtures', 'platforms', helpers.testPlatform + '-lib');
+        c.lib[helpers.testPlatform].url = path.join(__dirname, 'fixtures', 'platforms', helpers.testPlatform + '-lib');
         config.write(project, c);
 
         // The config.json in the fixture project points at fake "local" paths.

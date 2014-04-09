@@ -32,6 +32,13 @@ describe('lazy_load module', function() {
     var custom_path;
     beforeEach(function() {
         custom_path = spyOn(config, 'has_custom_path').andReturn(false);
+        fakeLazyLoad = function(id, platform, version) {
+            if (platform == 'wp7' || platform == 'wp8') {
+                return Q(path.join('lib', 'wp', id, version, platform));
+            } else {
+                return Q(path.join('lib', platform, id, version, platforms[platform] && platforms[platform].subdirectory ? platforms[platform].subdirectory : ''));
+            }
+        };
     });
     describe('cordova method (loads stock cordova libs)', function() {
         var custom;
@@ -46,8 +53,15 @@ describe('lazy_load module', function() {
             }).fin(done);
         });
         it('should invoke lazy_load.custom with appropriate url, platform, and version as specified in platforms manifest', function(done) {
+            var url = platforms.android.url + ';a=snapshot;h=' + platforms.android.version + ';sf=tgz';
+            custom.andCallFake(function (platforms, platform) {
+                expect(platform).toEqual('android');
+                expect(platforms[platform].url).toEqual(url);
+                expect(platforms[platform].id).toEqual('cordova');
+                return fakeLazyLoad(platforms[platform].id, platform, platforms[platform].version);
+            });
             lazy_load.cordova('android').then(function(dir) {
-                expect(custom).toHaveBeenCalledWith(platforms.android.url + ';a=snapshot;h=' + platforms.android.version + ';sf=tgz', 'cordova', 'android', platforms.android.version);
+                expect(custom).toHaveBeenCalled();
                 expect(dir).toBeDefined();
                 done();
             });
@@ -67,7 +81,14 @@ describe('lazy_load module', function() {
 
         it('should callback with no errors and not fire event hooks if library already exists', function(done) {
             exists.andReturn(true);
-            lazy_load.custom('http://some remote url', 'some id', 'platform X', 'three point five').then(function() {
+            var mock_platforms = {
+                'platform X': {
+                    id: 'some id',
+                    url: 'http://some remote url',
+                    version: 'three point five'
+                }
+            };
+            lazy_load.custom(mock_platforms, 'platform X').then(function() {
                 expect(fire).not.toHaveBeenCalled()
             }, function(err) {
                 expect(err).not.toBeDefined();
@@ -75,7 +96,14 @@ describe('lazy_load module', function() {
         });
         it('should callback with no errors and fire event hooks even if library already exists if the lib url is a local dir', function(done) {
             exists.andReturn(true);
-            lazy_load.custom('some local dir', 'some id', 'platform X', 'three point six').then(function() {
+            var mock_platforms = {
+                'platform X': {
+                    id: 'some id',
+                    url: 'some local dir',
+                    version: 'three point six'
+                }
+            };
+            lazy_load.custom(mock_platforms, 'platform X').then(function() {
                 expect(fire).not.toHaveBeenCalled()
             }, function(err) {
                 expect(err).not.toBeDefined();
@@ -109,11 +137,18 @@ describe('lazy_load module', function() {
                 load_spy = spyOn(npmconf, 'load').andCallFake(function(cb) { cb(null, { get: function() { return npmConfProxy }}); });
             });
 
-            it('should call request with appopriate url params', function(done) {
+            it('should call request with appropriate url params', function(done) {
                 var url = 'https://github.com/apache/someplugin';
-                lazy_load.custom(url, 'random', 'android', '1.0').then(function() {
+                var with_android_platform = {
+                    'android': {
+                        id: 'random',
+                        url: url,
+                        version: '1.0'
+                    }
+                };
+                lazy_load.custom(with_android_platform, 'android').then(function() {
                     expect(req).toHaveBeenCalledWith({
-                        uri:url
+                        url:url
                     }, jasmine.any(Function));
                 }, function(err) {
                     expect(err).not.toBeDefined();
@@ -123,9 +158,16 @@ describe('lazy_load module', function() {
                 var proxy = 'https://somelocalproxy.com';
                 npmConfProxy = proxy;
                 var url = 'https://github.com/apache/someplugin';
-                lazy_load.custom(url, 'random', 'android', '1.0').then(function() {
+                var with_android_platform = {
+                    'android': {
+                        id: 'random',
+                        url: url,
+                        version: '1.0'
+                    }
+                };
+                lazy_load.custom(with_android_platform, 'android').then(function() {
                     expect(req).toHaveBeenCalledWith({
-                        uri:url,
+                        url:url,
                         proxy:proxy
                     }, jasmine.any(Function));
                 }, function(err) {
@@ -136,9 +178,16 @@ describe('lazy_load module', function() {
                 var proxy = 'http://somelocalproxy.com';
                 npmConfProxy = proxy;
                 var url = 'http://github.com/apache/someplugin';
-                lazy_load.custom(url, 'random', 'android', '1.0').then(function() {
+                var with_android_platform = {
+                    'android': {
+                        id: 'random',
+                        url: url,
+                        version: '1.0'
+                    }
+                };
+                lazy_load.custom(with_android_platform, 'android').then(function() {
                     expect(req).toHaveBeenCalledWith({
-                        uri:url,
+                        url:url,
                         proxy:proxy
                     }, jasmine.any(Function));
                 }, function(err) {
@@ -149,14 +198,28 @@ describe('lazy_load module', function() {
 
         describe('local paths for libraries', function() {
             it('should return the local path, no symlink', function(done) {
-                lazy_load.custom('/some/random/lib', 'id', 'X', 'three point eight').then(function(dir) {
+                var mock_platforms = {
+                    'X': {
+                        id: 'id',
+                        url: '/some/random/lib',
+                        version: 'three point eight'
+                    }
+                };
+                lazy_load.custom(mock_platforms, 'X').then(function(dir) {
                     expect(dir).toEqual('/some/random/lib');
                 }, function(err) {
                     expect(err).toBeUndefined();
                 }).fin(done);
             });
             it('should not file download hook', function(done) {
-                lazy_load.custom('/some/random/lib', 'id', 'X', 'three point nine').then(function() {
+                var mock_platforms = {
+                    'X': {
+                        id: 'id',
+                        url: '/some/random/lib',
+                        version: 'three point nine'
+                    }
+                };
+                lazy_load.custom(mock_platforms, 'X').then(function() {
                     expect(fire).not.toHaveBeenCalledWith('after_library_download', {platform:'X',url:'/some/random/lib',id:'id',version:'three point nine',path:'/some/random/lib', symlink:false});
                 }, function(err) {
                     expect(err).toBeUndefined();
@@ -175,7 +238,7 @@ describe('lazy_load module', function() {
             var read = spyOn(config, 'read').andReturn({
                 lib:{
                     maybe:{
-                        uri:'you or eye?',
+                        url:'you or eye?',
                         id:'eye dee',
                         version:'four point twenty'
                     }
@@ -183,8 +246,15 @@ describe('lazy_load module', function() {
             });
             var p = '/some/random/custom/path';
             custom_path.andReturn(p);
+            custom.andCallFake(function (platforms, platform) {
+                expect(platform).toEqual('maybe');
+                expect(platforms[platform].url).toEqual('you or eye?');
+                expect(platforms[platform].id).toEqual('eye dee');
+                expect(platforms[platform].version).toEqual('four point twenty');
+                return fakeLazyLoad(platforms[platform].id, platform, platforms[platform].version);
+            });
             lazy_load.based_on_config('yup', 'maybe').then(function() {
-                expect(custom).toHaveBeenCalledWith('you or eye?', 'eye dee', 'maybe', 'four point twenty');
+                expect(custom).toHaveBeenCalled();
             }, function(err) {
                 expect(err).toBeUndefined();
             }).fin(done);

@@ -28,6 +28,7 @@ var fs            = require('fs'),
     ConfigParser  = require('../ConfigParser'),
     CordovaError  = require('../CordovaError'),
     config        = require('../config'),
+    lazy_load     = require('../lazy_load'),
     hooker        = require('../hooker');
 
 module.exports = function wp7_parser(project) {
@@ -45,13 +46,13 @@ module.exports = function wp7_parser(project) {
 };
 
 // Returns a promise.
-module.exports.check_requirements = function(project_root) {
-    events.emit('log', 'Checking wp7 requirements...');
-    var lib_path = path.join(util.libDirectory, 'wp', 'cordova', require('../../platforms').wp7.version, 'wp7');
-    var custom_path = config.has_custom_path(project_root, 'wp7');
-    if (custom_path) {
-        lib_path = path.join(custom_path, 'wp7');
+module.exports.check_requirements = function(project_root, lib_path) {
+    if (lib_path === undefined) {
+        return lazy_load.based_on_config(project_root, 'wp7').then(function (lib_path) {
+            return module.exports.check_requirements(project_root, lib_path);
+        });
     }
+    events.emit('log', 'Checking wp7 requirements...');
     var command = '"' + path.join(lib_path, 'bin', 'check_reqs') + '"';
     events.emit('verbose', 'Running "' + command + '" (output to follow)');
     var d = Q.defer();
