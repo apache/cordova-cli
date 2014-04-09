@@ -113,7 +113,7 @@ describe('create command', function () {
                 lib:{
                     www:{
                         id:'supercordova',
-                        uri:'/supacordoba',
+                        url:'/supacordoba',
                         version:'1337'
                     }
                 }
@@ -121,7 +121,7 @@ describe('create command', function () {
             config_read.andReturn(fake_config);
             config_write.andReturn(fake_config);
             cordova.raw.create(tempDir, 'some.app.id', 'SomeAppName', fake_config).then(function() {
-                expect(load_custom).toHaveBeenCalledWith(fake_config.lib.www.uri, fake_config.lib.www.id, 'www', fake_config.lib.www.version);
+                expect(load_custom).toHaveBeenCalledWith(fake_config.lib, 'www');
                 done();
             });
         });

@@ -36,7 +36,7 @@ var cfg = new ConfigParser(path.join(__dirname, '..', 'test-config.xml'));
 describe('windows8 project parser', function() {
 
     var proj = '/some/path';
-    var exists, exec, custom, readdir, cfg_parser;
+    var exists, exec, custom, readdir, cfg_parser, config_read;
     var winXml;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
@@ -45,6 +45,16 @@ describe('windows8 project parser', function() {
             cb(null, '', '');
         });
         custom = spyOn(config, 'has_custom_path').andReturn(false);
+        config_read = spyOn(config, 'read').andCallFake(function() {
+            return custom() ? {
+                lib: {
+                    windows8: {
+                        url: custom()
+                    }
+                }
+            }
+            : ({})
+        });
         readdir = spyOn(fs, 'readdirSync').andReturn(['test.jsproj']);
         winXml = null;
         spyOn(xmlHelpers, 'parseElementtreeSync').andCallFake(function(path) {

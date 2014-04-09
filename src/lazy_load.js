@@ -29,38 +29,72 @@ var path          = require('path'),
     tar           = require('tar'),
     URL           = require('url'),
     Q             = require('q'),
-    util          = require('./util');
+    util          = require('./util'),
+    stubplatform  = {
+        url    : undefined,
+        version: undefined,
+        altplatform: undefined,
+        subdirectory: ""
+    };
+
+function mixin(mixin, to) {
+    Object.getOwnPropertyNames(mixin).forEach(function (prop) {
+        if (Object.hasOwnProperty.call(mixin, prop)) {
+            Object.defineProperty(to, prop, Object.getOwnPropertyDescriptor(mixin, prop));
+        }
+    });
+    return to;
+}
 
 module.exports = {
     // Returns a promise for the path to the lazy-loaded directory.
     cordova:function lazy_load(platform) {
+        var mixed_platforms = mixin(platforms, {}),
+            plat;
+        if (!(platform in platforms)) {
+            return Q.reject(new Error('Cordova library "' + platform + '" not recognized.'));
+        }
+        plat = mixed_platforms[platform];
+        plat.url = plat.url + ';a=snapshot;h=' + plat.version + ';sf=tgz';
+        plat.id = 'cordova';
+        return module.exports.custom(mixed_platforms, platform);
+    },
+    // Returns a promise for the path to the lazy-loaded directory.
+    custom:function(platforms, platform) {
+        var plat;
+        var id;
+        var uri;
+        var url;
+        var version;
+        var subdir;
+        var platdir;
+        var download_dir;
+        var tmp_dir;
+        var lib_dir;
+        var isUri;
         if (!(platform in platforms)) {
             return Q.reject(new Error('Cordova library "' + platform + '" not recognized.'));
         }
 
-        var url = platforms[platform].url + ';a=snapshot;h=' + platforms[platform].version + ';sf=tgz';
-        return module.exports.custom(url, 'cordova', platform, platforms[platform].version);
-    },
-    // Returns a promise for the path to the lazy-loaded directory.
-    custom:function(url, id, platform, version) {
-        var download_dir;
-        var tmp_dir;
-        var lib_dir;
-
+        plat = mixin(platforms[platform], stubplatform);
+        version = plat.version;
+        url = plat.url
+        id = plat.id;
+        subdir = plat.subdirectory;
+        platdir = plat.altplatform || platform;
         // Return early for already-cached remote URL, or for local URLs.
-        var uri = URL.parse(url);
-        var isUri = uri.protocol && uri.protocol[1] != ':'; // second part of conditional is for awesome windows support. fuuu windows
+        uri = URL.parse(url);
+        isUri = uri.protocol && uri.protocol[1] != ':'; // second part of conditional is for awesome windows support. fuuu windows
         if (isUri) {
-            download_dir = (platform == 'wp7' || platform == 'wp8' ? path.join(util.libDirectory, 'wp', id, version) :
-                                                                     path.join(util.libDirectory, platform, id, version));
-            lib_dir = platforms[platform] && platforms[platform].subdirectory && platform !== "blackberry10" ? path.join(download_dir, platforms[platform].subdirectory) : download_dir;
+            download_dir = path.join(util.libDirectory, platdir, id, version);
+            lib_dir = path.join(download_dir, subdir);
             if (fs.existsSync(download_dir)) {
                 events.emit('verbose', id + ' library for "' + platform + '" already exists. No need to download. Continuing.');
                 return Q(lib_dir);
             }
         } else {
             // Local path.
-            lib_dir = platforms[platform] && platforms[platform].subdirectory ? path.join(url, platforms[platform].subdirectory) : url;
+            lib_dir = path.join(url, subdir);
             return Q(lib_dir);
         }
         return hooker.fire('before_library_download', {
@@ -88,7 +122,7 @@ module.exports = {
                 shell.mkdir('-p', tmp_dir);
 
                 var size = 0;
-                var request_options = {uri:url};
+                var request_options = {url:url};
                 if (proxy) {
                     request_options.proxy = proxy;
                 }
@@ -138,8 +172,10 @@ module.exports = {
     based_on_config:function(project_root, platform) {
         var custom_path = config.has_custom_path(project_root, platform);
         if (custom_path) {
-            var dot_file = config.read(project_root);
-            return module.exports.custom(dot_file.lib[platform].uri, dot_file.lib[platform].id, platform, dot_file.lib[platform].version);
+            var dot_file = config.read(project_root),
+                mixed_platforms = mixin(platforms, {});
+            mixed_platforms[platform] = mixin(dot_file.lib && dot_file.lib[platform] || {}, mixed_platforms[platform] || {})
+            return module.exports.custom(mixed_platforms, platform);
         } else {
             return module.exports.cordova(platform);
         }

@@ -36,7 +36,7 @@ var cfg = new ConfigParser(path.join(__dirname, '..', 'test-config.xml'));
 
 describe('wp8 project parser', function() {
     var proj = '/some/path';
-    var exists, exec, custom, readdir, cfg_parser;
+    var exists, exec, custom, readdir, cfg_parser, config_read;
     var manifestXml, projXml;
     beforeEach(function() {
         exists = spyOn(fs, 'existsSync').andReturn(true);
@@ -44,6 +44,16 @@ describe('wp8 project parser', function() {
             (cb || opts)(0, '', '');
         });
         custom = spyOn(config, 'has_custom_path').andReturn(false);
+        config_read = spyOn(config, 'read').andCallFake(function() {
+            return custom() ? {
+                lib: {
+                    wp8: {
+                        url: custom()
+                    }
+                }
+            }
+            : ({})
+        });
         readdir = spyOn(fs, 'readdirSync').andReturn(['test.csproj']);
         projXml = manifestXml = null;
         spyOn(xmlHelpers, 'parseElementtreeSync').andCallFake(function(path) {
