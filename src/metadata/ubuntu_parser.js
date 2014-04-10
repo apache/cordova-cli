@@ -41,7 +41,7 @@ function sanitize(str) {
 }
 
 // Returns a promise.
-module.exports.check_requirements = function(project_root, callback) {
+module.exports.check_requirements = function(project_root, lib_path) {
     var d = Q.defer();
 
     events.emit('log', 'Checking ubuntu requirements...');

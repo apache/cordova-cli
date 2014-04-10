@@ -45,6 +45,7 @@ module.exports = {
         parser : './src/metadata/wp7_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
         version: '3.4.0',
+        altplatform: 'wp',
         subdirectory: 'wp7'
     },
     'wp8' : {
@@ -52,6 +53,7 @@ module.exports = {
         parser : './src/metadata/wp8_parser',
         url    : 'https://git-wip-us.apache.org/repos/asf?p=cordova-wp8.git',
         version: '3.4.0',
+        altplatform: 'wp',
         subdirectory: 'wp8'
     },
     'blackberry10' : {

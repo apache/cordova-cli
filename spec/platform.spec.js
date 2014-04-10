@@ -95,8 +95,8 @@ describe('platform command', function() {
         load = spyOn(lazy_load, 'based_on_config').andCallFake(function(root, platform) {
             return fakeLazyLoad('cordova', platform, lazyLoadVersion);
         });
-        load_custom = spyOn(lazy_load, 'custom').andCallFake(function(url, id, platform, version) {
-            return fakeLazyLoad(id, platform, version);
+        load_custom = spyOn(lazy_load, 'custom').andCallFake(function(platforms, platform) {
+            return fakeLazyLoad(platforms[platform].id, platform, platforms[platform].version);
         });
 
         rm = spyOn(shell, 'rm');
@@ -204,14 +204,21 @@ describe('platform command', function() {
                 config_read.andReturn({
                     lib:{
                         'wp8':{
-                            uri:'haha',
+                            url:'haha',
                             id:'phonegap',
                             version:'bleeding edge'
                         }
                     }
                 });
+                load_custom.andCallFake(function (platforms, platform) {
+                    expect(platforms[platform].url).toEqual('haha');
+                    expect(platforms[platform].id).toEqual('phonegap');
+                    expect(platforms[platform].subdirectory).toEqual('wp8');
+                    expect(platforms[platform].version).toEqual('bleeding edge');
+                    return fakeLazyLoad(platforms[platform].id, platform, platforms[platform].version);
+                });
                 cordova.raw.platform('add', 'wp8').then(function() {
-                    expect(load_custom).toHaveBeenCalledWith('haha', 'phonegap', 'wp8', 'bleeding edge');
+                    expect(load_custom).toHaveBeenCalled();
                     expect(spawn.mostRecentCall.args.join()).toMatch(/lib.wp.phonegap.bleeding edge.wp8.*.bin.create/gi);
                     expect(spawn.mostRecentCall.args.join()).toContain(project_dir);
                 }, fail).fin(done);
@@ -222,7 +229,7 @@ describe('platform command', function() {
                 config_read.andReturn({
                     lib: {
                         android: {
-                            uri: "https://git-wip-us.apache.org/repos/asf?p=cordova-android.git",
+                            url: "https://git-wip-us.apache.org/repos/asf?p=cordova-android.git",
                             version: "3.0.0",
                             id: "cordova",
                             template: template_dir
@@ -239,7 +246,7 @@ describe('platform command', function() {
                 config_read.andReturn({
                     lib: {
                         android: {
-                            uri: "https://git-wip-us.apache.org/repos/asf?p=cordova-android.git",
+                            url: "https://git-wip-us.apache.org/repos/asf?p=cordova-android.git",
                             version: "3.0.0",
                             id: "cordova",
                         }
@@ -307,17 +314,17 @@ describe('platform command', function() {
             var real_platforms_data = {},
             synthetic_platforms_data = {
                 current: {
-                    uri: "https://localhost",
+                    url: "https://localhost",
                     version: "3.3.0",
                     parser: function(){}
                 },
                 stale: {
-                    uri: "https://localhost",
+                    url: "https://localhost",
                     version: "3.3.0",
                     parser: function(){}
                 },
                 newer: {
-                    uri: "https://localhost",
+                    url: "https://localhost",
                     version: "3.3.0",
                     parser: function(){}
                 }

@@ -25,7 +25,8 @@ var fs            = require('fs'),
     ConfigParser  = require('../ConfigParser'),
     CordovaError  = require('../CordovaError'),
     events        = require('../events'),
-    config        = require('../config');
+    config        = require('../config'),
+    lazy_load     = require('../lazy_load');
 
 module.exports = function blackberry_parser(project) {
     if (!fs.existsSync(path.join(project, 'www'))) {
@@ -37,13 +38,11 @@ module.exports = function blackberry_parser(project) {
 };
 
 // Returns a promise.
-module.exports.check_requirements = function(project_root) {
-    var custom_path = config.has_custom_path(project_root, 'blackberry10');
-    var lib_path;
-    if (custom_path) {
-        lib_path = path.resolve(custom_path);
-    } else {
-        lib_path = path.join(util.libDirectory, 'blackberry10', 'cordova', require('../../platforms').blackberry10.version);
+module.exports.check_requirements = function(project_root, lib_path) {
+    if (lib_path === undefined) {
+        return lazy_load.based_on_config(project_root, 'blackberry10').then(function (lib_path) {
+            return module.exports.check_requirements(project_root, lib_path);
+        });
     }
     var d = Q.defer();
     child_process.exec("\"" + path.join(lib_path, 'bin', 'check_reqs') + "\"", function(err, output, stderr) {

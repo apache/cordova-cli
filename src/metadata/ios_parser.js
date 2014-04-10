@@ -44,7 +44,7 @@ module.exports = function ios_parser(project) {
 };
 
 // Returns a promise.
-module.exports.check_requirements = function(project_root) {
+module.exports.check_requirements = function(project_root, lib_path) {
     // Rely on platform's bin/create script to check requirements.
     return Q(true);
 };
