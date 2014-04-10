@@ -252,7 +252,7 @@ module.exports.prototype = {
         var projectRoot = util.isCordova(process.cwd());
         var hooks = new hooker(projectRoot);
 
-        return hooks.fire('pre_package', { wwwPath:this.www_dir() })
+        return hooks.fire('pre_package', { wwwPath:this.www_dir(), platforms: ['wp7']  })
         .then(function() {
             that.update_csproj();
             // TODO: Add overrides support? Why is this missing?

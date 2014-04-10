@@ -280,7 +280,7 @@ module.exports.prototype = {
         var projectRoot = util.isCordova(process.cwd());
 
         var hooks = new hooker(projectRoot);
-        return hooks.fire('pre_package', { wwwPath:this.www_dir() })
+        return hooks.fire('pre_package', { wwwPath:this.www_dir(), platforms: ['windows8'] })
         .then(function() {
             // overrides (merges) are handled in update_www()
             that.update_jsproj();
