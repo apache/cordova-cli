@@ -74,11 +74,14 @@ module.exports = {
             npmconf.load(function(err, conf) {
                 // Check if NPM proxy settings are set. If so, include them in the request() call.
                 var proxy;
+                var strictSSL;
                 if (uri.protocol == 'https:') {
                     proxy = conf.get('https-proxy');
                 } else if (uri.protocol == 'http:') {
                     proxy = conf.get('proxy');
                 }
+                
+                strictSSL = conf.get('strict-ssl');
 
                 // Create a tmp dir. Using /tmp is a problem because it's often on a different partition and sehll.mv()
                 // fails in this case with "EXDEV, cross-device link not permitted".
@@ -91,6 +94,9 @@ module.exports = {
                 var request_options = {uri:url};
                 if (proxy) {
                     request_options.proxy = proxy;
+                }
+                if (typeof strictSSL == 'boolean') {
+                    request_options.strictSSL = strictSSL;
                 }
                 events.emit('verbose', 'Requesting ' + JSON.stringify(request_options) + '...');
                 events.emit('log', 'Downloading ' + id + ' library for ' + platform + '...');
