@@ -1,0 +1,148 @@
+{
+  "name": "cordova",
+  "version": "3.4.1-0.1.1-dev",
+  "preferGlobal": "true",
+  "description": "Cordova command line interface tool",
+  "main": "cordova",
+  "engines": {
+    "node": ">=0.9.9"
+  },
+  "engineStrict": true,
+  "bin": {
+    "cordova": "./bin/cordova"
+  },
+  "scripts": {
+    "test": "jasmine-node --color spec e2e"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git-wip-us.apache.org/repos/asf/cordova-cli.git"
+  },
+  "bugs": {
+    "url": "https://issues.apache.org/jira/browse/CB",
+    "email": "dev@cordova.apache.org"
+  },
+  "keywords": [
+    "cordova",
+    "client",
+    "cli"
+  ],
+  "dependencies": {
+    "elementtree": "0.1.5",
+    "plugman": "0.21.0",
+    "plist-with-patches": "0.5.x",
+    "xcode": "0.6.6",
+    "shelljs": "0.1.x",
+    "request": "~2.21.0",
+    "semver": "2.0.x",
+    "tar": "0.1.x",
+    "npmconf": "0.1.x",
+    "q": "~0.9",
+    "optimist": "0.6.0",
+    "mime": "~1.2.11",
+    "underscore":"1.4.4"
+  },
+  "devDependencies": {
+    "jasmine-node": "1.13.x"
+  },
+  "author": "Anis Kadri",
+  "contributors": [
+    {
+      "name": "Brian LeRoux",
+      "email": "b@brian.io"
+    },
+    {
+      "name": "Fil Maj",
+      "email": "maj.fil@gmail.com"
+    },
+    {
+      "name": "Mike Reinstein",
+      "email": "reinstein.mike@gmail.com"
+    },
+    {
+      "name": "Darry Pogue",
+      "email": "darryl@dpogue.ca"
+    },
+    {
+      "name": "Michael Brooks",
+      "email": "michael@michaelbrooks.ca"
+    },
+    {
+      "name": "Braden Shepherdson",
+      "email": "braden@chromium.org"
+    },
+    {
+      "name": "Gord Tanner",
+      "email": "gtanner@gmail.com"
+    },
+    {
+      "name": "Tim Kim",
+      "email": "timk@adobe.com"
+    },
+    {
+      "name": "Benn Mapes",
+      "email": "Benn.Mapes@gmail.com"
+    },
+    {
+      "name": "Michael Wolf",
+      "email": "Michael.Wolf@Cynergy.com"
+    },
+    {
+      "name": "Andrew Grieve",
+      "email": "agrieve@chromium.org"
+    },
+    {
+      "name": "Bryan Higgins",
+      "email": "bhiggins@blackberry.com"
+    },
+    {
+      "name": "Don Coleman",
+      "email": "dcoleman@chariotsolutions.com"
+    },
+    {
+      "name": "Germano Gabbianelli",
+      "email": "tyron.mx@gmail.com"
+    },
+    {
+      "name": "Ian Clelland",
+      "email": "iclelland@chromium.org"
+    },
+    {
+      "name": "Lucas Holmqust",
+      "email": "lholmqui@redhat.com"
+    },
+    {
+      "name": "Matt LeGrand",
+      "email": "mlegrand@gmail.com"
+    },
+    {
+      "name": "Michal Mocny",
+      "email": "mmocny@gmail.com"
+    },
+    {
+      "name": "Sam Breed",
+      "email": "sam@quickleft.com"
+    },
+    {
+      "name": "Tommy-Carlos Williams",
+      "email": "tommy@devgeeks.org"
+    },
+    {
+      "name": "Rubén Norte",
+      "email": "rubennorte@gmail.com"
+    },
+    {
+      "name": "Germano Gabbianelli",
+      "email": "tyrion.mx@gmail.com"
+    },
+    {
+      "name": "Steven Gill",
+      "email": "stevengill97@gmail.com"
+    },
+    {
+      "name":"Jesse",
+      "email":"purplecabbage@gmail.com"
+    }
+  ],
+  "license": "Apache version 2.0"
+}
