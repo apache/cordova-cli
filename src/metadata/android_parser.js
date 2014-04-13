@@ -59,6 +59,17 @@ module.exports.prototype = {
         return ret;
     },
 
+    findAndroidLaunchModePreference: function(config) {
+        var ret = config.getPreference('AndroidLaunchMode');
+        var valid = ['standard', 'singleTop', 'singleTask', 'singleInstance'].indexOf(ret) !== -1;
+        if (ret && !valid) {
+            events.emit('warn', 'Unknown value for launchMode preference: ' + ret);
+            ret = null;
+        }
+
+        return ret;
+    },
+
     update_from_config:function(config) {
         if (config instanceof ConfigParser) {
         } else throw new Error('update_from_config requires a ConfigParser object');
@@ -177,10 +188,11 @@ module.exports.prototype = {
         var orig_pkg = manifest.getroot().attrib.package;
         manifest.getroot().attrib.package = pkg;
 
+        var act = manifest.getroot().find('./application/activity');
+
         // Set the orientation in the AndroidManifest
         var orientationPref = this.findOrientationPreference(config);
         if (orientationPref) {
-            var act = manifest.getroot().find('./application/activity');
             switch (orientationPref) {
                 case 'default':
                     delete act.attrib["android:screenOrientation"];
@@ -191,6 +203,14 @@ module.exports.prototype = {
                 case 'landscape':
                     act.attrib["android:screenOrientation"] = 'landscape';
             }
+        }
+
+        // Set android:launchMode in AndroidManifest
+        var androidLaunchModePref = this.findAndroidLaunchModePreference(config);
+        if (androidLaunchModePref) {
+            act.attrib["android:launchMode"] = androidLaunchModePref;
+        } else { // User has (explicitly) set an invalid value for AndroidLaunchMode preference
+            delete act.attrib["android:launchMode"]; // use Android default value (standard)
         }
 
         // Write out AndroidManifest.xml

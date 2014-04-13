@@ -90,7 +90,7 @@ ConfigParser.prototype = {
         var ret = null;
         preferences.forEach(function (preference) {
             // Take the last one that matches.
-            if (preference.attrib.name.toLowerCase() === name) {
+            if (preference.attrib.name.toLowerCase() === name.toLowerCase()) {
                 ret = preference.attrib.value;
             }
         });
