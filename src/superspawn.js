@@ -24,6 +24,7 @@ var _ = require('underscore');
 var Q = require('q');
 var shell = require('shelljs');
 var events = require('./events');
+var iswin32 = process.platform == 'win32';
 
 // On Windows, spawn() for batch files requires absolute path & having the extension.
 function resolveWindowsExe(cmd) {
@@ -67,14 +68,18 @@ exports.spawn = function(cmd, args, opts) {
     var spawnOpts = {};
     var d = Q.defer();
 
-    if (process.platform == 'win32') {
+    if (iswin32) {
         cmd = resolveWindowsExe(cmd);
         // If we couldn't find the file, likely we'll end up failing,
         // but for things like "del", cmd will do the trick.
-        if (!fs.existsSync(cmd)) {
+        if (path.extname(cmd) != '.exe' && cmd.indexOf(' ') != -1) {
+            // We need to use /s to ensure that spaces are parsed properly with cmd spawned content
+            args = [['/s', '/c', '"'+[cmd].concat(args).map(function(a){if (/^[^"].* .*[^"]/.test(a)) return '"'+a+'"'; return a;}).join(" ")+'"'].join(" ")];
+            cmd = 'cmd';
+            spawnOpts.windowsVerbatimArguments = true;
+        } else if (!fs.existsSync(cmd)) {
             // We need to use /s to ensure that spaces are parsed properly with cmd spawned content
             args = ['/s', '/c', cmd].concat(args);
-            cmd = 'cmd';
         }
     }
 
