@@ -90,10 +90,10 @@ module.exports.prototype = {
                     delete act.attrib["android:screenOrientation"];
                     break;
                 case 'portrait':
-                    act.attrib["android:screenOrientation"] = 'userPortrait';
+                    act.attrib["android:screenOrientation"] = 'portrait';
                     break;
                 case 'landscape':
-                    act.attrib["android:screenOrientation"] = 'userLandscape';
+                    act.attrib["android:screenOrientation"] = 'landscape';
             }
         }
 

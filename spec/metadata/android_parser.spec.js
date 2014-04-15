@@ -127,7 +127,7 @@ describe('android project parser', function() {
             it('should handle portrait orientation', function() {
                 cfg.getPreference = function() { return 'portrait'; };
                 p.update_from_config(cfg);
-                expect(manifestRoot.getroot().find('./application/activity').attrib['android:screenOrientation']).toEqual('userPortrait');
+                expect(manifestRoot.getroot().find('./application/activity').attrib['android:screenOrientation']).toEqual('portrait');
             });
             it('should handle invalid orientation', function() {
                 cfg.getPreference = function() { return 'prtrait'; };
