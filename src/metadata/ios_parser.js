@@ -16,6 +16,7 @@
     specific language governing permissions and limitations
     under the License.
 */
+
 var fs            = require('fs'),
     path          = require('path'),
     xcode         = require('xcode'),
@@ -67,7 +68,8 @@ module.exports.prototype = {
 
         // Update version (bundle version)
         infoPlist['CFBundleShortVersionString'] = version;
-        // TODO: add a way to update infoPlist['CFBundleVersion'].
+        var CFBundleVersion = config.ios_CFBundleVersion() || default_CFBundleVersion(version);
+        infoPlist['CFBundleVersion'] = CFBundleVersion;
 
         var info_contents = plist.build(infoPlist);
         info_contents = info_contents.replace(/<string>[\s\r\n]*<\/string>/g,'<string></string>');
@@ -159,3 +161,10 @@ module.exports.prototype = {
         });
     }
 };
+
+
+// Construct a default value for CFBundleVersion as the version with any
+// -rclabel stripped=.
+function default_CFBundleVersion(version) {
+    return version.split('-')[0];
+}

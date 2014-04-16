@@ -73,6 +73,12 @@ ConfigParser.prototype = {
     version: function() {
         return this.doc.getroot().attrib['version'];
     },
+    android_versionCode: function() {
+        return this.doc.getroot().attrib['android-versionCode'];
+    },
+    ios_CFBundleVersion: function() {
+        return this.doc.getroot().attrib['ios-CFBundleVersion'];
+    },
     setVersion: function(value) {
         this.doc.getroot().attrib['version'] = value;
     },

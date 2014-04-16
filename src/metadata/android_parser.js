@@ -73,7 +73,9 @@ module.exports.prototype = {
         var manifest = xml.parseElementtreeSync(this.manifest);
         // Update the version by changing the AndroidManifest android:versionName
         var version = config.version();
+        var versionCode = config.android_versionCode() || default_versionCode(version);
         manifest.getroot().attrib["android:versionName"] = version;
+        manifest.getroot().attrib["android:versionCode"] = versionCode;
 
         // Update package name by changing the AndroidManifest id and moving the entry class around to the proper package directory
         var pkg = config.packageName();
@@ -175,3 +177,13 @@ module.exports.prototype = {
         return Q();
     }
 };
+
+
+// Consturct the default value for versionCode as
+// PATCH + MINOR * 100 + MAJOR * 10000
+// see http://developer.android.com/tools/publishing/versioning.html
+function default_versionCode(version) {
+    nums = version.split('-')[0].split('.').map(Number);
+    var versionCode = nums[0] * 10000 + nums[1] * 100 + nums[2];
+    return versionCode;
+}
