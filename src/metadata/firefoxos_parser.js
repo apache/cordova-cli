@@ -21,8 +21,7 @@ var fs = require('fs'),
     shell = require('shelljs'),
     util = require('../util'),
     Q = require('q'),
-    ConfigParser = require('../ConfigParser'),
-    config = require('../config');
+    ConfigParser = require('../ConfigParser');
 
 module.exports = function firefoxos_parser(project) {
     this.path = project;
@@ -35,15 +34,8 @@ module.exports.check_requirements = function(project_root) {
 
 module.exports.prototype = {
     // Returns a promise.
-    update_from_config: function(config) {
-        if (!(config instanceof ConfigParser)) {
-            return Q.reject(new Error('update_from_config requires a ConfigParser object'));
-        }
-
-        var name = config.name();
-        var pkg = config.packageName();
-        var version = config.version();
-
+    update_from_config: function() {
+        var config = new ConfigParser(this.config_xml());
         var manifestPath = path.join(this.www_dir(), 'manifest.webapp');
         var manifest;
 
@@ -57,10 +49,43 @@ module.exports.prototype = {
             };
         }
 
-        manifest.version = version;
-        manifest.name = name;
-        manifest.pkgName = pkg;
-        fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+        manifest.version = config.version();
+        manifest.name = config.name();
+        manifest.pkgName = config.packageName();
+        manifest.description = config.description();
+        manifest.developer = {
+            name: config.author()
+        };
+
+        var authorNode = config.doc.find('author');
+        var authorUrl = authorNode.attrib['href'];
+
+        if (authorUrl) {
+            manifest.developer.url = authorUrl;
+        }
+
+        var permissionNodes = config.doc.findall('permission');
+
+        if (permissionNodes.length) {
+            manifest.permissions = manifest.permissions || {};
+
+            permissionNodes.forEach(function(node) {
+                var permissionName = node.attrib['name'];
+
+                // Don't change if it was already created
+                if (!manifest.permissions[permissionName]) {
+                    manifest.permissions[permissionName] = {
+                        description: node.attrib['description']
+                    };
+
+                    if (node.attrib['access']) {
+                        manifest.permissions[permissionName].access = node.attrib['access'];
+                    }
+                }
+            });
+        }
+
+        fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 4));
 
         return Q();
     },
@@ -105,10 +130,10 @@ module.exports.prototype = {
 
     // Returns a promise.
     update_project: function(cfg) {
-        return this.update_from_config(cfg)
-        .then(function(){
-            this.update_overrides();
-            util.deleteSvnFolders(this.www_dir());
-        }.bind(this));
+        return this.update_from_config()
+            .then(function(){
+                this.update_overrides();
+                util.deleteSvnFolders(this.www_dir());
+            }.bind(this));
     }
 };
