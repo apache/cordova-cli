@@ -20,6 +20,7 @@ var fs = require('fs'),
     path = require('path'),
     shell = require('shelljs'),
     util = require('../util'),
+    events = require('../events'),
     Q = require('q'),
     ConfigParser = require('../ConfigParser'),
     config = require('../config');
@@ -56,6 +57,26 @@ module.exports.prototype = {
                 installs_allowed_from: ["*"]
             };
         }
+
+        // Update icons
+        var icons = config.getIcons('firefoxos');
+        var platformRoot = this.path;
+        var appRoot = util.isCordova(platformRoot);
+
+        // http://www.mozilla.org/en-US/styleguide/products/firefox-os/icons/
+        var platformIcons = [
+            {dest: "www/img/logo.png", width: 60, height: 60}
+        ];
+
+        platformIcons.forEach(function (item) {
+            icon = icons.getIconBySize(item.width, item.height) || icons.getDefault();
+            if (icon){
+                var src = path.join(appRoot, icon.src),
+                    dest = path.join(platformRoot, item.dest);
+                events.emit('verbose', 'Copying icon from ' + src + ' to ' + dest);
+                shell.cp('-f', src, dest);
+            }
+        });
 
         manifest.version = version;
         manifest.name = name;
