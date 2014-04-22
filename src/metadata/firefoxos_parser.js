@@ -83,7 +83,7 @@ module.exports.prototype = {
                         manifest.permissions[permissionName].access = node.attrib['access'];
                     }
 
-                    if (node.attrib['privileged']) {
+                    if (node.attrib['privileged'] === "true") {
                         privileged = true;
                     }
                 }
