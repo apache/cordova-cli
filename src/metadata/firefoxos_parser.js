@@ -65,6 +65,7 @@ module.exports.prototype = {
         }
 
         var permissionNodes = config.doc.findall('permission');
+        var privileged = false;
 
         if (permissionNodes.length) {
             manifest.permissions = manifest.permissions || {};
@@ -81,8 +82,18 @@ module.exports.prototype = {
                     if (node.attrib['access']) {
                         manifest.permissions[permissionName].access = node.attrib['access'];
                     }
+
+                    if (node.attrib['privileged']) {
+                        privileged = true;
+                    }
                 }
             });
+        }
+
+        if (privileged) {
+            manifest.type = 'privileged';
+        } else {
+            delete manifest.type;
         }
 
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 4));
