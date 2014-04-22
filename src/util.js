@@ -103,7 +103,12 @@ exports = module.exports = {
     },
     listPlatforms:function(project_dir) {
         var core_platforms = require('../platforms');
-        return fs.readdirSync(path.join(project_dir, 'platforms')).filter(function(p) {
+        var platforms_dir = path.join(project_dir, 'platforms');
+        if ( !fs.existsSync(platforms_dir)) {
+            return [];
+        }
+        var subdirs = fs.readdirSync(platforms_dir);
+        return subdirs.filter(function(p) {
             return Object.keys(core_platforms).indexOf(p) > -1;
         });
     },
