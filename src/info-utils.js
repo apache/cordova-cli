@@ -1,4 +1,4 @@
-/**
+    /**
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
     distributed with this work for additional information
@@ -15,44 +15,36 @@
     KIND, either express or implied.  See the License for the
     specific language governing permissions and limitations
     under the License.
-*/
-    var cordova_util  = require('./util'),
-        child_process = require('child_process'),
-        path          = require('path'),
-        fs            = require('fs'),
-        _self;
+     */
+var superspawn    = require('./superspawn'),
+    Q             = require('q'),
+    _self;
 
 _self = {
-    
-    getNodeInfo: function( callback ){
-        _self.execFunc('node', '--version', function(call){callback("Node version: "+call);});
-        },
-        
-    getCordovaInfo: function( callback ){
-        _self.execFunc('cordova', '--version', function(call){callback("Cordova version: "+call);});
-        },
-        
-    getPlatformInfo: function(platform, projectRoot, callback ){
-            var command="", args="";
-            switch( platform ){
-            case "ios":
-                _self.execFunc('xcodebuild', '-version', function(call){callback('iOS Platform:\n\n' +call);});
-                break;
-            case "android":
-                _self.execFunc('android', 'list target', function(call){callback('Android Platform:\n\n' +call);});
-                break;
-            }
-        },
-        
-    execFunc: function(command, args, callback){
-            child_process.exec(command + ' ' +args, 
-            function (error, stdout, stderr) {
-                callback(stdout);
-                if (error !== null) {
-                    callback('Error performing command: ' + error + "\n" +stderr);
-                }
-            });
-        },
+    getNodeInfo : function () {
+        return _self.execSpawn("node", "--version", "Node version: ", "Error retrieving Node version: ");
+    },
+    getCordovaInfo : function () {
+        return _self.execSpawn("Cordova", "--version", "Cordova version: ", "Error retrieving Cordova version: ");
+    },
+    getPlatformInfo : function (platform, projectRoot) {
+        switch (platform) {
+        case "ios":
+            return _self.execSpawn("xcodebuild", "-version", "iOS platform:\n\n", "Error retrieving iOS platform information: ");
+            break;
+        case "android":
+            return _self.execSpawn("android list target", "", "Android platform:\n\n", "Error retrieving Android platform information: ");
+            break;
+        }
+    },
+    // Execute using a child_process exec, for any async command
+    execSpawn : function (command, args, resultMsg, errorMsg) {
+        return Q.when(superspawn.spawn(command, args), function (result) {
+            return resultMsg + result;
+        }, function (error) {
+            return errorMsg + error;
+        });
+    }
 };
 
 module.exports = _self;
