@@ -153,8 +153,10 @@ module.exports.prototype = {
                 }
               }
             }
-            events.emit('verbose', 'Copying icon from ' + srcfilepath + ' to ' + destfilepath);
-            shell.cp('-f', srcfilepath, destfilepath);
+            if (srcfilepath) {
+                events.emit('verbose', 'Copying icon from ' + srcfilepath + ' to ' + destfilepath);
+                shell.cp('-f', srcfilepath, destfilepath);
+            }
           }.bind(this);
           for (var density in densities) {
             copyIcon(density);
