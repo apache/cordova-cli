@@ -43,7 +43,7 @@
     "underscore":"1.4.4"
   },
   "devDependencies": {
-    "jasmine-node": "1.13.x"
+    "jasmine-node": "~1"
   },
   "author": "Anis Kadri",
   "contributors": [
