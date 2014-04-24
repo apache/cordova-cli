@@ -52,6 +52,13 @@ function add(hooks, projectRoot, targets, opts) {
         return Q.reject(new CordovaError('No platform specified. Please specify a platform to add. See "platform list".'));
     }
     var config_json = config.read(projectRoot);
+    var platformsDir = path.join(projectRoot, 'platforms');
+
+    // The "platforms" dir is safe to delete, it's almost equivalent to
+    // cordova platfrom rm <list of all platforms>
+    if ( !fs.existsSync(platformsDir)) {
+        shell.mkdir('-p', platformsDir);
+    }
 
     return hooks.fire('before_platform_add', opts)
     .then(function() {

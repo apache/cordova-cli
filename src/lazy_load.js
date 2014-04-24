@@ -79,6 +79,7 @@ module.exports = {
                 } else if (uri.protocol == 'http:') {
                     proxy = conf.get('proxy');
                 }
+                var strictSSL = conf.get('strict-ssl');
 
                 // Create a tmp dir. Using /tmp is a problem because it's often on a different partition and sehll.mv()
                 // fails in this case with "EXDEV, cross-device link not permitted".
@@ -91,6 +92,9 @@ module.exports = {
                 var request_options = {uri:url};
                 if (proxy) {
                     request_options.proxy = proxy;
+                }
+                if (typeof strictSSL == 'boolean') {
+                    request_options.strictSSL = strictSSL;
                 }
                 events.emit('verbose', 'Requesting ' + JSON.stringify(request_options) + '...');
                 events.emit('log', 'Downloading ' + id + ' library for ' + platform + '...');
