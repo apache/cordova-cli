@@ -49,37 +49,37 @@ describe('xml-helpers', function(){
 
         it('should return true for identical tags', function(){
             expect(xml_helpers.equalNodes(usesNetworkOne, usesNetworkTwo)).toBe(true);
-        });   
-        
+        });
+
         it('should return false for different attributes', function(){
             expect(xml_helpers.equalNodes(usesNetworkOne, usesReceive)).toBe(false);
-        });  
-        
+        });
+
         it('should distinguish between text', function(){
             expect(xml_helpers.equalNodes(helloTagOne, goodbyeTag)).toBe(false);
-        });  
-        
+        });
+
         it('should ignore whitespace in text', function(){
             expect(xml_helpers.equalNodes(helloTagOne, helloTagTwo)).toBe(true);
-        });    
-        
+        });
+
         describe('should compare children', function(){
             it('by child quantity', function(){
                 var one = et.XML('<i><b>o</b></i>'),
                     two = et.XML('<i><b>o</b><u></u></i>');
-        
-                expect(xml_helpers.equalNodes(one, two)).toBe(false);        
+
+                expect(xml_helpers.equalNodes(one, two)).toBe(false);
             });
-            
+
             it('by child equality', function(){
                 var one = et.XML('<i><b>o</b></i>'),
                     two = et.XML('<i><u></u></i>'),
                     uno = et.XML('<i>\n<b>o</b>\n</i>');
-        
-                expect(xml_helpers.equalNodes(one, uno)).toBe(true); 
-                expect(xml_helpers.equalNodes(one, two)).toBe(false);       
+
+                expect(xml_helpers.equalNodes(one, uno)).toBe(true);
+                expect(xml_helpers.equalNodes(one, two)).toBe(false);
             });
-        }); 
+        });
     });
     describe('pruneXML', function() {
         var config_xml;

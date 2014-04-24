@@ -76,7 +76,7 @@ module.exports.prototype = {
         fs.writeFileSync(plistFile, info_contents, 'utf-8');
         events.emit('verbose', 'Wrote out iOS Bundle Identifier to "' + pkg + '"');
         events.emit('verbose', 'Wrote out iOS Bundle Version to "' + version + '"');
-        
+
         // Update icons
         var icons = config.getIcons('ios');
         var platformRoot = this.cordovaproj;

@@ -61,7 +61,7 @@ module.exports.prototype = {
 
         return ret;
     },
-    
+
     update_from_config:function(config) {
         if (config instanceof ConfigParser) {
         } else throw new Error('update_from_config requires a ConfigParser object');

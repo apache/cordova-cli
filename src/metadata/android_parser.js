@@ -107,7 +107,7 @@ module.exports.prototype = {
             }
             if (!size && !icon.density) {
               if (default_icon) {
-                  events.emit('verbose', "more than one default icon: " + JSON.stringify(icon)); 
+                  events.emit('verbose', "more than one default icon: " + JSON.stringify(icon));
               } else {
                   default_icon = icon;
               }
@@ -145,7 +145,7 @@ module.exports.prototype = {
               for (var density in densities) {
                 parseIcon(icon, size, densities[density], density);
               }
-            } 
+            }
           }
 
           var copyIcon = function(density) {

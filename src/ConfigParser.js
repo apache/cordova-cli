@@ -127,7 +127,7 @@ ConfigParser.prototype = {
 
             // default icon
             if (!icon.width && !icon.height && !icon.density) {
-                ret.defaultIcon = icon;  
+                ret.defaultIcon = icon;
             }
             ret.push(icon);
         });

@@ -76,7 +76,7 @@ module.exports.prototype = {
                 var src = path.join(projectRoot, icons[i].src),
                     dest = path.join(this.path, 'platform_www', icons[i].src),
                     destFolder = path.join(dest, '..');
-                
+
                 if (!fs.existsSync(destFolder)) {
                     shell.mkdir(destFolder); // make sure target dir exists
                 }
