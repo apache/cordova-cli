@@ -42,7 +42,7 @@ describe('lazy_load module', function() {
             lazy_load.cordova('atari').then(function() {
                 expect('this call').toEqual('to fail');
             }, function(err) {
-                expect(err).toEqual(new Error('Cordova library "atari" not recognized.'));
+                expect('' + err).toContain('Cordova library "atari" not recognized.');
             }).fin(done);
         });
         it('should invoke lazy_load.custom with appropriate url, platform, and version as specified in platforms manifest', function(done) {

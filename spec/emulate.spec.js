@@ -53,13 +53,13 @@ describe('emulate command', function() {
         it('should not run inside a Cordova-based project with no added platforms by calling util.listPlatforms', function() {
             list_platforms.andReturn([]);
             wrapper(cordova.raw.emulate, function() {
-                expect(result).toEqual(new Error('No platforms added to this project. Please use `cordova platform add <platform>`.'));
+                expect(''+ result).toContain('No platforms added to this project. Please use `cordova platform add <platform>`.');
             });
         });
         it('should not run outside of a Cordova-based project', function() {
             is_cordova.andReturn(false);
             wrapper(cordova.raw.emulate, function() {
-                expect(result).toEqual(new Error('Current working directory is not a Cordova-based project.'));
+                expect(result instanceof Error).toBe(true);
             });
         });
     });
@@ -107,9 +107,7 @@ describe('emulate command', function() {
                     expect('this call').toBe('fail');
                 }, function(err) {
                     expect(fire).not.toHaveBeenCalled();
-                    expect(err.message).toEqual(
-                        'No platforms added to this project. Please use `cordova platform add <platform>`.'
-                    )
+                    expect(''+err).toContain('No platforms added to this project. Please use `cordova platform add <platform>`.')
                 }).fin(done);
             });
         });

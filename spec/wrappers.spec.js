@@ -27,9 +27,10 @@ describe('callback wrapper', function() {
             });
 
             it('should call the callback with the error on failure', function(done) {
-                raw.andReturn(Q.reject(new Error('junk')));
-                cordova[call](function(err) {
-                    expect(err).toEqual(new Error('junk'));
+                var err = new Error('junk');
+                raw.andReturn(Q.reject(err));
+                cordova[call](function(e) {
+                    expect(e).toEqual(err);
                     done();
                 });
             });

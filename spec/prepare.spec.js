@@ -106,7 +106,7 @@ describe('prepare command', function() {
             Q().then(prepare).then(function() {
                 expect('this call').toBe('fail');
             }, function(err) {
-                expect(err).toEqual(new Error('Current working directory is not a Cordova-based project.'));
+                expect('' + err).toContain('Current working directory is not a Cordova-based project.');
             }).fin(done);
         });
         it('should not run inside a cordova-based project with no platforms', function(done) {
@@ -114,7 +114,7 @@ describe('prepare command', function() {
             Q().then(prepare).then(function() {
                 expect('this call').toBe('fail');
             }, function(err) {
-                expect(err).toEqual(new Error('No platforms added to this project. Please use `cordova platform add <platform>`.'));
+                expect('' + err).toContain('No platforms added to this project. Please use `cordova platform add <platform>`.');
             }).fin(done);
         });
     });
