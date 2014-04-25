@@ -64,5 +64,7 @@ addModuleProperty(module, 'platforms', './src/platform', true);
 addModuleProperty(module, 'compile', './src/compile', true);
 addModuleProperty(module, 'run', './src/run', true);
 addModuleProperty(module, 'info', './src/info', true);
+addModuleProperty(module, 'save', './src/save', true);
+addModuleProperty(module, 'restore', './src/restore', true);
 
 

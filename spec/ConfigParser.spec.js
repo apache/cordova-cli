@@ -80,5 +80,20 @@ describe('config.xml parser', function () {
                 expect(cfg.getPreference('zimzooo!')).toEqual(undefined);
             });
         });
+        describe('feature',function(){
+            it('should allow adding a new feature', function(){
+                cfg.addFeature('myfeature');
+                var features = cfg.doc.findall('feature');
+                expect(features[0].attrib.name).toEqual('myfeature');
+            });
+            it('should allow adding features with params', function(){
+                cfg.addFeature('afeature', JSON.parse('[{"name":"paraname", "value":"paravalue"}]'));
+                var features = cfg.doc.findall('feature');
+                expect(features[0].attrib.name).toEqual('afeature');
+                var params = features[0].findall('param');
+                expect(params[0].attrib.name).toEqual('paraname');
+                expect(params[0].attrib.value).toEqual('paravalue');
+            });
+        });
     });
 });

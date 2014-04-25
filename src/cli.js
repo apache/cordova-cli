@@ -151,6 +151,13 @@ module.exports = function CLI(inputArgs) {
         }
         // create(dir, id, name, cfg)
         cordova.raw[cmd].call(this, args._[1], args._[2], args._[3], cfg).done();
+    } else if( cmd == 'save' || cmd == 'restore'){
+        var subcommand = tokens[0]
+        if(subcommand == 'plugins'){
+          cordova.raw[cmd].call(this,'plugins');
+        }else{
+          throw new CordovaError('Let cordova know what you want to '+ cmd + ', try "cordova '+ cmd +' plugins"');
+        }
     } else {
         // platform/plugins add/rm [target(s)]
         var subcommand = tokens[0]; // this has the sub-command, like "add", "ls", "rm" etc.

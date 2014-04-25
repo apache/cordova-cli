@@ -155,6 +155,22 @@ ConfigParser.prototype = {
 
         return ret;
     },
+    /**
+     *This does not check for duplicate feature entries
+     */
+    addFeature: function (name, params){ 
+      var el = new et.Element('feature');
+        el.attrib.name = name;
+        if(params){
+          params.forEach(function(param){
+            var p = new et.Element('param');
+            p.attrib.name = param.name;
+            p.attrib.value = param.value;
+            el.append(p);
+          });
+        }
+        this.doc.getroot().append(el);
+    },
     write:function() {
         fs.writeFileSync(this.path, this.doc.write({indent: 4}), 'utf-8');
     }
