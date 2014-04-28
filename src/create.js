@@ -41,7 +41,8 @@ var DEFAULT_NAME = "HelloCordova",
  * @cfg - extra config to be saved in .cordova/config.json
  **/
 // Returns a promise.
-module.exports = function create (dir, id, name, cfg) {
+module.exports = create;
+function create(dir, id, name, cfg) {
     if (!dir ) {
         return Q(help());
     }
@@ -66,7 +67,7 @@ module.exports = function create (dir, id, name, cfg) {
     // dir must be either empty except for .cordova config file or not exist at all..
     var sanedircontents = function (d) {
         var contents = fs.readdirSync(d);
-        if (contents.length == 0) {
+        if (contents.length === 0) {
             return true;
         } else if (contents.length == 1) {
             if (contents[0] == '.cordova') {
@@ -74,7 +75,7 @@ module.exports = function create (dir, id, name, cfg) {
             }
         }
         return false;
-    }
+    };
 
     if (fs.existsSync(dir) && !sanedircontents(dir)) {
         return Q.reject(new CordovaError('Path already exists and is not empty: ' + dir));
@@ -85,6 +86,11 @@ module.exports = function create (dir, id, name, cfg) {
 
     var p;
     var symlink = false; // Whether to symlink the www dir instead of copying.
+    var www_parent_dir;
+    var custom_config_xml;
+    var custom_merges;
+    var custom_hooks;
+
     if (config_json.lib && config_json.lib.www) {
         events.emit('log', 'Using custom www assets from '+config_json.lib.www.uri);
         // TODO (kamrik): extend lazy_load for retrieval without caching to allow net urls for --src.
@@ -109,7 +115,7 @@ module.exports = function create (dir, id, name, cfg) {
             });
         }
     } else {
-        // Nope, so use stock cordova-hello-world-app one.
+        // No custom www - use stock cordova-hello-world-app.
         events.emit('verbose', 'Using stock cordova hello-world application.');
         p = lazy_load.cordova('www')
         .then(function(d) {
@@ -124,7 +130,24 @@ module.exports = function create (dir, id, name, cfg) {
         }
         // Keep going into child "www" folder if exists in stock app package.
         while (fs.existsSync(path.join(www_lib, 'www'))) {
+            www_parent_dir = www_lib;
             www_lib = path.join(www_lib, 'www');
+        }
+
+        // Find if we also have custom merges and config.xml as siblings of custom www.
+        if (www_parent_dir && config_json.lib && config_json.lib.www) {
+            custom_config_xml = path.join(www_parent_dir, 'config.xml');
+            if ( !fs.existsSync(custom_config_xml) ) {
+                custom_config_xml = null;
+            }
+            custom_merges = path.join(www_parent_dir, 'merges');
+            if ( !fs.existsSync(custom_merges) ) {
+                custom_merges = null;
+            }
+            custom_hooks = path.join(www_parent_dir, 'hooks');
+            if ( !fs.existsSync(custom_hooks) ) {
+                custom_hooks = null;
+            }
         }
 
         var dirAlreadyExisted = fs.existsSync(dir);
@@ -134,6 +157,15 @@ module.exports = function create (dir, id, name, cfg) {
         if (symlink) {
             try {
                 fs.symlinkSync(www_lib, www_dir, 'dir');
+                if (custom_merges) {
+                    fs.symlinkSync(custom_merges, path.join(dir, 'merges'), 'dir');
+                }
+                if (custom_hooks) {
+                    fs.symlinkSync(custom_hooks, path.join(dir, 'hooks'), 'dir');
+                }
+                if (custom_config_xml) {
+                    fs.symlinkSync(custom_config_xml, path.join(dir, 'config.xml'));
+                }
             } catch (e) {
                 if (!dirAlreadyExisted) {
                     fs.rmdirSync(dir);
@@ -145,12 +177,28 @@ module.exports = function create (dir, id, name, cfg) {
             }
         } else {
             shell.mkdir(www_dir);
-            shell.cp('-rf', path.join(www_lib, '*'), www_dir);
+            shell.cp('-R', path.join(www_lib, '*'), www_dir);
+            if (custom_merges) {
+                var merges_dir = path.join(dir, 'merges');
+                shell.mkdir(merges_dir);
+                shell.cp('-R', path.join(custom_merges, '*'), merges_dir);
+            }
+            if (custom_hooks) {
+                var hooks_dir = path.join(dir, 'hooks');
+                shell.mkdir(hooks_dir);
+                shell.cp('-R', path.join(custom_hooks, '*'), hooks_dir);
+            }
+            if (custom_config_xml) {
+                shell.cp(custom_config_xml, path.join(dir, 'config.xml'));
+            }
+
         }
 
         // Create basic project structure.
         shell.mkdir(path.join(dir, 'platforms'));
-        shell.mkdir(path.join(dir, 'merges'));
+        if ( !custom_merges) {
+            shell.mkdir(path.join(dir, 'merges'));
+        }
         shell.mkdir(path.join(dir, 'plugins'));
         shell.mkdir(path.join(dir, 'hooks'));
 
@@ -169,4 +217,4 @@ module.exports = function create (dir, id, name, cfg) {
             config.write();
         }
     });
-};
+}
