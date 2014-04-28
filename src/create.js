@@ -99,9 +99,10 @@ function create(dir, id, name, cfg) {
         symlink  = !!config_json.lib.www.link;
         if ( www_dir.indexOf(path.resolve(config_json.lib.www.uri)) === 0 ) {
             throw new CordovaError(
-                'Project must not be created inside the www assets dir.' +
-                '\n    project dir:\t' + dir +
-                '\n    www assets dir:\t' + config_json.lib.www.uri
+                'Project dir "' +
+                dir +
+                '" must not be created at/inside the template used to create the project "' +
+                config_json.lib.www.uri + '".'
             );
         }
         if(symlink) {
