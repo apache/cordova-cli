@@ -49,7 +49,7 @@ function add(hooks, projectRoot, targets, opts) {
     var xml = cordova_util.projectConfig(projectRoot);
     var cfg = new ConfigParser(xml);
     if (!targets || !targets.length) {
-        return Q.reject(new CordovaError('No platform specified. Please specify a platform to add. See "platform list".'));
+        return Q.reject(new CordovaError('No platform specified. Please specify a platform to add. See `cordova platform list`.'));
     }
     var config_json = config.read(projectRoot);
     var platformsDir = path.join(projectRoot, 'platforms');
@@ -85,7 +85,7 @@ function add(hooks, projectRoot, targets, opts) {
 
 function remove(hooks, projectRoot, targets, opts) {
     if (!targets || !targets.length) {
-        return Q.reject(new CordovaError('No platform[s] specified. Please specify platform[s] to remove. See "platform list".'));
+        return Q.reject(new CordovaError('No platform specified. Please specify a platform to remove. See `cordova platform list`.'));
     }
     return hooks.fire('before_platform_rm', opts)
     .then(function() {
@@ -102,7 +102,7 @@ function remove(hooks, projectRoot, targets, opts) {
 function update(hooks, projectRoot, targets, opts) {
     // Shell out to the update script provided by the named platform.
     if (!targets || !targets.length) {
-        return Q.reject(new CordovaError('No platform specified. Please specify a platform to update. See "platform list".'));
+        return Q.reject(new CordovaError('No platform specified. Please specify a platform to update. See `cordova platform list`.'));
     } else if (targets.length > 1) {
         return Q.reject(new CordovaError('Platform update can only be executed on one platform at a time.'));
     } else {
@@ -110,7 +110,7 @@ function update(hooks, projectRoot, targets, opts) {
         var platformPath = path.join(projectRoot, 'platforms', plat);
         var installed_platforms = cordova_util.listPlatforms(projectRoot);
         if (installed_platforms.indexOf(plat) < 0) {
-            return Q.reject(new CordovaError('Platform "' + plat + '" is not installed. See "platform list".'));
+            return Q.reject(new CordovaError('Platform "' + plat + '" is not installed. See `cordova platform list`.'));
         }
 
         function copyCordovaJs() {
@@ -264,7 +264,7 @@ module.exports = function platform(command, targets) {
         var err;
         targets.forEach(function(t) {
             if (!(t in platforms)) {
-                err = new CordovaError('Platform "' + t + '" not recognized as a core cordova platform. See "platform list".');
+                err = new CordovaError('Platform "' + t + '" not recognized as a core cordova platform. See `cordova platform list`.');
             }
         });
         if (err) return Q.reject(err);
