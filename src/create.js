@@ -82,6 +82,7 @@ function create(dir, id, name, cfg) {
     }
 
     // Read / Write .cordova/config.json file if necessary.
+    config.setAutoPersist(false);
     var config_json = config(dir, cfg);
 
     var p;
@@ -125,6 +126,7 @@ function create(dir, id, name, cfg) {
     }
 
     return p.then(function(www_lib) {
+        var cfg, config_json;
         if (!fs.existsSync(www_lib)) {
             throw new CordovaError('Could not find directory: '+www_lib);
         }
@@ -133,6 +135,10 @@ function create(dir, id, name, cfg) {
             www_parent_dir = www_lib;
             www_lib = path.join(www_lib, 'www');
         }
+
+        cfg = config.read(dir);
+        config.setAutoPersist(true);
+        config_json = config(dir, cfg);
 
         // Find if we also have custom merges and config.xml as siblings of custom www.
         if (www_parent_dir && config_json.lib && config_json.lib.www) {
@@ -211,10 +217,10 @@ function create(dir, id, name, cfg) {
             var template_config_xml = path.join(__dirname, '..', 'templates', 'config.xml');
             shell.cp(template_config_xml, configPath);
             // Write out id and name to config.xml
-            var config = new ConfigParser(configPath);
-            config.setPackageName(id);
-            config.setName(name);
-            config.write();
+            var conf = new ConfigParser(configPath);
+            conf.setPackageName(id);
+            conf.setName(name);
+            conf.write();
         }
     });
 }
