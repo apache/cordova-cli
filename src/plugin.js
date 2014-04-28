@@ -81,7 +81,7 @@ module.exports = function plugin(command, targets, opts) {
     switch(command) {
         case 'add':
             if (!targets || !targets.length) {
-                return Q.reject(new CordovaError('No plugin specified. Please specify a plugin to add. See "plugin search".'));
+                return Q.reject(new CordovaError('No plugin specified. Please specify a plugin to add. See `cordova plugin search`.'));
             }
 
             var config_json = config(projectRoot, {});
@@ -148,14 +148,14 @@ module.exports = function plugin(command, targets, opts) {
         case 'rm':
         case 'remove':
             if (!targets || !targets.length) {
-                return Q.reject(new CordovaError('No plugin specified. Please specify a plugin to remove. See "plugin list".'));
+                return Q.reject(new CordovaError('No plugin specified. Please specify a plugin to remove. See `cordova plugin list`.'));
             }
             return hooks.fire('before_plugin_rm', opts)
             .then(function() {
                 return opts.plugins.reduce(function(soFar, target) {
                     // Check if we have the plugin.
                     if (plugins.indexOf(target) < 0) {
-                        return Q.reject(new CordovaError('Plugin "' + target + '" is not present in the project. See "plugin list".'));
+                        return Q.reject(new CordovaError('Plugin "' + target + '" is not present in the project. See `cordova plugin list`.'));
                     }
 
                     var targetPath = path.join(pluginPath, target);
