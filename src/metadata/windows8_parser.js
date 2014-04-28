@@ -111,7 +111,7 @@ module.exports.prototype = {
                 app['attrib']['Id'] = pkgName;
             }
 
-            var visualElems = manifest.find('.//VisualElements');
+            var visualElems = manifest.find('.//VisualElements') || manifest.find('.//m2:VisualElements');
 
             if(visualElems) {
                 var displayName = visualElems['attrib']['DisplayName'];
