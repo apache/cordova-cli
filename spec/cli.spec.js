@@ -19,8 +19,9 @@
 
 var CLI = require("../src/cli"),
     Q = require('q'),
-    plugman = require('plugman'),
-    cordova = require("../cordova");
+    cordova_lib = require('cordova-lib'),
+    plugman = cordova_lib.plugman,
+    cordova = cordova_lib.cordova;
 
 describe("cordova cli", function () {
     beforeEach(function () {

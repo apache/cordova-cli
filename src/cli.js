@@ -18,8 +18,8 @@
 */
 
 var path = require('path'),
-    CordovaError = require('./CordovaError'),
     optimist, // required in try-catch below to print a nice error message if it's not installed.
+    help = require('./help'),
     _;
 
 module.exports = function CLI(inputArgs) {
@@ -31,7 +31,10 @@ module.exports = function CLI(inputArgs) {
                       path.dirname(__dirname));
         process.exit(2);
     }
-    var cordova   = require('../cordova');
+    var cordova_lib = require('cordova-lib'),
+        CordovaError = cordova_lib.CordovaError,
+        cordova = cordova_lib.cordova,
+        plugman = cordova_lib.plugman;
 
     // If no inputArgs given, use process.argv.
     var tokens;
@@ -80,7 +83,6 @@ module.exports = function CLI(inputArgs) {
     if (!opts.silent) {
         cordova.on('log', console.log);
         cordova.on('warn', console.warn);
-        var plugman = require('plugman');
         plugman.on('log', console.log);
         plugman.on('results', console.log);
         plugman.on('warn', console.warn);
@@ -93,7 +95,7 @@ module.exports = function CLI(inputArgs) {
     if (opts.verbose) {
         // Add handlers for verbose logging.
         cordova.on('verbose', console.log);
-        require('plugman').on('verbose', console.log);
+        plugman.on('verbose', console.log);
 
         //Remove the corresponding token
         if(args.d && args.verbose) {
@@ -107,7 +109,7 @@ module.exports = function CLI(inputArgs) {
 
     var cmd = tokens && tokens.length ? tokens.splice(0,1) : undefined;
     if (cmd === undefined) {
-        return cordova.help();
+        return help();
     }
 
     if (!cordova.hasOwnProperty(cmd)) {
@@ -116,7 +118,7 @@ module.exports = function CLI(inputArgs) {
 
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
         // Filter all non-platforms into options
-        var platforms = require("../platforms");
+        var platforms = cordova_lib.cordova_platforms;
         tokens.forEach(function(option, index) {
             if (platforms.hasOwnProperty(option)) {
                 opts.platforms.push(option);
