@@ -302,8 +302,7 @@ module.exports.prototype = {
         .then(function() {
             // overrides (merges) are handled in update_www()
             that.update_jsproj();
-            //that.add_bom();
-
+            that.add_bom();
             util.deleteSvnFolders(that.www_dir());
         });
     },
