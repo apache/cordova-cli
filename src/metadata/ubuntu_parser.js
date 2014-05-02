@@ -102,20 +102,27 @@ module.exports.prototype = {
                          hooks: { cordova: { desktop: "cordova.desktop",
                                              apparmor: "apparmor.json" } },
                          framework: "ubuntu-sdk-13.10",
-                         maintainer: sanitize(this.config.author()),
+                         maintainer: sanitize(this.config.author())  + " <" + this.config.doc.find('author').attrib.email + ">",
                          architecture: arch,
                          description: sanitize(this.config.description()) };
-        fs.writeFileSync(path.join(this.path, 'manifest.json'), JSON.stringify(manifest));
 
         var name = this.config.name().replace(/\n/g, ' '); //FIXME: escaping
         var content = "[Desktop Entry]\nName=" + name + "\nExec=./cordova-ubuntu www/\nIcon=qmlscene\nTerminal=false\nType=Application\nX-Ubuntu-Touch=true";
 
+        var name = sanitize(this.config.name()); //FIXME: escaping
+        var content = "[Desktop Entry]\nName=" + name + "\nExec=./cordova-ubuntu www/\nTerminal=false\nType=Application\nX-Ubuntu-Touch=true";
+
+        if (this.config.doc.find('icon') && this.config.doc.find('icon').attrib.src && fs.existsSync(path.join(this.path, 'www', this.config.doc.find('icon').attrib.src))) {
+            content += '\nIcon=www/' + this.config.doc.find('icon').attrib.src;
+        }
+
+        fs.writeFileSync(path.join(this.path, 'manifest.json'), JSON.stringify(manifest));
         fs.writeFileSync(path.join(this.path, 'cordova.desktop'), content);
 
         var policy = { policy_groups: ["networking", "audio"], policy_version: 1 };
 
         this.config.doc.getroot().findall('./feature/param').forEach(function (element) {
-            if (element.attrib.policy_group && policy.policy_groups.indexOf(policy.policy_groups) === -1)
+            if (element.attrib.policy_group && policy.policy_groups.indexOf(element.attrib.policy_group) === -1)
                 policy.policy_groups.push(element.attrib.policy_group);
         });
 
