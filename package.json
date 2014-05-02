@@ -28,7 +28,7 @@
     "cli"
   ],
   "dependencies": {
-    "cordova-lib": "0.0.1",
+    "cordova-lib": "0.21.1",
     "q": "~0.9",
     "optimist": "0.6.0",
     "underscore":"1.4.4"
