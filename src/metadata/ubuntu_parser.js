@@ -115,7 +115,7 @@ module.exports.prototype = {
         var policy = { policy_groups: ["networking", "audio"], policy_version: 1 };
 
         this.config.doc.getroot().findall('./feature/param').forEach(function (element) {
-            if (element.attrib.policy_group && policy.policy_groups.indexOf(policy.policy_groups) === -1)
+            if (element.attrib.policy_group && policy.policy_groups.indexOf(element.attrib.policy_group) === -1)
                 policy.policy_groups.push(element.attrib.policy_group);
         });
 
