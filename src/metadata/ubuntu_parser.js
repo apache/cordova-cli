@@ -102,7 +102,7 @@ module.exports.prototype = {
                          hooks: { cordova: { desktop: "cordova.desktop",
                                              apparmor: "apparmor.json" } },
                          framework: "ubuntu-sdk-13.10",
-                         maintainer: sanitize(this.config.author()),
+                         maintainer: sanitize(this.config.author())  + " <" + this.config.doc.find('author').attrib.email + ">",
                          architecture: arch,
                          description: sanitize(this.config.description()) };
         fs.writeFileSync(path.join(this.path, 'manifest.json'), JSON.stringify(manifest));
