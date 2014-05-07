@@ -51,6 +51,7 @@ module.exports = function CLI(inputArgs) {
         .boolean('v')
         .boolean('version')
         .boolean('silent')
+        .boolean('experimental')
         .string('copy-from')
         .alias('copy-from', 'src')
         .string('link-to')
@@ -65,7 +66,8 @@ module.exports = function CLI(inputArgs) {
             platforms: [],
             options: [],
             verbose: (args.d || args.verbose),
-            silent: args.silent
+            silent: args.silent,
+            experimental: args.experimental
         };
 
     // For CrodovaError print only the message without stack trace.
