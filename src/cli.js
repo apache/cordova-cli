@@ -109,6 +109,10 @@ module.exports = function CLI(inputArgs) {
         }
     }
 
+    if (opts.experimental) {
+        tokens.splice(tokens.indexOf("--experimental"), 1);
+    }
+
     var cmd = tokens && tokens.length ? tokens.splice(0,1) : undefined;
     if (cmd === undefined) {
         return help();
