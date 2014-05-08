@@ -67,7 +67,6 @@ module.exports = function CLI(inputArgs) {
             options: [],
             verbose: (args.d || args.verbose),
             silent: args.silent,
-            experimental: args.experimental
         };
 
     // For CrodovaError print only the message without stack trace.
