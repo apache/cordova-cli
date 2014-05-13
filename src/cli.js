@@ -158,6 +158,8 @@ module.exports = function CLI(inputArgs) {
         }
         // create(dir, id, name, cfg)
         cordova.raw[cmd].call(this, args._[1], args._[2], args._[3], cfg).done();
+    } else if (cmd == 'help') {
+        return help();
     } else {
         // platform/plugins add/rm [target(s)]
         var subcommand = tokens[0]; // this has the sub-command, like "add", "ls", "rm" etc.
