@@ -52,6 +52,7 @@ module.exports = function CLI(inputArgs) {
         .boolean('version')
         .boolean('silent')
         .boolean('experimental')
+        .boolean('noregistry')
         .string('copy-from')
         .alias('copy-from', 'src')
         .string('link-to')
@@ -108,8 +109,12 @@ module.exports = function CLI(inputArgs) {
         }
     }
 
-    if (opts.experimental) {
+    if (args.experimental) {
         tokens.splice(tokens.indexOf("--experimental"), 1);
+    }
+
+    if (args.noregistry) {
+        tokens.splice(tokens.indexOf("--noregistry"), 1);
     }
 
     var cmd = tokens && tokens.length ? tokens.splice(0,1) : undefined;
@@ -164,6 +169,6 @@ module.exports = function CLI(inputArgs) {
         // platform/plugins add/rm [target(s)]
         var subcommand = tokens[0]; // this has the sub-command, like "add", "ls", "rm" etc.
         var targets = tokens.slice(1); // this should be an array of targets, be it platforms or plugins
-        cordova.raw[cmd].call(this, subcommand, targets, { searchpath: args.searchpath }).done();
+        cordova.raw[cmd].call(this, subcommand, targets, { searchpath: args.searchpath, noregistry: args.noregistry }).done();
     }
 };
