@@ -53,6 +53,7 @@ module.exports = function CLI(inputArgs) {
         .boolean('silent')
         .boolean('experimental')
         .boolean('noregistry')
+        .boolean('shrinkwrap')
         .string('copy-from')
         .alias('copy-from', 'src')
         .string('link-to')
@@ -163,6 +164,16 @@ module.exports = function CLI(inputArgs) {
         }
         // create(dir, id, name, cfg)
         cordova.raw[cmd].call(this, args._[1], args._[2], args._[3], cfg).done();
+    } else if( cmd == 'save' || cmd == 'restore'){
+        if(!opts.experimental && !args.experimental ){
+          throw new CordovaError('save and restore commands are experimental, please add "--experimental" to indicate that you understand that it may change in the future'); 
+        }
+        var subcommand = tokens[0]
+        if(subcommand == 'plugins'){
+          cordova.raw[cmd].call(this,'plugins',{ shrinkwrap:args.shrinkwrap });
+        }else{
+          throw new CordovaError('Let cordova know what you want to '+ cmd + ', try "cordova '+ cmd +' plugins"');
+        }        
     } else if (cmd == 'help') {
         return help();
     } else {
