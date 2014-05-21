@@ -168,12 +168,12 @@ module.exports = function CLI(inputArgs) {
         if(!opts.experimental && !args.experimental ){
           throw new CordovaError('save and restore commands are experimental, please add "--experimental" to indicate that you understand that it may change in the future'); 
         }
-        var subcommand = tokens[0]
-        if(subcommand == 'plugins'){
-          cordova.raw[cmd].call(this,'plugins',{ shrinkwrap:args.shrinkwrap });
+        var subcommand = tokens[0];
+        if(subcommand !== 'plugins' && subcommand !== 'platforms'){
+          throw new CordovaError('Specify what you want to '+ cmd + ', try "cordova '+ cmd +' plugins" or " cordova '+cmd+' platforms"');
         }else{
-          throw new CordovaError('Let cordova know what you want to '+ cmd + ', try "cordova '+ cmd +' plugins"');
-        }        
+            cordova.raw[cmd].call(this,subcommand,{ shrinkwrap:args.shrinkwrap });
+        }
     } else if (cmd == 'help') {
         return help();
     } else {
