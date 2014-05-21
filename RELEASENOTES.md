@@ -20,6 +20,11 @@
 -->
 # Cordova-cli Release Notes
 
+### 3.5.0-0.2.4 (May 14, 2014)
+* CB-5941 Update link to hooks-README.md file from README.md
+* Fix cordova help
+* Fixing failing CLI tests by removing 'experimental' key
+
 ### 3.5.0-0.2.0 (May 09, 2014)
 * CB-6649 Removing experimental flag from positional arguments
 * CB-6648 Adding a flag for experimental features
@@ -45,10 +50,7 @@
 * CB-5093: Add versionCode and CFBundleVersion during prepare
 * CB-6312 Use "landscape" instead of "userLandscape" in AndroidManifest.xml
 * CB-6421: Move tests from e2e to spec - cli test
-* CB-6421: Move tests from e2e to spec
-* CB-6421: Move tests from e2e to spec
 * CB-6377 superspawn: always wrap non .exe with spaces to cmd with /s /c
-* CB-6245 Incremented package version to -dev
 
 ### 3.4.1-0.1.0 (Apr 03, 2014)
 * updated to use iOS 3.4.1
