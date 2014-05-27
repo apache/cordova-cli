@@ -124,7 +124,7 @@ module.exports = function CLI(inputArgs) {
     }
 
     if (!cordova.hasOwnProperty(cmd)) {
-        throw new CordovaError('Cordova does not know ' + cmd + '; try help for a list of all the available commands.');
+        throw new CordovaError('Cordova does not know ' + cmd + '; try `'+cordova_lib.binname+' help` for a list of all the available commands.');
     }
 
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
