@@ -54,6 +54,7 @@ module.exports = function CLI(inputArgs) {
         .boolean('experimental')
         .boolean('noregistry')
         .boolean('shrinkwrap')
+        .boolean('usenpm')
         .string('copy-from')
         .alias('copy-from', 'src')
         .string('link-to')
@@ -118,6 +119,10 @@ module.exports = function CLI(inputArgs) {
         tokens.splice(tokens.indexOf("--noregistry"), 1);
     }
 
+    if (args.usenpm) {
+        tokens.splice(tokens.indexOf("--usenpm"), 1);
+    }
+
     var cmd = tokens && tokens.length ? tokens.splice(0,1) : undefined;
     if (cmd === undefined) {
         return help();
@@ -166,20 +171,25 @@ module.exports = function CLI(inputArgs) {
         cordova.raw[cmd].call(this, args._[1], args._[2], args._[3], cfg).done();
     } else if( cmd == 'save' || cmd == 'restore'){
         if(!opts.experimental && !args.experimental ){
-          throw new CordovaError('save and restore commands are experimental, please add "--experimental" to indicate that you understand that it may change in the future'); 
+          throw new CordovaError('save and restore commands are experimental, please add "--experimental" to indicate that you understand that it may change in the future');
         }
         var subcommand = tokens[0]
         if(subcommand == 'plugins'){
           cordova.raw[cmd].call(this,'plugins',{ shrinkwrap:args.shrinkwrap });
         }else{
           throw new CordovaError('Let cordova know what you want to '+ cmd + ', try "cordova '+ cmd +' plugins"');
-        }        
+        }
     } else if (cmd == 'help') {
         return help();
     } else {
         // platform/plugins add/rm [target(s)]
         var subcommand = tokens[0]; // this has the sub-command, like "add", "ls", "rm" etc.
         var targets = tokens.slice(1); // this should be an array of targets, be it platforms or plugins
-        cordova.raw[cmd].call(this, subcommand, targets, { searchpath: args.searchpath, noregistry: args.noregistry }).done();
+        var download_opts = {
+            searchpath: args.searchpath,
+            noregistry: args.noregistry,
+            usenpm: args.usenpm
+        }
+        cordova.raw[cmd].call(this, subcommand, targets, download_opts).done();
     }
 };
