@@ -17,60 +17,73 @@
     under the License.
 */
 
-var path = require('path'),
-    optimist, // required in try-catch below to print a nice error message if it's not installed.
-    help = require('./help'),
-    _;
+/* jshint node:true, laxcomma:true, asi:true, strict:false, trailing:true, unused:vars */
 
-module.exports = function CLI(inputArgs) {
+
+var path = require('path')
+  , help = require('./help')
+
+// nopt and underscore are require()d in try-catch below to print a nice error
+// message if one of them is not installed.
+var nopt, _
+
+
+module.exports = cli
+function cli(inputArgs) {
     try {
-        optimist = require('optimist');
+        nopt = require('nopt');
         _ = require('underscore');
     } catch (e) {
-        console.error("Please run npm install from this directory:\n\t" +
-                      path.dirname(__dirname));
+        console.error(
+            'Please run npm install from this directory:\n\t' +
+            path.dirname(__dirname)
+        );
         process.exit(2);
     }
+
+    // When changing command line arguments, update doc/help.txt accordingly.
+    var knownOpts =
+        { 'verbose' : Boolean
+        , 'version' : Boolean
+        , 'help' : Boolean
+        , 'silent' : Boolean
+        , 'experimental' : Boolean
+        , 'noregistry' : Boolean
+        , 'shrinkwrap' : Boolean
+        , 'usenpm' : Boolean
+        , 'copy-from' : String
+        , 'link-to' : path
+        , 'searchpath' : String
+        , 'variable' : Array
+        // Flags to be passed to `cordova run`
+        , 'debug' : Boolean
+        , 'release' : Boolean
+        , 'device' : Boolean
+        , 'emulator': Boolean
+        , 'target' : String
+        }
+
+    var shortHands =
+        { 'd' : '--verbose'
+        , 'v' : '--version'
+        , 'h' : '--help'
+        , 'src' : '--copy-from'
+        }
+
+    // If no inputArgs given, use process.argv.
+    inputArgs = inputArgs || process.argv
+    var args = nopt(knownOpts, shortHands, inputArgs)
+
+    if (args.version) {
+        console.log( require('../package').version );
+        return
+    }
+
     var cordova_lib = require('cordova-lib'),
         CordovaError = cordova_lib.CordovaError,
         cordova = cordova_lib.cordova,
         plugman = cordova_lib.plugman;
 
-    // If no inputArgs given, use process.argv.
-    var tokens;
-    if (inputArgs) {
-        tokens = inputArgs.slice(2);
-    } else {
-        tokens = process.argv.slice(2);
-    }
-
-    // When changing command line arguments, update doc/help.txt accordingly.
-    var args = optimist(tokens)
-        .boolean('d')
-        .boolean('verbose')
-        .boolean('v')
-        .boolean('version')
-        .boolean('silent')
-        .boolean('experimental')
-        .boolean('noregistry')
-        .boolean('shrinkwrap')
-        .boolean('usenpm')
-        .string('copy-from')
-        .alias('copy-from', 'src')
-        .string('link-to')
-        .string('searchpath')
-        .argv;
-
-    if (args.v || args.version) {
-        return console.log(require('../package').version);
-    }
-
-    var opts = {
-            platforms: [],
-            options: [],
-            verbose: (args.d || args.verbose),
-            silent: args.silent,
-        };
 
     // For CrodovaError print only the message without stack trace.
     process.on('uncaughtException', function(err){
@@ -82,85 +95,113 @@ module.exports = function CLI(inputArgs) {
         process.exit(1);
     });
 
+
+    // Set up event handlers for logging and results emitted as events.
     cordova.on('results', console.log);
 
-    if (!opts.silent) {
+    if ( !args.silent ) {
         cordova.on('log', console.log);
         cordova.on('warn', console.warn);
         plugman.on('log', console.log);
         plugman.on('results', console.log);
         plugman.on('warn', console.warn);
-    } else {
-        // Remove the token.
-        tokens.splice(tokens.indexOf('--silent'), 1);
     }
 
-
-    if (opts.verbose) {
-        // Add handlers for verbose logging.
+    // Add handlers for verbose logging.
+    if (args.verbose) {
         cordova.on('verbose', console.log);
         plugman.on('verbose', console.log);
-
-        //Remove the corresponding token
-        if(args.d && args.verbose) {
-            tokens.splice(Math.min(tokens.indexOf("-d"), tokens.indexOf("--verbose")), 1);
-        } else if (args.d) {
-            tokens.splice(tokens.indexOf("-d"), 1);
-        } else if (args.verbose) {
-            tokens.splice(tokens.indexOf("--verbose"), 1);
-        }
     }
 
-    if (args.experimental) {
-        tokens.splice(tokens.indexOf("--experimental"), 1);
+    // TODO: Example wanted, is this functionality ever used?
+    // If there were arguments protected from nopt with a double dash, keep
+    // them in unparsedArgs. For example:
+    // cordova build ios -- --verbose --whatever
+    // In this case "--verbose" is not parsed by nopt and args.vergbose will be
+    // false, the unparsed args after -- are kept in unparsedArgs and can be
+    // passed downstream to some scripts invoked by Cordova.
+    var unparsedArgs = []
+    var parseStopperIdx =  args.argv.original.indexOf('--')
+    if (parseStopperIdx != -1) {
+        unparsedArgs = args.argv.original.slice(parseStopperIdx + 1)
     }
 
-    if (args.noregistry) {
-        tokens.splice(tokens.indexOf("--noregistry"), 1);
+    // args.argv.remain contains both the undashed args (like platform names)
+    // and whatever unparsed args that were protected by " -- ".
+    // "undashed" stores only the undashed args without those after " -- " .
+    var remain = args.argv.remain
+    var undashed = remain.slice(0, remain.length - unparsedArgs.length)
+    var cmd = undashed[0]
+    var subcommand
+    var msg
+    var known_platforms = Object.keys(cordova_lib.cordova_platforms)
+
+    if ( !cmd || cmd == 'help' || args.help ) {
+        return help()
     }
 
-    if (args.usenpm) {
-        tokens.splice(tokens.indexOf("--usenpm"), 1);
+    if ( !cordova.hasOwnProperty(cmd) ) {
+        msg =
+            'Cordova does not know ' + cmd + '; try `' + cordova_lib.binname +
+            ' help` for a list of all the available commands.'
+        throw new CordovaError(msg);
     }
 
-    var cmd = tokens && tokens.length ? tokens.splice(0,1) : undefined;
-    if (cmd === undefined) {
-        return help();
-    }
+    var opts = {
+        platforms: [],
+        options: [],
+        verbose: args.verbose || false,
+        silent: args.silent || false,
+    };
 
-    if (!cordova.hasOwnProperty(cmd)) {
-        throw new CordovaError('Cordova does not know ' + cmd + '; try `'+cordova_lib.binname+' help` for a list of all the available commands.');
-    }
 
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
-        // Filter all non-platforms into options
-        var platforms = cordova_lib.cordova_platforms;
-        tokens.forEach(function(option, index) {
-            if (platforms.hasOwnProperty(option)) {
-                opts.platforms.push(option);
-            } else {
-                opts.options.push(option);
+        // All options without dashes are assumed to be platform names
+        opts.platforms = undashed.slice(1)
+        var badPlatforms = _.difference(opts.platforms, known_platforms)
+        if( !_.isEmpty(badPlatforms) ) {
+            msg = 'Unknown platforms: ' + badPlatforms.join(', ')
+            throw new CordovaError(msg)
+        }
+
+        // Reconstruct the args to be passed along to platform scripts.
+        // This is an ugly temporary fix. The code spawning or otherwise
+        // calling into platform code should be dealing with this based
+        // on the parsed args object.
+        var downstreamArgs = []
+        var argNames = [ 'debug', 'release', 'device', 'emulator' ]
+        argNames.forEach(function(flag) {
+            if (args[flag]) {
+                downstreamArgs.push('--' + flag)
             }
-        });
-        cordova.raw[cmd].call(this, opts).done();
+        })
+        if (args.target) {
+            downstreamArgs.push('--target=' + args.target)
+        }
+        opts.options = downstreamArgs.concat(unparsedArgs)
+
+        cordova.raw[cmd].call(null, opts).done();
     } else if (cmd == 'serve') {
-        cordova.raw[cmd].apply(this, tokens).done();
+        var port = undashed[1]
+        cordova.raw.serve(port).done();
     } else if (cmd == 'create') {
         var cfg = {};
-        // If we got a forth parameter, consider it to be JSON to init the config.
-        if (args._[4]) {
-            cfg = JSON.parse(args._[4]);
+        // If we got a fourth parameter, consider it to be JSON to init the config.
+        if ( undashed[4] ) {
+            cfg = JSON.parse(undashed[4]);
         }
         var customWww = args['copy-from'] || args['link-to'];
         if (customWww) {
             if (customWww.indexOf(':') != -1) {
-                throw new CordovaError('Only local paths for custom www assets are supported.');
+                throw new CordovaError(
+                    'Only local paths for custom www assets are supported.'
+                );
             }
-            if (customWww.substr(0,1) === '~') {  // resolve tilde in a naive way.
+            if ( customWww.substr(0,1) === '~' ) {  // resolve tilde in a naive way.
                 customWww = path.join(process.env.HOME,  customWww.substr(1));
             }
             customWww = path.resolve(customWww);
-            var wwwCfg = {uri: customWww};
+            var wwwCfg = { uri: customWww };
             if (args['link-to']) {
                 wwwCfg.link = true;
             }
@@ -168,28 +209,46 @@ module.exports = function CLI(inputArgs) {
             cfg.lib.www = wwwCfg;
         }
         // create(dir, id, name, cfg)
-        cordova.raw[cmd].call(this, args._[1], args._[2], args._[3], cfg).done();
-    } else if( cmd == 'save' || cmd == 'restore'){
-        if(!opts.experimental && !args.experimental ){
-          throw new CordovaError('save and restore commands are experimental, please add "--experimental" to indicate that you understand that it may change in the future');
+        cordova.raw.create( undashed[1]  // dir to create the project in
+                          , undashed[2]  // App id
+                          , undashed[3]  // App name
+                          , cfg
+        ).done();
+    } else if ( cmd == 'save' || cmd == 'restore') {
+        if ( !args.experimental ) {
+            msg =
+                'save and restore commands are experimental, please ' +
+                'add "--experimental" to indicate that you understand that ' +
+                'it may change in the future'
+            throw new CordovaError(msg);
         }
-        var subcommand = tokens[0]
-        if(subcommand == 'plugins'){
-          cordova.raw[cmd].call(this,'plugins',{ shrinkwrap:args.shrinkwrap });
-        }else{
-          throw new CordovaError('Let cordova know what you want to '+ cmd + ', try "cordova '+ cmd +' plugins"');
+        subcommand  = undashed[1]
+        if (subcommand == 'plugins') {
+            cordova.raw[cmd].call(null, 'plugins', { shrinkwrap:args.shrinkwrap })
+        } else {
+            msg =
+                'Let cordova know what you want to '+ cmd +
+                ', try "cordova '+ cmd +' plugins"'
+            throw new CordovaError(msg)
         }
-    } else if (cmd == 'help') {
-        return help();
     } else {
         // platform/plugins add/rm [target(s)]
-        var subcommand = tokens[0]; // this has the sub-command, like "add", "ls", "rm" etc.
-        var targets = tokens.slice(1); // this should be an array of targets, be it platforms or plugins
-        var download_opts = {
-            searchpath: args.searchpath,
-            noregistry: args.noregistry,
-            usenpm: args.usenpm
+        subcommand = undashed[1] // sub-command like "add", "ls", "rm" etc.
+        var targets = undashed.slice(2) // array of targets, either platforms or plugins
+        var cli_vars = {}
+        if (args.variable) {
+            args.variable.forEach( function(s) {
+                var keyval = s.split('=')
+                var key = keyval[0].toUpperCase()
+                cli_vars[key] = keyval[1]
+            })
         }
-        cordova.raw[cmd].call(this, subcommand, targets, download_opts).done();
+        var download_opts =
+            { searchpath : args.searchpath
+            , noregistry : args.noregistry
+            , usenpm : args.usenpm
+            , cli_variables : cli_vars
+            }
+        cordova.raw[cmd](subcommand, targets, download_opts).done()
     }
-};
+}

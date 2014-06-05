@@ -30,7 +30,7 @@
   "dependencies": {
     "cordova-lib": "0.21.3",
     "q": "~0.9",
-    "optimist": "0.6.0",
+    "nopt": "~2",
     "underscore":"1.4.4"
   },
   "devDependencies": {
