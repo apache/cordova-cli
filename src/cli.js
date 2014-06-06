@@ -87,7 +87,7 @@ function cli(inputArgs) {
 
     // For CrodovaError print only the message without stack trace.
     process.on('uncaughtException', function(err){
-        if (err instanceof CordovaError) {
+        if ( (err instanceof CordovaError) && !args.verbose ) {
             console.error(err.message);
         } else {
             console.error(err.stack);
