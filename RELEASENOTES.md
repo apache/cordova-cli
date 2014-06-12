@@ -20,6 +20,18 @@
 -->
 # Cordova-cli Release Notes
 
+### 3.5.0-0.2.5 (June 12, 2014)
+* Update cordova-lib
+* Show full stack for CordovaError in verbose mode
+* CB-6024: Use nopt instead of optimist in cli
+* CB-6859 remove wp7 as platform
+* Add --usenpm flag to activate npm based lazy_load
+* CB-6813 Add license to CONTRIBUTING.md
+* CB-6767 Allow `cordova` to be replacable
+* CLI docs for save and restore plugins
+* CLI implementation for the save and restore plugins
+* Add --noregstry flag for disabling plugin lookup in the registry
+
 ### 3.5.0-0.2.4 (May 14, 2014)
 * CB-5941 Update link to hooks-README.md file from README.md
 * Fix cordova help
