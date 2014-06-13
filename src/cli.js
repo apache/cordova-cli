@@ -48,8 +48,28 @@ function init() {
     }
 };
 
-// Add handlers for verbose logging.
+/**
+ *
+ * set up event handlers for logging and results emitted as events.
+ */
+function initLogHandlers(args) {
+    
+    init();
+
+    cordova.on('results', console.log);
+
+    if ( !args.silent ) {
+        cordova.on('log', console.log);
+        cordova.on('warn', console.warn);
+        plugman.on('log', console.log);
+        plugman.on('results', console.log);
+        plugman.on('warn', console.warn);
+    }
+
+};
+
 function initVerboseHandlers() {
+    // Add handlers for verbose logging
     if (args.verbose) {
         cordova.on('verbose', console.log);
         plugman.on('verbose', console.log);
@@ -91,9 +111,14 @@ function cli(inputArgs) {
         , 'src' : '--copy-from'
         };
 
+    init();
+
     // If no inputArgs given, use process.argv.
-    inputArgs = inputArgs || process.argv;
-    var args = nopt(knownOpts, shortHands, inputArgs);
+    inputArgs = inputArgs || process.argv
+
+    var args = nopt(knownOpts, shortHands, inputArgs)
+
+    initLogHandlers(args);
 
     if (args.version) {
         console.log( require('../package').version );
@@ -222,7 +247,11 @@ function cli(inputArgs) {
 
         cordova.raw[cmd].call(null, opts).done();
     } else if (cmd == 'serve') {
+<<<<<<< HEAD
         var port = undashed[1];
+=======
+        var port = undashed[1]
+>>>>>>> be1e82d... updated tests and cli to pass all tests
         cordova.raw.serve(port).done();
     } else if (cmd == 'create') {
         var cfg = {};
