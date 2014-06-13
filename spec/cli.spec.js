@@ -91,6 +91,36 @@ describe("cordova cli", function () {
             cli(["node", "cordova", "--silent", "build", "blackberry10", "--",  "-k", "abcd1234", "--silent"]);
             expect(cordova.raw.build).toHaveBeenCalledWith({verbose: false, silent: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--silent"]});
         });
+
+    });
+
+    describe("create args", function () {
+        beforeEach(function () {
+            spyOn(cordova.raw, "create").andReturn(Q());
+            spyOn(cordova_lib, "CordovaError");
+        });
+
+        it("will allow copy-from with ':' char", function () {
+            cli(["node", "cordova", "create", "a", "b" , "c", "--copy-from", "c:\\personalWWW"]);
+            expect(cordova.raw.create).toHaveBeenCalledWith("a","b","c",{lib:{www:{uri:"c:\\personalWWW"}}});
+        });
+
+        it("will NOT allow copy-from starting with 'http'", function () {
+            var threwAnException = false;
+            try {
+                cli(["node", "cordova", "create", "a", "b" , "c", "--copy-from", "http://www.somesite.com"]);
+            }
+            catch(e) {
+                threwAnException = true;
+            }
+            expect(cordova_lib.CordovaError).toHaveBeenCalledWith('Only local paths for custom www assets are supported.');
+            expect(threwAnException).toBe(true);
+        });
+
+        it("will allow link-to with ':' char", function () {
+            cli(["node", "cordova", "create", "a", "b" , "c", "--link-to", "c:\\personalWWW"]);
+            expect(cordova.raw.create).toHaveBeenCalledWith("a","b","c",{lib:{www:{uri:"c:\\personalWWW", link:true}}});
+        });
     });
 
     describe("plugin", function () {

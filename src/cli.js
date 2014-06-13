@@ -30,6 +30,7 @@ var nopt, _
 
 module.exports = cli
 function cli(inputArgs) {
+
     try {
         nopt = require('nopt');
         _ = require('underscore');
@@ -193,7 +194,7 @@ function cli(inputArgs) {
         }
         var customWww = args['copy-from'] || args['link-to'];
         if (customWww) {
-            if (customWww.indexOf(':') != -1) {
+            if (customWww.indexOf('http') === 0) {
                 throw new CordovaError(
                     'Only local paths for custom www assets are supported.'
                 );
