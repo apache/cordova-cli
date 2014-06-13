@@ -3,19 +3,22 @@
 
 /**
  * provides logic for exposing cordova-lib create functionality to the command line
+ * the create argument is implied from the call to this function, all other cl arguments should be passed in unmodified
  * 
- * 
+ * @args  - 
+ * @undashed 
  */
-var CordovaCLICreate = function () {
+var CordovaCLICreate = function (args, undashed) {
+    var cfg = {},
+        customWww;
 
-(cmd == 'create') {
-        var cfg = {};
         // If we got a fourth parameter, consider it to be JSON to init the config.
         if ( undashed[4] ) {
             cfg = JSON.parse(undashed[4]);
         }
-        var customWww = args['copy-from'] || args['link-to'];
-        if (customWww) {
+
+        // handle custom www
+        if (customWww = args['copy-from'] || args['link-to']) {
             if (customWww.indexOf(':') != -1) {
                 throw new CordovaError(
                     'Only local paths for custom www assets are supported.'
@@ -32,6 +35,7 @@ var CordovaCLICreate = function () {
             cfg.lib = cfg.lib || {};
             cfg.lib.www = wwwCfg;
         }
+
         // create(dir, id, name, cfg)
         cordova.raw.create( undashed[1]  // dir to create the project in
                           , undashed[2]  // App id
