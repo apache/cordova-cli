@@ -1,6 +1,28 @@
 
 
 
+
+
+/**
+ * parseConfig
+ * generic parser, if it's valid json, returns the resulting object
+ * if anything resolving to false is passed in, return an empty object 
+ * invalid json results in an error message and process exit with status code 2.
+ *
+ * jsondata - a json data string
+ *
+ */
+function parseConfig(jsondata) {
+    if (!jsondata) return {};
+
+    try {
+        cfg = JSON.parse(jsondata);
+    } catch (e) {
+        console.error('Error while parsing json data\nError: '+ e +'\nData:' + jsondata);
+        process.exit(2); 
+    }
+};
+
 /**
  * provides logic for exposing cordova-lib create functionality to the command line
  * the create argument is implied from the call to this function, all other cl arguments should be passed in unmodified
@@ -12,10 +34,8 @@ var CordovaCLICreate = function (args, undashed) {
     var cfg = {},
         customWww;
 
-        // If we got a fourth parameter, consider it to be JSON to init the config.
-        if ( undashed[4] ) {
-            cfg = JSON.parse(undashed[4]);
-        }
+    // parseConfig will determine if there's a valid config JSON string
+    cfg = parseCofig(undashed[4]);
 
         // handle custom www
         if (customWww = args['copy-from'] || args['link-to']) {
@@ -46,4 +66,3 @@ var CordovaCLICreate = function (args, undashed) {
 };
 
 module.exports = CordovaCLICreate;
-
