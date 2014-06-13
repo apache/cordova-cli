@@ -17,7 +17,7 @@
     under the License.
 */
 
-var cli = require("../src/cli"),
+var cli = require("../src/create.js"),
     Q = require('q'),
     cordova_lib = require('cordova-lib'),
     plugman = cordova_lib.plugman,
@@ -33,80 +33,22 @@ describe("cordova cli", function () {
         spyOn(plugman, "on");
     });
 
-    describe("options", function () {
-        describe("version", function () {
-            var version = require("../package").version;
-            beforeEach(function () {
-                spyOn(console, "log");
+    describe("Create Module", function () {
+
+        describe("parseConfig", function() { 
+
+            it("should be defined", function () {
+                expect(cdvclicreate.parseConfig).toEqual(jasmine.any(Function));    
             });
 
-            it("will spit out the version with -v", function () {
-                cli(["node", "cordova", "-v"]);
-                expect(console.log).toHaveBeenCalledWith(version);
+        });
+
+        describe("create", function() { 
+
+            it("should be defined", function () {
+                expect(cdvclicreate.create).toEqual(jasmine.any(Function));    
             });
 
-            it("will spit out the version with --version", function () {
-                cli(["node", "cordova", "--version"]);
-                expect(console.log).toHaveBeenCalledWith(version);
-            });
-
-            it("will spit out the version with -v anywher", function () {
-                cli(["node", "cordova", "one", "-v", "three"]);
-                expect(console.log).toHaveBeenCalledWith(version);
-            });
         });
     });
-
-    describe("project commands other than plugin and platform", function () {
-        beforeEach(function () {
-            spyOn(cordova.raw, "build").andReturn(Q());
-        });
-
-        it("will call command with all arguments passed through", function () {
-            cli(["node", "cordova", "build", "blackberry10", "--", "-k", "abcd1234"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: false, silent: false, platforms: ["blackberry10"], options: ["-k", "abcd1234"]});
-        });
-
-        it("will consume the first instance of -d", function () {
-            cli(["node", "cordova", "-d", "build", "blackberry10", "--", "-k", "abcd1234", "-d"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, silent: false, platforms: ["blackberry10"], options: ["-k", "abcd1234", "-d"]});
-        });
-
-        it("will consume the first instance of --verbose", function () {
-            cli(["node", "cordova", "--verbose", "build", "blackberry10", "--", "-k", "abcd1234", "--verbose"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, silent: false, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--verbose"]});
-        });
-
-        it("will consume the first instance of either --verbose of -d", function () {
-            cli(["node", "cordova", "--verbose", "build", "blackberry10", "--", "-k", "abcd1234", "-d"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, silent: false, platforms: ["blackberry10"], options: ["-k", "abcd1234", "-d"]});
-        });
-
-        it("will consume the first instance of either --verbose of -d", function () {
-            cli(["node", "cordova", "-d", "build", "blackberry10", "--", "-k", "abcd1234", "--verbose"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: true, silent: false, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--verbose"]});
-        });
-
-        it("will consume the first instance of --silent", function () {
-            cli(["node", "cordova", "--silent", "build", "blackberry10", "--",  "-k", "abcd1234", "--silent"]);
-            expect(cordova.raw.build).toHaveBeenCalledWith({verbose: false, silent: true, platforms: ["blackberry10"], options: ["-k", "abcd1234", "--silent"]});
-        });
-    });
-
-    describe("plugin", function () {
-        beforeEach(function () {
-            spyOn(cordova.raw, "plugin").andReturn(Q());
-        });
-
-        it("will pass variables", function () {
-            cli(["node", "cordova", "plugin", "add", "facebook", "--variable", "FOO=foo"]);
-            expect(cordova.raw.plugin).toHaveBeenCalledWith(
-                "add",
-                ["facebook"],
-                jasmine.any(Object)
-            );
-            var opts = cordova.raw.plugin.calls[0].args[2];
-            expect(opts.cli_variables.FOO).toBe('foo');
-        });
-    });
-});
+};
