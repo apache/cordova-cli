@@ -85,7 +85,8 @@ function cli(inputArgs) {
         plugman = cordova_lib.plugman;
 
 
-    // For CrodovaError print only the message without stack trace.
+    // For CordovaError print only the message without stack trace unless we
+    // are in a verbose mode.
     process.on('uncaughtException', function(err){
         if ( (err instanceof CordovaError) && !args.verbose ) {
             console.error(err.message);
