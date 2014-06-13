@@ -23,18 +23,19 @@
 */
 
 
-var path = require('path')
-,   help = require('./help')
-,   fs = require('fs');
+var path = require('path'),
+    help = require('./help'),
+    nopt, 
+    _;
 
-// nopt and underscore are require()d in try-catch below to print a nice error
-// message if one of them is not installed.
-var nopt, _;
-
-
-module.exports = cli;
-function cli(inputArgs) {
-
+/*
+ * init
+ *
+ * initializes nopt and underscore 
+ * nopt and underscore are require()d in try-catch below to print a nice error
+ * message if one of them is not installed.
+ */
+function init() {
     try {
         nopt = require('nopt');
         _ = require('underscore');
@@ -45,7 +46,10 @@ function cli(inputArgs) {
         );
         process.exit(2);
     }
+};
 
+module.exports = cli
+function cli(inputArgs) {
     // When changing command line arguments, update doc/help.txt accordingly.
     var knownOpts =
         { 'verbose' : Boolean
