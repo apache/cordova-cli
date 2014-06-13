@@ -48,6 +48,16 @@ function init() {
     }
 };
 
+// Add handlers for verbose logging.
+function initVerboseHandlers() {
+    if (args.verbose) {
+        cordova.on('verbose', console.log);
+        plugman.on('verbose', console.log);
+    }
+
+};
+
+
 module.exports = cli
 function cli(inputArgs) {
     // When changing command line arguments, update doc/help.txt accordingly.
