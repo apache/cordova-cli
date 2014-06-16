@@ -34,10 +34,8 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/) 
 - BlackBerry 10
 - iOS
 - Ubuntu
-- Windows Phone 7 &amp; 8
+- Windows Phone 8
 - Windows 8
-
-> **Note: Windows Phone 7 is deprecated as a target platform. Support will be removed in version 3.7.0, approx. May 2014.**
 
 # Requirements
 
@@ -54,7 +52,7 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/) 
 
 `cordova-cli` has been tested on **Mac OS X**, **Linux**, **Windows 7**, and **Windows 8**.
 
-Please note that some platforms have OS restrictions.  For example, you cannot build for Windows 8 or Windows Phone 7 & 8 on Mac OS X, nor can you build for iOS on Windows.
+Please note that some platforms have OS restrictions.  For example, you cannot build for Windows 8 or Windows Phone 8 on Mac OS X, nor can you build for iOS on Windows.
 
 # Install
 
