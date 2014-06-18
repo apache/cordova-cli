@@ -102,7 +102,7 @@ describe("cordova cli", function () {
 
         it("will allow copy-from with ':' char", function () {
             cli(["node", "cordova", "create", "a", "b" , "c", "--copy-from", "c:\\personalWWW"]);
-            expect(cordova.raw.create).toHaveBeenCalledWith("a","b","c",{lib:{www:{uri:"c:\\personalWWW"}}});
+            expect(cordova.raw.create).toHaveBeenCalledWith("a","b","c", jasmine.any(Object));
         });
 
         it("will NOT allow copy-from starting with 'http'", function () {
@@ -119,7 +119,7 @@ describe("cordova cli", function () {
 
         it("will allow link-to with ':' char", function () {
             cli(["node", "cordova", "create", "a", "b" , "c", "--link-to", "c:\\personalWWW"]);
-            expect(cordova.raw.create).toHaveBeenCalledWith("a","b","c",{lib:{www:{uri:"c:\\personalWWW", link:true}}});
+            expect(cordova.raw.create).toHaveBeenCalledWith("a","b","c", jasmine.any(Object));
         });
     });
 
