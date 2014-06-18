@@ -20,7 +20,7 @@
 var cli = require("../src/cli"),
     Q = require('q'),
     cordova_lib = require('cordova-lib'),
-    plugman = cordova_lib.plugman,
+    events = cordova_lib.events,
     cordova = cordova_lib.cordova;
 
 describe("cordova cli", function () {
@@ -29,8 +29,7 @@ describe("cordova cli", function () {
         // tests in a directory run in a single process (and in parallel),
         // logging events registered as a result of the "--verbose" flag in
         // CLI testing below would cause lots of logging messages printed out by other specs.
-        spyOn(cordova, "on");
-        spyOn(plugman, "on");
+        spyOn(events, "on");
     });
 
     describe("options", function () {
