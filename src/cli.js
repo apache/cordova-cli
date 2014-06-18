@@ -17,7 +17,10 @@
     under the License.
 */
 
-/* jshint node:true, laxcomma:true, asi:true, strict:false, trailing:true, unused:vars */
+/* jshint node:true, bitwise:true, undef:true, trailing:true, quotmark:true,
+          indent:4, unused:vars, latedef:nofunc,
+          laxcomma:true, asi:true
+*/
 
 
 var path = require('path')
@@ -83,7 +86,7 @@ function cli(inputArgs) {
     var cordova_lib = require('cordova-lib'),
         CordovaError = cordova_lib.CordovaError,
         cordova = cordova_lib.cordova,
-        plugman = cordova_lib.plugman;
+        events = cordova_lib.events;
 
 
     // For CordovaError print only the message without stack trace unless we
@@ -99,20 +102,16 @@ function cli(inputArgs) {
 
 
     // Set up event handlers for logging and results emitted as events.
-    cordova.on('results', console.log);
+    events.on('results', console.log);
 
     if ( !args.silent ) {
-        cordova.on('log', console.log);
-        cordova.on('warn', console.warn);
-        plugman.on('log', console.log);
-        plugman.on('results', console.log);
-        plugman.on('warn', console.warn);
+        events.on('log', console.log);
+        events.on('warn', console.warn);
     }
 
     // Add handlers for verbose logging.
     if (args.verbose) {
-        cordova.on('verbose', console.log);
-        plugman.on('verbose', console.log);
+        events.on('verbose', console.log);
     }
 
     // TODO: Example wanted, is this functionality ever used?
