@@ -59,9 +59,10 @@ function cli(inputArgs) {
         , 'link-to' : path
         , 'searchpath' : String
         , 'variable' : Array
-        // Flags to be passed to `cordova run`
+        // Flags to be passed to `cordova build/run/emulate`
         , 'debug' : Boolean
         , 'release' : Boolean
+        , 'archs' : String
         , 'device' : Boolean
         , 'emulator': Boolean
         , 'target' : String
@@ -178,6 +179,9 @@ function cli(inputArgs) {
         })
         if (args.target) {
             downstreamArgs.push('--target=' + args.target)
+        }
+        if (args.archs) {
+            downstreamArgs.push('--archs=' + args.archs)
         }
         opts.options = downstreamArgs.concat(unparsedArgs)
 
