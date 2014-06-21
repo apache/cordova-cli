@@ -19,20 +19,20 @@
 
 /* jshint node:true, bitwise:true, undef:true, trailing:true, quotmark:true,
           indent:4, unused:vars, latedef:nofunc,
-          laxcomma:true, asi:true
+          laxcomma:true
 */
 
 
 var path = require('path')
 ,   help = require('./help')
-,   fs = require('fs')
+,   fs = require('fs');
 
 // nopt and underscore are require()d in try-catch below to print a nice error
 // message if one of them is not installed.
-var nopt, _
+var nopt, _;
 
 
-module.exports = cli
+module.exports = cli;
 function cli(inputArgs) {
 
     try {
@@ -67,22 +67,22 @@ function cli(inputArgs) {
         , 'device' : Boolean
         , 'emulator': Boolean
         , 'target' : String
-        }
+        };
 
     var shortHands =
         { 'd' : '--verbose'
         , 'v' : '--version'
         , 'h' : '--help'
         , 'src' : '--copy-from'
-        }
+        };
 
     // If no inputArgs given, use process.argv.
-    inputArgs = inputArgs || process.argv
-    var args = nopt(knownOpts, shortHands, inputArgs)
+    inputArgs = inputArgs || process.argv;
+    var args = nopt(knownOpts, shortHands, inputArgs);
 
     if (args.version) {
         console.log( require('../package').version );
-        return
+        return;
     }
 
     var cordova_lib = require('cordova-lib'),
@@ -123,30 +123,30 @@ function cli(inputArgs) {
     // In this case "--verbose" is not parsed by nopt and args.vergbose will be
     // false, the unparsed args after -- are kept in unparsedArgs and can be
     // passed downstream to some scripts invoked by Cordova.
-    var unparsedArgs = []
-    var parseStopperIdx =  args.argv.original.indexOf('--')
+    var unparsedArgs = [];
+    var parseStopperIdx =  args.argv.original.indexOf('--');
     if (parseStopperIdx != -1) {
-        unparsedArgs = args.argv.original.slice(parseStopperIdx + 1)
+        unparsedArgs = args.argv.original.slice(parseStopperIdx + 1);
     }
 
     // args.argv.remain contains both the undashed args (like platform names)
     // and whatever unparsed args that were protected by " -- ".
     // "undashed" stores only the undashed args without those after " -- " .
-    var remain = args.argv.remain
-    var undashed = remain.slice(0, remain.length - unparsedArgs.length)
-    var cmd = undashed[0]
-    var subcommand
-    var msg
-    var known_platforms = Object.keys(cordova_lib.cordova_platforms)
+    var remain = args.argv.remain;
+    var undashed = remain.slice(0, remain.length - unparsedArgs.length);
+    var cmd = undashed[0];
+    var subcommand;
+    var msg;
+    var known_platforms = Object.keys(cordova_lib.cordova_platforms);
 
     if ( !cmd || cmd == 'help' || args.help ) {
-        return help()
+        return help();
     }
 
     if ( !cordova.hasOwnProperty(cmd) ) {
         msg =
             'Cordova does not know ' + cmd + '; try `' + cordova_lib.binname +
-            ' help` for a list of all the available commands.'
+            ' help` for a list of all the available commands.';
         throw new CordovaError(msg);
     }
 
@@ -160,11 +160,11 @@ function cli(inputArgs) {
 
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
         // All options without dashes are assumed to be platform names
-        opts.platforms = undashed.slice(1)
-        var badPlatforms = _.difference(opts.platforms, known_platforms)
+        opts.platforms = undashed.slice(1);
+        var badPlatforms = _.difference(opts.platforms, known_platforms);
         if( !_.isEmpty(badPlatforms) ) {
-            msg = 'Unknown platforms: ' + badPlatforms.join(', ')
-            throw new CordovaError(msg)
+            msg = 'Unknown platforms: ' + badPlatforms.join(', ');
+            throw new CordovaError(msg);
         }
 
         // CB-6976 Windows Universal Apps. Allow mixing windows and windows8 aliases
@@ -180,30 +180,30 @@ function cli(inputArgs) {
                 return 'windows8';
             }
             return platform;
-        })
+        });
 
         // Reconstruct the args to be passed along to platform scripts.
         // This is an ugly temporary fix. The code spawning or otherwise
         // calling into platform code should be dealing with this based
         // on the parsed args object.
-        var downstreamArgs = []
-        var argNames = [ 'debug', 'release', 'device', 'emulator' ]
+        var downstreamArgs = [];
+        var argNames = [ 'debug', 'release', 'device', 'emulator' ];
         argNames.forEach(function(flag) {
             if (args[flag]) {
-                downstreamArgs.push('--' + flag)
+                downstreamArgs.push('--' + flag);
             }
-        })
+        });
         if (args.target) {
-            downstreamArgs.push('--target=' + args.target)
+            downstreamArgs.push('--target=' + args.target);
         }
         if (args.archs) {
-            downstreamArgs.push('--archs=' + args.archs)
+            downstreamArgs.push('--archs=' + args.archs);
         }
-        opts.options = downstreamArgs.concat(unparsedArgs)
+        opts.options = downstreamArgs.concat(unparsedArgs);
 
         cordova.raw[cmd].call(null, opts).done();
     } else if (cmd == 'serve') {
-        var port = undashed[1]
+        var port = undashed[1];
         cordova.raw.serve(port).done();
     } else if (cmd == 'create') {
         var cfg = {};
@@ -240,36 +240,35 @@ function cli(inputArgs) {
             msg =
                 'save and restore commands are experimental, please ' +
                 'add "--experimental" to indicate that you understand that ' +
-                'it may change in the future'
+                'it may change in the future';
             throw new CordovaError(msg);
         }
-        subcommand  = undashed[1]
+        subcommand  = undashed[1];
         if (subcommand == 'plugins') {
-            cordova.raw[cmd].call(null, 'plugins', { shrinkwrap:args.shrinkwrap })
+            cordova.raw[cmd].call(null, 'plugins', { shrinkwrap:args.shrinkwrap });
         } else {
             msg =
                 'Let cordova know what you want to '+ cmd +
-                ', try "cordova '+ cmd +' plugins"'
-            throw new CordovaError(msg)
+                ', try "cordova '+ cmd +' plugins"';
+            throw new CordovaError(msg);
         }
     } else {
         // platform/plugins add/rm [target(s)]
-        subcommand = undashed[1] // sub-command like "add", "ls", "rm" etc.
-        var targets = undashed.slice(2) // array of targets, either platforms or plugins
-        var cli_vars = {}
+        subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
+        var targets = undashed.slice(2); // array of targets, either platforms or plugins
+        var cli_vars = {};
         if (args.variable) {
             args.variable.forEach( function(s) {
-                var keyval = s.split('=')
-                var key = keyval[0].toUpperCase()
-                cli_vars[key] = keyval[1]
-            })
+                var keyval = s.split('=');
+                var key = keyval[0].toUpperCase();
+                cli_vars[key] = keyval[1];
+            });
         }
-        var download_opts =
-            { searchpath : args.searchpath
-            , noregistry : args.noregistry
-            , usenpm : args.usenpm
-            , cli_variables : cli_vars
-            }
-        cordova.raw[cmd](subcommand, targets, download_opts).done()
+        var download_opts = { searchpath : args.searchpath
+                            , noregistry : args.noregistry
+                            , usenpm : args.usenpm
+                            , cli_variables : cli_vars
+                            };
+        cordova.raw[cmd](subcommand, targets, download_opts).done();
     }
 }
