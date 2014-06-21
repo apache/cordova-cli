@@ -24,7 +24,8 @@
 
 
 var path = require('path')
-  , help = require('./help')
+,   help = require('./help')
+,   fs = require('fs')
 
 // nopt and underscore are require()d in try-catch below to print a nice error
 // message if one of them is not installed.
@@ -169,12 +170,13 @@ function cli(inputArgs) {
         // CB-6976 Windows Universal Apps. Allow mixing windows and windows8 aliases
         opts.platforms = opts.platforms.map(function(platform) {
             // allow using old windows8 alias for new unified windows platform
-            if (platform == 'windows8' && require('fs').existsSync('platforms/windows')) {
+            if (platform == 'windows8' && fs.existsSync('platforms/windows')) {
                 return 'windows';
-            } 
+            }
             // allow using new windows alias for old windows8 platform
-            if (platform == 'windows' && !require('fs').existsSync('platforms/windows') 
-                && require('fs').existsSync('platforms/windows8')) {
+            if (platform == 'windows' &&
+                !fs.existsSync('platforms/windows') &&
+                fs.existsSync('platforms/windows8')) {
                 return 'windows8';
             }
             return platform;
