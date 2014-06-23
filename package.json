@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "3.5.0-0.2.6",
+  "version": "3.5.0-0.2.7-dev",
   "preferGlobal": "true",
   "description": "Cordova command line interface tool",
   "main": "cordova",
