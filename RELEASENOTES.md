@@ -20,6 +20,20 @@
 -->
 # Cordova-cli Release Notes
 
+### 3.5.0-0.2.6 ()
+* CB-6976 Add support for Windows Universal apps (Windows 8.1 and WP 8.1)
+* CB-6728: Support chip architecture flag --archs
+* CB-6954: Use the unified cordova_lib.events
+* CB-6740: [amazon-fireos]Clean up error reporting when AmazonWebView SDK not found
+* CB-6943 Path can include the : if it is absolute, only test for http. Added tests
+* Show full stack for CordovaError in verbose mode
+* CB-6024: Use nopt instead of optimist in cli
+* CB-6859 remove wp7 as platform
+* Add --usenpm flag to activate npm based lazy_load
+* CB-6767 Allow `cordova` to be replacable in error messages
+* CLI implementation & docs for the save and restore plugins
+* Add --noregstry flag for disabling plugin lookup in the registry
+
 ### 3.5.0-0.2.4 (May 14, 2014)
 * CB-5941 Update link to hooks-README.md file from README.md
 * Fix cordova help
