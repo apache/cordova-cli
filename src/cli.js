@@ -168,19 +168,19 @@ function cli(inputArgs) {
         }
 
         // CB-6976 Windows Universal Apps. Allow mixing windows and windows8 aliases
-        opts.platforms = opts.platforms.map(function(platform) {
-            // allow using old windows8 alias for new unified windows platform
-            if (platform == 'windows8' && fs.existsSync('platforms/windows')) {
-                return 'windows';
-            }
-            // allow using new windows alias for old windows8 platform
-            if (platform == 'windows' &&
-                !fs.existsSync('platforms/windows') &&
-                fs.existsSync('platforms/windows8')) {
-                return 'windows8';
-            }
-            return platform;
-        });
+        // opts.platforms = opts.platforms.map(function(platform) {
+        //     // allow using old windows8 alias for new unified windows platform
+        //     if (platform == 'windows8' && fs.existsSync('platforms/windows')) {
+        //         return 'windows';
+        //     }
+        //     // allow using new windows alias for old windows8 platform
+        //     if (platform == 'windows' &&
+        //         !fs.existsSync('platforms/windows') &&
+        //         fs.existsSync('platforms/windows8')) {
+        //         return 'windows8';
+        //     }
+        //     return platform;
+        // });
 
         // Reconstruct the args to be passed along to platform scripts.
         // This is an ugly temporary fix. The code spawning or otherwise
