@@ -21,7 +21,6 @@
 # Cordova-cli Release Notes
 
 ### 3.5.0-0.2.6 ()
-* CB-6976 Add support for Windows Universal apps (Windows 8.1 and WP 8.1)
 * CB-6728: Support chip architecture flag --archs
 * CB-6954: Use the unified cordova_lib.events
 * CB-6740: [amazon-fireos]Clean up error reporting when AmazonWebView SDK not found
