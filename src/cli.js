@@ -222,7 +222,7 @@ function cli(inputArgs) {
                 customWww = path.join(process.env.HOME,  customWww.substr(1));
             }
             customWww = path.resolve(customWww);
-            var wwwCfg = { uri: customWww };
+            var wwwCfg = { url: customWww };
             if (args['link-to']) {
                 wwwCfg.link = true;
             }
