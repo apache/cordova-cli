@@ -55,7 +55,7 @@ function cli(inputArgs) {
         , 'experimental' : Boolean
         , 'noregistry' : Boolean
         , 'shrinkwrap' : Boolean
-        , 'usenpm' : Boolean
+        , 'usegit' : Boolean
         , 'copy-from' : String
         , 'link-to' : path
         , 'searchpath' : String
@@ -266,7 +266,7 @@ function cli(inputArgs) {
         }
         var download_opts = { searchpath : args.searchpath
                             , noregistry : args.noregistry
-                            , usenpm : args.usenpm
+                            , usegit : args.usegit
                             , cli_variables : cli_vars
                             };
         cordova.raw[cmd](subcommand, targets, download_opts).done();
