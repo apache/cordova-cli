@@ -67,6 +67,7 @@ function cli(inputArgs) {
         , 'device' : Boolean
         , 'emulator': Boolean
         , 'target' : String
+        , 'browserify': Boolean
         };
 
     var shortHands =
@@ -80,6 +81,8 @@ function cli(inputArgs) {
     inputArgs = inputArgs || process.argv;
     var args = nopt(knownOpts, shortHands, inputArgs);
 
+    console.log(args);
+    console.log('cli.js');
     if (args.version) {
         console.log( require('../package').version );
         return;
