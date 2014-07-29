@@ -1,0 +1,8 @@
+Synopsis
+
+    cordova serve [PORT]
+
+Run a local web server for www/ assets. Port defaults to 8000.
+
+Access projects at: http://HOST_IP:PORT/PLATFORM/www
+

@@ -140,7 +140,10 @@ function cli(inputArgs) {
     var known_platforms = Object.keys(cordova_lib.cordova_platforms);
 
     if ( !cmd || cmd == 'help' || args.help ) {
-        return help();
+        if (!args.help && remain[0] == 'help') {
+            remain.shift();
+        }
+        return help(remain);
     }
 
     if ( !cordova.hasOwnProperty(cmd) ) {

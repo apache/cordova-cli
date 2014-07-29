@@ -1,0 +1,6 @@
+Synopsis
+
+    cordova emulate [PLATFORM...]
+
+Alias for "run --emulator"
+

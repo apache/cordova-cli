@@ -22,8 +22,29 @@ var fs = require('fs'),
     Q = require('q'),
     path = require('path');
 
-module.exports = function help () {
-    var raw = fs.readFileSync(path.join(__dirname, '..', 'doc', 'help.txt')).toString('utf8');
+module.exports = function help (args) {
+    var command,
+        file,
+        raw,
+        docdir;
+    args = args || [];
+    command = ((args)[0] || 'cordova');
+    docdir = path.join(__dirname, '..', 'doc');
+    file = [
+      command + '.md',
+      command + '.txt',
+      'cordova.md',
+      'cordova.txt',
+    ].map(function (file) {
+        var f = path.join(docdir, file);
+        if (fs.existsSync(f)) {
+           return f;
+        }
+        return null;
+    }).filter(function (f) {
+        return f !== null;
+    });
+    raw = fs.readFileSync(file[0]).toString('utf8');
     cordova.emit('results', raw);
     return Q();
 };

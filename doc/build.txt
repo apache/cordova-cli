@@ -1,0 +1,7 @@
+Synopsis
+
+    cordova build [PLATFORM..]
+
+Shortcut for `cordova prepare` + `cordova compile` for
+all/the specified platforms.
+

@@ -1,0 +1,15 @@
+Synopsis
+
+    cordova run [--debug|--release] [--device|--emulator|--target=FOO] [PLATFORM] -- [platformopts]
+
+Deploys app on specified platform devices / emulators
+
+    --debug ............................ Deploy a debug build
+    --release .......................... Deploy a release build
+
+    --device ........................... Deploy to a device
+    --emulator ......................... Deploy to an emulator
+    --target ........................... Deploy to a specific target
+
+To provide platform specific options, you must include them after `--`.
+

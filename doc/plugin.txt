@@ -1,0 +1,21 @@
+Synopsis
+
+    cordova plugin <command> [PLUGIN]
+
+Manage project plugins
+
+    add <SPEC1> [<SPEC2> ...] ............. SPEC can be a plugin ID, a local path, or a git URL.
+        [--searchpath <directory>] ........ When looking up plugins by ID, look in this directory and
+                                            each of its subdirectories for the plugin before hitting the registry.
+                                            Multiple search paths can be used by either specifying the flag multiple
+                                            times, or by separating paths with a delimiter (: on 'nix, ; on Windows).
+
+    remove <plugin_id1> [<plugin_id2>] .... remove plugins with the given IDs.
+
+    list .................................. list currently installed plugins
+    search [<keyword>]* ................... search the plugin registry for plugins matching the keywords
+
+aliases:
+    plugins -> plugin
+    rm -> remove
+    ls -> list

@@ -1,0 +1,5 @@
+Synopsis
+
+    cordova compile [PLATFORM..]
+
+Builds the app for specified platforms, or all platforms

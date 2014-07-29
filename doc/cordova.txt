@@ -1,0 +1,37 @@
+Synopsis
+
+    cordova command [options]
+
+Global Commands
+
+    create ............................. Create a project
+    help ............................... Get help for a command
+
+Project Commands
+
+    info ............................... Generate project information
+
+    platform ........................... Manage project platforms
+    plugin ............................. Manage project plugins
+
+    prepare ............................ Copy files into platform(s) for building
+    compile ............................ Build platform(s)
+    build .............................. prepare + compile
+
+    run ................................ Run project
+    emulate ............................ Run project with an emulator
+    serve .............................. Run project with a local webserver
+
+Experimental Commands
+
+    These commands require the --experimental flag.
+
+    save ............................... Save installed platforms/plugins
+    restore ............................ Restore saved platforms/plugins
+
+Command-line Flags/Options
+
+    -v, --version ...................... prints out this utility's version
+    -d, --verbose ...................... debug mode produces verbose log output for all activity,
+                                         including output of sub-commands cordova invokes
+

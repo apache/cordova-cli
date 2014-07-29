@@ -1,0 +1,17 @@
+Synopsis
+
+    cordova platform <command> [PLATFORM]
+
+Manage project platforms
+
+    add .................... add specified PLATFORM
+    remove ................. remove specified PLATFORM
+    list ................... list all installed and available platforms
+    update ................. update the version of Cordova used for a specific
+                             PLATFORM; use after updating the CLI.
+    check .................. list platforms which can be updated by `cordova platform update`
+
+aliases:
+    platforms -> platform
+    rm -> remove
+    ls -> list
