@@ -1,6 +1,5 @@
 Synopsis
 
-    cordova emulate [PLATFORM...]
+    cordova-cli emulate [PLATFORM...]
 
-Alias for "run --emulator"
-
+Alias for `cordova-cli run --emulator`

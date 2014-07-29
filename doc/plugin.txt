@@ -1,6 +1,6 @@
 Synopsis
 
-    cordova plugin <command> [PLUGIN]
+    cordova-cli plugin <command> [PLUGIN]
 
 Manage project plugins
 

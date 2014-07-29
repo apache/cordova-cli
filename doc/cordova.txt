@@ -1,6 +1,6 @@
 Synopsis
 
-    cordova command [options]
+    cordova-cli command [options]
 
 Global Commands
 
@@ -33,5 +33,4 @@ Command-line Flags/Options
 
     -v, --version ...................... prints out this utility's version
     -d, --verbose ...................... debug mode produces verbose log output for all activity,
-                                         including output of sub-commands cordova invokes
-
+                                         including output of sub-commands cordova-cli invokes

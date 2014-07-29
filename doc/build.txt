@@ -1,7 +1,6 @@
 Synopsis
 
-    cordova build [PLATFORM..]
+    cordova-cli build [PLATFORM..]
 
-Shortcut for `cordova prepare` + `cordova compile` for
+Shortcut for `cordova-cli prepare` + `cordova-cli compile` for
 all/the specified platforms.
-

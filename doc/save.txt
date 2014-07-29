@@ -1,6 +1,6 @@
 Synopsis
 
-    cordova save <command> [--shrinkwrap]
+    cordova-cli save <command> [--shrinkwrap]
 
 Save project metadata to config.xml
 
@@ -9,4 +9,4 @@ Save project metadata to config.xml
     plugins .............................. save the list of currently installed plugins to config.xml
         [--shrinkwrap] ................... lock down plugin versions to currently installed versions
 
-See also: cordova restore
+See also: cordova-cli restore

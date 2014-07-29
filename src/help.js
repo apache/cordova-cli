@@ -44,7 +44,7 @@ module.exports = function help (args) {
     }).filter(function (f) {
         return f !== null;
     });
-    raw = fs.readFileSync(file[0]).toString('utf8');
+    raw = fs.readFileSync(file[0]).toString('utf8').replace(/cordova-cli/g, cordova_lib.binname);
     cordova.emit('results', raw);
     return Q();
 };

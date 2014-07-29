@@ -1,5 +1,5 @@
 Synopsis
 
-    cordova compile [PLATFORM..]
+    cordova-cli compile [PLATFORM..]
 
 Builds the app for specified platforms, or all platforms
