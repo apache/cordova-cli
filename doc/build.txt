@@ -1,6 +1,8 @@
 Synopsis
 
-    cordova-cli build [PLATFORM..]
+    cordova-cli build [PLATFORM..] [-- [platformopts]]
 
 Shortcut for `cordova-cli prepare` + `cordova-cli compile` for
 all/the specified platforms.
+
+To provide platform specific options, you must include them after `--`.

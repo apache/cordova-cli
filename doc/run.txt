@@ -1,6 +1,6 @@
 Synopsis
 
-    cordova-cli run [--debug|--release] [--device|--emulator|--target=FOO] [PLATFORM] -- [platformopts]
+    cordova-cli run [--debug|--release] [--device|--emulator|--target=FOO] [PLATFORM] [-- [platformopts]]
 
 Deploys app on specified platform devices / emulators
 

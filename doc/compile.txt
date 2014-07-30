@@ -1,5 +1,7 @@
 Synopsis
 
-    cordova-cli compile [PLATFORM..]
+    cordova-cli compile [PLATFORM..] [-- [platformopts]]
 
 Builds the app for specified platforms, or all platforms
+
+To provide platform specific options, you must include them after `--`.
