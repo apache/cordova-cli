@@ -67,6 +67,7 @@ function cli(inputArgs) {
         , 'device' : Boolean
         , 'emulator': Boolean
         , 'target' : String
+        , 'browserify': Boolean
         };
 
     var shortHands =
@@ -158,6 +159,7 @@ function cli(inputArgs) {
         options: [],
         verbose: args.verbose || false,
         silent: args.silent || false,
+        browserify: args.browserify || false
     };
 
 
