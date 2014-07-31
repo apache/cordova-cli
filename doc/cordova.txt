@@ -28,6 +28,7 @@ Experimental Commands
 
     save ............................... Save installed platforms/plugins
     restore ............................ Restore saved platforms/plugins
+    browserify ......................... Plugins javascript gets loaded at build time instead of runtime using browserify. Replaces cordovajs file. 
 
 Command-line Flags/Options
 
