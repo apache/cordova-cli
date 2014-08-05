@@ -81,8 +81,6 @@ function cli(inputArgs) {
     inputArgs = inputArgs || process.argv;
     var args = nopt(knownOpts, shortHands, inputArgs);
 
-    console.log(args);
-    console.log('cli.js');
     if (args.version) {
         console.log( require('../package').version );
         return;
@@ -158,6 +156,7 @@ function cli(inputArgs) {
         options: [],
         verbose: args.verbose || false,
         silent: args.silent || false,
+        browserify: args.browserify || false
     };
 
 
@@ -271,6 +270,7 @@ function cli(inputArgs) {
                             , noregistry : args.noregistry
                             , usegit : args.usegit
                             , cli_variables : cli_vars
+                            , browserify: args.browserify || false
                             };
         cordova.raw[cmd](subcommand, targets, download_opts).done();
     }
