@@ -269,6 +269,7 @@ function cli(inputArgs) {
                             , noregistry : args.noregistry
                             , usegit : args.usegit
                             , cli_variables : cli_vars
+                            , browserify: args.browserify || false
                             };
         cordova.raw[cmd](subcommand, targets, download_opts).done();
     }
