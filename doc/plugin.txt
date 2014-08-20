@@ -4,7 +4,7 @@ Synopsis
 
 Manage project plugins
 
-    add [<pluginid>|<directory>|<giturl>] [...] ... add specified plugins
+    add <pluginid>|<directory>|<giturl> [...] ..... add specified plugins
                                                     pluginid will be matched in --searchpath / registry
                                                     directory is a directory containing a plugin
                                                     giturl is a git repo containing a plugin
