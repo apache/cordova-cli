@@ -16,11 +16,15 @@ Project Commands
 
     prepare ............................ Copy files into platform(s) for building
     compile ............................ Build platform(s)
-    build .............................. prepare + compile
 
     run ................................ Run project
-    emulate ............................ Run project with an emulator
+                                            (including prepare && compile)
     serve .............................. Run project with a local webserver
+                                            (including prepare)
+
+aliases:
+    build -> cordova-cli prepare && cordova-cli compile
+    emulate -> cordova-cli run --emulator
 
 Experimental Commands
 

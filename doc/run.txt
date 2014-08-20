@@ -1,8 +1,17 @@
 Synopsis
 
-    cordova-cli run [--debug|--release] [--device|--emulator|--target=FOO] [PLATFORM] [-- [platformopts]]
+    cordova-cli run [BUILD] [PROD] [TARGET] [EXP] [PLATS] [-- POPTS]
+
+      BUILD:  --nobuild
+      PROD:   --debug|--release
+      TARGET: --device|--emulator|--target=FOO
+      EXP:    --experimental [EXPERIMENTALFLAGS]
+      PLATS:  PLATFORM [...]
+      POPTS:  platformopts
 
 Deploys app on specified platform devices / emulators
+
+    --nobuild .......................... don't build
 
     --debug ............................ Deploy a debug build
     --release .......................... Deploy a release build
@@ -13,6 +22,12 @@ Deploys app on specified platform devices / emulators
 
 To provide platform specific options, you must include them after `--`.
 
-Experimental Flag
+Technical details
+    calls cordova-cli prepare
+    calls PLATFORM run
+        PLATFORM run calls PLATFORM build (unless --nobuild)
 
-    --browserify ....................... Plugins javascript gets loaded at build time instead of runtime using browserify. Replaces cordovajs file with one that includes the JS of the installed plugins.
+Experimental Flags
+
+    --browserify ....................... Plugins javascript gets loaded at build time instead of runtime using browserify.
+                                         Replaces cordovajs file with one that includes the JS of the installed plugins.

@@ -1,15 +1,19 @@
 Synopsis
 
-    cordova-cli platform <command> [PLATFORM]
+    cordova-cli platform <command> [options]
 
 Manage project platforms
 
-    add .................... add specified PLATFORM
-    remove ................. remove specified PLATFORM
-    list ................... list all installed and available platforms
-    update ................. update the version of Cordova used for a specific
-                             PLATFORM; use after updating the CLI.
-    check .................. list platforms which can be updated by `cordova-cli platform update`
+    add PLATFORM [...] ............ add specified PLATFORMs
+        --usegit .................. retrieve PLATFORMs from git instead of npm registry
+
+    remove PLATFORM [...] ......... remove specified PLATFORMs
+
+    list .......................... list all installed and available platforms
+    update PLATFORM ............... update the version of Cordova used for a specific
+                                    PLATFORM; use after updating the CLI.
+        --usegit .................. retrieve PLATFORM from git instead of npm registry
+    check ......................... list platforms which can be updated by `cordova-cli platform update`
 
 aliases:
     platforms -> platform
