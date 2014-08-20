@@ -27,7 +27,6 @@ CordovaCliCreate.prototype.run = function (args, undashed) {
                       , undashed[3]  // App name
                       , cfg
     ).done();
- 
 };
 
 /**

@@ -28,6 +28,13 @@ var path = require('path'),
     nopt, 
     _;
 
+var cordova_lib = require('cordova-lib'),
+    CordovaError = cordova_lib.CordovaError,
+    cordova = cordova_lib.cordova,
+    plugman = cordova_lib.plugman,
+    events = cordova_lib.events;
+
+
 /*
  * init
  *
@@ -124,11 +131,6 @@ function cli(inputArgs) {
         console.log( require('../package').version );
         return;
     }
-
-    var cordova_lib = require('cordova-lib'),
-        CordovaError = cordova_lib.CordovaError,
-        cordova = cordova_lib.cordova,
-        events = cordova_lib.events;
 
 
     // For CordovaError print only the message without stack trace unless we
@@ -247,11 +249,7 @@ function cli(inputArgs) {
 
         cordova.raw[cmd].call(null, opts).done();
     } else if (cmd == 'serve') {
-<<<<<<< HEAD
-        var port = undashed[1];
-=======
         var port = undashed[1]
->>>>>>> be1e82d... updated tests and cli to pass all tests
         cordova.raw.serve(port).done();
     } else if (cmd == 'create') {
         var cfg = {};
