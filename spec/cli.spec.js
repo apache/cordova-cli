@@ -33,6 +33,7 @@ describe("cordova cli", function () {
         // Each call to cli() registers another listener for uncaughtException.
         // This results in a warning when too many of them are registered.
         process.removeAllListeners();
+        spyOn(console, 'log');
     });
 
     describe("options", function () {
@@ -40,7 +41,7 @@ describe("cordova cli", function () {
             var version = require("../package").version;
 
             beforeEach(function () {
-                spyOn(console, "log");
+                spyOn(console, "log").andCallFake(function(){});
             });
 
             it("will spit out the version with -v", function () {
