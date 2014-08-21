@@ -1,10 +1,15 @@
 Synopsis
 
-    cordova-cli restore <command>
+    cordova-cli restore <command> --experimental
 
 Restore project based on to config.xml
 
     plugins ........................... install all plugins that are currently listed in config.xml
     platforms ......................... install all platforms that are currently listed in config.xml
+
+Experimental
+
+    Because this command is experimental, you must include --experimental.
+    The arguments and behavior of this command may change.
 
 See also: cordova-cli save

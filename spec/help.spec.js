@@ -18,17 +18,65 @@
 */
 var cordova_lib = require('cordova-lib'),
     cordova = cordova_lib.cordova,
-    help = require('../src/help');
+    help = require('../src/help'),
+    allcommands;
 
-describe('help command', function() {
-    it('should emit a results event with help contents', function(done) {
-        this.after(function() {
+describe('help', function() {
+    allcommands = [''].concat(Object.keys(cordova).map(function(k) {
+        if (k in cordova.raw)
+            return k;
+        return null;
+    }).filter(function (k) { return k; }));
+    describe('commands should', function() {
+        afterEach(function() {
             cordova.removeAllListeners('results');
         });
-        cordova.on('results', function(h) {
-            expect(h).toMatch(/synopsis/gi);
-            done();
+        describe('emit results', function (done) {
+            allcommands.forEach(function (k) {
+                it(k, function(done) {
+                    cordova.on('results', function(h) {
+                        expect(h).toMatch(/^Synopsis/);
+                        done();
+                    });
+                    help([k]).then(function () {
+                        expect(done).toHaveBeenCalled();
+                    });
+                });
+            });
         });
-        help();
+        describe('not have overly long lines:', function (done) {
+            allcommands.forEach(function (k) {
+                it(k || '(default)', function(done) {
+                    cordova.on('results', function(h) {
+                        expect(h.split("\n").filter(function (l) { return l.length > 130; }).length).toBe(0);
+                        done();
+                    });
+                    help([k]).then(function () {
+                        expect(done).toHaveBeenCalled();
+                    });
+                });
+            });
+        });
+        describe('use cordova-cli instead of cordova:', function (done) {
+            var binname = cordova.binname,
+                testname = 'testgap';
+            beforeEach(function() {
+                cordova.binname = testname;
+            });
+            afterEach(function() {
+                cordova.binname = binname;
+            });
+            allcommands.forEach(function (k) {
+                it(k || '(default)', function(done) {
+                    cordova.on('results', function(h) {
+                        expect(h.split("\n")[2]).toMatch(RegExp(testname + ' (?:' + k + '|command)\\b'));
+                        done();
+                    });
+                    help([k]).then(function () {
+                        expect(done).toHaveBeenCalled();
+                    });
+                });
+            });
+        });
     });
 });
