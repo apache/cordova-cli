@@ -97,29 +97,18 @@ describe("cordova cli", function () {
 
     });
 
-/*
-    describe("create args", function () {
+    describe("create", function () {
         beforeEach(function () {
             spyOn(cordova.raw, "create").andReturn(Q());
             spyOn(cordova_lib, "CordovaError");
         });
 
-        it("will allow copy-from with ':' char", function () {
-            cli(["node", "cordova", "create", "a", "b" , "c", "--copy-from", "c:\\personalWWW"]);
-            expect(cordova.raw.create).toHaveBeenCalledWith("a","b","c", jasmine.any(Object));
-        });
-
-        it("will NOT allow copy-from starting with 'http'", function () {
-            cli(["node", "cordova", "create", "a", "b" , "c", "--copy-from", "http://www.somesite.com"]);
-            expect(cordova_lib.CordovaError).toThrow();
-        });
-
-        it("will allow link-to with ':' char", function () {
+        it("calls cordova raw create", function () {
             cli(["node", "cordova", "create", "a", "b" , "c", "--link-to", "c:\\personalWWW"]);
             expect(cordova.raw.create).toHaveBeenCalledWith("a","b","c", jasmine.any(Object));
         });
     });
-*/
+    
     describe("plugin", function () {
         beforeEach(function () {
             spyOn(cordova.raw, "plugin").andReturn(Q());
