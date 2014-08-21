@@ -55,33 +55,6 @@ function init() {
     }
 };
 
-/**
- *
- * set up event handlers for logging and results emitted as events.
- */
-function initLogHandlers(args) {
-
-    cordova.on('results', console.log);
-
-    if ( !args.silent ) {
-        cordova.on('log', console.log);
-        cordova.on('warn', console.warn);
-        plugman.on('log', console.log);
-        plugman.on('results', console.log);
-        plugman.on('warn', console.warn);
-    }
-
-};
-
-function initVerboseHandlers() {
-    // Add handlers for verbose logging
-    if (args.verbose) {
-        cordova.on('verbose', console.log);
-        plugman.on('verbose', console.log);
-    }
-};
-
-
 module.exports = cli
 function cli(inputArgs) {
     // When changing command line arguments, update doc/help.txt accordingly.
@@ -119,7 +92,6 @@ function cli(inputArgs) {
     inputArgs = inputArgs || process.argv
 
     init();
-    initLogHandlers(inputArgs);
 
 
 
