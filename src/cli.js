@@ -60,8 +60,6 @@ function init() {
  * set up event handlers for logging and results emitted as events.
  */
 function initLogHandlers(args) {
-    
-    init();
 
     cordova.on('results', console.log);
 
@@ -81,7 +79,6 @@ function initVerboseHandlers() {
         cordova.on('verbose', console.log);
         plugman.on('verbose', console.log);
     }
-
 };
 
 
@@ -118,14 +115,16 @@ function cli(inputArgs) {
         , 'src' : '--copy-from'
         };
 
-    init();
-
     // If no inputArgs given, use process.argv.
     inputArgs = inputArgs || process.argv
 
+    init();
+    initLogHandlers(inputArgs);
+
+
+
     var args = nopt(knownOpts, shortHands, inputArgs)
 
-    initLogHandlers(args);
 
     if (args.version) {
         console.log( require('../package').version );
