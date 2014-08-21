@@ -17,13 +17,14 @@
     under the License.
 */
 
-var cli = require("../src/create.js"),
+var clicreate = require("../src/create.js"),
     Q = require('q'),
     cordova_lib = require('cordova-lib'),
     plugman = cordova_lib.plugman,
     cordova = cordova_lib.cordova;
 
 describe("cordova cli", function () {
+
     beforeEach(function () {
         // Event registration is currently process-global. Since all jasmine
         // tests in a directory run in a single process (and in parallel),
@@ -38,7 +39,7 @@ describe("cordova cli", function () {
         describe("parseConfig", function() { 
 
             it("should be defined", function () {
-                expect(cdvclicreate.parseConfig).toEqual(jasmine.any(Function));    
+                expect(clicreate.parseConfig).toEqual(jasmine.any(Function));    
             });
 
         });
@@ -46,9 +47,9 @@ describe("cordova cli", function () {
         describe("create", function() { 
 
             it("should be defined", function () {
-                expect(cdvclicreate.create).toEqual(jasmine.any(Function));    
+                expect(clicreate.run).toEqual(jasmine.any(Function));    
             });
 
         });
     });
-};
+});
