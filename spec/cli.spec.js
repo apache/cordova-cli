@@ -109,15 +109,8 @@ describe("cordova cli", function () {
         });
 
         it("will NOT allow copy-from starting with 'http'", function () {
-            var threwAnException = false;
-            try {
-                cli(["node", "cordova", "create", "a", "b" , "c", "--copy-from", "http://www.somesite.com"]);
-            }
-            catch(e) {
-                threwAnException = true;
-            }
-            expect(cordova_lib.CordovaError).toHaveBeenCalledWith('Only local paths for custom www assets are supported.');
-            expect(threwAnException).toBe(true);
+            cli(["node", "cordova", "create", "a", "b" , "c", "--copy-from", "http://www.somesite.com"]);
+            expect(cordova_lib.CordovaError).toThrow();
         });
 
         it("will allow link-to with ':' char", function () {
