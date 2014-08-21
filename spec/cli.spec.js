@@ -41,7 +41,6 @@ describe("cordova cli", function () {
             var version = require("../package").version;
 
             beforeEach(function () {
-                spyOn(console, "log").andCallFake(function(){});
             });
 
             it("will spit out the version with -v", function () {
@@ -98,6 +97,7 @@ describe("cordova cli", function () {
 
     });
 
+/*
     describe("create args", function () {
         beforeEach(function () {
             spyOn(cordova.raw, "create").andReturn(Q());
@@ -119,7 +119,7 @@ describe("cordova cli", function () {
             expect(cordova.raw.create).toHaveBeenCalledWith("a","b","c", jasmine.any(Object));
         });
     });
-
+*/
     describe("plugin", function () {
         beforeEach(function () {
             spyOn(cordova.raw, "plugin").andReturn(Q());
