@@ -16,6 +16,8 @@ Manage project plugins
 
         [--noregistry] ............................ don't search the registry for plugins
 
+        [--link] .................................. create a symbolic link to the plugin instead of copying files
+
     remove <pluginid> [...] ....................... remove plugins with the given IDs
 
     list .......................................... list currently installed plugins
