@@ -72,6 +72,7 @@ function cli(inputArgs) {
         , 'link-to' : path
         , 'searchpath' : String
         , 'variable' : Array
+        , 'link': Boolean
         // Flags to be passed to `cordova build/run/emulate`
         , 'debug' : Boolean
         , 'release' : Boolean
@@ -285,6 +286,7 @@ function cli(inputArgs) {
                             , usegit : args.usegit
                             , cli_variables : cli_vars
                             , browserify: args.browserify || false
+                            , link: args.link || false
                             };
         cordova.raw[cmd](subcommand, targets, download_opts).done();
     }
