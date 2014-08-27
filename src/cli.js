@@ -24,6 +24,7 @@
 
 
 var path = require('path'),
+    fs = require('fs'),
     help = require('./help'),
     nopt, 
     _;
