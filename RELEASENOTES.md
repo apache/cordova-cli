@@ -20,6 +20,50 @@
 -->
 # Cordova-cli Release Notes
 
+### 3.6.0-0.2.8 (Aug 29, 2014)
+* adds missing 'fs' reference required for Windows (ln191)
+* [CB-7355] re added single test to test call through to cordova-lib cordova raw create
+* CB-7364 remove duplicate logging initialization for cordova/plugman
+* CB-7363 Do not insist on precise version of cordova-lib
+* [CB-7355] removed create tests which test behaviour of downstream dependencies
+* [CB-7358] cli spec mocks console log to avoid polluting test output while testing
+* CB-7347 document cordova platform add /path/to support
+* CB-7345 add tests to validate documentation
+* CB-7345 improve cli documentation
+* [] refactored test to make use of jasmine's 'toThrow' expectation
+* correct object referenced in tests
+* proper order of initializers, which indicates a bigger problem
+* removed merge conflict
+* moved custom www handling code to a separate function
+* basic tests and structure added to create spec
+* renamed cli create spec more sensibly
+* parse config json moved to a function
+* functional refactor of create with expected input from caller implemented
+* updated tests and cli to pass all tests
+* tracking cli create spec
+* inital commit of cli create command logic in its own file
+* added verbose mode initialization to set up event handlers
+* created init function to handle initalization of underscore and nopt
+* Fixed the tests
+* Added browserify option "download_opts"
+* CB-7260 use newer cordova-lib to get cordova-android 3.5.1, bump version num
+* CB-7249 cordova-cli documentation translation: cordova-cli
+* CB-7001 moved browserify help docs to proper locations
+* CB-7001 added browserify to cordova.txt help doc
+* CB-6024 Document -- for platform options
+* Added browserify flag to cli options
+* checking for browserify flag
+* CB-7220 Support cordova_lib.binname
+* CB-7220 Split cordova help into per feature help files
+* CB-6756 Adds the platforms subcommand for save and restore
+* CB-7100: Use npm based lazy-load by default
+* CB-6127lisa7cordova-plugin-consolecordova-cli documentation translation: cordova-cli
+* Call process.removeAllListeners() in cli spec
+* Add --captureExceptions flag to jasmine
+* Pin jasmine to older version temporarily
+* Fix CB-7069 copy-from & link-to custom uri -> url
+* CB-7002 Incremented package version to -dev
+
 ### 3.5.0-0.2.6 ()
 * CB-6976 Add support for Windows Universal apps (Windows 8.1 and WP 8.1)
 * CB-6728: Support chip architecture flag --archs
@@ -333,48 +377,3 @@ Important note: This version targets Cordova version 3.1.0-rc1.
 
 - Plugins are now installed serially across all installed platforms, rather than in parallel. This avoids race conditions in dependency installation. [CB-4184](https://issues.apache.org/jira/browse/CB-4184)
 - (WP8) All files from project www dir are now copied into the binary, not the top-level www. This means merges and plugin assets are correctly handled.
-
-
-### 3.6.0-0.2.8 (Aug 29, 2014)
-* adds missing 'fs' reference required for Windows (ln191)
-* [CB-7355] re added single test to test call through to cordova-lib cordova raw create
-* CB-7364 remove duplicate logging initialization for cordova/plugman
-* CB-7363 Do not insist on precise version of cordova-lib
-* [CB-7355] removed create tests which test behaviour of downstream dependencies
-* [CB-7358] cli spec mocks console log to avoid polluting test output while testing
-* CB-7347 document cordova platform add /path/to support
-* CB-7345 add tests to validate documentation
-* CB-7345 improve cli documentation
-* [] refactored test to make use of jasmine's 'toThrow' expectation
-* correct object referenced in tests
-* proper order of initializers, which indicates a bigger problem
-* removed merge conflict
-* moved custom www handling code to a separate function
-* basic tests and structure added to create spec
-* renamed cli create spec more sensibly
-* parse config json moved to a function
-* functional refactor of create with expected input from caller implemented
-* updated tests and cli to pass all tests
-* tracking cli create spec
-* inital commit of cli create command logic in its own file
-* added verbose mode initialization to set up event handlers
-* created init function to handle initalization of underscore and nopt
-* Fixed the tests
-* Added browserify option "download_opts"
-* CB-7260 use newer cordova-lib to get cordova-android 3.5.1, bump version num
-* CB-7249 cordova-cli documentation translation: cordova-cli
-* CB-7001 moved browserify help docs to proper locations
-* CB-7001 added browserify to cordova.txt help doc
-* CB-6024 Document -- for platform options
-* Added browserify flag to cli options
-* checking for browserify flag
-* CB-7220 Support cordova_lib.binname
-* CB-7220 Split cordova help into per feature help files
-* CB-6756 Adds the platforms subcommand for save and restore
-* CB-7100: Use npm based lazy-load by default
-* CB-6127lisa7cordova-plugin-consolecordova-cli documentation translation: cordova-cli
-* Call process.removeAllListeners() in cli spec
-* Add --captureExceptions flag to jasmine
-* Pin jasmine to older version temporarily
-* Fix CB-7069 copy-from & link-to custom uri -> url
-* CB-7002 Incremented package version to -dev
