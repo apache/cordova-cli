@@ -13,3 +13,6 @@ Create a Cordova project
     Options:
         --copy-from|src=<PATH> ... use custom www assets instead of the stock Cordova hello-world.
         --link-to=<PATH> ......... symlink to custom www assets without creating a copy.
+        --projectname ............ set a custom project name (name for main project file/class/activity).
+                                    Can be used for projects that named with non-ascii characters, since
+                                    some platform doesn't support such names for files/classes (Android...)

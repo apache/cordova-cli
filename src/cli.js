@@ -72,6 +72,8 @@ function cli(inputArgs) {
         , 'link-to' : path
         , 'searchpath' : String
         , 'variable' : Array
+        // New option from CB-7231. Available for create command only.
+        , 'projectname': String
         // Flags to be passed to `cordova build/run/emulate`
         , 'debug' : Boolean
         , 'release' : Boolean
@@ -247,11 +249,12 @@ function cli(inputArgs) {
             cfg.lib = cfg.lib || {};
             cfg.lib.www = wwwCfg;
         }
-        // create(dir, id, name, cfg)
+        // create(dir, id, name, cfg, projectname)
         cordova.raw.create( undashed[1]  // dir to create the project in
                           , undashed[2]  // App id
                           , undashed[3]  // App name
                           , cfg
+                          , args.projectname
         ).done();
     } else if ( cmd == 'save' || cmd == 'restore') {
         if ( !args.experimental ) {
