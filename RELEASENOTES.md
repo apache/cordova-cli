@@ -20,6 +20,10 @@
 -->
 # Cordova-cli Release Notes
 
+### 3.6.1-0.2.10 (Sep 05, 2014)
+* updated Release notes
+* updated version to include dev prefix
+
 ### 3.6.0-0.2.8 (Aug 29, 2014)
 * adds missing 'fs' reference required for Windows (ln191)
 * [CB-7355] re added single test to test call through to cordova-lib cordova raw create
