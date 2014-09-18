@@ -20,6 +20,15 @@
 -->
 # Cordova-cli Release Notes
 
+### 3.6.1-0.2.13 
+* update shrinkwrap
+
+### 3.6.1-0.2.12
+* CB-7383 depend on a newer version of cordova-lib
+
+### 3.6.1-0.2.11 
+* bump version to 3.6.3-0.2.11
+
 ### 3.6.1-0.2.10 (Sep 05, 2014)
 * updated Release notes
 * updated version to include dev prefix
