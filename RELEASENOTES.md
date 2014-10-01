@@ -20,6 +20,10 @@
 -->
 # Cordova-cli Release Notes
 
+### 3.7.0 (Oct 01, 2014)
+* Made version semVer complient and bumped to 3.7.0 
+* added missing AL header
+
 ### 3.6.1-0.2.13 
 * update shrinkwrap
 
