@@ -23,7 +23,7 @@
 
 Cordova CLI przyjechał wiązany rezygnować skrypt, który zawiera kartę zakończenia wiersza poleceń dla Bash. Jeśli używasz wystarczająco Unix-y system operacyjny (Linux, BSD, OS X) można zainstalować ten ułatwia pisanie wierszy polecenia cordova.
 
-## Instalacji
+## Instalacja
 
 ### Linux
 
