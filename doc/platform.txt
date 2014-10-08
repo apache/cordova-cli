@@ -4,9 +4,7 @@ Synopsis
 
 Manage project platforms
 
-    add <name>|<directory> [...] ...... add specified platforms
-                                        directory is a directory containing a platform
-                                        name of platform to be retrieved from npm registry
+    add <plat-spec> [...].............. add specified platforms
         --usegit ...................... retrieve from git instead of npm registry
 
     remove <platform> [...] ........... remove specified platforms
@@ -15,8 +13,24 @@ Manage project platforms
     update <platform> ................. update the version of Cordova used for a specific
                                         platform; use after updating the CLI.
         --usegit ...................... retrieve platform from git instead of npm registry
+
     check ............................. list platforms which can be updated by `cordova-cli platform update`
 
+Syntax
+    <plat-spec>:
+        <platform-ver>|<path>|<url>
+
+    <platform-ver>:
+        <platform>[@<version>]
+
+    <platform> ........................ platform (typically from npm registry)
+
+    <path> ............................ path to a directory containing a platform
+                                        name of platform to be retrieved from npm registry
+
+    <url> ............................. url to a git repository containing a platform
+
+    <version> ......................... major.minor.patch version specifier
 aliases:
     platforms -> platform
     rm -> remove
