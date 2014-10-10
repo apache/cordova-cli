@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "3.7.1-dev",
+  "version": "4.0.0",
   "preferGlobal": "true",
   "description": "Cordova command line interface tool",
   "main": "cordova",
@@ -28,13 +28,13 @@
     "cli"
   ],
   "dependencies": {
-    "cordova-lib": "3.7.0",
-    "q": "~0.9",
-    "nopt": "~2",
+    "cordova-lib": "4.0.0",
+    "q": "0.9.7",
+    "nopt": "2.2.1",
     "underscore":"1.4.4"
   },
   "devDependencies": {
-    "jasmine-node": "1.14.1"
+    "jasmine-node": "1.14.5"
   },
   "author": "Anis Kadri",
   "contributors": [
