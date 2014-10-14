@@ -26,7 +26,7 @@
 var path = require('path'),
     fs = require('fs'),
     help = require('./help'),
-    nopt, 
+    nopt,
     _;
 
 var cordova_lib = require('cordova-lib'),
@@ -39,7 +39,7 @@ var cordova_lib = require('cordova-lib'),
 /*
  * init
  *
- * initializes nopt and underscore 
+ * initializes nopt and underscore
  * nopt and underscore are require()d in try-catch below to print a nice error
  * message if one of them is not installed.
  */
@@ -57,6 +57,10 @@ function init() {
 };
 
 module.exports = cli
+// Also export the cordova-lib so that downstream consumers of cordova lib and
+// CLI will be able to use CLI's cordova-lib and avoid the risk of having two
+// different versions of cordova-lib.
+module.exports.cordova_lib = cordova_lib
 function cli(inputArgs) {
     // When changing command line arguments, update doc/help.txt accordingly.
     var knownOpts =
