@@ -57,10 +57,6 @@ function init() {
 };
 
 module.exports = cli
-// Also export the cordova-lib so that downstream consumers of cordova lib and
-// CLI will be able to use CLI's cordova-lib and avoid the risk of having two
-// different versions of cordova-lib.
-module.exports.cordova_lib = cordova_lib
 function cli(inputArgs) {
     // When changing command line arguments, update doc/help.txt accordingly.
     var knownOpts =

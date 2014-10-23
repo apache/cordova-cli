@@ -17,8 +17,15 @@
     under the License.
 */
 
-// All cordova js API moved to cordova-lib. This is a temporary shim for
-// dowstream packages that use cordova-cli for the API.
+// All cordova js API moved to cordova-lib. If you don't need the cordova CLI,
+// use cordova-lib directly.
 
 var cordova_lib = require('cordova-lib');
 module.exports = cordova_lib.cordova;
+
+// Also export the cordova-lib so that downstream consumers of cordova lib and
+// CLI will be able to use CLI's cordova-lib and avoid the risk of having two
+// different versions of cordova-lib which would result in two instances of
+// "events" and can cause bad event handling.
+module.exports.cordova_lib = cordova_lib;
+module.exports.cli = require('./src/cli');
