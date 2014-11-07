@@ -20,7 +20,7 @@
 -->
 # Cordova-cli Release Notes
 
-### 4.0.1 (Nov 7, 2014)
+### 4.1.0 (Nov 7, 2014)
 * Expose cordova-lib and the cli from cordova-cli
 * CB-7636 Allow using --nobuild flag without screaning
 
