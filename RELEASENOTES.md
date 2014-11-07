@@ -20,18 +20,22 @@
 -->
 # Cordova-cli Release Notes
 
+### 4.0.1 (Nov 7, 2014)
+* Expose cordova-lib and the cli from cordova-cli
+* CB-7636 Allow using --nobuild flag without screaning
+
 ### 4.0.0 (Oct 10, 2014)
-* Made version semver complient and bumped to 4.0.0 
+* Made version semver complient and bumped to 4.0.0
 * Pinned dependencies
 * added missing AL header
 
-### 3.6.1-0.2.13 
+### 3.6.1-0.2.13
 * update shrinkwrap
 
 ### 3.6.1-0.2.12
 * CB-7383 depend on a newer version of cordova-lib
 
-### 3.6.1-0.2.11 
+### 3.6.1-0.2.11
 * bump version to 3.6.3-0.2.11
 
 ### 3.6.1-0.2.10 (Sep 05, 2014)
