@@ -266,7 +266,8 @@ function cli(inputArgs) {
         if (subcommand !== 'plugins' && subcommand !== 'platforms') {
             throw new CordovaError('Specify what you want to '+ cmd + ', try "cordova '+ cmd +' plugins" or " cordova '+cmd+' platforms"');
         }
-        cordova.raw[cmd].call(null, subcommand, { shrinkwrap:args.shrinkwrap }).done();
+        cordova.raw[cmd].call(null, subcommand, { shrinkwrap:args.shrinkwrap,
+                                                    searchpath: args.searchpath }).done();
     } else {
         // platform/plugins add/rm [target(s)]
         subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
