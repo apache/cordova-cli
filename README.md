@@ -239,6 +239,10 @@ The directory structure of KewlApp now looks like this:
 
     npm test
 
+## Get test coverage reports
+
+    npm run cover
+
 ## TO-DO + Issues
 
 Please check [Cordova issues with the CLI Component](http://issues.cordova.io). If you find issues with this tool, please be so kind as to include relevant information needed to debug issues such as:

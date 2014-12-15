@@ -30,9 +30,6 @@ describe("cordova cli", function () {
         // logging events registered as a result of the "--verbose" flag in
         // CLI testing below would cause lots of logging messages printed out by other specs.
         spyOn(events, "on");
-        // Each call to cli() registers another listener for uncaughtException.
-        // This results in a warning when too many of them are registered.
-        process.removeAllListeners();
         spyOn(console, 'log');
     });
 
