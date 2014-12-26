@@ -32,7 +32,6 @@ var path = require('path'),
 var cordova_lib = require('cordova-lib'),
     CordovaError = cordova_lib.CordovaError,
     cordova = cordova_lib.cordova,
-    plugman = cordova_lib.plugman,
     events = cordova_lib.events;
 
 
@@ -54,9 +53,9 @@ function init() {
         );
         process.exit(2);
     }
-};
+}
 
-module.exports = cli
+module.exports = cli;
 function cli(inputArgs) {
     // When changing command line arguments, update doc/help.txt accordingly.
     var knownOpts =
@@ -93,13 +92,13 @@ function cli(inputArgs) {
         };
 
     // If no inputArgs given, use process.argv.
-    inputArgs = inputArgs || process.argv
+    inputArgs = inputArgs || process.argv;
 
     init();
 
 
 
-    var args = nopt(knownOpts, shortHands, inputArgs)
+    var args = nopt(knownOpts, shortHands, inputArgs);
 
 
     if (args.version) {
@@ -224,7 +223,7 @@ function cli(inputArgs) {
 
         cordova.raw[cmd].call(null, opts).done();
     } else if (cmd == 'serve') {
-        var port = undashed[1]
+        var port = undashed[1];
         cordova.raw.serve(port).done();
     } else if (cmd == 'create') {
         var cfg = {};
