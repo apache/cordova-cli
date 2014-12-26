@@ -82,6 +82,7 @@ function cli(inputArgs) {
         , 'target' : String
         , 'browserify': Boolean
         , 'nobuild': Boolean
+        , 'list': Boolean
         };
 
     var shortHands =
@@ -207,7 +208,7 @@ function cli(inputArgs) {
         // calling into platform code should be dealing with this based
         // on the parsed args object.
         var downstreamArgs = [];
-        var argNames = [ 'debug', 'release', 'device', 'emulator', 'nobuild'];
+        var argNames = [ 'debug', 'release', 'device', 'emulator', 'nobuild', 'list'];
         argNames.forEach(function(flag) {
             if (args[flag]) {
                 downstreamArgs.push('--' + flag);
