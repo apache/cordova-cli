@@ -6,13 +6,16 @@ Manage project platforms
 
     add <plat-spec> [...].............. add specified platforms
         --usegit ...................... retrieve from git instead of npm registry
+        --save ........................ save specified platforms into config.xml after installing them
 
     remove <platform> [...] ........... remove specified platforms
+        --save ........................ delete specified platforms from config.xml after removing them
 
     list .............................. list all installed and available platforms
     update <platform> ................. update the version of Cordova used for a specific
                                         platform; use after updating the CLI.
         --usegit ...................... retrieve platform from git instead of npm registry
+        --save ........................ save the latest versions for specified platforms into config.xml
 
     check ............................. list platforms which can be updated by `cordova-cli platform update`
 
