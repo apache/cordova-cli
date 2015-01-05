@@ -265,7 +265,7 @@ function cli(inputArgs) {
         }
         subcommand  = undashed[1];
         if (subcommand !== 'plugins' && subcommand !== 'platforms') {
-            throw new CordovaError('Specify what you want to '+ cmd + ', try "cordova '+ cmd +' plugins" or " cordova '+cmd+' platforms"');
+            throw new CordovaError('Specify what you want to '+ cmd + ', try "' + cordova_lib.binname + ' '+ cmd +' plugins" or "' + cordova_lib.binname + ' '+cmd+' platforms"');
         }
         cordova.raw[cmd].call(null, subcommand, { shrinkwrap:args.shrinkwrap,
                                                     searchpath: args.searchpath }).done();
