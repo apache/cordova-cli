@@ -33,13 +33,8 @@ CordovaCliCreate.prototype.run = function (args, undashed) {
         customWww;
 
     // parseConfig will determine if there's a valid config JSON string
-    cfg = parseConfig(undashed[4]);
+    cfg = this.parseConfig(undashed[4]);
     
-    // customWww
-    this.customWww = function (args) {
-
-    }
-
     // create(dir, id, name, cfg)
     cordova.raw.create( undashed[1]  // dir to create the project in
                       , undashed[2]  // App id
