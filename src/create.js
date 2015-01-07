@@ -33,7 +33,7 @@ CordovaCliCreate.prototype.run = function (args, undashed) {
         customWww;
 
     // parseConfig will determine if there's a valid config JSON string
-    cfg = parseCofig(undashed[4]);
+    cfg = parseConfig(undashed[4]);
     
     // customWww
     this.customWww = function (args) {
