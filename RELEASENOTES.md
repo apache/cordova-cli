@@ -20,6 +20,14 @@
 -->
 # Cordova-cli Release Notes
 
+
+### 4.2.0 (Jan 06, 2015)
+* CB-6756 use cordova_lib.binname instead of cordova
+* Fixed jshint issues with cli.js (close #199)
+* CB-8211 Add --link option to `cordova plugin add` (close #191)
+* CB-8129 Adds 'npm run cover' command to generate tests coverage report
+* searchpath option is added to restore
+
 ### 4.1.2 (Nov 13, 2014)
 * Expose cordova-lib and the cli from cordova-cli
 * CB-7636 Allow using --nobuild flag without screaning
@@ -399,3 +407,4 @@ Important note: This version targets Cordova version 3.1.0-rc1.
 
 - Plugins are now installed serially across all installed platforms, rather than in parallel. This avoids race conditions in dependency installation. [CB-4184](https://issues.apache.org/jira/browse/CB-4184)
 - (WP8) All files from project www dir are now copied into the binary, not the top-level www. This means merges and plugin assets are correctly handled.
+
