@@ -81,6 +81,7 @@ function cli(inputArgs) {
         , 'target' : String
         , 'browserify': Boolean
         , 'nobuild': Boolean
+        , 'list': Boolean
         };
 
     var shortHands =
@@ -206,12 +207,20 @@ function cli(inputArgs) {
         // calling into platform code should be dealing with this based
         // on the parsed args object.
         var downstreamArgs = [];
-        var argNames = [ 'debug', 'release', 'device', 'emulator', 'nobuild'];
+        var argNames =
+            [ 'debug'
+            , 'release'
+            , 'device'
+            , 'emulator'
+            , 'nobuild'
+            , 'list'
+            ];
         argNames.forEach(function(flag) {
             if (args[flag]) {
                 downstreamArgs.push('--' + flag);
             }
         });
+
         if (args.target) {
             downstreamArgs.push('--target=' + args.target);
         }
@@ -219,6 +228,11 @@ function cli(inputArgs) {
             downstreamArgs.push('--archs=' + args.archs);
         }
         opts.options = downstreamArgs.concat(unparsedArgs);
+
+        if (cmd == 'run' && args.list && cordova.raw.targets) {
+            cordova.raw.targets.call(null, opts).done();
+            return;
+        }
 
         cordova.raw[cmd].call(null, opts).done();
     } else if (cmd == 'serve') {
