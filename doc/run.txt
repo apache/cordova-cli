@@ -1,13 +1,14 @@
 Synopsis
 
-    cordova-cli run [BUILD] [PROD] [TARGET] [EXP] [PLATS] [-- POPTS]
+    cordova-cli run [MODE] [PROD] [TARGET] [EXP] [PLATS] [-- POPTS]
 
-      BUILD:  --nobuild
-      PROD:   --debug|--release
-      TARGET: --device|--emulator|--target=FOO
-      EXP:    --experimental [EXPERIMENTALFLAGS]
-      PLATS:  PLATFORM [...]
-      POPTS:  platformopts
+      MODE:       --list|--nobuild
+      PROD:        --debug|--release
+      TARGET:      DEVICECLASS|--target=FOO
+      EXP:         --experimental [EXPERIMENTALFLAGS]
+      PLATS:       PLATFORM [...]
+      POPTS:       platformopts
+      DEVICECLASS: --device|--emulator
 
 Deploys app on specified platform devices / emulators
 
@@ -19,6 +20,10 @@ Deploys app on specified platform devices / emulators
     --device ........................... Deploy to a device
     --emulator ......................... Deploy to an emulator
     --target ........................... Deploy to a specific target
+
+    --list ............................. Lists available targets
+                                         Will display both device and emulator
+                                         unless DEVICECLASS option is provided
 
 To provide platform specific options, you must include them after `--`.
 
