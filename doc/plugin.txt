@@ -16,7 +16,9 @@ Manage project plugins
 
         [--noregistry] ............................ don't search the registry for plugins
 
-        [--link] .................................. create a symbolic link to the plugin instead of copying files
+        [--link] .................................. when installing from a local path, creates a symbolic link to the plugin
+                                                    instead of copying files. The extent to which files are linked vs copied
+                                                    varies by platform. Useful for plugin development.
 
     remove <pluginid> [...] ....................... remove plugins with the given IDs
 

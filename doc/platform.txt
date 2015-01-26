@@ -6,6 +6,10 @@ Manage project platforms
 
     add <plat-spec> [...].............. add specified platforms
         --usegit ...................... retrieve from git instead of npm registry
+        --link ........................ when <plat-spec> is a local path, links the platform
+                                        library directly instead of making a copy of it (support
+                                        varies by platform; useful for platform development)
+
 
     remove <platform> [...] ........... remove specified platforms
 
