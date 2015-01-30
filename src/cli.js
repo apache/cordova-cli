@@ -102,7 +102,13 @@ function cli(inputArgs) {
 
 
     if (args.version) {
-        console.log( require('../package').version );
+        var cliVersion = require('../package').version;
+        var libVersion = require('cordova-lib/package').version;
+        var toPrint = cliVersion;
+        if (cliVersion != libVersion || /-dev$/.exec(libVersion)) {
+            toPrint += ' (cordova-lib@' + libVersion + ')';
+        }
+        console.log(toPrint);
         return;
     }
 
