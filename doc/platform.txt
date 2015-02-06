@@ -19,8 +19,9 @@ Manage project platforms
         --save ........................ delete specified platforms from config.xml after removing them
 
     list .............................. list all installed and available platforms
-    update <platform> ................. update the version of Cordova used for a specific
-                                        platform; use after updating the CLI.
+    update <plat-spec> ................ update the version of Cordova used for a specific platform;
+                                        update to the latest <version> if no <version>, <path> or <url> is specified
+
         --usegit ...................... retrieve platform from git instead of npm registry
         --save ........................ save the latest versions for specified platforms into config.xml
 
