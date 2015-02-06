@@ -14,8 +14,9 @@ Manage project platforms
     remove <platform> [...] ........... remove specified platforms
 
     list .............................. list all installed and available platforms
-    update <platform> ................. update the version of Cordova used for a specific
-                                        platform; use after updating the CLI.
+    update <plat-spec> ................ update the version of Cordova used for a specific platform;
+                                        update to the latest <version> if no <version>, <path> or <url> is specified
+
         --usegit ...................... retrieve platform from git instead of npm registry
 
     check ............................. list platforms which can be updated by `cordova-cli platform update`
