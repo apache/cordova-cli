@@ -306,6 +306,7 @@ function cli(inputArgs) {
                             , cli_variables : cli_vars
                             , browserify: args.browserify || false
                             , link: args.link || false
+                            , save: args.save || false
                             };
         cordova.raw[cmd](subcommand, targets, download_opts).done();
     }
