@@ -26,13 +26,6 @@ aliases:
     build -> cordova-cli prepare && cordova-cli compile
     emulate -> cordova-cli run --emulator
 
-Experimental Commands
-
-    These commands require the --experimental flag.
-
-    save ............................... Save installed platforms/plugins
-    restore ............................ Restore saved platforms/plugins 
-
 Command-line Flags/Options
 
     -v, --version ...................... prints out this utility's version

@@ -274,20 +274,6 @@ function cli(inputArgs) {
                           , undashed[3]  // App name
                           , cfg
         ).done();
-    } else if (cmd == 'save' || cmd == 'restore') {
-        if ( !args.experimental ) {
-            msg =
-                'save and restore commands are experimental, please ' +
-                'add "--experimental" to indicate that you understand that ' +
-                'it may change in the future';
-            throw new CordovaError(msg);
-        }
-        subcommand  = undashed[1];
-        if (subcommand !== 'plugins' && subcommand !== 'platforms') {
-            throw new CordovaError('Specify what you want to ' + cmd + ', try "' + cordova_lib.binname + ' ' + cmd + ' plugins" or "' + cordova_lib.binname + ' ' + cmd + ' platforms"');
-        }
-        cordova.raw[cmd].call(null, subcommand, { shrinkwrap:args.shrinkwrap,
-                                                    searchpath: args.searchpath }).done();
     } else {
         // platform/plugins add/rm [target(s)]
         subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
