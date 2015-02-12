@@ -19,8 +19,14 @@ Manage project plugins
         [--link] .................................. when installing from a local path, creates a symbolic link to the plugin
                                                     instead of copying files. The extent to which files are linked vs copied
                                                     varies by platform. Useful for plugin development.
+        [--save] .................................. save the information for specified plugin into config.xml
+
+
 
     remove <pluginid> [...] ....................... remove plugins with the given IDs
+      
+        [--save] ................................... remove the information for specified plugin into config.xml
+
 
     list .......................................... list currently installed plugins
     search [<keyword>] [...] ...................... search the plugin registry for plugins matching the keywords
