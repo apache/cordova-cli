@@ -293,6 +293,7 @@ function cli(inputArgs) {
                             , browserify: args.browserify || false
                             , link: args.link || false
                             , save: args.save || false
+                            , shrinkwrap: args.shrinkwrap || false
                             };
         cordova.raw[cmd](subcommand, targets, download_opts).done();
     }
