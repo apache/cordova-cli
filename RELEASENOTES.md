@@ -20,6 +20,21 @@
 -->
 # Cordova-cli Release Notes
 
+### 4.3.0 (Feb 27, 2015)
+* docs update for plugin --save
+* Grunt "retire" task added (close #204)
+* CB-8439 Fix 'cordova platform update' documentation to include `<plat-spec>` (close #208)
+* CB-8379 Have --version print out cordova-lib version if it's not the same as CLI's version
+* CB-8211, CB-8358 Update `--link` help text
+* CB-8168 --list support for CLI (close #205)
+* CB-8314 Speed up Travis CI (close #207)
+* CB-8301 Added CI configuration files (close #206)
+* CB-8227 CB-8237 CB-8238 Add --save option to 'cordova platform add', 'cordova platform remove' and 'cordova platform update'
+* Add coverage/ to .npmignore
+* CB-5316 Spell Cordova as a brand unless it's a command or script
+* CB-7950 CLI make CordovaCliCreate.prototype.run vaguely correct
+* CB-7739 document installing specific version of platforms
+* CB-7950 CLI create.js misspells parseConfig
 
 ### 4.2.0 (Jan 06, 2015)
 * CB-6756 use cordova_lib.binname instead of cordova
@@ -407,4 +422,3 @@ Important note: This version targets Cordova version 3.1.0-rc1.
 
 - Plugins are now installed serially across all installed platforms, rather than in parallel. This avoids race conditions in dependency installation. [CB-4184](https://issues.apache.org/jira/browse/CB-4184)
 - (WP8) All files from project www dir are now copied into the binary, not the top-level www. This means merges and plugin assets are correctly handled.
-
