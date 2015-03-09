@@ -29,10 +29,13 @@ Manage project platforms
 
 Syntax
     <plat-spec>:
-        <platform-ver>|<path>|<url>
+        <platform-ver>|<path>|<git-url>
 
     <platform-ver>:
         <platform>[@<version>]
+
+    <git-url>:
+        <url>[#<branch>]
 
     <platform> ........................ platform (typically from npm registry)
 
@@ -42,6 +45,9 @@ Syntax
     <url> ............................. url to a git repository containing a platform
 
     <version> ......................... major.minor.patch version specifier
+
+    <branch> .......................... name of the branch to checkout after cloning the git repo
+                                        if none is specified, the 'master' branch will be checked out
 aliases:
     platforms -> platform
     rm -> remove
