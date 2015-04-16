@@ -20,6 +20,11 @@
 -->
 # Cordova-cli Release Notes
 
+### 5.0.0 (Apr 16, 2015)
+* Add information on Firefox OS to the README
+* Update link to hooks README
+* CB-8634 Adds docs about support for custom branches for `cordova platform add`
+
 ### 4.3.0 (Feb 27, 2015)
 * docs update for plugin --save
 * Grunt "retire" task added (close #204)
