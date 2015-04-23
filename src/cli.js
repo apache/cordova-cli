@@ -241,6 +241,60 @@ function cli(inputArgs) {
         }
 
         cordova.raw[cmd].call(null, opts).done();
+    } else if (cmd === 'requirements') {
+        // All options without dashes are assumed to be platform names
+        opts.platforms = undashed.slice(1);
+        var badPlatforms = _.difference(opts.platforms, known_platforms);
+        if( !_.isEmpty(badPlatforms) ) {
+            msg = 'Unknown platforms: ' + badPlatforms.join(', ');
+            throw new CordovaError(msg);
+        }
+
+        // CB-6976 Windows Universal Apps. Allow mixing windows and windows8 aliases
+        opts.platforms = opts.platforms.map(function(platform) {
+            // allow using old windows8 alias for new unified windows platform
+            if (platform == 'windows8' && fs.existsSync('platforms/windows')) {
+                return 'windows';
+            }
+            // allow using new windows alias for old windows8 platform
+            if (platform == 'windows' &&
+                !fs.existsSync('platforms/windows') &&
+                fs.existsSync('platforms/windows8')) {
+                return 'windows8';
+            }
+            return platform;
+        });
+
+        cordova.raw[cmd].call(null, opts.platforms)
+        .then(function (platformChecks) {
+
+            var someChecksFailed = Object.keys(platformChecks).map(function (platformName) {
+                events.emit('log', '\nRequirements check results for ' + platformName + ':');
+                var platformCheck = platformChecks[platformName];
+                if (platformCheck instanceof CordovaError) {
+                    events.emit('warn', 'Check failed for ' + platformName + ' due to ' + platformCheck);
+                    return true;
+                }
+
+                var someChecksFailed = false;
+                platformCheck.forEach(function (checkItem) {
+                    var checkSummary = checkItem.name + ': ' +
+                                    (checkItem.installed ? 'installed ' : 'not installed ') +
+                                    (checkItem.metadata.version || '');
+                    events.emit('log', checkSummary);
+                    if (!checkItem.installed) {
+                        someChecksFailed = true;
+                        events.emit('warn', checkItem.metadata.reason);
+                    }
+                });
+
+                return someChecksFailed;
+            }).some(function (isCheckFailedForPlatform) {
+                return isCheckFailedForPlatform;
+            });
+
+            if (someChecksFailed) throw new CordovaError('Some of requirements check failed');
+        }).done();
     } else if (cmd == 'serve') {
         var port = undashed[1];
         cordova.raw.serve(port).done();
