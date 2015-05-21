@@ -180,7 +180,8 @@ function cli(inputArgs) {
         options: [],
         verbose: args.verbose || false,
         silent: args.silent || false,
-        browserify: args.browserify || false
+        browserify: args.browserify || false,
+        searchpath : args.searchpath
     };
 
 
