@@ -20,6 +20,9 @@
 -->
 # Cordova-cli Release Notes
 
+### 5.1.0 (May 27, 2015)
+* CB-8898 Introduces `cordova requirements` command
+
 ### 5.0.0 (Apr 16, 2015)
 * Add information on Firefox OS to the README
 * Update link to hooks README
