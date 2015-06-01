@@ -20,6 +20,9 @@
 -->
 # Cordova-cli Release Notes
 
+### 4.3.1 (June 1, 2015)
+* Updated Android pinned version to 3.7.2 (security patch).
+
 ### 4.3.0 (Feb 27, 2015)
 * docs update for plugin --save
 * Grunt "retire" task added (close #204)
