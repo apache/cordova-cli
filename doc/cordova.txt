@@ -10,6 +10,8 @@ Global Commands
 Project Commands
 
     info ............................... Generate project information
+    requirements ....................... Checks and print out all the requirements
+                                            for platforms specified
 
     platform ........................... Manage project platforms
     plugin ............................. Manage project plugins
