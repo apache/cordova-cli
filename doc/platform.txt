@@ -5,7 +5,10 @@ Synopsis
 Manage project platforms
 
     add <plat-spec> [...].............. add specified platforms
-        --usegit ...................... retrieve from git instead of npm registry
+        --usegit ...................... [WARNING: This flag has been deprecated.]
+                                        [Instead, please use: `cordova platform add git-url#custom-branch`.] 
+                                        [e.g: cordova platform add https://github.com/apache/cordova-android.git#2.4.0]
+                                        retrieve from git instead of npm registry
 
         --save ........................ save specified platforms into config.xml after installing them
 
