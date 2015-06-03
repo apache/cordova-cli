@@ -82,6 +82,7 @@ function cli(inputArgs) {
         , 'browserify': Boolean
         , 'nobuild': Boolean
         , 'list': Boolean
+        , 'buildConfig' : String
         };
 
     var shortHands =
@@ -226,7 +227,9 @@ function cli(inputArgs) {
                 downstreamArgs.push('--' + flag);
             }
         });
-
+        if (args.buildConfig) {
+            downstreamArgs.push('--buildConfig=' + args.buildConfig);
+        }
         if (args.target) {
             downstreamArgs.push('--target=' + args.target);
         }
