@@ -186,7 +186,7 @@ function cli(inputArgs) {
     };
 
 
-    if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run') {
+    if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run' || cmd === 'clean') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
         var badPlatforms = _.difference(opts.platforms, known_platforms);

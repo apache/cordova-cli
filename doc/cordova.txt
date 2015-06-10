@@ -18,6 +18,7 @@ Project Commands
 
     prepare ............................ Copy files into platform(s) for building
     compile ............................ Build platform(s)
+    clean .............................. Cleanup project from build artifacts
 
     run ................................ Run project
                                             (including prepare && compile)

@@ -1,0 +1,8 @@
+Synopsis
+
+    cordova clean [PLATFORM..]
+
+Cleans the build artifacts for the specified platform, or all platforms
+by running platform-provided clean script.
+
+To provide platform specific options, you must include them after `--`.
