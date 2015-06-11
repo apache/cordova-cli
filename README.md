@@ -150,7 +150,7 @@ project root. Any scripts you add to these directories will be executed before
 and after the commands corresponding to the directory name. Useful for
 integrating your own build systems or integrating with version control systems.
 
-Refer to [hooks' README.md](https://github.com/apache/cordova-app-hello-world/blob/master/hooks/README.md) for more information.
+Refer to [Hooks Guide](http://cordova.apache.org/docs/en/edge/guide_appdev_hooks_index.md.html#Hooks%20Guide) for more information.
 
 ## merges/
 Platform-specific web assets (HTML, CSS and JavaScript files) are contained within appropriate subfolders in this directory. These are deployed during a `prepare` to the appropriate native directory.  Files placed under `merges/` will override matching files in the `www/` folder for the relevant platform. A quick example, assuming a project structure of:
@@ -195,6 +195,7 @@ There are two types of hooks: project-specific ones and module-level ones. Both 
 ## Project-specific Hooks
 
 These are located under the `hooks` directory in the root of your Cordova project. Any scripts you add to these directories will be executed before and after the appropriate commands. Useful for integrating your own build systems or integrating with version control systems. __Remember__: make your scripts executable.
+Refer to [Hooks Guide](http://cordova.apache.org/docs/en/edge/guide_appdev_hooks_index.md.html#Hooks%20Guide) for more information.
 
 ### Examples
 
