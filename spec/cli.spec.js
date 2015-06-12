@@ -121,5 +121,16 @@ describe("cordova cli", function () {
             var opts = cordova.raw.plugin.calls[0].args[2];
             expect(opts.cli_variables.FOO).toBe('foo');
         });
+
+          it("will  support variables with =", function () {
+            cli(["node", "cordova", "plugin", "add", "facebook", "--variable", "MOTO=DELTA=WAS=HERE"]);
+            expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                "add",
+                ["facebook"],
+                jasmine.any(Object)
+            );
+            var opts = cordova.raw.plugin.calls[0].args[2];
+            expect(opts.cli_variables.MOTO).toBe('DELTA=WAS=HERE');
+        });
     });
 });

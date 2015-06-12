@@ -338,10 +338,15 @@ function cli(inputArgs) {
         var targets = undashed.slice(2); // array of targets, either platforms or plugins
         var cli_vars = {};
         if (args.variable) {
-            args.variable.forEach( function(s) {
-                var keyval = s.split('=');
-                var key = keyval[0].toUpperCase();
-                cli_vars[key] = keyval[1];
+             args.variable.forEach( function(s) {
+                
+                // CB-9171
+                var eq = s.indexOf('=');
+                if (eq==-1)
+                    throw new CordovaError("invalid variable format: "+s);
+                var key = s.substr(0,eq).toUpperCase();
+                var val = s.substr(eq+1,s.length);
+                cli_vars[key] = val;
             });
         }
         var download_opts = { searchpath : args.searchpath
