@@ -185,7 +185,6 @@ function cli(inputArgs) {
         searchpath : args.searchpath
     };
 
-
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run' || cmd === 'clean') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
@@ -210,34 +209,9 @@ function cli(inputArgs) {
             return platform;
         });
 
-        // Reconstruct the args to be passed along to platform scripts.
-        // This is an ugly temporary fix. The code spawning or otherwise
-        // calling into platform code should be dealing with this based
-        // on the parsed args object.
-        var downstreamArgs = [];
-        var argNames =
-            [ 'debug'
-            , 'release'
-            , 'device'
-            , 'emulator'
-            , 'nobuild'
-            , 'list'
-            ];
-        argNames.forEach(function(flag) {
-            if (args[flag]) {
-                downstreamArgs.push('--' + flag);
-            }
-        });
-        if (args.buildConfig) {
-            downstreamArgs.push('--buildConfig=' + args.buildConfig);
-        }
-        if (args.target) {
-            downstreamArgs.push('--target=' + args.target);
-        }
-        if (args.archs) {
-            downstreamArgs.push('--archs=' + args.archs);
-        }
-        opts.options = downstreamArgs.concat(unparsedArgs);
+        // Pass nopt-parsed args to PlatformApi through opts.options
+        opts.options = args;
+        opts.options.argv = unparsedArgs;
 
         if (cmd == 'run' && args.list && cordova.raw.targets) {
             cordova.raw.targets.call(null, opts).done();
