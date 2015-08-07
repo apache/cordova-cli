@@ -20,6 +20,18 @@
 -->
 # Cordova-cli Release Notes
 
+### 5.2.0 (Aug 06, 2015)
+* docs: unify expression of Amazon Fire OS
+* docs: delete duplicated Windows Phone SDK description
+* CB-9114: Deprecation Warning for --usegit flag. This closes #214
+* Adding .ratignore file.
+* CB-9171 Support Plugin Variables with =
+* CB-9128 cordova-cli documentation translation: cordova-cli
+* CB-5578 Adds `clean` command to cordova-cli.
+* CB-8993 Plugin restore ignores search path. This closes #213
+* CB-9121 Add support for build configuration to be specified using the CLI
+* CB-8898 Adds missing section about `requirements` to general cordova help
+
 ### 5.1.1 (June 4, 2015)
 * CB-8898 Adds missing section about `requirements` to general cordova help
 * CB-8898 Introduces `cordova requirements` command
