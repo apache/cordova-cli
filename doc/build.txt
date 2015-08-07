@@ -1,6 +1,6 @@
 Synopsis
 
-    cordova build [PROD] [TARGET] [EXP] [PLATS] [BUILDCONFIG] [-- POPTS]
+    cordova-cli build [PROD] [TARGET] [EXP] [PLATS] [BUILDCONFIG] [-- POPTS]
 
       PROD:   --debug|--release
       TARGET: --device|--emulator|--target=FOO

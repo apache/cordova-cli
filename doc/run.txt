@@ -1,6 +1,6 @@
 Synopsis
 
-    cordova run [MODE] [PROD] [TARGET] [EXP] [PLATS] [BUILDCONFIG] [-- POPTS] 
+    cordova-cli run [MODE] [PROD] [TARGET] [EXP] [PLATS] [BUILDCONFIG] [-- POPTS] 
 
       MODE:       --list|--nobuild
       PROD:        --debug|--release

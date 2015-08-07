@@ -1,6 +1,6 @@
 Synopsis
 
-    cordova clean [PLATFORM..]
+    cordova-cli clean [PLATFORM..]
 
 Cleans the build artifacts for the specified platform, or all platforms
 by running platform-provided clean script.
