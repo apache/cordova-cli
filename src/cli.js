@@ -27,7 +27,9 @@ var path = require('path'),
     fs = require('fs'),
     help = require('./help'),
     nopt,
-    _;
+    _,
+    updateNotifier,
+    pkg = require('../package.json');
 
 var cordova_lib = require('cordova-lib'),
     CordovaError = cordova_lib.CordovaError,
@@ -46,6 +48,7 @@ function init() {
     try {
         nopt = require('nopt');
         _ = require('underscore');
+        updateNotifier = require('update-notifier');
     } catch (e) {
         console.error(
             'Please run npm install from this directory:\n\t' +
@@ -53,6 +56,16 @@ function init() {
         );
         process.exit(2);
     }
+}
+
+function checkForUpdates() {
+    // Checks for available update and returns an instance
+    var notifier = updateNotifier({
+        pkg: pkg
+    });
+
+    // Notify using the built-in convenience method
+    notifier.notify();
 }
 
 module.exports = cli;
@@ -97,7 +110,7 @@ function cli(inputArgs) {
 
     init();
 
-
+    checkForUpdates();
 
     var args = nopt(knownOpts, shortHands, inputArgs);
 

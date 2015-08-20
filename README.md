@@ -124,6 +124,7 @@ Now the `cordova` and `plugman` in your path are the local git versions. Don't f
 
 - `-d` or `--verbose` will pipe out more verbose output to your shell. You can also subscribe to `log` and `warn` events if you are consuming `cordova-cli` as a node module by calling `cordova.on('log', function() {})` or `cordova.on('warn', function() {})`.
 - `-v` or `--version` will print out the version of your `cordova-cli` install.
+- `--no-update-notifier` will disable updates check. Alternatively set `"optOut": true` in `~/.config/configstore/update-notifier-cordova.json` or set `NO_UPDATE_NOTIFIER` environment variable with any value (see details in [update-notifier docs](https://www.npmjs.com/package/update-notifier#user-settings)).
 
 # Project Directory Structure
 A Cordova application built with `cordova-cli` will have the following directory structure:

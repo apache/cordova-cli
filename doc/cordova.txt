@@ -34,3 +34,4 @@ Command-line Flags/Options
     -v, --version ...................... prints out this utility's version
     -d, --verbose ...................... debug mode produces verbose log output for all activity,
                                          including output of sub-commands cordova-cli invokes
+    --no-update-notifier ............... disables check for CLI updates
