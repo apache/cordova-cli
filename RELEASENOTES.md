@@ -20,8 +20,8 @@
 -->
 # Cordova-cli Release Notes
 
-### 5.3.0 (Aug 28, 2015)
-* Updated cordova-lib dependency to 5.3.0 
+### 5.3.1 (Aug 28, 2015)
+* Updated cordova-lib dependency to 5.3.1 
 
 ### 5.2.0 (Aug 06, 2015)
 * docs: unify expression of Amazon Fire OS
