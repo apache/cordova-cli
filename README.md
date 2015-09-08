@@ -27,6 +27,8 @@
 
 Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/) for more details on how to work with Cordova sub-projects.
 
+:warning: Check issues on the [JIRA issue tracker](https://issues.apache.org/jira/browse/CB-9388?jql=project%20%3D%20CB%20AND%20resolution%20%3D%20Unresolved%20AND%20component%20%3D%20CLI%20ORDER%20BY%20priority%20DESC)
+
 # Supported Cordova Platforms
 
 - Amazon Fire OS
