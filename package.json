@@ -29,10 +29,11 @@
     "cli"
   ],
   "dependencies": {
+    "ansi": "^0.3.0",
     "cordova-lib": "5.3.1",
     "q": "1.0.1",
     "nopt": "3.0.1",
-    "underscore":"1.7.0"
+    "underscore": "1.7.0"
   },
   "devDependencies": {
     "istanbul": "^0.3.4",

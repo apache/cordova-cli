@@ -27,7 +27,8 @@ var path = require('path'),
     fs = require('fs'),
     help = require('./help'),
     nopt,
-    _;
+    _,
+    logger = require('./logger');
 
 var cordova_lib = require('cordova-lib'),
     CordovaError = cordova_lib.CordovaError,
@@ -118,25 +119,28 @@ function cli(inputArgs) {
     // are in a verbose mode.
     process.on('uncaughtException', function(err){
         if ( (err instanceof CordovaError) && !args.verbose ) {
-            console.error(err.message);
+            events.emit('error', err.message);
         } else {
-            console.error(err.stack);
+            events.emit('error', err.stack);
         }
         process.exit(1);
     });
 
+    events.on('verbose', logger.verbose);
+    events.on('log', logger.normal);
+    events.on('info', logger.info);
+    events.on('warn', logger.warn);
+    events.on('error', logger.error);
 
     // Set up event handlers for logging and results emitted as events.
-    events.on('results', console.log);
+    events.on('results', logger.results);
 
-    if ( !args.silent ) {
-        events.on('log', console.log);
-        events.on('warn', console.warn);
+    if (args.silent) {
+        logger.setLevel('error');
     }
 
-    // Add handlers for verbose logging.
     if (args.verbose) {
-        events.on('verbose', console.log);
+        logger.setLevel('verbose');
     }
 
     // TODO: Example wanted, is this functionality ever used?
