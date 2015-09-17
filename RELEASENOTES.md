@@ -20,6 +20,9 @@
 -->
 # Cordova-cli Release Notes
 
+### 5.3.2 (Sep 17, 2015)
+* Updated cordova-lib dependency to 5.3.2
+
 ### 5.3.1 (Aug 28, 2015)
 * Updated cordova-lib dependency to 5.3.1 
 
