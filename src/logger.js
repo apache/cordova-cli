@@ -27,7 +27,6 @@ var EOL = require('os').EOL;
 
 var logger = {
     levels: {},
-    prefixes: {},
     colors: {},
     output: process.stdout
 };
@@ -59,13 +58,12 @@ function formatError(error, isVerbose) {
 logger.log = function (logLevel, message) {
     if (this.levels[logLevel] >= this.levels[this.logLevel]) {
         var isVerbose = this.logLevel === 'verbose';
-        var prefix = this.prefixes[logLevel] ? this.prefixes[logLevel] + ': ' : '';
 
         if(message instanceof Error) {
             message = formatError(message, isVerbose);
         }
 
-        message = prefix + message + EOL;
+        message = message + EOL;
 
         if (!this.cursor) {
             this.output.write(message);
@@ -80,9 +78,8 @@ logger.log = function (logLevel, message) {
     }
 };
 
-logger.addLevel = function (level, severity, prefix, color) {
+logger.addLevel = function (level, severity, color) {
     this.levels[level] = severity;
-    prefix && (this.prefixes[level] = prefix);
     color && (this.colors[level] = color);
 
     if (!this[level]) {
@@ -97,11 +94,11 @@ logger.setLevel = function (logLevel) {
     }
 };
 
-logger.addLevel('verbose', 1000, 'VERB ', 'grey');
-logger.addLevel('normal' , 2000, 'LOG  ');
-logger.addLevel('warn'   , 2000, 'WARN ', 'yellow');
-logger.addLevel('info'   , 3000, 'INFO ', 'blue');
-logger.addLevel('error'  , 5000, 'ERROR', 'red');
+logger.addLevel('verbose', 1000, 'grey');
+logger.addLevel('normal' , 2000);
+logger.addLevel('warn'   , 2000, 'yellow');
+logger.addLevel('info'   , 3000, 'blue');
+logger.addLevel('error'  , 5000, 'red');
 logger.addLevel('results' , 10000);
 
 logger.setLevel('normal');
