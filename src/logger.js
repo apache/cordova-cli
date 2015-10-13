@@ -28,10 +28,12 @@ var EOL = require('os').EOL;
 var logger = {
     levels: {},
     colors: {},
-    output: process.stdout
+    stdout: process.stdout,
+    stderr: process.stderr
 };
 
-logger.cursor = ansi(logger.output);
+logger.stdoutCursor = ansi(logger.stdout);
+logger.stderrCursor = ansi(logger.stderr);
 
 function formatError(error, isVerbose) {
     var message = '';
@@ -44,13 +46,10 @@ function formatError(error, isVerbose) {
         } else {
             message = error.message;
         }
+    } else {
+        // Plain text error message
+        message = error;
     }
-
-    // Some error messages start with 'Error: ' prefix, so cut it off here to avoid duplication.
-    // This will also remove generic Error.name (type), which Error.stack outputs in verbose mode,
-    // i.e. events.emit('error', new Error('...')), while preserving a specific Error type like RangeError.
-    // TODO: Update platforms code to remove such prefixes
-    message = message && message.replace(/^error:\s+/i, '');
 
     return message;
 }
@@ -58,23 +57,29 @@ function formatError(error, isVerbose) {
 logger.log = function (logLevel, message) {
     if (this.levels[logLevel] >= this.levels[this.logLevel]) {
         var isVerbose = this.logLevel === 'verbose';
+        var cursor, output;
 
-        if(message instanceof Error) {
+        if(message instanceof Error || logLevel === 'error') {
             message = formatError(message, isVerbose);
+            cursor = this.stderrCursor;
+            output = this.stderr;
+        } else {
+            cursor = this.stdoutCursor;
+            output = this.stdout;
         }
 
         message = message + EOL;
 
-        if (!this.cursor) {
-            this.output.write(message);
+        if (!cursor) {
+            output.write(message);
         }
-        if (this.output !== this.cursor.stream) {
-            this.cursor = ansi(this.output, { enabled: colorEnabled });
+        if (output !== cursor.stream) {
+            cursor = ansi(output, { enabled: colorEnabled });
         }
         var color = this.colors[logLevel];
-        !!color && this.cursor.bold().fg[color]();
-        this.cursor.write(message);
-        this.cursor.reset();
+        !!color && cursor.bold().fg[color]();
+        cursor.write(message);
+        cursor.reset();
     }
 };
 
