@@ -130,12 +130,8 @@ function cli(inputArgs) {
 
     // For CordovaError print only the message without stack trace unless we
     // are in a verbose mode.
-    process.on('uncaughtException', function(err){
-        if ( (err instanceof CordovaError) && !args.verbose ) {
-            events.emit('error', err.message);
-        } else {
-            events.emit('error', err.stack);
-        }
+    process.on('uncaughtException', function(err) {
+        logger.error(err);
         process.exit(1);
     });
 
@@ -143,7 +139,6 @@ function cli(inputArgs) {
     events.on('log', logger.normal);
     events.on('info', logger.info);
     events.on('warn', logger.warn);
-    events.on('error', logger.error);
 
     // Set up event handlers for logging and results emitted as events.
     events.on('results', logger.results);
