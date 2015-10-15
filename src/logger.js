@@ -51,6 +51,11 @@ function formatError(error, isVerbose) {
         message = error;
     }
 
+    if(message.toUpperCase().indexOf('ERROR:') !== 0) {
+        // Needed for backward compatibility with external tools
+        message = 'Error: ' + message;
+    }
+
     return message;
 }
 
