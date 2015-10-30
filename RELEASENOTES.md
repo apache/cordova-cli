@@ -20,6 +20,17 @@
 -->
 # Cordova-cli Release Notes
 
+### 5.4.0 (Oct 30, 2015)
+* CB-9903 update cordova-lib dependency to 5.4.0
+* CB-9861 fixed failing tests
+* CB-9800 Fixing contribute link.
+* CB-9792 Make CLI logging system interrupt process on an error event
+* CB-9788 Add support of stderr/stdout split to CLI logger
+* CB-9784 Remove CLI logger levels prefixes
+* CB-8198 Unified console output logic for core platforms
+* CB-9523 Show out of date message for older cordova CLI
+* CB-9597 Updates cli to pass structured args to platform methods
+
 ### 5.3.1 (Aug 28, 2015)
 * Updated cordova-lib dependency to 5.3.1 
 
