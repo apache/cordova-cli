@@ -11,5 +11,6 @@ Create a Cordova project
                                     [PATH]/.cordova-cli/config.json
 
     Options:
-        --copy-from|src=<PATH> ... use custom www assets instead of the stock Cordova hello-world.
-        --link-to=<PATH> ......... symlink to custom www assets without creating a copy.
+        --template=<PATH|NPM PACKAGE|GIT URL> ... use a custom template located locally, in NPM, or GitHub.
+        --copy-from|src=<PATH> .................. deprecated, use --template instead.
+        --link-to=<PATH> ........................ symlink to custom www assets without creating a copy.

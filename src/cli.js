@@ -96,6 +96,7 @@ function cli(inputArgs) {
         , 'nobuild': Boolean
         , 'list': Boolean
         , 'buildConfig' : String
+        , 'template' : String
         };
 
     var shortHands =
@@ -103,6 +104,7 @@ function cli(inputArgs) {
         , 'v' : '--version'
         , 'h' : '--help'
         , 'src' : '--copy-from'
+        , 't' : '--template'
         };
 
     // If no inputArgs given, use process.argv.
@@ -113,7 +115,6 @@ function cli(inputArgs) {
     checkForUpdates();
 
     var args = nopt(knownOpts, shortHands, inputArgs);
-
 
     if (args.version) {
         var cliVersion = require('../package').version;
@@ -288,35 +289,7 @@ function cli(inputArgs) {
         var port = undashed[1];
         cordova.raw.serve(port).done();
     } else if (cmd == 'create') {
-        var cfg = {};
-        // If we got a fourth parameter, consider it to be JSON to init the config.
-        if ( undashed[4] ) {
-            cfg = JSON.parse(undashed[4]);
-        }
-        var customWww = args['copy-from'] || args['link-to'];
-        if (customWww) {
-            if (customWww.indexOf('http') === 0) {
-                throw new CordovaError(
-                    'Only local paths for custom www assets are supported.'
-                );
-            }
-            if ( customWww.substr(0,1) === '~' ) {  // resolve tilde in a naive way.
-                customWww = path.join(process.env.HOME,  customWww.substr(1));
-            }
-            customWww = path.resolve(customWww);
-            var wwwCfg = { url: customWww };
-            if (args['link-to']) {
-                wwwCfg.link = true;
-            }
-            cfg.lib = cfg.lib || {};
-            cfg.lib.www = wwwCfg;
-        }
-        // create(dir, id, name, cfg)
-        cordova.raw.create( undashed[1]  // dir to create the project in
-                          , undashed[2]  // App id
-                          , undashed[3]  // App name
-                          , cfg
-        ).done();
+        create();
     } else {
         // platform/plugins add/rm [target(s)]
         subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
@@ -342,5 +315,51 @@ function cli(inputArgs) {
                             , shrinkwrap: args.shrinkwrap || false
                             };
         cordova.raw[cmd](subcommand, targets, download_opts).done();
+    }
+
+    function create() {
+        var cfg;            // Create config
+        var customWww;      // Template path
+        var wwwCfg;         // Template config
+
+        // If we got a fourth parameter, consider it to be JSON to init the config.
+        if (undashed[4])
+            cfg = JSON.parse(undashed[4]);
+        else
+            cfg = {};
+
+        customWww = args['copy-from'] || args['link-to'] || args.template;
+
+        if (customWww) {
+            if (!args.template && customWww.indexOf('http') === 0) {
+                throw new CordovaError(
+                    'Only local paths for custom www assets are supported.'
+                );
+            }
+
+            // Resolve tilda
+            if (customWww.substr(0,1) === '~')
+                customWww = path.join(process.env.HOME,  customWww.substr(1));
+
+            wwwCfg = {
+                url: customWww,
+                template: false
+            };
+
+            if (args['link-to'])
+                wwwCfg.link = true;
+            else if (args.template)
+                wwwCfg.template = true;
+
+            cfg.lib = cfg.lib || {};
+            cfg.lib.www = wwwCfg;
+        }
+
+        // create(dir, id, name, cfg)
+        cordova.raw.create( undashed[1]  // dir to create the project in
+            , undashed[2]  // App id
+            , undashed[3]  // App name
+            , cfg
+        ).done();
     }
 }
