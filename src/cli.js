@@ -97,6 +97,7 @@ function cli(inputArgs) {
         , 'nobuild': Boolean
         , 'list': Boolean
         , 'buildConfig' : String
+        , 'template' : String
         };
 
     var shortHands =
@@ -104,6 +105,7 @@ function cli(inputArgs) {
         , 'v' : '--version'
         , 'h' : '--help'
         , 'src' : '--copy-from'
+        , 't' : '--template'
         };
 
     // If no inputArgs given, use process.argv.
