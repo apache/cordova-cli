@@ -62,8 +62,8 @@ CordovaCliCreate.prototype.parseConfig = function (jsondata) {
         process.exit(2); 
     }
 };
-
 CordovaCliCreate.prototype.customWww = function (args) {
+
     // handle custom www
     if (customWww = args['copy-from'] || args['link-to']) {
 
