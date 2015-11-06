@@ -313,6 +313,8 @@ To run your app, you will need to open the `.sln` in the `platforms/windows8` fo
 
 ## Amazon Fire OS
 
+**DEPRECATION NOTICE** Cordova Amazon Fire OS platform support is deprecated for Amazon Fire OS 5.0 and higher (2015 devices and later); for these devices, please use the Android platform target only.
+
 Amazon Fire OS does not include the ability to emulate. You are still able to use the following commands with Amazon Fire OS
 
 - `platform add amazon-fireos`
