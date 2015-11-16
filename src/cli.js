@@ -334,7 +334,7 @@ function cli(inputArgs) {
         customWww = args['copy-from'] || args['link-to'] || args.template;
 
         if (customWww) {
-            if (!args.template && customWww.indexOf('http') === 0) {
+            if (args['link-to'] && customWww.indexOf('http') === 0) {
                 throw new CordovaError(
                     'Only local paths for custom www assets are supported.'
                 );
@@ -351,7 +351,7 @@ function cli(inputArgs) {
 
             if (args['link-to'])
                 wwwCfg.link = true;
-            else if (args.template)
+            else
                 wwwCfg.template = true;
 
             cfg.lib = cfg.lib || {};
