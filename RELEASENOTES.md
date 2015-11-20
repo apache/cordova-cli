@@ -20,6 +20,9 @@
 -->
 # Cordova-cli Release Notes
 
+### 5.4.1 (Nov 19, 2015)
+* CB-10049 updated cordova-lib dependency to 5.4.1
+
 ### 5.4.0 (Oct 30, 2015)
 * CB-9903 update cordova-lib dependency to 5.4.0
 * CB-9861 fixed failing tests
