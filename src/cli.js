@@ -80,7 +80,6 @@ function cli(inputArgs) {
         , 'experimental' : Boolean
         , 'noregistry' : Boolean
         , 'shrinkwrap' : Boolean
-        , 'usegit' : Boolean
         , 'copy-from' : String
         , 'link-to' : path
         , 'searchpath' : String
@@ -336,7 +335,6 @@ function cli(inputArgs) {
         }
         var download_opts = { searchpath : args.searchpath
                             , noregistry : args.noregistry
-                            , usegit : args.usegit
                             , cli_variables : cli_vars
                             , browserify: args.browserify || false
                             , link: args.link || false
