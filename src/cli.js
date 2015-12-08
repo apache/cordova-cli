@@ -79,6 +79,7 @@ function cli(inputArgs) {
         , 'silent' : Boolean
         , 'experimental' : Boolean
         , 'noregistry' : Boolean
+        , 'nohooks': [String, Array]
         , 'shrinkwrap' : Boolean
         , 'copy-from' : String
         , 'link-to' : path
@@ -194,6 +195,7 @@ function cli(inputArgs) {
         verbose: args.verbose || false,
         silent: args.silent || false,
         browserify: args.browserify || false,
+        nohooks: args.nohooks || [],
         searchpath : args.searchpath
     };
 
@@ -308,6 +310,7 @@ function cli(inputArgs) {
         }
         var download_opts = { searchpath : args.searchpath
                             , noregistry : args.noregistry
+                            , nohooks : args.nohooks
                             , cli_variables : cli_vars
                             , browserify: args.browserify || false
                             , link: args.link || false
