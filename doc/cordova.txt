@@ -35,3 +35,5 @@ Command-line Flags/Options
     -d, --verbose ...................... debug mode produces verbose log output for all activity,
                                          including output of sub-commands cordova-cli invokes
     --no-update-notifier ............... disables check for CLI updates
+    --nohooks .......................... suppress executing hooks
+                                            (taking RegExp hook patterns as parameters)
