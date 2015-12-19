@@ -50,7 +50,7 @@ describe("cordova cli", function () {
                 expect(console.log.mostRecentCall.args[0]).toMatch(version);
             });
 
-            it("will spit out the version with -v anywher", function () {
+            it("will spit out the version with -v anywhere", function () {
                 cli(["node", "cordova", "one", "-v", "three"]);
                 expect(console.log.mostRecentCall.args[0]).toMatch(version);
             });
@@ -132,5 +132,17 @@ describe("cordova cli", function () {
             var opts = cordova.raw.plugin.calls[0].args[2];
             expect(opts.cli_variables.MOTO).toBe('DELTA=WAS=HERE');
         });
+
+        it("will pass hook patterns to suppress", function () {
+            cli(["node", "cordova", "plugin", "add", "facebook", "--nohooks", "before_plugin_add"]);
+            expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                "add",
+                ["facebook"],
+                jasmine.any(Object)
+            );
+            var opts = cordova.raw.plugin.calls[0].args[2];
+            expect(opts.nohooks[0]).toBe("before_plugin_add");
+        });
+
     });
 });

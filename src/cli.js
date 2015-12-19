@@ -79,7 +79,7 @@ function cli(inputArgs) {
         , 'silent' : Boolean
         , 'experimental' : Boolean
         , 'noregistry' : Boolean
-        , 'nohooks': [String, Array]
+        , 'nohooks': Array
         , 'shrinkwrap' : Boolean
         , 'copy-from' : String
         , 'link-to' : path
