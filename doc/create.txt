@@ -5,12 +5,16 @@ Synopsis
 Create a Cordova project
 
     PATH ......................... Where to create the project
-    ID ........................... reverse-domain-style package name - used in <widget id>
-    NAME ......................... human readable field
+    ID ........................... Reverse-domain-style package name - used in <widget id>
+    NAME ......................... Human readable name
     CONFIG ....................... json string whose key/values will be included in
                                     [PATH]/.cordova-cli/config.json
 
-    Options:
-        --template=<PATH|NPM PACKAGE|GIT URL> ... use a custom template located locally, in NPM, or GitHub.
-        --copy-from|src=<PATH> .................. deprecated, use --template instead.
-        --link-to=<PATH> ........................ symlink to custom www assets without creating a copy.
+Options
+
+    --template=<PATH|NPM PACKAGE|GIT URL> ... use a custom template located locally, in NPM, or GitHub.
+    --copy-from|src=<PATH> .................. deprecated, use --template instead.
+    --link-to=<PATH> ........................ symlink to custom www assets without creating a copy.
+    
+Example
+    cordova-cli create myapp com.mycompany.myteam.myapp MyApp

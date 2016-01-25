@@ -10,6 +10,8 @@ Synopsis
 
 Builds the app for specified platforms, or all platforms
 
+Options
+
     --debug ............................ Deploy a debug build
     --release .......................... Deploy a release build
 
@@ -18,3 +20,8 @@ Builds the app for specified platforms, or all platforms
     --target ........................... Deploy to a specific target
 
 To provide platform specific options, you must include them after `--`.
+
+Examples
+
+    cordova-cli compile android windows --debug --device
+    cordova-cli compile android --release

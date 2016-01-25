@@ -29,6 +29,9 @@ Deploys app on specified platform devices / emulators
     --buildConfig....................... Use the specified build configuration
                                          instead of default build.json
 
+    --browserify ....................... Compile plugin JS at build time using 
+                                         browserify instead of runtime.
+
 To provide platform specific options, you must include them after `--`.
 
 Technical details
@@ -36,11 +39,8 @@ Technical details
     calls PLATFORM run
         PLATFORM run calls PLATFORM build (unless --nobuild)
 
-Experimental Flags
-
-    --browserify ....................... Plugins javascript gets loaded at build time instead of runtime using browserify.
-                                         Replaces cordovajs file with one that includes the JS of the installed plugins.
-
-Example
-
-    cordova run android --release --buildConfig=..\myBuildConfig.json --target=myEmulator
+Examples 
+    cordova-cli run android --release --buildConfig=..\myBuildConfig.json --target=myEmulator
+    cordova-cli run android --nobuild
+    cordova-cli run ios --device
+    cordova-cli run ios --list

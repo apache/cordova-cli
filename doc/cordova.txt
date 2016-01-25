@@ -1,14 +1,11 @@
 Synopsis
-
     cordova-cli command [options]
 
 Global Commands
-
     create ............................. Create a project
     help ............................... Get help for a command
 
 Project Commands
-
     info ............................... Generate project information
     requirements ....................... Checks and print out all the requirements
                                             for platforms specified
@@ -24,16 +21,21 @@ Project Commands
                                             (including prepare && compile)
     serve .............................. Run project with a local webserver
                                             (including prepare)
-
-aliases:
+Aliases
     build -> cordova-cli prepare && cordova-cli compile
     emulate -> cordova-cli run --emulator
 
-Command-line Flags/Options
-
+Options
     -v, --version ...................... prints out this utility's version
     -d, --verbose ...................... debug mode produces verbose log output for all activity,
-                                         including output of sub-commands cordova-cli invokes
     --no-update-notifier ............... disables check for CLI updates
     --nohooks .......................... suppress executing hooks
-                                            (taking RegExp hook patterns as parameters)
+                                         (taking RegExp hook patterns as parameters)
+
+Examples
+    cordova-cli create myApp org.apache.cordova.myApp myApp
+    cordova-cli plugin add cordova-plugin-camera --save
+    cordova-cli platform add android --save
+    cordova-cli requirements android    
+    cordova-cli buid android --verbose
+    cordova-cli run android
