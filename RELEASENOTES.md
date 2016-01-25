@@ -20,6 +20,15 @@
 -->
 # Cordova-cli Release Notes
 
+### 6.0.0 (Jan 25, 2016)
+* CB-10424 Updated cordova-lib dependency to 6.0.0
+* CB-8455 Added `--nohooks` option.
+* CB-9964 Added `--template` support to `cordova create`
+* Removing the `--usegit` flag from `cordova platform`. Recommended method is to use `cordova platform add git_url#branch`
+* CB-9836 Add `.gitattributes` to prevent `CRLF` line endings in repos
+* Message about deprecating **amazon-fireos** for **Fire OS 5.0+** devices. 2015 onwards **FireOS** devices should use **android** platform only.
+* add **JIRA** issue tracker link. 
+
 ### 5.4.1 (Nov 19, 2015)
 * CB-10049 updated cordova-lib dependency to 5.4.1
 
