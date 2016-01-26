@@ -21,6 +21,9 @@ Project Commands
                                             (including prepare && compile)
     serve .............................. Run project with a local webserver
                                             (including prepare)
+
+Learn more about command options using 'cordova-cli help <command>'
+
 Aliases
     build -> cordova-cli prepare && cordova-cli compile
     emulate -> cordova-cli run --emulator
@@ -37,5 +40,6 @@ Examples
     cordova-cli plugin add cordova-plugin-camera --save
     cordova-cli platform add android --save
     cordova-cli requirements android    
-    cordova-cli buid android --verbose
+    cordova-cli build android --verbose
     cordova-cli run android
+    cordova-cli build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
