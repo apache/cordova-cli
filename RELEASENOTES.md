@@ -22,6 +22,7 @@
 
 ### 6.0.0 (Jan 25, 2016)
 * CB-10424 Updated cordova-lib dependency to 6.0.0
+* Remove browserify from experimental flags list
 * CB-8455 Added `--nohooks` option.
 * CB-9964 Added `--template` support to `cordova create`
 * Removing the `--usegit` flag from `cordova platform`. Recommended method is to use `cordova platform add git_url#branch`
