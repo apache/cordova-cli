@@ -35,7 +35,7 @@ Syntax
     <directory> ....................... Directory containing plugin.xml
     <url> ............................. Url to a git repository containing a plugin.xml
     <version> ......................... Major.minor.patch version specifier using semver
-    <commit-ish> ...................... Commit/tag reference. If none is specified, 'master' is used
+    <commit-ish> ...................... Commit/tag/branch reference. If none is specified, 'master' is used
 
 Aliases
     plugins -> plugin
@@ -43,9 +43,9 @@ Aliases
     ls -> list
 
 Examples
-    cordova-cli plugin add cordova-plugin-camera --save
-    cordova-cli plugin add cordova-plugin-camera@^2.0.0 --save --searchpath ~/plugins
-    cordova-cli plugin add https://github.com/myfork/cordova-plugin-camera.git#2.0.0 --save
+    cordova-cli plugin add cordova-plugin-camera cordova-plugin-file --save --searchpath ~/plugins
+    cordova-cli plugin add cordova-plugin-camera@^2.0.0 --save
+    cordova-cli plugin add https://github.com/myfork/cordova-plugin-camera.git#2.1.0 --save
     cordova-cli plugin add ../cordova-plugin-camera --save
     cordova-cli plugin add ../cordova-plugin-camera.tgz --save
     cordova-cli plugin rm camera --save

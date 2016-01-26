@@ -30,3 +30,4 @@ To provide platform specific options, you must include them after `--`.
 Example
     cordova-cli build android windows --debug --device
     cordova-cli build android --release --buildConfig=..\myBuildConfig.json
+    cordova-cli build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey 

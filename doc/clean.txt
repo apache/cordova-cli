@@ -8,4 +8,4 @@ by running platform-provided clean script.
 To provide platform specific options, you must include them after `--`.
 
 Example
-    corodva-cli clean android
+    cordova-cli clean android

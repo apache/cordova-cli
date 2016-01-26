@@ -31,7 +31,7 @@ Syntax
     <path> ............................ Path to a directory containing a platform
     <url> ............................. Url to a git repository containing a platform
     <version> ......................... Major.minor.patch version specifier using semver
-    <commit-ish> ...................... Commit/tag reference. If none is specified, 'master' is used
+    <commit-ish> ...................... Commit/tag/bramch reference. If none is specified, 'master' is used
     
 Aliases
     platforms -> platform
@@ -39,7 +39,7 @@ Aliases
     ls -> list
 
 Examples
-    cordova-cli platform add android --save
+    cordova-cli platform add android ios --save
     cordova-cli platform add android@^5.0.0 --save
     cordova-cli platform add https://github.com/myfork/cordova-android.git#4.0.0 --save
     cordova-cli platform add ../android --save
