@@ -21,9 +21,7 @@ Manage project plugins
                                          browserify instead of runtime.
 
     remove <pluginid>|<name> [...] ..... Remove plugins with the given IDs/name.
-      
-        --save ......................... Remove the information for specified plugin into config.xml
-
+        --save ......................... Remove the information for specified plugin from config.xml
 
     list .............................. List currently installed plugins
     search [<keyword>] [...] .......... Search http://plugins.cordova.io for plugins matching the keywords
