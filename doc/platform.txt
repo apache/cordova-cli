@@ -28,9 +28,9 @@ Syntax
     <plat-spec> : <platform>[@<version>]|<path>|<url>[#<commit-ish>]
 
     <platform> ........................ Platform name e.g. android, ios, windows etc.
+    <version> ......................... Major.minor.patch version specifier using semver
     <path> ............................ Path to a directory containing a platform
     <url> ............................. Url to a git repository containing a platform
-    <version> ......................... Major.minor.patch version specifier using semver
     <commit-ish> ...................... Commit/tag/bramch reference. If none is specified, 'master' is used
     
 Aliases

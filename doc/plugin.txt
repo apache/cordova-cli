@@ -32,9 +32,9 @@ Syntax
     <plugin-spec> : <pluginID>[@<version>]|<directory>|<url>[#<commit-ish>]
 
     <plugin> .......................... Plugin id (id of plugin in npm registry or --searchPath)
+    <version> ......................... Major.minor.patch version specifier using semver
     <directory> ....................... Directory containing plugin.xml
     <url> ............................. Url to a git repository containing a plugin.xml
-    <version> ......................... Major.minor.patch version specifier using semver
     <commit-ish> ...................... Commit/tag/branch reference. If none is specified, 'master' is used
 
 Aliases
