@@ -1,6 +1,6 @@
 Synopsis
 
-    cordova-cli create <PATH> [ID [NAME [CONFIG]]] [options] [PLATFORM...]
+    cordova-cli create <PATH> [ID [NAME [CONFIG]]] [options]
 
 Create a Cordova project
 

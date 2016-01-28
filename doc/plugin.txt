@@ -21,22 +21,21 @@ Manage project plugins
                                          browserify instead of runtime.
 
     remove <pluginid>|<name> [...] ..... Remove plugins with the given IDs/name.
-      
-        --save ......................... Remove the information for specified plugin into config.xml
-
+        --save ......................... Remove the information for specified plugin from config.xml
 
     list .............................. List currently installed plugins
     search [<keyword>] [...] .......... Search http://plugins.cordova.io for plugins matching the keywords
     
 Syntax
-    <plugin-spec> : <pluginID>[@<version>]|<directory>|<url>[#<commit-ish>]
+    <plugin-spec> : <pluginID>[@<version>]|<directory>|<url>[#<commit-ish>][:subdir]
 
     <plugin> .......................... Plugin id (id of plugin in npm registry or --searchPath)
     <version> ......................... Major.minor.patch version specifier using semver
     <directory> ....................... Directory containing plugin.xml
     <url> ............................. Url to a git repository containing a plugin.xml
     <commit-ish> ...................... Commit/tag/branch reference. If none is specified, 'master' is used
-
+    <subdir> .......................... Sub-directory to find plugin.xml for the specified plugin.
+    
 Aliases
     plugins -> plugin
     rm -> remove

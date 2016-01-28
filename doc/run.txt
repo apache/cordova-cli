@@ -1,11 +1,10 @@
 Synopsis
 
-    cordova-cli run [MODE] [PROD] [TARGET] [EXP] [PLATS] [BUILDCONFIG] [-- POPTS] 
+    cordova-cli run [MODE] [PROD] [TARGET] [PLATS] [BUILDCONFIG] [-- POPTS] 
 
       MODE:       --list|--nobuild
       PROD:        --debug|--release
       TARGET:      DEVICECLASS|--target=FOO
-      EXP:         --experimental [EXPERIMENTALFLAGS]
       PLATS:       PLATFORM [...]
       BUILDCONFIG: --buildConfig=CONFIGFILE
       POPTS:       platformopts

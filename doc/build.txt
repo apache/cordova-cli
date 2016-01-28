@@ -1,10 +1,9 @@
 Synopsis
 
-    cordova-cli build [PROD] [TARGET] [EXP] [PLATS] [BUILDCONFIG] [-- POPTS]
+    cordova-cli build [PROD] [TARGET] [PLATS] [BUILDCONFIG] [-- POPTS]
 
       PROD:   --debug|--release
-      TARGET: --device|--emulator|--target=FOO
-      EXP:    --experimental [EXPERIMENTALFLAGS]
+      TARGET: --device|--emulator
       PLATS:  PLATFORM [...]
       BUILDCONFIG: --buildConfig=CONFIGFILE
       POPTS:  platformopts
@@ -15,9 +14,8 @@ all/the specified platforms.
     --debug ............................ debug build
     --release .......................... release build
 
-    --device ........................... Deploy to a device
-    --emulator ......................... Deploy to an emulator
-    --target ........................... Deploy to a specific target
+    --device ........................... Build it for a device
+    --emulator ......................... Build it for an emulator
 
     --buildConfig....................... Use the specified build configuration
                                          instead of default build.json
