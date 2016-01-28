@@ -23,6 +23,7 @@ Manage project platforms
 
     list .............................. List all installed and available platforms
     check ............................. List platforms which can be updated by `cordova-cli platform update`
+    save .............................. Save all current platform versions to config.xml
 
 Syntax
     <plat-spec> : <platform>[@<version>]|<path>|<url>[#<commit-ish>]
