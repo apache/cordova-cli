@@ -22,9 +22,9 @@
 #Cordova Command-line-interface (CLI) Reference
 
 ##Syntax
-    
-    cordova command [options]
-
+```    
+    cordova <command> [options]
+```
 ##Global Commands
 
 These commands are available at all times.    
@@ -36,7 +36,7 @@ These commands are available at all times.
 
 ##Project Commands
 
-These commands are supported in a valid Cordova project.
+These commands are supported when the current working directory is a valid Cordova project.
 
 | Command      | Description
 |--------------|--------------
@@ -52,27 +52,25 @@ These commands are supported in a valid Cordova project.
 
 ##Common options
 
-These options appply to all cordova-cli commands.
+These options apply to all cordova-cli commands.
 
 | Option               | Description
 |----------------------|------------------------
 | -d or --verbose      | Pipe out more verbose output to your shell. You can also subscribe to `log` and `warn` events if you are consuming `cordova-cli` as a node module by calling `cordova.on('log', function() {})` or `cordova.on('warn', function() {})`.
 | -v or --version      | Print out the version of your `cordova-cli` install.
-| --no-update-notifier | will disable updates check. Alternatively set `"optOut": true` in `~/.config/configstore/update-notifier-cordova.json` or set `NO_UPDATE_NOTIFIER` environment variable with any value (see details in [update-notifier docs](https://www.npmjs.com/package/update-notifier#user-settings)).
-|--nohooks             | suppress executing hooks (taking RegExp hook patterns as parameters)
+| --no-update-notifier | Will disable updates check. Alternatively set `"optOut": true` in `~/.config/configstore/update-notifier-cordova.json` or set `NO_UPDATE_NOTIFIER` environment variable with any value (see details in [update-notifier docs](https://www.npmjs.com/package/update-notifier#user-settings)).
+|--nohooks             | Suppress executing hooks (taking RegExp hook patterns as parameters)
+
+## Platform-specific options
+
+Certain platforms support options that only apply to their platform. These can be provided to the cordova-cli with a '--' separator that stops the command parsing within the cordova-lib module and passes through rest of the options for platforms to parse.   
 
 ##Examples
-- The following commands will:
-    - Create a cordova project in `myApp` directory.
-    - Add `cordova-plugin-camera` to the project and `config.xml`.
-    - Add `android` platform to the project
-    - Check for system requirements for the `android` platform.
-    - Build the project for the `android` platform and emit verbose output.
-    - Run the project on `android` emulator or device.
-    - Build `android` platform using custom signing options.
-
+-  This example demonstrates how cordova-cli can be used to create a project with the `camera` plugin and run it for `android` platform. In particular, platform specific options like `--keystore` can be provided:
+    
 ```
-    cordova create myApp org.apache.cordova.myApp myApp
+    cordova create myApp com.myCompany.myApp myApp
+    cd myApp
     cordova plugin add cordova-plugin-camera --save
     cordova platform add android --save
     cordova requirements android    
@@ -87,9 +85,9 @@ These options appply to all cordova-cli commands.
 Create the directory structure for the Cordova project in the specified path.
 
 ###Syntax
-
+```
     cordova create path [id [name [config]]] [options] 
-
+```
 | Value | Description   |
 |-------|---------------|     
 | path  |  Directory which should not already exist. Cordova will create this directory. For more details on the directory structure, see below. |
@@ -106,32 +104,32 @@ Create the directory structure for the Cordova project in the specified path.
 |--link-to | Symlink to specified `www` directory without creating a copy. |
 
 ###Directory structure
-A Cordova application built with `cordova-cli` will have the following directory structure:
-
+A Cordova application created with `cordova-cli` will have the following directory structure:
+```
     myapp/
     |-- config.xml
     |-- hooks/
     |-- merges/
     | | |-- android/
-    | | |-- blackberry10/
+    | | |-- windows/
     | | `-- ios/
     |-- www/                    
     |-- platforms/             
     | |-- android/
-    | |-- blackberry10/
+    | |-- windows/
     | `-- ios/
     `-- plugins/
-
-#### `config.xml`
-Specifies your application configuration allowing you to customize behavior for your file. See also [conifg.xml reference documentation][config.xml ref]
+```
+#### config.xml
+Specifies your application allowing you to customize behavior for your file. See also [conifg.xml reference documentation][config.xml ref]
     
 #### www/
-Contains the project's web artifacts, such as .html, .css and .js files. As a cordova application developer, most of your code and assets will go here. They will be copied on a `cordova prepare` to each platform's www directory. The www source directory is reproduced within each platform's subdirectory, appearing for example in platforms/ios/www or platforms/android/assets/www. Because the CLI constantly copies over files from the source www folder, you should only edit these files and not the ones located under the platforms subdirectories. If you use version control software, you should add this source www folder, along with the merges folder, to your version control system.
+Contains the project's web artifacts, such as .html, .css and .js files. As a cordova application developer, most of your code and assets will go here. They will be copied on a `cordova prepare` to each platform's www directory. The www source directory is reproduced within each platform's subdirectory, appearing for example in `platforms/ios/www` or `platforms/android/assets/www`. Because the CLI constantly copies over files from the source www folder, you should only edit these files and not the ones located under the platforms subdirectories. If you use version control software, you should add this source www folder, along with the merges folder, to your version control system.
 
 #### platforms/
 Contains all the source code and build scripts for the platforms that you add to your project. 
 
-**WARNING:** When using the CLI to build your application, you should not edit any files in the /platforms/ directory unless you know what you are doing, or if documentation specifies otherwise. The files in this directory are routinely overwritten when preparing applications for building, or when plugins are reinstalled. 
+> **WARNING:** When using the CLI to build your application, you should not edit any files in the /platforms/ directory unless you know what you are doing, or if documentation specifies otherwise. The files in this directory are routinely overwritten when preparing applications for building, or when plugins are re-installed. 
 
 #### plugins/
 Any added plugins will be extracted or copied into this directory. 
@@ -143,7 +141,7 @@ Refer to [Hooks Guide] for more information.
 
 #### merges/
 Platform-specific web assets (HTML, CSS and JavaScript files) are contained within appropriate subfolders in this directory. These are deployed during a `prepare` to the appropriate native directory.  Files placed under `merges/` will override matching files in the `www/` folder for the relevant platform. A quick example, assuming a project structure of:
-
+```
     merges/
     |-- ios/
     | `-- app.js
@@ -151,7 +149,7 @@ Platform-specific web assets (HTML, CSS and JavaScript files) are contained with
     | `-- android.js
     www/
     `-- app.js
-
+```
 After building the Android and iOS projects, the Android application will contain both `app.js` and `android.js`. However, the iOS application will only contain an `app.js`, and it will be the one from `merges/ios/app.js`, overriding the "common" `app.js` located inside `www/`.
 
 ####Version control
@@ -176,7 +174,7 @@ Manage cordova platforms - allowing you to add, remove, update, list and check f
 
 ###Syntax
 ```
-    cordova {platform | platfoms} [ 
+    cordova {platform | platforms} [ 
         add <platform-spec> [...] {--save | link=<path> } | 
         {remove | rm}  platform [...] | 
         {list | ls}  | 
@@ -186,49 +184,51 @@ Manage cordova platforms - allowing you to add, remove, update, list and check f
 | Sub-command           | Option | Description |
 ------------------------|-------------|------|
 | add `<platform-spec>` [...] |  | Add specified platforms |
-|     | --save                   | Save `<platform-spec` into config.xml after installing them using `<engine>` tag |
+|     | --save                   | Save `<platform-spec>` into config.xml after installing them using `<engine>` tag |
 |     | --link=`<path>`          | When `<platform-spec>` is a local path, links the platform library directly instead of making a copy of it (support varies by platform; useful for platform development)
 | remove `<platform>` [...] |    | Remove specified platforms |
 |     | --save                   | Delete specified platforms from config.xml after removing them |
 | update `platform` [...] |      | Update specified platforms |
 |     | --save                   | Updates the version specified in `config.xml` |     
 | list |                         | List all installed and available platforms |
-| check |                        | List platforms which can be updated by `cordova-cli platform update | 
+| check |                        | List platforms which can be updated by `cordova-cli platform update` | 
 | save  |                        | Save `<platform-spec>` of all platforms added to config.xml |
 
 ### Platform-spec
 There are a number of ways to specify a platform:    
-    
+```    
     <platform-spec> : platform[@version] | path | url[#commit-ish]
-    
+```    
 | Value | Description |
 |-----------|-------------|
-| platform | Platform name e.g. android, ios, windows etc. to be added to the project. Every release of cordova CLI pins a version for each platform. When no version is specified this version is used to add the platform. |
-| version | Major.minor.patch version specifier using semver |
-| path |  Path to a directory containing a platform |
-| url | Url to a git repository or tarball containing a platform |
-| commit-ish | Commit/tag/bramch reference. If none is specified, 'master' is used |
+| platform  | Platform name e.g. android, ios, windows etc. to be added to the project. Every release of cordova CLI pins a version for each platform. When no version is specified this version is used to add the platform. |
+| version   | Major.minor.patch version specifier using semver |
+| path      | Path to a directory or tarball containing a platform |
+| url       | URL to a git repository or tarball containing a platform |
+| commit-ish | Commit/tag/branch reference. If none is specified, 'master' is used |
 
 ###Supported Platforms
 
 - Android
 - iOS
-- Windows (8.0, 8.1, 10, Phone 8.1)
+- Windows (8.1, 10, Phone 8.1)
 - Blackberry10
 - Firefox OS
 - Ubuntu
+- Browser
 
 ###Deprecated Platforms
 
 - Amazon-fireos (use Android platform instead)
 - WP8 (use Windows platform instead)
+- Windows 8.0 (use older versions of cordova)
 
 ###Examples
 
 - Add pinned version of the `android` and `ios` platform and save the downloaded version to `config.xml`:
-``` 
+```
     cordova platform add android ios --save
-```    
+```     
 - Add `android` platform with [semver](http://semver.org/) version ^5.0.0 and save it to `config.xml`:   
 ```     
     cordova platform add android@^5.0.0 --save
@@ -275,32 +275,33 @@ Manage project plugins
 ```
 | Sub-command | Option | Description
 |------------------------|-------------|------
-| add `<plugin-spec>` [...] | | Add specified plugins
+| add `<plugin-spec>` [...] |     | Add specified plugins
 |       |--searchpath `<directory>` | When looking up plugins by ID, look in this directory and each of its subdirectories before hitting the registry. Multiple search paths can be specified. Use ':' as a separator in *nix based systems and ';' for Windows.
 |       |--noregistry             | Don't search the registry for plugins.
 |       |--link                   | When installing from a local path, creates a symbolic link instead of copying files. The extent to which files are linked varies by platform. Useful for plugin development.
 |       |--save                   | Save the `<plugin-spec>` as part of the `plugin` element  into `config.xml`.
 |       |--browserify             | Compile plugin JS at build time using browserify instead of runtime.
-| remove `<pluginid>|<name>` [...] | Remove plugins with the given IDs/name.
+| remove `<pluginid>|<name>` [...]| | Remove plugins with the given IDs/name.
 |       |--save                    | Remove the specified plugin from config.xml
 |list                           |  | List currently installed plugins
 |search `[<keyword>]` [...]     |  | Search http://plugins.cordova.io for plugins matching the keywords
-|save                           |  | Save `<plugin-spec` of all plugins currently added to the project                      
+|save                           |  | Save `<plugin-spec>` of all plugins currently added to the project                      
    
 ### Plugin-spec
 
 There are a number of ways to specify a plugin:
 ```
-    <plugin-spec> : pluginID[@version]|directory|url[#commit-ish]
+    <plugin-spec> : pluginID[@version]|directory|url[#commit-ish][:subdir]
 ```
 
 | Value       | Description
 |-------------|--------------------
-| plugin | Plugin id (id of plugin in npm registry or in --searchPath)
-| version | Major.minor.patch version specifier using  insemver
-| directory | Directory containing plugin.xml
-| url | Ur inl to a git repository containing a plugin.xml
-| commit-ish | Commit/tag/branch reference. If none is sp inecified, 'master' is used
+| plugin      | Plugin id (id of plugin in npm registry or in --searchPath)
+| version     | Major.minor.patch version specifier using semver
+| directory   | Directory containing plugin.xml
+| url         | Url to a git repository containing a plugin.xml
+| commit-ish  | Commit/tag/branch reference. If none is specified, 'master' is used
+| subdir      | Sub-directory to find plugin.xml for the specified plugin.
 
 ### Examples
 - Add `cordova-plugin-camera` and `cordova-plugin-file` to the project and save it to `config.xml`. Use `../plugins` directory to search for the plugins.
@@ -311,9 +312,9 @@ There are a number of ways to specify a plugin:
 ```    
     cordova plugin add cordova-plugin-camera@^2.0.0 --save
 ```
-- Clone the specified git repo, checkout to tag `2.1.0` and add it to the project. Save the `plugin-spec` to `config.xml`:
+- Clone the specified git repo, checkout to tag `2.1.0`, look for plugin.xml in the `plugin` directory, and add it to the project. Save the `plugin-spec` to `config.xml`:
 ```    
-    cordova plugin add https://github.com/apache/cordova-plugin-camera.git#2.1.0 --save
+    cordova plugin add https://github.com/apache/cordova-plugin-camera.git#2.1.0:plugin --save
 ```
 - Add the plugin from the specified local directory:    
 ```
@@ -323,7 +324,7 @@ There are a number of ways to specify a plugin:
 ```
     cordova plugin add ../cordova-plugin-camera.tgz --save
 ```
-- Remove the plugin from the project and the config.xml:
+- Remove the plugin from the project and the `config.xml`:
 ```
     cordova plugin rm camera --save
 ```
@@ -332,5 +333,198 @@ There are a number of ways to specify a plugin:
     cordova plugin ls
 ```
 
-[Hooks guide]: http://cordova.apache.org/docs/en/latest/guide_appdev_hooks_index.md.html#Hooks%20Guide
-[config.xml ref]: 
+##cordova prepare command
+
+###Synopsis
+Transforms config.xml metadata to platform-specific manifest files, copies icons & splashscreens, 
+copies plugin files for specified platforms so that the project is ready to build with each native SDK.
+
+###Syntax
+```    
+    cordova prepare [<platform> [..]]
+         [--browserify] 
+```
+###Options
+
+| Option     | Description
+|------------|------------------
+| `<platform> [..]` | Platform name(s) to prepare. If not specified, all platforms are built.
+|--browserify | Compile plugin JS at build time using browserify instead of runtime.
+
+##cordova compile command
+
+###Synopsis
+
+`cordova compile` is a subset of the [cordova build command](#cordova_build_command). 
+It only performs the compilation step without doing prepare. It's common to invoke `cordova build` instead of this command - however, this stage is useful to allow extending using [hooks][Hooks guide].    
+
+###Syntax
+```
+    cordova build [<platform> [...]] 
+        [--debug|--release] 
+        [--device|--emulator|--target=<targetName>] 
+        [--buildConfig=<configfile>]
+        [--browserify] 
+        [-- <platformOpts>]
+```
+For detailed documentation see [cordova build command](#cordova_build_command) docs below.
+
+<a name='cordova_build_command'></a>
+##cordova build command
+
+###Synopsis
+
+Shortcut for `cordova prepare` + `cordova compile` for all/the specified platforms. Allows you to build the app for the specified platform.
+
+###Syntax
+```
+    cordova build [<platform> [...]] 
+        [--debug|--release] 
+        [--device|--emulator] 
+        [--buildConfig=<configfile>]
+        [--browserify] 
+        [-- <platformOpts>]
+```
+| Option     | Description
+|------------|------------------
+| `<platform> [..]` | Platform name(s) to build. If not specified, all platforms are built.
+| --debug    | Perform a debug build. This typically translates to debug mode for the underlying platform being built.
+| --release  | Perform a release build. This typically translates to release mode for the underlying platform being built.
+| --device   | Build it for a device
+| --emulator | Build it for an emulator. In particular, the platform architecture might be different for a device Vs emulator.
+| --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process esecially related to signing the package.
+| --browserify | Compile plugin JS at build time using browserify instead of runtime
+| `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. 
+                                           
+###Examples
+- Build for `android` and `windows` platform in `debug` mode for deployment to device:
+```    
+    cordova build android windows --debug --device
+```
+- Build for `android` platform in `release` mode and use the specified build configuration:
+```
+    cordova build android --release --buildConfig=..\myBuildConfig.json
+```
+- Build for `android` platform in release mode and pass custom platform options to android build process:
+```
+    cordova build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey 
+```
+
+<a name="cordova_run_command"></a>
+##cordova run command
+###Synopsis
+
+Prepares, builds (unless `--nobuild` is specified) and deploys app on specified platform devices/emulators. If a device is connected it will be used, unless an eligible emulator is already running.
+
+###Syntax
+```   
+    cordova run [<platform> [...]] 
+        [--list | --nobuild ]
+        [--device|--emulator|--target=<targetName>]
+        [--buildConfig=<configfile>]
+        [--browserify] 
+        [-- <platformOpts>]
+```
+
+| Option     | Description
+|------------|------------------
+| `<platform> [..]` | Platform name(s) to run. If not specified, all platforms are run.
+|--nobuild   | Skip building
+|--debug     | Deploy a debug build. This is the default behavior unless `--release` is specified.
+|--release   | Deploy a release build
+|--device    | Deploy to a device
+|--emulator  | Deploy to an emulator
+|--target    | Deploy to a specific target emulator/device. Use `--list` to display target options
+| --list     | Lists available targets. Displays both device and emulator deployment targets unless specified
+| --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process esecially related to signing the package.
+| --browserify | Compile plugin JS at build time using browserify instead of runtime
+| `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. 
+
+###Examples 
+
+- Run a release build of current cordova project on `android` platform emulator named `Nexus_5_API_23_x86`. Use the spcified build configuration when running:
+```
+    cordova run android --release --buildConfig=..\myBuildConfig.json --target=Nexus_5_API_23_x86
+```
+- Run a debug build of current cordova project on `android` platform using 
+a device or emulator (if no device is connected). Skip doing the build:
+```
+    cordova run android --nobuild
+```
+- Run a debug build of current cordova project on an `ios` device:   
+```
+    cordova run ios --device
+```
+- Enumerate names of all the connected devices and available emulators that can be used to run this app:
+```
+    cordova run ios --list
+```
+
+## cordova emulate command
+###Synopsis
+
+Alias for `cordova run --emulator`. Launches the emulator instead of device. 
+See [cordova run command docs](#cordova_run_command) for more details. 
+
+## cordova clean command
+###Synopsis
+Cleans the build artifacts for the specified platform, or all platforms by running platform-specific build cleanup.
+
+###Syntax
+```
+    cordova clean [<platform> [...]] 
+```
+###Example
+
+- Clean `android` platform build artifiacts:
+
+```
+    cordova clean android
+```
+
+## cordova requirements command
+###Synopsis
+Checks and print out all the requirements for platforms specified (or all platforms added
+to project if none specified). If all requirements for each platform are met, exits with code 0
+otherwise exits with non-zero code. 
+
+This can be useful when setting up a machine for building a particular platform.
+
+###Syntax
+```    
+    cordova requirements android
+```
+
+## cordova info command
+###Synopsis
+Print out useful information helpful for submitting bug
+reports and getting help.  Creates an info.txt file at the
+base of your project.
+
+###Syntax
+```
+    cordova info
+```
+
+## cordova serve command
+###Synopsis
+Run a local web server for www/ assets using specified `port` or default of 8000. Access projects at: `http://HOST_IP:PORT/PLATFORM/www`
+
+###Syntax
+```
+    cordova serve [port]
+```
+
+##cordova help command
+###Synopsis
+Show syntax summary, or the help for a specific command.
+
+###Syntax
+```
+    cordova help [command]
+    cordova [command] -h
+    cordova -h [command]
+```
+
+[Hooks guide]: http://cordova.apache.org/docs/en/latest/guide_appdev_hooks_index.md.html
+[config.xml ref]: http://cordova.apache.org/docs/en/latest/config_ref/index.html

@@ -1,10 +1,9 @@
 Synopsis
 
-    cordova-cli compile [PROD] [TARGET] [EXP] [PLATS] [-- POPTS]
+    cordova-cli compile [PROD] [TARGET] [PLATS] [-- POPTS]
 
       PROD:   --debug|--release
       TARGET: --device|--emulator|--target=FOO
-      EXP:    --experimental [EXPERIMENTALFLAGS]
       PLATS:  PLATFORM [...]
       POPTS:  platformopts
 
