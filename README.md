@@ -39,7 +39,7 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/) 
 - iOS
 - Ubuntu
 - Windows Phone 8
-- Windows 8
+- Windows (Windows 8.1, Windows Phone 8.1, Windows 10)
 
 # Requirements
 
@@ -53,9 +53,9 @@ Check out the [Getting Started guides](http://cordova.apache.org/docs/en/edge/) 
   - **iOS**: [iOS SDK](http://developer.apple.com) with the latest `Xcode` and `Xcode Command Line Tools`
   - **Windows Phone**: [Windows Phone SDK](http://dev.windowsphone.com/en-us/downloadsdk) - **NOTE** This tool will not work unless you have `msbuild` on your __system path__ otherwise Windows Phone support will fail (`msbuild.exe` is generally located in `C:\Windows\Microsoft.NET\Framework\v4.0.30319`).
 
-`cordova-cli` has been tested on **Mac OS X**, **Linux**, **Windows 7**, and **Windows 8**.
+`cordova-cli` has been tested on **Mac OS X**, **Linux**, **Windows 7**, and **Windows 8.1**.
 
-Please note that some platforms have OS restrictions.  For example, you cannot build for Windows 8 or Windows Phone 8 on Mac OS X, nor can you build for iOS on Windows.
+Please note that some platforms have OS restrictions.  For example, you cannot build for Windows or Windows Phone 8 on Mac OS X, nor can you build for iOS on Windows.
 
 # Install
 
@@ -296,20 +296,6 @@ run the command `android list target`.  If you see:
     operable program or batch file.
 
 at the beginning of the command output, it means you will need to fix your Windows Path variable to include xcopy. This location is typically under C:\Windows\System32.
-
-## Windows 8
-
-Windows 8 support does not include the ability to launch/run/emulate, so you will need to open **Visual Studio** to see your app live.  You are still able to use the following commands with windows8:
-
-- `platform add windows8`
-- `platform remove windows8`
-- `prepare windows8`
-- `compile windows8`
-- `build windows8`
-
-To run your app, you will need to open the `.sln` in the `platforms/windows8` folder using **Visual Studio 2012**.
-
-**Visual Studio** will tell you to reload the project if you run any of the above commands while the project is loaded.
 
 ## Amazon Fire OS
 

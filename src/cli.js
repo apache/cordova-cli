@@ -208,21 +208,6 @@ function cli(inputArgs) {
             throw new CordovaError(msg);
         }
 
-        // CB-6976 Windows Universal Apps. Allow mixing windows and windows8 aliases
-        opts.platforms = opts.platforms.map(function(platform) {
-            // allow using old windows8 alias for new unified windows platform
-            if (platform == 'windows8' && fs.existsSync('platforms/windows')) {
-                return 'windows';
-            }
-            // allow using new windows alias for old windows8 platform
-            if (platform == 'windows' &&
-                !fs.existsSync('platforms/windows') &&
-                fs.existsSync('platforms/windows8')) {
-                return 'windows8';
-            }
-            return platform;
-        });
-
         // Pass nopt-parsed args to PlatformApi through opts.options
         opts.options = args;
         opts.options.argv = unparsedArgs;
@@ -241,21 +226,6 @@ function cli(inputArgs) {
             msg = 'Unknown platforms: ' + badPlatforms.join(', ');
             throw new CordovaError(msg);
         }
-
-        // CB-6976 Windows Universal Apps. Allow mixing windows and windows8 aliases
-        opts.platforms = opts.platforms.map(function(platform) {
-            // allow using old windows8 alias for new unified windows platform
-            if (platform == 'windows8' && fs.existsSync('platforms/windows')) {
-                return 'windows';
-            }
-            // allow using new windows alias for old windows8 platform
-            if (platform == 'windows' &&
-                !fs.existsSync('platforms/windows') &&
-                fs.existsSync('platforms/windows8')) {
-                return 'windows8';
-            }
-            return platform;
-        });
 
         cordova.raw[cmd].call(null, opts.platforms)
         .then(function (platformChecks) {
