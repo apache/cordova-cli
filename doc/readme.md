@@ -69,13 +69,20 @@ Certain platforms support options that only apply to their platform. These can b
 -  This example demonstrates how cordova-cli can be used to create a project with the `camera` plugin and run it for `android` platform. In particular, platform specific options like `--keystore` can be provided:
     
 ```
+    #create a cordova project
     cordova create myApp com.myCompany.myApp myApp
     cd myApp
+    #Add camera plugin to the project and remember that in config.xml
     cordova plugin add cordova-plugin-camera --save
+    #Add android platform to the project and remember that in config.xml
     cordova platform add android --save
-    cordova requirements android    
+    #check to see if your system is configured for building android platform.
+    cordova requirements android
+    #Build the android and emit verbose logs.
     cordova build android --verbose
+    #Run the project on the android platform.
     cordova run android
+    #Build for android platform in release mode with specified signing parameters.  
     cordova build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
 ```
 ##cordova create command
@@ -121,7 +128,7 @@ A Cordova application created with `cordova-cli` will have the following directo
     `-- plugins/
 ```
 #### config.xml
-Specifies your application allowing you to customize behavior for your file. See also [conifg.xml reference documentation][config.xml ref]
+Configures your application and allows you to customize the behavior of your project. See also [conifg.xml reference documentation][config.xml ref]
     
 #### www/
 Contains the project's web artifacts, such as .html, .css and .js files. As a cordova application developer, most of your code and assets will go here. They will be copied on a `cordova prepare` to each platform's www directory. The www source directory is reproduced within each platform's subdirectory, appearing for example in `platforms/ios/www` or `platforms/android/assets/www`. Because the CLI constantly copies over files from the source www folder, you should only edit these files and not the ones located under the platforms subdirectories. If you use version control software, you should add this source www folder, along with the merges folder, to your version control system.
@@ -184,10 +191,10 @@ Manage cordova platforms - allowing you to add, remove, update, list and check f
 | Sub-command           | Option | Description |
 ------------------------|-------------|------|
 | add `<platform-spec>` [...] |  | Add specified platforms |
-|     | --save                   | Save `<platform-spec>` into config.xml after installing them using `<engine>` tag |
+|     | --save                   | Save `<platform-spec>` into `config.xml` after installing them using `<engine>` tag |
 |     | --link=`<path>`          | When `<platform-spec>` is a local path, links the platform library directly instead of making a copy of it (support varies by platform; useful for platform development)
 | remove `<platform>` [...] |    | Remove specified platforms |
-|     | --save                   | Delete specified platforms from config.xml after removing them |
+|     | --save                   | Delete specified platforms from `config.xml` after removing them |
 | update `platform` [...] |      | Update specified platforms |
 |     | --save                   | Updates the version specified in `config.xml` |     
 | list |                         | List all installed and available platforms |
@@ -211,9 +218,8 @@ There are a number of ways to specify a platform:
 
 - Android
 - iOS
-- Windows (8.1, 10, Phone 8.1)
+- Windows (8.1, Phone 8.1, UWP - Windows 10)
 - Blackberry10
-- Firefox OS
 - Ubuntu
 - Browser
 
@@ -222,6 +228,7 @@ There are a number of ways to specify a platform:
 - Amazon-fireos (use Android platform instead)
 - WP8 (use Windows platform instead)
 - Windows 8.0 (use older versions of cordova)
+- Firefox OS (use older versions of cordova)
 
 ###Examples
 
