@@ -1,5 +1,5 @@
 ---
-title: Cordova CLI reference
+title: CLI Reference
 description: Learn how to use Cordova CLI commands and their options.
 ---
 <!--
