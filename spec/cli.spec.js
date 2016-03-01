@@ -29,7 +29,14 @@ describe("cordova cli", function () {
         // tests in a directory run in a single process (and in parallel),
         // logging events registered as a result of the "--verbose" flag in
         // CLI testing below would cause lots of logging messages printed out by other specs.
-        spyOn(events, "on");
+
+        // This is required so that fake events chaining works (events.on('log').on('verbose')...)
+        var FakeEvents = function FakeEvents() {};
+        FakeEvents.prototype.on = function fakeOn () {
+            return new FakeEvents();
+        };
+
+        spyOn(events, "on").andReturn(new FakeEvents());
         spyOn(console, 'log');
     });
 

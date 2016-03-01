@@ -29,13 +29,13 @@ var path = require('path'),
     nopt,
     _,
     updateNotifier,
-    pkg = require('../package.json'),
-    logger = require('./logger');
+    pkg = require('../package.json');
 
 var cordova_lib = require('cordova-lib'),
     CordovaError = cordova_lib.CordovaError,
     cordova = cordova_lib.cordova,
-    events = cordova_lib.events;
+    events = cordova_lib.events,
+    logger = require('cordova-common').CordovaLogger.get();
 
 
 /*
@@ -136,13 +136,7 @@ function cli(inputArgs) {
         process.exit(1);
     });
 
-    events.on('verbose', logger.verbose);
-    events.on('log', logger.normal);
-    events.on('info', logger.info);
-    events.on('warn', logger.warn);
-
-    // Set up event handlers for logging and results emitted as events.
-    events.on('results', logger.results);
+    logger.subscribe(events);
 
     if (args.silent) {
         logger.setLevel('error');
