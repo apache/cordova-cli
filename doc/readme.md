@@ -28,8 +28,8 @@ description: Learn how to use Cordova CLI commands and their options.
 
 ## Syntax
 
-```
-cordova <command> [options]
+```bash
+cordova <command> [options] -- [platformOpts]
 ```
 
 ## Global Command List
@@ -70,12 +70,11 @@ These options apply to all cordova-cli commands.
 
 ## Platform-specific options
 
-Certain commands have options that are specific to a particular platform. They can be provided to the cordova-cli with a '--' separator that stops the command parsing within the cordova-lib module and passes through rest of the options for platforms to parse.
+Certain commands have options (`platformOpts`) that are specific to a particular platform. They can be provided to the cordova-cli with a '--' separator that stops the command parsing within the cordova-lib module and passes through rest of the options for platforms to parse.   
 
 ## Examples
-
 -  This example demonstrates how cordova-cli can be used to create a project with the `camera` plugin and run it for `android` platform. In particular, platform specific options like `--keystore` can be provided:
-
+          
         # Create a cordova project
         cordova create myApp com.myCompany.myApp myApp
         cd myApp
