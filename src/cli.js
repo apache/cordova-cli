@@ -86,6 +86,7 @@ function cli(inputArgs) {
         , 'searchpath' : String
         , 'variable' : Array
         , 'link': Boolean
+        , 'force': Boolean
         // Flags to be passed to `cordova build/run/emulate`
         , 'debug' : Boolean
         , 'release' : Boolean
@@ -280,6 +281,7 @@ function cli(inputArgs) {
                             , link: args.link || false
                             , save: args.save || false
                             , shrinkwrap: args.shrinkwrap || false
+                            , force: args.force || false
                             };
         cordova.raw[cmd](subcommand, targets, download_opts).done();
     }

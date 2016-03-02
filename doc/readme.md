@@ -299,7 +299,7 @@ Manage project plugins
 
 ```bash
 cordova {plugin | plugins} [
-    add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --browserify} |
+    add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --browserify | --force} |
     {remove | rm} {<pluginid> | <name>} --save |
     {list | ls} |
     search [<keyword>] |
@@ -315,6 +315,7 @@ cordova {plugin | plugins} [
 |       |--link                   | When installing from a local path, creates a symbolic link instead of copying files. The extent to which files are linked varies by platform. Useful for plugin development.
 |       |--save                   | Save the `<plugin-spec>` as part of the `plugin` element  into `config.xml`.
 |       |--browserify             | Compile plugin JS at build time using browserify instead of runtime.
+|       |--force                  | _Introduced in version 6.1._ Forces copying source files from the plugin even if the same file already exists in the target directory.
 | remove `<pluginid>|<name>` [...]| | Remove plugins with the given IDs/name.
 |       |--save                    | Remove the specified plugin from config.xml
 |list                           |  | List currently installed plugins

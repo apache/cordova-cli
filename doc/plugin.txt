@@ -20,6 +20,9 @@ Manage project plugins
         --browserify ................... Compile plugin JS at build time using 
                                          browserify instead of runtime.
 
+        --force ........................ Forces copying source files from the plugin even if the
+                                         same file already exists in the target directory.
+
     remove <pluginid>|<name> [...] ..... Remove plugins with the given IDs/name.
         --save ......................... Remove the information for specified plugin from config.xml
 
