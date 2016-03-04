@@ -106,6 +106,7 @@ function cli(inputArgs) {
         , 'target' : String
         , 'browserify': Boolean
         , 'noprepare': Boolean
+        , 'fetch': Boolean
         , 'nobuild': Boolean
         , 'list': Boolean
         , 'buildConfig' : String
@@ -201,6 +202,7 @@ function cli(inputArgs) {
         verbose: args.verbose || false,
         silent: args.silent || false,
         browserify: args.browserify || false,
+        fetch: args.fetch || false,
         nohooks: args.nohooks || [],
         searchpath : args.searchpath
     };
@@ -289,6 +291,7 @@ function cli(inputArgs) {
                             , nohooks : args.nohooks
                             , cli_variables : cli_vars
                             , browserify: args.browserify || false
+                            , fetch: args.fetch || false
                             , link: args.link || false
                             , save: args.save || false
                             , shrinkwrap: args.shrinkwrap || false
