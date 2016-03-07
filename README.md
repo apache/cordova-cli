@@ -18,6 +18,7 @@
 # under the License.
 #
 -->
+[![Build Status](https://travis-ci.org/apache/cordova-cli.svg?branch=master)](https://travis-ci.org/apache/cordova-cli)
 
 # cordova-cli
 
