@@ -4,20 +4,23 @@ Synopsis
 
 Manage project plugins
 
-    add <plugin-spec> [...] ............ Add specified plugins
+    add <plugin-spec> [...] ............ Add specified plugins. If adding a plugin from npm, the
+                                         the CLI will attempt to fetch the latest version of
+                                         the plugin that is compatible with the current project if
+                                         the version is not specified using @ or in config.xml
         --searchpath <directory> ....... When looking up plugins by ID, look in this directory and
                                          each of its subdirectories before hitting the registry.
                                          Multiple search paths can be specified.
 
         --noregistry ................... Don't search the registry for plugins
 
-        --link ......................... When installing from a local path, creates a symbolic link 
+        --link ......................... When installing from a local path, creates a symbolic link
                                          instead of copying files. The extent to which files are linked
                                          varies by platform. Useful for plugin development.
         --save ......................... Save the information for specified plugin into config.xml
-        --shrinkwrap ................... Used together with --save, saves the 
+        --shrinkwrap ................... Used together with --save, saves the
                                          installed version numbers to config.xml
-        --browserify ................... Compile plugin JS at build time using 
+        --browserify ................... Compile plugin JS at build time using
                                          browserify instead of runtime.
 
         --force ........................ Forces copying source files from the plugin even if the
@@ -28,7 +31,7 @@ Manage project plugins
 
     list .............................. List currently installed plugins
     search [<keyword>] [...] .......... Search http://plugins.cordova.io for plugins matching the keywords
-    
+
 Syntax
     <plugin-spec> : <pluginID>[@<version>]|<directory>|<url>[#<commit-ish>][:subdir]
 
@@ -38,7 +41,7 @@ Syntax
     <url> ............................. Url to a git repository containing a plugin.xml
     <commit-ish> ...................... Commit/tag/branch reference. If none is specified, 'master' is used
     <subdir> .......................... Sub-directory to find plugin.xml for the specified plugin.
-    
+
 Aliases
     plugins -> plugin
     rm -> remove
