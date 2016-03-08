@@ -1,4 +1,5 @@
 Synopsis
+
     cordova-cli command [options]
 
 Global Commands

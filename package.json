@@ -31,6 +31,7 @@
   "dependencies": {
     "ansi": "^0.3.0",
     "cordova-lib": "6.0.0",
+    "cordova-common": "^1.1.0",
     "q": "1.0.1",
     "nopt": "3.0.1",
     "underscore": "1.7.0",
@@ -141,5 +142,5 @@
       "email":"purplecabbage@gmail.com"
     }
   ],
-  "license": "Apache version 2.0"
+  "license": " Apache-2.0"
 }
