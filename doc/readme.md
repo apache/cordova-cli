@@ -129,13 +129,14 @@ myapp/
 |-- merges/
 | | |-- android/
 | | |-- windows/
-| | -- ios/
+| | |-- ios/
 |-- www/
 |-- platforms/
 | |-- android/
 | |-- windows/
-| -- ios/
--- plugins/
+| |-- ios/
+|-- plugins/
+  |--cordova-plugin-camera/
 ```
 
 #### config.xml
