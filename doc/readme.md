@@ -70,11 +70,11 @@ These options apply to all cordova-cli commands.
 
 ## Platform-specific options
 
-Certain commands have options (`platformOpts`) that are specific to a particular platform. They can be provided to the cordova-cli with a '--' separator that stops the command parsing within the cordova-lib module and passes through rest of the options for platforms to parse.   
+Certain commands have options (`platformOpts`) that are specific to a particular platform. They can be provided to the cordova-cli with a '--' separator that stops the command parsing within the cordova-lib module and passes through rest of the options for platforms to parse.
 
 ## Examples
 -  This example demonstrates how cordova-cli can be used to create a project with the `camera` plugin and run it for `android` platform. In particular, platform specific options like `--keystore` can be provided:
-          
+
         # Create a cordova project
         cordova create myApp com.myCompany.myApp myApp
         cd myApp
@@ -337,6 +337,18 @@ There are a number of ways to specify a plugin:
 | commit-ish  | Commit/tag/branch reference. If none is specified, 'master' is used
 | subdir      | Sub-directory to find plugin.xml for the specified plugin.
 
+### Algorithm for choosing which plugin version to fetch from npm
+
+When adding a plugin to a project from npm, the CLI will choose which version
+of the plugin to fetch based on the following criteria (listed in order of
+precedence):
+
+1. The plugin version specified in the command (e.g. `cordova plugin add plugin@version`)
+2. The plugin version saved in config.xml (i.e. if the plugin was previously added with `--save`)
+3. The latest plugin version that the current project can support (only applies to plugins that list their [Cordova dependencies] in their `package.json`)
+4. The plugin version pinned by your installed CLI version (only applies to [Apache-developed plugins])
+5. The latest plugin version published to npm
+
 ### Examples
 
 - Add `cordova-plugin-camera` and `cordova-plugin-file` to the project and save it to `config.xml`. Use `../plugins` directory to search for the plugins.
@@ -583,3 +595,5 @@ cordova -h [command]
 
 [Hooks guide]: http://cordova.apache.org/docs/en/latest/guide_appdev_hooks_index.md.html
 [config.xml ref]: http://cordova.apache.org/docs/en/latest/config_ref/index.html
+[Cordova dependencies]: http://cordova.apache.org/docs/en/latest/guide/hybrid/plugins/index.html#specifying-project-requirements
+[Apache-developed plugins]: https://github.com/apache?utf8=%E2%9C%93&query=cordova-plugin-
