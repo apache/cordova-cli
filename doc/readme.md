@@ -343,11 +343,10 @@ When adding a plugin to a project from npm, the CLI will choose which version
 of the plugin to fetch based on the following criteria (listed in order of
 precedence):
 
-1. The plugin version specified in the command (e.g. `cordova plugin add plugin@version`)
-2. The plugin version saved in config.xml (i.e. if the plugin was previously added with `--save`)
-3. The latest plugin version that the current project can support (only applies to plugins that list their [Cordova dependencies] in their `package.json`)
-4. The plugin version pinned by your installed CLI version (only applies to [Apache-developed plugins])
-5. The latest plugin version published to npm
+1. The `plugin-spec` given in the command (e.g. `cordova plugin add pluginID@version`)
+2. The plugin version saved in `config.xml` (i.e. if the plugin was previously added with `--save`)
+3. As of Cordova version 6.1, the latest plugin version that the current project can support (only applies to plugins that list their [Cordova dependencies] in their `package.json`)
+4. The latest plugin version published to npm
 
 ### Examples
 
@@ -596,4 +595,3 @@ cordova -h [command]
 [Hooks guide]: http://cordova.apache.org/docs/en/latest/guide_appdev_hooks_index.md.html
 [config.xml ref]: http://cordova.apache.org/docs/en/latest/config_ref/index.html
 [Cordova dependencies]: http://cordova.apache.org/docs/en/latest/guide/hybrid/plugins/index.html#specifying-project-requirements
-[Apache-developed plugins]: https://github.com/apache?utf8=%E2%9C%93&query=cordova-plugin-
