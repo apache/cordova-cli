@@ -22,6 +22,9 @@ var cli = require("../src/cli"),
     cordova_lib = require('cordova-lib'),
     events = cordova_lib.events,
     cordova = cordova_lib.cordova;
+    
+    //avoid node complaining of too many event listener added
+    process.setMaxListeners(0);
 
 describe("cordova cli", function () {
     beforeEach(function () {
