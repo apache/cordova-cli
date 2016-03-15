@@ -337,15 +337,14 @@ There are a number of ways to specify a plugin:
 | commit-ish  | Commit/tag/branch reference. If none is specified, 'master' is used
 | subdir      | Sub-directory to find plugin.xml for the specified plugin.
 
-### Algorithm for choosing which plugin version to fetch from npm
+### Algorithm for resolving plugins
 
-When adding a plugin to a project from npm, the CLI will choose which version
-of the plugin to fetch based on the following criteria (listed in order of
-precedence):
+When adding a plugin to a project, the CLI will resolve the plugin
+based on the following criteria (listed in order of precedence):
 
 1. The `plugin-spec` given in the command (e.g. `cordova plugin add pluginID@version`)
-2. The plugin version saved in `config.xml` (i.e. if the plugin was previously added with `--save`)
-3. As of Cordova version 6.1, the latest plugin version that the current project can support (only applies to plugins that list their [Cordova dependencies] in their `package.json`)
+2. The `plugin-spec` saved in `config.xml` (i.e. if the plugin was previously added with `--save`)
+3. As of Cordova version 6.1, the latest plugin version published to npm that the current project can support (only applies to plugins that list their [Cordova dependencies] in their `package.json`)
 4. The latest plugin version published to npm
 
 ### Examples
