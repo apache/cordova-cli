@@ -20,6 +20,22 @@
 -->
 # Cordova-cli Release Notes
 
+### 6.1.0 (Mar 17, 2016)
+* CB-10902 Updated cordova-lib dependency to 6.1.0
+* Simplify cordova CLI readme
+* CB-10860 avoid node complaining of too many event listener added when running tests
+* Fix readme.md - directory structure
+* CB-10673 add `plugin add --force` option.
+* Add Travis CI badge
+* Specify valid `SPDX` license in `package.json`
+* CB-10748 Use `cordova-common.CordovaLogger` in CLI
+* Adding and fixing some whitespace in CLI docs.
+* CB-10348 Update formatting of CLI reference readme
+* CB-10348 CLI reference readme
+* CB-10482 Remove references to **windows8** from cordova-lib/cli
+* CB-10348 CLI doc output tweaks
+* Update help docs - add examples and make them consistent
+
 ### 6.0.0 (Jan 25, 2016)
 * CB-10424 Updated cordova-lib dependency to 6.0.0
 * Remove browserify from experimental flags list
