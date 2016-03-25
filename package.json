@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "preferGlobal": "true",
   "description": "Cordova command line interface tool",
   "main": "cordova",
@@ -30,7 +30,7 @@
   ],
   "dependencies": {
     "ansi": "^0.3.0",
-    "cordova-lib": "6.1.0",
+    "cordova-lib": "6.1.1",
     "cordova-common": "^1.1.0",
     "q": "1.0.1",
     "nopt": "3.0.1",
@@ -138,8 +138,8 @@
       "email": "stevengill97@gmail.com"
     },
     {
-      "name":"Jesse",
-      "email":"purplecabbage@gmail.com"
+      "name": "Jesse",
+      "email": "purplecabbage@gmail.com"
     }
   ],
   "license": "Apache-2.0"
