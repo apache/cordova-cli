@@ -20,6 +20,9 @@
 -->
 # Cordova-cli Release Notes
 
+### 6.1.1 (Mar 29, 2016)
+* CB-10980 Updated cordova-lib dependency to 6.1.1
+
 ### 6.1.0 (Mar 17, 2016)
 * CB-10902 Updated cordova-lib dependency to 6.1.0
 * Simplify cordova CLI readme
@@ -44,7 +47,7 @@
 * Removing the `--usegit` flag from `cordova platform`. Recommended method is to use `cordova platform add git_url#branch`
 * CB-9836 Add `.gitattributes` to prevent `CRLF` line endings in repos
 * Message about deprecating **amazon-fireos** for **Fire OS 5.0+** devices. 2015 onwards **FireOS** devices should use **android** platform only.
-* add **JIRA** issue tracker link. 
+* add **JIRA** issue tracker link.
 
 ### 5.4.1 (Nov 19, 2015)
 * CB-10049 updated cordova-lib dependency to 5.4.1
@@ -61,7 +64,7 @@
 * CB-9597 Updates cli to pass structured args to platform methods
 
 ### 5.3.1 (Aug 28, 2015)
-* Updated cordova-lib dependency to 5.3.1 
+* Updated cordova-lib dependency to 5.3.1
 
 ### 5.2.0 (Aug 06, 2015)
 * docs: unify expression of Amazon Fire OS
