@@ -327,10 +327,11 @@ cordova {plugin | plugins} [
 
 There are a number of ways to specify a plugin:
 
-    <plugin-spec> : pluginID[@version]|directory|url[#commit-ish][:subdir]
+    <plugin-spec> : [@scope/]pluginID[@version]|directory|url[#commit-ish][:subdir]
 
 | Value       | Description
 |-------------|--------------------
+| scope       | Scope of plugin published as a [scoped npm package]
 | plugin      | Plugin id (id of plugin in npm registry or in --searchPath)
 | version     | Major.minor.patch version specifier using semver
 | directory   | Directory containing plugin.xml
@@ -595,3 +596,4 @@ cordova -h [command]
 [Hooks guide]: http://cordova.apache.org/docs/en/latest/guide_appdev_hooks_index.md.html
 [config.xml ref]: http://cordova.apache.org/docs/en/latest/config_ref/index.html
 [Cordova dependencies]: http://cordova.apache.org/docs/en/latest/guide/hybrid/plugins/index.html#specifying-project-requirements
+[scoped npm package]: https://docs.npmjs.com/misc/scope
