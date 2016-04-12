@@ -464,29 +464,31 @@ cordova build [<platform> [...]]
 
 ### Synopsis
 
-Prepares, builds (unless `--nobuild` is specified) and deploys app on specified platform devices/emulators. If a device is connected it will be used, unless an eligible emulator is already running.
+Prepares, builds, and deploys app on specified platform devices/emulators. If a device is connected it will be used, unless an eligible emulator is already running.
 
 ###Syntax
 
 ```bash
 cordova run [<platform> [...]]
-    [--list | --nobuild ]
+    [--list | --debug | --release]
+    [--noprepare] [--nobuild]
     [--device|--emulator|--target=<targetName>]
     [--buildConfig=<configfile>]
     [--browserify]
     [-- <platformOpts>]
 ```
 
-| Option     | Description
-|------------|------------------
+| Option      | Description
+|-------------|------------------
 | `<platform> [..]` | Platform name(s) to run. If not specified, all platforms are run.
-|--nobuild   | Skip building
-|--debug     | Deploy a debug build. This is the default behavior unless `--release` is specified.
-|--release   | Deploy a release build
-|--device    | Deploy to a device
-|--emulator  | Deploy to an emulator
-|--target    | Deploy to a specific target emulator/device. Use `--list` to display target options
-| --list     | Lists available targets. Displays both device and emulator deployment targets unless specified
+| --list      | Lists available targets. Displays both device and emulator deployment targets unless specified
+| --debug     | Deploy a debug build. This is the default behavior unless `--release` is specified.
+| --release   | Deploy a release build
+| --noprepare | Skip preparing
+| --nobuild   | Skip building
+| --device    | Deploy to a device
+| --emulator  | Deploy to an emulator
+| --target    | Deploy to a specific target emulator/device. Use `--list` to display target options
 | --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process esecially related to signing the package.
 | --browserify | Compile plugin JS at build time using browserify instead of runtime
 | `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.

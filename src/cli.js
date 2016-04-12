@@ -105,6 +105,7 @@ function cli(inputArgs) {
         , 'emulator': Boolean
         , 'target' : String
         , 'browserify': Boolean
+        , 'noprepare': Boolean
         , 'nobuild': Boolean
         , 'list': Boolean
         , 'buildConfig' : String
