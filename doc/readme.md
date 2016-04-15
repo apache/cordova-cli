@@ -484,7 +484,7 @@ cordova run [<platform> [...]]
 | --list      | Lists available targets. Displays both device and emulator deployment targets unless specified
 | --debug     | Deploy a debug build. This is the default behavior unless `--release` is specified.
 | --release   | Deploy a release build
-| --noprepare | Skip preparing
+| --noprepare | Skip preparing (available in Cordova v6.2 or later)
 | --nobuild   | Skip building
 | --device    | Deploy to a device
 | --emulator  | Deploy to an emulator
