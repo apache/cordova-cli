@@ -120,7 +120,7 @@ cordova create path [id [name [config]]] [options]
 
 ### Directory structure
 
-A Cordova application created with `cordova-cli` will have the following directory structure:
+Cordova CLI works with the following directory structure:
 
 ```
 myapp/
