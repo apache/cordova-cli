@@ -29,7 +29,8 @@ var path = require('path'),
     nopt,
     _,
     updateNotifier,
-    pkg = require('../package.json');
+    pkg = require('../package.json'),
+    telemetry = require('./telemetry');
 
 var cordova_lib = require('cordova-lib'),
     CordovaError = cordova_lib.CordovaError,
@@ -79,8 +80,20 @@ function checkForUpdates() {
     }
 }
 
-module.exports = cli;
-function cli(inputArgs) {
+module.exports = function(inputArgs) {
+    // Telemetry Prompt: only shows up on first run
+    // If the user has not made any decision about telemetry yet,
+    // ... a timed prompt is shown(30 seconds), asking him whether or not he wants to opt-in.
+    // ... If the timeout expires without him having made any decisions, he is considered to have opted out.
+    
+    // Note: The timed prompt can be prevented from being shown by setting an environment variable: CORDOVA_TELEMETRY_OPT_OUT
+    // ... This is useful in CI environments.
+    return telemetry.setup().then(function(isUserOptedIntoTelemetry) {
+        return cli(inputArgs, isUserOptedIntoTelemetry);
+    });
+};
+
+function cli(inputArgs, isUserOptedIntoTelemetry) {
     // When changing command line arguments, update doc/help.txt accordingly.
     var knownOpts =
         { 'verbose' : Boolean
@@ -138,6 +151,10 @@ function cli(inputArgs) {
             toPrint += ' (cordova-lib@' + libVersion + ')';
         }
         console.log(toPrint);
+        if(isUserOptedIntoTelemetry) {
+            var cmd = 'version';
+            telemetry.track(cmd, args.version);
+        }
         return;
     }
 
@@ -146,6 +163,8 @@ function cli(inputArgs) {
     // are in a verbose mode.
     process.on('uncaughtException', function(err) {
         logger.error(err);
+        // Test this
+        telemetry.track('uncaughtException', err);
         process.exit(1);
     });
 
@@ -186,6 +205,10 @@ function cli(inputArgs) {
         if (!args.help && remain[0] == 'help') {
             remain.shift();
         }
+        if(isUserOptedIntoTelemetry) {
+            telemetry.track(cmd); 
+            telemetry.trackEvent('category', cmd);
+        }
         return help(remain);
     }
 
@@ -220,12 +243,25 @@ function cli(inputArgs) {
         opts.options = args;
         opts.options.argv = unparsedArgs;
 
-        if (cmd == 'run' && args.list && cordova.raw.targets) {
-            cordova.raw.targets.call(null, opts).done();
-            return;
+        if (cmd === 'run' && args.list && cordova.raw.targets) {
+            var result = cordova.raw.targets.call(null, opts);
+            return result.finally(function() {
+                if (isUserOptedIntoTelemetry) {
+                    telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
+                    telemetry.trackEvent('category', cmd);
+                }
+                return result;
+            });
         }
 
-        cordova.raw[cmd].call(null, opts).done();
+        var result = cordova.raw[cmd].call(null, opts);
+        return result.finally(function() {
+            if (isUserOptedIntoTelemetry) {
+                telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
+                telemetry.trackEvent('category', cmd);
+            }
+            return result;
+        });
     } else if (cmd === 'requirements') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
@@ -235,41 +271,58 @@ function cli(inputArgs) {
             throw new CordovaError(msg);
         }
 
-        cordova.raw[cmd].call(null, opts.platforms)
-        .then(function (platformChecks) {
+        var result = cordova.raw[cmd].call(null, opts.platforms)
+            .then(function(platformChecks) {
 
-            var someChecksFailed = Object.keys(platformChecks).map(function (platformName) {
-                events.emit('log', '\nRequirements check results for ' + platformName + ':');
-                var platformCheck = platformChecks[platformName];
-                if (platformCheck instanceof CordovaError) {
-                    events.emit('warn', 'Check failed for ' + platformName + ' due to ' + platformCheck);
-                    return true;
-                }
-
-                var someChecksFailed = false;
-                platformCheck.forEach(function (checkItem) {
-                    var checkSummary = checkItem.name + ': ' +
-                                    (checkItem.installed ? 'installed ' : 'not installed ') +
-                                    (checkItem.metadata.version || '');
-                    events.emit('log', checkSummary);
-                    if (!checkItem.installed) {
-                        someChecksFailed = true;
-                        events.emit('warn', checkItem.metadata.reason);
+                var someChecksFailed = Object.keys(platformChecks).map(function(platformName) {
+                    events.emit('log', '\nRequirements check results for ' + platformName + ':');
+                    var platformCheck = platformChecks[platformName];
+                    if (platformCheck instanceof CordovaError) {
+                        events.emit('warn', 'Check failed for ' + platformName + ' due to ' + platformCheck);
+                        return true;
                     }
+
+                    var someChecksFailed = false;
+                    platformCheck.forEach(function(checkItem) {
+                        var checkSummary = checkItem.name + ': ' +
+                            (checkItem.installed ? 'installed ' : 'not installed ') +
+                            (checkItem.metadata.version || '');
+                        events.emit('log', checkSummary);
+                        if (!checkItem.installed) {
+                            someChecksFailed = true;
+                            events.emit('warn', checkItem.metadata.reason);
+                        }
+                    });
+
+                    return someChecksFailed;
+                }).some(function(isCheckFailedForPlatform) {
+                    return isCheckFailedForPlatform;
                 });
 
-                return someChecksFailed;
-            }).some(function (isCheckFailedForPlatform) {
-                return isCheckFailedForPlatform;
+                if (someChecksFailed) throw new CordovaError('Some of requirements check failed');
             });
-
-            if (someChecksFailed) throw new CordovaError('Some of requirements check failed');
-        }).done();
+        return result.finally(function() {
+            if (isUserOptedIntoTelemetry) {
+                telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
+            }
+            return result;
+        });   
     } else if (cmd == 'serve') {
         var port = undashed[1];
-        cordova.raw.serve(port).done();
+        var result = cordova.raw.serve(port);
+        return result.finally(function() {
+            if(isUserOptedIntoTelemetry) {
+                telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
+            }
+        });
     } else if (cmd == 'create') {
-        create();
+        var result = create();
+        return result.finally(function() {
+            if (isUserOptedIntoTelemetry) {
+                telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
+            }
+            return result;
+        });
     } else {
         // platform/plugins add/rm [target(s)]
         subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
@@ -297,7 +350,13 @@ function cli(inputArgs) {
                             , shrinkwrap: args.shrinkwrap || false
                             , force: args.force || false
                             };
-        cordova.raw[cmd](subcommand, targets, download_opts).done();
+        var result = cordova.raw[cmd](subcommand, targets, download_opts);
+        return result.finally(function() {
+            if (isUserOptedIntoTelemetry) {
+                telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
+            }
+            return result;
+        });
     }
 
     function create() {
@@ -339,10 +398,10 @@ function cli(inputArgs) {
         }
 
         // create(dir, id, name, cfg)
-        cordova.raw.create( undashed[1]  // dir to create the project in
+        return cordova.raw.create( undashed[1]  // dir to create the project in
             , undashed[2]  // App id
             , undashed[3]  // App name
             , cfg
-        ).done();
+        );
     }
 }
