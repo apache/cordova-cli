@@ -34,7 +34,8 @@ var insight = new Insight({
     pkg: pkg
 });
 
-/**  Telemetry Prompt:
+/**
+ * Telemetry Prompt:
  * If the user has not made any decision about telemetry yet,
  * ... a timed prompt is shown, asking him whether or not he wants to opt-in.
  * ... If the timeout expires without him having made any decisions, he is considered to have opted out.
@@ -44,9 +45,10 @@ var insight = new Insight({
 
 @returns {Boolean} It returns true if the user has agreed to opt-in to telemetry, false otherwise
 */
-exports.setup = function setup() {
+function setup() {
     var deferred = Q.defer();
     
+    // ToDO: should we just rely on 'CI' env variable? (what are others doing?)
     var isInteractive = !process.env.CORDOVA_TELEMETRY_OPT_OUT && !process.env.CI;
     if(!isInteractive) {
         // Update user's config file to make sure telemetry doesn't get collected
@@ -67,7 +69,10 @@ exports.setup = function setup() {
         var msg = 'Privacy statement: http://docs.cordova.io/privacy-statement.html' + require('os').EOL +
                     'May cordova anonymously report usage statitics to improve the tool over time ?';
         insight.askPermission(msg, function(unused, optIn) {
-            track('telemetry-opt-out');
+            if(!optIn) {
+                // Always track telemetry opt-outs!
+                track('telemetry-opt-out', 'via-cli-prompt-choice');
+            }
             deferred.resolve(optIn /* same as !insight.optOut */);
         }, {
             optInByDefault: false // If prompt timeout expires, opt the user out of telemetry
@@ -79,11 +84,11 @@ exports.setup = function setup() {
     return deferred.promise;
 }
 
-exports.track = function track() {
+function track() {
     insight.track.apply(insight, arguments);
 }
 
-exports.trackEvent = function trackEvent(category, action, label, value) {
+function trackEvent(category, action, label, value) {
     insight.trackEvent({
         category: category,
         action: action,
@@ -91,3 +96,24 @@ exports.trackEvent = function trackEvent(category, action, label, value) {
         value: value
     });
 }
+
+function turnOn() {
+    insight.optOut = false;
+}
+
+function turnOff() {
+    insight.optOut = true;
+}
+
+function isOptedIn() {
+    return !insight.optOut;
+}
+
+module.exports = {
+    setup: setup,
+    track: track,
+    trackEvent: trackEvent,
+    turnOn: turnOn,
+    turnOff: turnOff,
+    isOptedIn: isOptedIn
+};

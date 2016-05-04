@@ -30,7 +30,8 @@ var path = require('path'),
     _,
     updateNotifier,
     pkg = require('../package.json'),
-    telemetry = require('./telemetry');
+    telemetry = require('./telemetry'),
+    Q = require('q');
 
 var cordova_lib = require('cordova-lib'),
     CordovaError = cordova_lib.CordovaError,
@@ -81,14 +82,31 @@ function checkForUpdates() {
 }
 
 module.exports = function(inputArgs) {
-    // Telemetry Prompt: only shows up on first run
-    // If the user has not made any decision about telemetry yet,
-    // ... a timed prompt is shown(30 seconds), asking him whether or not he wants to opt-in.
-    // ... If the timeout expires without him having made any decisions, he is considered to have opted out.
     
-    // Note: The timed prompt can be prevented from being shown by setting an environment variable: CORDOVA_TELEMETRY_OPT_OUT
-    // ... This is useful in CI environments.
-    return telemetry.setup().then(function(isUserOptedIntoTelemetry) {
+    init();
+    
+    // If no inputArgs given, use process.argv.
+    inputArgs = inputArgs || process.argv;
+        
+    return Q().then(function() {
+        // Skip telemetry prompt when user runs: `cordova telemetry on | off`, `cordova telemetry ...`
+        var isTelemetryCmd = (function() {
+            return inputArgs[2] === 'telemetry';
+        })(inputArgs);
+        
+        if (isTelemetryCmd) {
+            return Q(telemetry.isOptedIn);
+        }
+
+        // Telemetry Prompt: only shows up on first run
+        // If the user has not made any decision about telemetry yet,
+        // ... a timed prompt is shown(30 seconds), asking him whether or not he wants to opt-in.
+        // ... If the timeout expires without him having made any decisions, he is considered to have opted out.
+
+        // Note: The timed prompt can be prevented from being shown by setting an environment variable: CORDOVA_TELEMETRY_OPT_OUT
+        // ... This is useful in CI environments.
+        return telemetry.setup();
+    }).then(function(isUserOptedIntoTelemetry) {
         return cli(inputArgs, isUserOptedIntoTelemetry);
     });
 };
@@ -134,11 +152,6 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
         , 't' : '--template'
         };
 
-    // If no inputArgs given, use process.argv.
-    inputArgs = inputArgs || process.argv;
-
-    init();
-
     checkForUpdates();
 
     var args = nopt(knownOpts, shortHands, inputArgs);
@@ -163,7 +176,7 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
     // are in a verbose mode.
     process.on('uncaughtException', function(err) {
         logger.error(err);
-        // Test this
+        // Test this: err could cause issues
         telemetry.track('uncaughtException', err);
         process.exit(1);
     });
@@ -211,6 +224,26 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
         }
         return help(remain);
     }
+    
+    // ToDO: Test this
+    // ToDO: Write console help
+    // ToDO: when running `cordova telemetry on|off`, don't show telemetry prompt
+    if (cmd === 'telemetry') {
+        if (undashed[1] === 'on') {
+            telemetry.turnOn();
+            if (isUserOptedIntoTelemetry) {
+                telemetry.track(cmd, 'on');
+            }
+        } else if (undashed[1] === 'off') {
+            telemetry.turnOff();
+            // Always track telemetry opt-outs whether user opted out or not!
+            telemetry.track('telemetry-opt-out', 'via-telemetry-cmd'); 
+        } else {
+            return help('telemetry'); // test this.
+        }
+
+        return Q();
+    }
 
     if ( !cordova.hasOwnProperty(cmd) ) {
         msg =
@@ -229,6 +262,7 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
         nohooks: args.nohooks || [],
         searchpath : args.searchpath
     };
+    
 
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run' || cmd === 'clean') {
         // All options without dashes are assumed to be platform names
