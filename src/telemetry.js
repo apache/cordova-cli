@@ -22,64 +22,31 @@
           laxcomma:true
 */
 
-var path = require('path');
 var Q = require('q');
 
-var GOOGLE_ANALYTICS_TRACKING_ID = 'UA-64283057-7'; 
+// Google Analytics tracking code
+var GA_TRACKING_CODE = 'UA-64283057-7';
 
 var pkg = require('../package.json');
 var Insight = require('insight');
 var insight = new Insight({
-    trackingCode: GOOGLE_ANALYTICS_TRACKING_ID,
+    trackingCode: GA_TRACKING_CODE,
     pkg: pkg
 });
 
-/**
- * Telemetry Prompt:
- * If the user has not made any decision about telemetry yet,
- * ... a timed prompt is shown, asking him whether or not he wants to opt-in.
- * ... If the timeout expires without him having made any decisions, he is considered to have opted out.
 
- * Note: The timed prompt can be prevented from being shown by setting an environment variable: CORDOVA_TELEMETRY_OPT_OUT
- * ... This is useful in CI environments.
-
-@returns {Boolean} It returns true if the user has agreed to opt-in to telemetry, false otherwise
-*/
-function setup() {
+function showPrompt() {
+    
     var deferred = Q.defer();
     
-    // ToDO: should we just rely on 'CI' env variable? (what are others doing?)
-    var isInteractive = !process.env.CORDOVA_TELEMETRY_OPT_OUT && !process.env.CI;
-    if(!isInteractive) {
-        // Update user's config file to make sure telemetry doesn't get collected
-        // This handles the case where user had previously opted-in, then 
-        // ... sets up environment variable to signify they want out
-        insight.optOut = true; 
-    }
-    
-    if (isInteractive && insight.optOut === undefined) {
-
-        // Note: insight.askPermission() won't display the permissions prompt if one of these is true:
-        //     - the process is not a TTY
-        //     - the process was started with --no-insight flag
-        //     - the CI environment variable is set 
-        // For further infos, see: https://github.com/yeoman/insight/blob/3a6ac613b7312272f9f10e1188310b199afa4e1d/lib/index.js#L133
-        
-        // ToDO: Fix link to privacy-statement
-        var msg = 'Privacy statement: http://docs.cordova.io/privacy-statement.html' + require('os').EOL +
-                    'May cordova anonymously report usage statitics to improve the tool over time ?';
-        insight.askPermission(msg, function(unused, optIn) {
-            if(!optIn) {
-                // Always track telemetry opt-outs!
-                track('telemetry-opt-out', 'via-cli-prompt-choice');
-            }
-            deferred.resolve(optIn /* same as !insight.optOut */);
-        }, {
-            optInByDefault: false // If prompt timeout expires, opt the user out of telemetry
-        });
-    } else {
-        deferred.resolve(!insight.optOut);
-    }
+    var msg = 'Do you want to prevent cordova from anonymously collecting usage statitics to improve the tool over time ?';
+    insight.askPermission(msg, function (unused, optIn) {
+        if (!optIn) {
+            // Always track telemetry opt-outs! (whether opted-in or opted-out)
+            track('telemetry-opt-out', 'via-cli-prompt-choice');
+        }
+        deferred.resolve(optIn /* same as !insight.optOut */);
+    });
     
     return deferred.promise;
 }
@@ -105,15 +72,49 @@ function turnOff() {
     insight.optOut = true;
 }
 
+/**
+ * Clears telemetry setting
+ * Has the same effect as if user never answered the telemetry prompt
+ * Useful for testing purposes
+ */
+function clear() {
+    insight.optOut = undefined;
+}
+
 function isOptedIn() {
     return !insight.optOut;
 }
 
+/**
+ * Has the user already answered the telemetry prompt? (thereby opting in or out?)
+ */
+function hasUserOptedInOrOut() {
+    return !(insight.optOut === undefined);
+}
+
+/**
+ * Is the environment variable 'CI' specified ?
+ */
+function isCI(env) {
+    return !!env.CI;
+}
+
+/**
+ * Has the user ran a command of the form: `cordova run --no-telemetry` ?
+ */
+function isNoTelemetryFlag(args) {
+    return args.indexOf('--no-telemetry') > -1;
+}
+
 module.exports = {
-    setup: setup,
     track: track,
     trackEvent: trackEvent,
     turnOn: turnOn,
     turnOff: turnOff,
-    isOptedIn: isOptedIn
+    clear: clear,
+    isOptedIn: isOptedIn,
+    hasUserOptedInOrOut: hasUserOptedInOrOut,
+    isCI: isCI,
+    showPrompt: showPrompt,
+    isNoTelemetryFlag: isNoTelemetryFlag
 };

@@ -89,29 +89,43 @@ module.exports = function(inputArgs) {
     inputArgs = inputArgs || process.argv;
         
     return Q().then(function() {
-        // Skip telemetry prompt when user runs: `cordova telemetry on | off`, `cordova telemetry ...`
-        var isTelemetryCmd = (function() {
-            return inputArgs[2] === 'telemetry';
-        })(inputArgs);
         
-        if (isTelemetryCmd) {
-            return Q(telemetry.isOptedIn);
+        /**
+         * 1- Skip telemetry prompt if:
+         * - CI environment variable is present
+         * - Command is run with `--no-telemetry` flag
+         * - Command ran is: `cordova telemetry on | off | ...`
+         */
+        
+        if(telemetry.isCI(process.env) || telemetry.isNoTelemetryFlag(inputArgs)) {
+            return Q(false);
         }
-
-        // Telemetry Prompt: only shows up on first run
-        // If the user has not made any decision about telemetry yet,
-        // ... a timed prompt is shown(30 seconds), asking him whether or not he wants to opt-in.
-        // ... If the timeout expires without him having made any decisions, he is considered to have opted out.
-
-        // Note: The timed prompt can be prevented from being shown by setting an environment variable: CORDOVA_TELEMETRY_OPT_OUT
-        // ... This is useful in CI environments.
-        return telemetry.setup();
-    }).then(function(isUserOptedIntoTelemetry) {
-        return cli(inputArgs, isUserOptedIntoTelemetry);
+        
+        /**
+         * 2- We shouldn't prompt for telemetry if user issues a command of the form: `cordova telemetry on | off | ...x`
+         */
+        var isTelemetryCmd = inputArgs[2] === 'telemetry';
+        if(isTelemetryCmd) {
+            return Q(telemetry.isOptedIn());
+        }
+        
+        // 3- If user has already been prompted and made a decision, use his saved answer
+        if(telemetry.hasUserOptedInOrOut()) {
+            return Q(telemetry.isOptedIn());
+        }
+        
+        /**
+         * 4- Otherwise, prompt user to opt-in or out
+         * Note: the prompt is shown for 30 seconds. If no choice is made by that time, User is considered to have opted out.
+         */
+        return telemetry.showPrompt();
+        
+    }).then(function(shouldCollectTelemetry) { 
+        cli(inputArgs, shouldCollectTelemetry);
     });
 };
 
-function cli(inputArgs, isUserOptedIntoTelemetry) {
+function cli(inputArgs, shouldCollectTelemetry) {
     // When changing command line arguments, update doc/help.txt accordingly.
     var knownOpts =
         { 'verbose' : Boolean
@@ -164,11 +178,11 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
             toPrint += ' (cordova-lib@' + libVersion + ')';
         }
         console.log(toPrint);
-        if(isUserOptedIntoTelemetry) {
+        if(shouldCollectTelemetry) {
             var cmd = 'version';
             telemetry.track(cmd, args.version);
         }
-        return;
+        return Q();
     }
 
 
@@ -176,11 +190,13 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
     // are in a verbose mode.
     process.on('uncaughtException', function(err) {
         logger.error(err);
-        // Test this: err could cause issues
-        telemetry.track('uncaughtException', err);
+        // Don't send exception details, just send that it happened
+        if(shouldCollectTelemetry) {
+            telemetry.track('uncaughtException');
+        }
         process.exit(1);
     });
-
+    
     logger.subscribe(events);
 
     if (args.silent) {
@@ -218,26 +234,22 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
         if (!args.help && remain[0] == 'help') {
             remain.shift();
         }
-        if(isUserOptedIntoTelemetry) {
+        if(shouldCollectTelemetry) {
             telemetry.track(cmd); 
-            telemetry.trackEvent('category', cmd);
         }
         return help(remain);
     }
     
-    // ToDO: Test this
-    // ToDO: Write console help
-    // ToDO: when running `cordova telemetry on|off`, don't show telemetry prompt
     if (cmd === 'telemetry') {
         if (undashed[1] === 'on') {
             telemetry.turnOn();
-            if (isUserOptedIntoTelemetry) {
+            if (shouldCollectTelemetry) {
                 telemetry.track(cmd, 'on');
             }
         } else if (undashed[1] === 'off') {
             telemetry.turnOff();
-            // Always track telemetry opt-outs whether user opted out or not!
-            telemetry.track('telemetry-opt-out', 'via-telemetry-cmd'); 
+            // Always track telemetry opt-outs (whether user opted out or not!)
+            telemetry.track('telemetry-opt-out', 'via-cordova-telemetry-off'); 
         } else {
             return help('telemetry'); // test this.
         }
@@ -280,9 +292,8 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
         if (cmd === 'run' && args.list && cordova.raw.targets) {
             var result = cordova.raw.targets.call(null, opts);
             return result.finally(function() {
-                if (isUserOptedIntoTelemetry) {
+                if (shouldCollectTelemetry) {
                     telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
-                    telemetry.trackEvent('category', cmd);
                 }
                 return result;
             });
@@ -290,9 +301,8 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
 
         var result = cordova.raw[cmd].call(null, opts);
         return result.finally(function() {
-            if (isUserOptedIntoTelemetry) {
+            if (shouldCollectTelemetry) {
                 telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
-                telemetry.trackEvent('category', cmd);
             }
             return result;
         });
@@ -336,7 +346,7 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
                 if (someChecksFailed) throw new CordovaError('Some of requirements check failed');
             });
         return result.finally(function() {
-            if (isUserOptedIntoTelemetry) {
+            if (shouldCollectTelemetry) {
                 telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
             }
             return result;
@@ -345,14 +355,14 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
         var port = undashed[1];
         var result = cordova.raw.serve(port);
         return result.finally(function() {
-            if(isUserOptedIntoTelemetry) {
+            if(shouldCollectTelemetry) {
                 telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
             }
         });
     } else if (cmd == 'create') {
         var result = create();
         return result.finally(function() {
-            if (isUserOptedIntoTelemetry) {
+            if (shouldCollectTelemetry) {
                 telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
             }
             return result;
@@ -386,7 +396,7 @@ function cli(inputArgs, isUserOptedIntoTelemetry) {
                             };
         var result = cordova.raw[cmd](subcommand, targets, download_opts);
         return result.finally(function() {
-            if (isUserOptedIntoTelemetry) {
+            if (shouldCollectTelemetry) {
                 telemetry.track(cmd, result.isFulfilled() ? 'successful' : 'unsuccessful');
             }
             return result;
