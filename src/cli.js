@@ -246,12 +246,14 @@ function cli(inputArgs, shouldCollectTelemetry) {
             if (shouldCollectTelemetry) {
                 telemetry.track(cmd, 'on');
             }
+            console.log("Thanks for opting into telemetry to help us better cordova");
         } else if (undashed[1] === 'off') {
             telemetry.turnOff();
             // Always track telemetry opt-outs (whether user opted out or not!)
             telemetry.track('telemetry-opt-out', 'via-cordova-telemetry-off'); 
+            console.log("You have been opted out of telemetry. To change this, run: cordova telemetry on");
         } else {
-            return help('telemetry'); // test this.
+            return help(['telemetry']); 
         }
 
         return Q();

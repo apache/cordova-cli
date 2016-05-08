@@ -34,18 +34,24 @@ var insight = new Insight({
     pkg: pkg
 });
 
-
+/**
+ * Returns true if the user opted in, and false otherwise
+ */
 function showPrompt() {
-    
+
     var deferred = Q.defer();
     
     var msg = 'Do you want to prevent cordova from anonymously collecting usage statitics to improve the tool over time ?';
-    insight.askPermission(msg, function (unused, optIn) {
-        if (!optIn) {
+    insight.askPermission(msg, function (unused, optOut) {
+        if (optOut) {
+            console.log("You have been opted out of telemetry. To change this, run: cordova telemetry on");
             // Always track telemetry opt-outs! (whether opted-in or opted-out)
             track('telemetry-opt-out', 'via-cli-prompt-choice');
+        } else {
+            console.log("Thanks for opting into telemetry to help us better cordova");
         }
-        deferred.resolve(optIn /* same as !insight.optOut */);
+
+        deferred.resolve(!optOut); 
     });
     
     return deferred.promise;
