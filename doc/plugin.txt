@@ -23,8 +23,17 @@ Manage project plugins
         --force ........................ Forces copying source files from the plugin even if the
                                          same file already exists in the target directory.
 
+        --fetch ........................ Fetches the plugin into the project's
+                                         node_modules directory. Uses
+                                         `npm install` to do the fetching
+
     remove <pluginid>|<name> [...] ..... Remove plugins with the given IDs/name.
         --save ......................... Remove the information for specified plugin from config.xml
+
+        --fetch ........................ Removes the plugin from the project's
+                                         node_modules directory. Uses
+                                         `npm uninstall` under the hood.
+
 
     list .............................. List currently installed plugins
     search [<keyword>] [...] .......... Search http://plugins.cordova.io for plugins matching the keywords
