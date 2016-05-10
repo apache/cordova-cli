@@ -5,6 +5,7 @@ Synopsis
 Global Commands
     create ............................. Create a project
     help ............................... Get help for a command
+    telemetry .......................... Turn telemetry collection on or off
 
 Project Commands
     info ............................... Generate project information
@@ -22,12 +23,6 @@ Project Commands
                                             (including prepare && compile)
     serve .............................. Run project with a local webserver
                                             (including prepare)
-
-Telemetry Commands
-    telemetry on ....................... Turn telemetry collection on
-    telemetry off ...................... Turn telemetry collection off 
-    <cordova-cmd> --no-telemetry ............... Turn telemetry collection off only for the command being run
-    For details, see our privacy notice: https://cordova.apache.org/privacy-notice.html                                           
 
 Learn more about command options using 'cordova-cli help <command>'
 
@@ -50,6 +45,3 @@ Examples
     cordova-cli build android --verbose
     cordova-cli run android
     cordova-cli build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
-    cordova-cli telemetry on
-    cordova-cli telemetry off
-    cordova-cli build --no-telemetry

@@ -57,31 +57,22 @@ describe("cordova cli", function () {
             });
             
             it("will spit out the version with -v", function (done) {
-                cli(["node", "cordova", "-v"]).then(function() {
+                cli(["node", "cordova", "-v"], function() {
                     expect(console.log.mostRecentCall.args[0]).toMatch(version);
-                    done();
-                }).fail(function() {
-                    expect(true).toBe(false);
                     done();
                 });
             });
 
             it("will spit out the version with --version", function (done) {
-                cli(["node", "cordova", "--version"]).then(function() {
+                cli(["node", "cordova", "--version"], function () {
                     expect(console.log.mostRecentCall.args[0]).toMatch(version);
-                    done();
-                }).fail(function() {
-                    assert(true).toBe(false);
-                    done();
+                    done()
                 });
             });
 
             it("will spit out the version with -v anywhere", function (done) {
-                cli(["node", "cordova", "one", "-v", "three"]).then(function() {
+                cli(["node", "cordova", "one", "-v", "three"], function () {
                     expect(console.log.mostRecentCall.args[0]).toMatch(version);
-                    done();
-                }).fail(function() {
-                    expect(true).toBe(false);
                     done();
                 });
             });
@@ -94,61 +85,43 @@ describe("cordova cli", function () {
         });
 
         it("will call command with all arguments passed through", function (done) {
-            cli(["node", "cordova", "build", "blackberry10", "--", "-k", "abcd1234"]).then(function () {
-                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { argv: ['-k', 'abcd1234'] }, verbose: false, silent: false, browserify: false, nohooks: [], searchpath: undefined });
-                done();
-            }).fail(function () {
-                expect(true).toBe(false);
+            cli(["node", "cordova", "build", "blackberry10", "--", "-k", "abcd1234"], function () {
+                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { argv: ['-k', 'abcd1234'] }, verbose: false, silent: false, browserify: false, nohooks: [], searchpath: undefined, fetch: false });
                 done();
             });
         });
 
         it("will consume the first instance of -d", function (done) {
-            cli(["node", "cordova", "-d", "build", "blackberry10", "--", "-k", "abcd1234", "-d"]).then(function () {
-                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, browserify: false, nohooks: [], searchpath: undefined });
-                done();
-            }).fail(function () {
-                expect(true).toBe(false);
+            cli(["node", "cordova", "-d", "build", "blackberry10", "--", "-k", "abcd1234", "-d"], function () {
+                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, browserify: false, nohooks: [], searchpath: undefined, fetch: false });
                 done();
             });
         });
 
         it("will consume the first instance of --verbose", function (done) {
-            cli(["node", "cordova", "--verbose", "build", "blackberry10", "--", "-k", "abcd1234", "--verbose"]).then(function () {
-                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, browserify: false, nohooks: [], searchpath: undefined });
-                done();
-            }).fail(function () {
-                expect(true).toBe(false);
+            cli(["node", "cordova", "--verbose", "build", "blackberry10", "--", "-k", "abcd1234", "--verbose"], function () {
+                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, browserify: false, nohooks: [], searchpath: undefined, fetch: false });
                 done();
             });
         });
 
         it("will consume the first instance of either --verbose or -d", function (done) {
-            cli(["node", "cordova", "--verbose", "build", "blackberry10", "--", "-k", "abcd1234", "-d"]).then(function () {
-                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, browserify: false, nohooks: [], searchpath: undefined });
-                done();
-            }).fail(function () {
-                expect(true).toBe(false);
+            cli(["node", "cordova", "--verbose", "build", "blackberry10", "--", "-k", "abcd1234", "-d"], function () {
+                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, browserify: false, nohooks: [], searchpath: undefined, fetch: false });
                 done();
             });
         });
 
         it("will consume the first instance of either --verbose or -d", function (done) {
-            cli(["node", "cordova", "-d", "build", "blackberry10", "--", "-k", "abcd1234", "--verbose"]).then(function () {
-                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, browserify: false, nohooks: [], searchpath: undefined });
-                done();
-            }).fail(function () {
-                expect(true).toBe(false);
+            cli(["node", "cordova", "-d", "build", "blackberry10", "--", "-k", "abcd1234", "--verbose"], function () {
+                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, browserify: false, nohooks: [], searchpath: undefined, fetch: false });
                 done();
             });
         });
 
         it("will consume the first instance of --silent", function (done) {
-            cli(["node", "cordova", "--silent", "build", "blackberry10", "--", "-k", "abcd1234", "--silent"]).then(function () {
-                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { silent: true, argv: ['-k', 'abcd1234', '--silent'] }, verbose: false, silent: true, browserify: false, nohooks: [], searchpath: undefined });
-                done();
-            }).fail(function () {
-                expect(true).toBe(false);
+            cli(["node", "cordova", "--silent", "build", "blackberry10", "--", "-k", "abcd1234", "--silent"], function () {
+                expect(cordova.raw.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { silent: true, argv: ['-k', 'abcd1234', '--silent'] }, verbose: false, silent: true, browserify: false, nohooks: [], searchpath: undefined, fetch: false });
                 done();
             });
         });
@@ -161,11 +134,8 @@ describe("cordova cli", function () {
         });
 
         it("calls cordova raw create", function (done) {
-            cli(["node", "cordova", "create", "a", "b", "c", "--link-to", "c:\\personalWWW"]).then(function () {
+            cli(["node", "cordova", "create", "a", "b", "c", "--link-to", "c:\\personalWWW"], function () {
                 expect(cordova.raw.create).toHaveBeenCalledWith("a", "b", "c", jasmine.any(Object));
-                done();
-            }).fail(function () {
-                expect(true).toBe(false);
                 done();
             });
         });
@@ -177,7 +147,7 @@ describe("cordova cli", function () {
         });
 
         it("will pass variables", function (done) {
-            cli(["node", "cordova", "plugin", "add", "facebook", "--variable", "FOO=foo"]).then(function () {
+            cli(["node", "cordova", "plugin", "add", "facebook", "--variable", "FOO=foo"], function () {
                 expect(cordova.raw.plugin).toHaveBeenCalledWith(
                     "add",
                     ["facebook"],
@@ -186,15 +156,11 @@ describe("cordova cli", function () {
                 var opts = cordova.raw.plugin.calls[0].args[2];
                 expect(opts.cli_variables.FOO).toBe('foo');
                 done();
-            }).fail(function() {
-                expect(true).toBe(false);
-                done();
             });
-
         });
 
         it("will  support variables with =", function (done) {
-            cli(["node", "cordova", "plugin", "add", "facebook", "--variable", "MOTO=DELTA=WAS=HERE"]).then(function () {
+            cli(["node", "cordova", "plugin", "add", "facebook", "--variable", "MOTO=DELTA=WAS=HERE"], function () {
                 expect(cordova.raw.plugin).toHaveBeenCalledWith(
                     "add",
                     ["facebook"],
@@ -203,14 +169,11 @@ describe("cordova cli", function () {
                 var opts = cordova.raw.plugin.calls[0].args[2];
                 expect(opts.cli_variables.MOTO).toBe('DELTA=WAS=HERE');
                 done();
-            }).fail(function () {
-                expect(true).toBe(false);
-                done();
             });
         });
 
         it("will pass hook patterns to suppress", function (done) {
-            cli(["node", "cordova", "plugin", "add", "facebook", "--nohooks", "before_plugin_add"]).then(function () {
+            cli(["node", "cordova", "plugin", "add", "facebook", "--nohooks", "before_plugin_add"], function () {
                 expect(cordova.raw.plugin).toHaveBeenCalledWith(
                     "add",
                     ["facebook"],
@@ -219,10 +182,7 @@ describe("cordova cli", function () {
                 var opts = cordova.raw.plugin.calls[0].args[2];
                 expect(opts.nohooks[0]).toBe("before_plugin_add");
                 done();
-            }).fail(function () {
-                expect(true).toBe(false);
-                done();
-            });  
+            });
         });
 
     });
@@ -234,15 +194,12 @@ describe("cordova cli", function () {
                wasPromptShown = true;
            });
 
-           cli(["node", "cordova", "telemetry", "on"]).then(function (done) {
-               return cli(["node", "cordova", "telemetry", "off"])
-           }).then(function () {
-               expect(wasPromptShown).toBeFalsy();
-               done();
-           }).fail(function () {
-               expect(true).toBe(false);
-               done();
-           });           
+           cli(["node", "cordova", "telemetry", "on"], function () {
+               cli(["node", "cordova", "telemetry", "off"], function () {
+                   expect(wasPromptShown).toBeFalsy();
+                   done();
+               });
+           });         
        });
        
        it("is NOT collected when user runs 'cordova telemetry on' while NOT opted-in", function(done) {
@@ -251,13 +208,10 @@ describe("cordova cli", function () {
            
            spyOn(telemetry, "track");
            
-           cli(["node", "cordova", "telemetry", "on"]).then(function () {
+           cli(["node", "cordova", "telemetry", "on"], function () {
                expect(telemetry.track).not.toHaveBeenCalled();
                done();
-           }).fail(function () {
-               expect(true).toBe(false);
-               done();
-           });  
+           });
        });
        
        it("is collected when user runs 'cordova telemetry off' while opted-in", function(done) {
@@ -266,13 +220,10 @@ describe("cordova cli", function () {
            
            spyOn(telemetry, "track");
            
-           cli(["node", "cordova", "telemetry", "off"]).then(function () {
-               expect(telemetry.track).toHaveBeenCalledWith("telemetry-opt-out", "via-cordova-telemetry-off");
+           cli(["node", "cordova", "telemetry", "off"], function () {
+               expect(telemetry.track).toHaveBeenCalledWith("telemetry", "off", "via-cordova-telemetry-cmd", "successful");
                done();
-           }).fail(function () {
-               expect(true).toBe(false);
-               done();
-           });  
+           });
        });
        
        it("shows prompt if user neither opted in or out yet", function(done) {
@@ -283,11 +234,8 @@ describe("cordova cli", function () {
            spyOn(telemetry, "isNoTelemetryFlag").andReturn(false);
            spyOn(telemetry, "showPrompt").andReturn(Q(false));
            
-           return cli(["node", "cordova", "prepare"]).then(function() {
+           cli(["node", "cordova", "prepare"], function () {
                expect(telemetry.showPrompt).toHaveBeenCalled();
-               done();
-           }).fail(function() {
-               expect(true).toBe(false);
                done();
            });
        });
@@ -302,12 +250,9 @@ describe("cordova cli", function () {
            spyOn(telemetry, "isCI").andReturn(false);
            spyOn(telemetry, "track");
            
-           cli(["node", "cordova", "--version"]).then(function() {
+           cli(["node", "cordova", "--version"], function () {
                expect(telemetry.isOptedIn()).toBeFalsy();
-               expect(telemetry.track).toHaveBeenCalledWith('telemetry-opt-out', 'via-cli-prompt-choice');
-               done();
-           }).fail(function() {
-               expect(true).toBe(false);
+               expect(telemetry.track).toHaveBeenCalledWith("telemetry", "off", "via-cli-prompt-choice", "successful");
                done();
            });
        }/*, 45000*/);
@@ -320,12 +265,9 @@ describe("cordova cli", function () {
            spyOn(telemetry, "showPrompt");
            spyOn(telemetry, "track");
            
-           cli(["node", "cordova", "--version"]).then(function() {
+           cli(["node", "cordova", "--version"], function () {
                expect(telemetry.showPrompt).not.toHaveBeenCalled();
                expect(telemetry.track).not.toHaveBeenCalled();
-               done();
-           }).fail(function() {
-               expect(true).toBe(false);
                done();
            });
        });
@@ -338,12 +280,9 @@ describe("cordova cli", function () {
            spyOn(telemetry, "showPrompt");
            spyOn(telemetry, "track");
            
-           cli(["node", "cordova", "--version", "--no-telemetry"]).then(function() {
+           cli(["node", "cordova", "--version", "--no-telemetry"], function () {
                expect(telemetry.showPrompt).not.toHaveBeenCalled();
                expect(telemetry.track).not.toHaveBeenCalled();
-               done();
-           }).fail(function() {
-               expect(true).toBe(false);
                done();
            });
        });
@@ -356,12 +295,9 @@ describe("cordova cli", function () {
            spyOn(telemetry, "showPrompt");
            spyOn(telemetry, "track");
            
-           cli(["node", "cordova", "--version"]).then(function() {
+           cli(["node", "cordova", "--version"], function () {
                expect(telemetry.showPrompt).not.toHaveBeenCalled();
                expect(telemetry.track).not.toHaveBeenCalled();
-               done();
-           }).fail(function() {
-               expect(true).toBe(false);
                done();
            });
        });
@@ -374,12 +310,9 @@ describe("cordova cli", function () {
            spyOn(telemetry, "showPrompt");
            spyOn(telemetry, "track");
            
-           cli(["node", "cordova", "--version"]).then(function() {
+           cli(["node", "cordova", "--version"], function () {
                expect(telemetry.showPrompt).not.toHaveBeenCalled();
                expect(telemetry.track).toHaveBeenCalled();
-               done();
-           }).fail(function() {
-               expect(true).toBe(false);
                done();
            });
        });
@@ -391,15 +324,12 @@ describe("cordova cli", function () {
            spyOn(telemetry, "track");
 
            expect(telemetry.isOptedIn()).toBeFalsy();
-           
-           cli(["node", "cordova", "telemetry", "off"]).then(function() {
+
+           cli(["node", "cordova", "telemetry", "off"], function () {
                expect(telemetry.isOptedIn()).toBeFalsy();
-               expect(telemetry.track).toHaveBeenCalledWith("telemetry-opt-out", "via-cordova-telemetry-off");
+               expect(telemetry.track).toHaveBeenCalledWith("telemetry", "off", "via-cordova-telemetry-cmd", "successful");
                done();
-           }).fail(function() {
-               expect(true).toBe(false);
-               done();
-           });;
+           });
        });
     });
 });

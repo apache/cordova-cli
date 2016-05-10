@@ -35,7 +35,7 @@
         "nopt": "3.0.1",
         "underscore": "1.7.0",
         "update-notifier": "^0.5.0",
-        "insight": "~0.8.1"
+        "insight": "~0.8.2"
     },
     "devDependencies": {
         "istanbul": "^0.3.4",

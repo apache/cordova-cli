@@ -40,6 +40,7 @@ These commands are available at all times.
 |----------|--------------
 | create | Create a project
 | help <command> | Get help for a command
+| telemetry | Turn telemetry collection on or off
 
 ## Project Command List
 
@@ -610,6 +611,23 @@ Run a local web server for www/ assets using specified `port` or default of 8000
 ```
 cordova serve [port]
 ```
+
+## cordova telemetry command
+
+### Synopsis
+
+Turns telemetry collection on or off.
+
+### Syntax
+
+```
+cordova telemetry [STATE]
+```
+
+| Option      | Description
+|-------------|------------------
+| on          | Turn telemetry collection on.
+| off         | Turn telemetry collection off.
 
 ## cordova help command
 

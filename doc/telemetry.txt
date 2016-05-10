@@ -13,12 +13,11 @@ Details
     A timed prompt asking the user to opt-in or out is displayed the first time cordova is run.
     It lasts for 30 seconds, after which the user is automatically opted-out if he doesn't provide any answer.
     In CI environments, the `CI` environment variable can be set, which will prevent the prompt from showing up.
-    Telemetry collection can also be turned off on a single command by using the `--no-telemetry-flag`.
+    Telemetry collection can also be turned off on a single command by using the `--no-telemetry` flag.
 
 Examples
     cordova-cli telemetry on
     cordova-cli telemetry off
     cordova-cli build --no-telemetry
 
-For details, see our privacy notice: https://cordova.apache.org/privacy-notice.html 
-and the proposal: https://github.com/cordova/cordova-discuss/pull/43
+For details, see our privacy notice: https://cordova.apache.org/privacy

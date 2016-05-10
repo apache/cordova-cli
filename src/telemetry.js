@@ -22,6 +22,11 @@
           laxcomma:true
 */
 
+
+
+// For further details on telemetry, see:
+// https://github.com/cordova/cordova-discuss/pull/43
+
 var Q = require('q');
 
 // Google Analytics tracking code
@@ -41,17 +46,19 @@ function showPrompt() {
 
     var deferred = Q.defer();
     
-    var msg = 'Do you want to prevent cordova from anonymously collecting usage statitics to improve the tool over time ?';
-    insight.askPermission(msg, function (unused, optOut) {
-        if (optOut) {
-            console.log("You have been opted out of telemetry. To change this, run: cordova telemetry on");
-            // Always track telemetry opt-outs! (whether opted-in or opted-out)
-            track('telemetry-opt-out', 'via-cli-prompt-choice');
+    var msg = "May Cordova anonymously report usage statistics to improve the tool over time?";
+    insight.askPermission(msg, function (unused, optIn) {
+        var EOL = require('os').EOL;
+        if (optIn) {
+            console.log(EOL + "Thanks for opting into telemetry to help us improve cordova.");
+            track('telemetry', 'on', 'via-cli-prompt-choice', 'successful');
         } else {
-            console.log("Thanks for opting into telemetry to help us better cordova");
+            console.log(EOL + "You have been opted out of telemetry. To change this, run: cordova telemetry on.");
+            // Always track telemetry opt-outs! (whether opted-in or opted-out)
+            track('telemetry', 'off', 'via-cli-prompt-choice', 'successful');
         }
-
-        deferred.resolve(!optOut); 
+        
+        deferred.resolve(optIn); 
     });
     
     return deferred.promise;
@@ -59,15 +66,6 @@ function showPrompt() {
 
 function track() {
     insight.track.apply(insight, arguments);
-}
-
-function trackEvent(category, action, label, value) {
-    insight.trackEvent({
-        category: category,
-        action: action,
-        label: label,
-        value: value
-    });
 }
 
 function turnOn() {
@@ -114,7 +112,6 @@ function isNoTelemetryFlag(args) {
 
 module.exports = {
     track: track,
-    trackEvent: trackEvent,
     turnOn: turnOn,
     turnOff: turnOff,
     clear: clear,
