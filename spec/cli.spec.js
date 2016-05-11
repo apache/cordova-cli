@@ -52,17 +52,17 @@ describe("cordova cli", function () {
 
             it("will spit out the version with -v", function () {
                 cli(["node", "cordova", "-v"]);
-                expect(console.log.mostRecentCall.args[0]).toMatch(version);
+                expect(console.log.mostRecentCall.args[0]).toContain(version);
             });
 
             it("will spit out the version with --version", function () {
                 cli(["node", "cordova", "--version"]);
-                expect(console.log.mostRecentCall.args[0]).toMatch(version);
+                expect(console.log.mostRecentCall.args[0]).toContain(version);
             });
 
             it("will spit out the version with -v anywhere", function () {
                 cli(["node", "cordova", "one", "-v", "three"]);
-                expect(console.log.mostRecentCall.args[0]).toMatch(version);
+                expect(console.log.mostRecentCall.args[0]).toContain(version);
             });
         });
     });
