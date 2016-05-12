@@ -68,6 +68,7 @@ These options apply to all cordova-cli commands.
 | -v or --version      | Print out the version of your `cordova-cli` install.
 | --no-update-notifier | Will disable updates check. Alternatively set `"optOut": true` in `~/.config/configstore/update-notifier-cordova.json` or set `NO_UPDATE_NOTIFIER` environment variable with any value (see details in [update-notifier docs](https://www.npmjs.com/package/update-notifier#user-settings)).
 |--nohooks             | Suppress executing hooks (taking RegExp hook patterns as parameters)
+| --no-telemetry       | Disable telemetry collection for the current command.
 
 ## Platform-specific options
 
