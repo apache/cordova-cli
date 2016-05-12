@@ -629,6 +629,21 @@ cordova telemetry [STATE]
 | on          | Turn telemetry collection on.
 | off         | Turn telemetry collection off.
 
+### Details
+ A timed prompt asking the user to opt-in or out is displayed the first time cordova is run.
+ It lasts for 30 seconds, after which the user is automatically opted-out if he doesn't provide any answer.
+ In CI environments, the `CI` environment variable can be set, which will prevent the prompt from showing up.
+ Telemetry collection can also be turned off on a single command by using the `--no-telemetry` flag.
+
+### Examples
+```
+cordova telemetry on
+cordova telemetry off
+cordova build --no-telemetry
+```
+
+For details, see our privacy notice: https://cordova.apache.org/privacy
+
 ## cordova help command
 
 ### Synopsis
