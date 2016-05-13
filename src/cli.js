@@ -158,6 +158,12 @@ module.exports = function (inputArgs, cb) {
 };
 
 function handleTelemetryCmd(subcommand, isOptedIn) {
+    
+    if (subcommand !== 'on' && subcommand !== 'off') {
+        logger.subscribe(events);
+        return help(['telemetry']);
+    }
+    
     var turnOn = subcommand === 'on' ? true : false;
     var cmdSuccess = true;
 
