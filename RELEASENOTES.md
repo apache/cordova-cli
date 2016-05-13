@@ -20,6 +20,15 @@
 -->
 # Cordova-cli Release Notes
 
+### 6.2.0 (May 12, 2016)
+* [Telemetry](https://github.com/apache/cordova-cli/pull/247) Added telemetry to cordova-cli to collect data for data driven development
+* CB-11250 Fix CLI tests verifying the version
+* CB-9858 added `--fetch` option
+* CB-10986 Adding note about scoped npm packages for plugins
+* CB-11042 Add cordova run option to skip prepare
+* CB-10062 Error: `EACCES: permission denied - update-notifier-cordova.json`
+* CB-10679 Documenting how the CLI chooses plugin versions
+
 ### 6.1.1 (Mar 29, 2016)
 * CB-10980 Updated cordova-lib dependency to 6.1.1
 
