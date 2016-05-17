@@ -81,6 +81,18 @@ function checkForUpdates() {
     }
 }
 
+// For CordovaError print only the message without stack trace unless we
+// are in a verbose mode.
+process.on('uncaughtException', function (err) {
+    logger.error(err);
+    // Don't send exception details, just send that it happened
+    if (shouldCollectTelemetry) {
+        telemetry.track('uncaughtException');
+    }
+    process.exit(1);
+});
+    
+    
 var shouldCollectTelemetry = false;
 module.exports = function (inputArgs, cb) {
     
@@ -93,15 +105,28 @@ module.exports = function (inputArgs, cb) {
     
     // If no inputArgs given, use process.argv.
     inputArgs = inputArgs || process.argv;
+    
+    var args = parseArguments(inputArgs);
+    
+    logger.subscribe(events);
+
+    if (args.silent) {
+        logger.setLevel('error');
+    }
+
+    if (args.verbose) {
+        logger.setLevel('verbose');
+    }
+    
     var cmd = inputArgs[2]; // e.g: inputArgs= 'node cordova run ios'
     var isTelemetryCmd = (cmd === 'telemetry');
 
     // ToDO: Move nopt-based parsing of args up here
-    if(cmd === '--version' || cmd === '-v') {
+    /*if(cmd === '--version' || cmd === '-v') {
         cmd = 'version';
     } else if(!cmd || cmd === '--help' || cmd === 'h') {
         cmd = 'help';
-    }
+    }*/
             
     Q().then(function() {
         
@@ -195,85 +220,52 @@ function handleTelemetryCmd(subcommand, isOptedIn) {
     return Q();
 }
 
-function cli(inputArgs) {
+
+function parseArguments(inputArgs) {
     // When changing command line arguments, update doc/help.txt accordingly.
     var knownOpts =
-        { 'verbose' : Boolean
-        , 'version' : Boolean
-        , 'help' : Boolean
-        , 'silent' : Boolean
-        , 'experimental' : Boolean
-        , 'noregistry' : Boolean
-        , 'nohooks': Array
-        , 'shrinkwrap' : Boolean
-        , 'copy-from' : String
-        , 'link-to' : path
-        , 'searchpath' : String
-        , 'variable' : Array
-        , 'link': Boolean
-        , 'force': Boolean
-        // Flags to be passed to `cordova build/run/emulate`
-        , 'debug' : Boolean
-        , 'release' : Boolean
-        , 'archs' : String
-        , 'device' : Boolean
-        , 'emulator': Boolean
-        , 'target' : String
-        , 'browserify': Boolean
-        , 'noprepare': Boolean
-        , 'fetch': Boolean
-        , 'nobuild': Boolean
-        , 'list': Boolean
-        , 'buildConfig' : String
-        , 'template' : String
+        {
+            'verbose': Boolean
+            , 'version': Boolean
+            , 'help': Boolean
+            , 'silent': Boolean
+            , 'experimental': Boolean
+            , 'noregistry': Boolean
+            , 'nohooks': Array
+            , 'shrinkwrap': Boolean
+            , 'copy-from': String
+            , 'link-to': path
+            , 'searchpath': String
+            , 'variable': Array
+            , 'link': Boolean
+            , 'force': Boolean
+            // Flags to be passed to `cordova build/run/emulate`
+            , 'debug': Boolean
+            , 'release': Boolean
+            , 'archs': String
+            , 'device': Boolean
+            , 'emulator': Boolean
+            , 'target': String
+            , 'browserify': Boolean
+            , 'noprepare': Boolean
+            , 'fetch': Boolean
+            , 'nobuild': Boolean
+            , 'list': Boolean
+            , 'buildConfig': String
+            , 'template': String
         };
 
     var shortHands =
-        { 'd' : '--verbose'
-        , 'v' : '--version'
-        , 'h' : '--help'
-        , 'src' : '--copy-from'
-        , 't' : '--template'
+        {
+            'd': '--verbose'
+            , 'v': '--version'
+            , 'h': '--help'
+            , 'src': '--copy-from'
+            , 't': '--template'
         };
 
-    checkForUpdates();
-
-    var args = nopt(knownOpts, shortHands, inputArgs);
-
-    if (args.version) {
-        var cliVersion = require('../package').version;
-        var libVersion = require('cordova-lib/package').version;
-        var toPrint = cliVersion;
-        if (cliVersion != libVersion || /-dev$/.exec(libVersion)) {
-            toPrint += ' (cordova-lib@' + libVersion + ')';
-        }
-        console.log(toPrint);
-        return Q();
-    }
-
-
-    // For CordovaError print only the message without stack trace unless we
-    // are in a verbose mode.
-    process.on('uncaughtException', function(err) {
-        logger.error(err);
-        // Don't send exception details, just send that it happened
-        if(shouldCollectTelemetry) {
-            telemetry.track('uncaughtException');
-        }
-        process.exit(1);
-    });
+    var args = nopt(knownOpts, shortHands, inputArgs); 
     
-    logger.subscribe(events);
-
-    if (args.silent) {
-        logger.setLevel('error');
-    }
-
-    if (args.verbose) {
-        logger.setLevel('verbose');
-    }
-
-    // TODO: Example wanted, is this functionality ever used?
     // If there were arguments protected from nopt with a double dash, keep
     // them in unparsedArgs. For example:
     // cordova build ios -- --verbose --whatever
@@ -291,21 +283,45 @@ function cli(inputArgs) {
     // "undashed" stores only the undashed args without those after " -- " .
     var remain = args.argv.remain;
     var undashed = remain.slice(0, remain.length - unparsedArgs.length);
-    var cmd = undashed[0];
+    
+    //var cmd = undashed[0];
+    args.command = undashed[0];
+    args.subcommand = undefined;
+    args.remain = remain;
+    args.unparsed = unparsedArgs; // ToDO: rename unparsedArgs to args.unparsed
+    
+    return args;
+}
+
+function cli(args) {
+
+    checkForUpdates();
+
+    if (args.version) {
+        var cliVersion = require('../package').version;
+        var libVersion = require('cordova-lib/package').version;
+        var toPrint = cliVersion;
+        if (cliVersion != libVersion || /-dev$/.exec(libVersion)) {
+            toPrint += ' (cordova-lib@' + libVersion + ')';
+        }
+        console.log(toPrint);
+        return Q();
+    }
+
     var subcommand;
     var msg;
     var known_platforms = Object.keys(cordova_lib.cordova_platforms);
 
-    if ( !cmd || cmd == 'help' || args.help ) {
-        if (!args.help && remain[0] == 'help') {
-            remain.shift();
+    if ( !args.command || args.command == 'help' || args.help ) {
+        if (!args.help && args.remain[0] == 'help') {
+            args.remain.shift();
         }
-        return help(remain);
+        return help(args.remain);
     }
 
-    if ( !cordova.hasOwnProperty(cmd) ) {
+    if ( !cordova.hasOwnProperty(args.command) ) {
         msg =
-            'Cordova does not know ' + cmd + '; try `' + cordova_lib.binname +
+            'Cordova does not know ' + args.command + '; try `' + cordova_lib.binname +
             ' help` for a list of all the available commands.';
         throw new CordovaError(msg);
     }
@@ -316,15 +332,15 @@ function cli(inputArgs) {
         verbose: args.verbose || false,
         silent: args.silent || false,
         browserify: args.browserify || false,
-        fetch: args.fetch || false,
+        fetch: args.fetch || false, //ToDO: check that they all get parsed
         nohooks: args.nohooks || [],
         searchpath : args.searchpath
     };
     
 
-    if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run' || cmd === 'clean') {
+    if (args.command == 'emulate' || args.command == 'build' || args.command == 'prepare' || args.command == 'compile' || args.command == 'run' || args.command === 'clean') {
         // All options without dashes are assumed to be platform names
-        opts.platforms = undashed.slice(1);
+        opts.platforms = args.undashed.slice(1);
         var badPlatforms = _.difference(opts.platforms, known_platforms);
         if( !_.isEmpty(badPlatforms) ) {
             msg = 'Unknown platforms: ' + badPlatforms.join(', ');
@@ -333,14 +349,14 @@ function cli(inputArgs) {
 
         // Pass nopt-parsed args to PlatformApi through opts.options
         opts.options = args;
-        opts.options.argv = unparsedArgs;
+        opts.options.argv = args.unparsed;
 
-        if (cmd === 'run' && args.list && cordova.raw.targets) {
+        if (args.command === 'run' && args.list && cordova.raw.targets) { // ToDO args.list ?
             return cordova.raw.targets.call(null, opts);
         }
 
         return cordova.raw[cmd].call(null, opts);
-    } else if (cmd === 'requirements') {
+    } else if (args.command === 'requirements') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
         var badPlatforms = _.difference(opts.platforms, known_platforms);
@@ -349,7 +365,7 @@ function cli(inputArgs) {
             throw new CordovaError(msg);
         }
 
-        return cordova.raw[cmd].call(null, opts.platforms)
+        return cordova.raw[args.command].call(null, opts.platforms)
             .then(function(platformChecks) {
 
                 var someChecksFailed = Object.keys(platformChecks).map(function(platformName) {
@@ -379,15 +395,19 @@ function cli(inputArgs) {
 
                 if (someChecksFailed) throw new CordovaError('Some of requirements check failed');
             });
-    } else if (cmd == 'serve') {
-        var port = undashed[1];
+    } else if (args.command == 'serve') {
+        var port = args.undashed[1];
         return cordova.raw.serve(port);
-    } else if (cmd == 'create') {
+    } else if (args.command == 'create') {
         return create();
     } else {
         // platform/plugins add/rm [target(s)]
-        subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
+        // ToDO: test this //subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
+        subcommand = args.subcommand;
+        
+        // ToDO: parse targets
         var targets = undashed.slice(2); // array of targets, either platforms or plugins
+        
         var cli_vars = {};
         if (args.variable) {
             args.variable.forEach(function (s) {
