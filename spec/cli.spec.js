@@ -22,10 +22,11 @@ var cli = require("../src/cli"),
     cordova_lib = require('cordova-lib'),
     events = cordova_lib.events,
     cordova = cordova_lib.cordova,
-    telemetry = require('../src/telemetry');
-    
-    //avoid node complaining of too many event listener added
-    process.setMaxListeners(0);
+    telemetry = require('../src/telemetry'),
+    logger = require('cordova-common').CordovaLogger.get();
+
+//avoid node complaining of too many event listener added
+process.setMaxListeners(0);
 
 describe("cordova cli", function () {
     beforeEach(function () {
@@ -41,8 +42,12 @@ describe("cordova cli", function () {
         };
 
         spyOn(events, "on").andReturn(new FakeEvents());
+
+        // Spy and mute output
+        spyOn(logger, 'results');
+        spyOn(logger, 'warn');
         spyOn(console, 'log');
-        
+
         // Prevent accidentally turning telemetry on/off during testing
         telemetry.turnOn = function() {};
         telemetry.turnOff = function() {};
@@ -58,21 +63,21 @@ describe("cordova cli", function () {
             
             it("will spit out the version with -v", function (done) {
                 cli(["node", "cordova", "-v"], function() {
-                    expect(console.log.mostRecentCall.args[0]).toMatch(version);
+                    expect(logger.results.mostRecentCall.args[0]).toMatch(version);
                     done();
                 });
             });
 
             it("will spit out the version with --version", function (done) {
                 cli(["node", "cordova", "--version"], function () {
-                    expect(console.log.mostRecentCall.args[0]).toMatch(version);
+                    expect(logger.results.mostRecentCall.args[0]).toMatch(version);
                     done()
                 });
             });
 
             it("will spit out the version with -v anywhere", function (done) {
                 cli(["node", "cordova", "one", "-v", "three"], function () {
-                    expect(console.log.mostRecentCall.args[0]).toMatch(version);
+                    expect(logger.results.mostRecentCall.args[0]).toMatch(version);
                     done();
                 });
             });

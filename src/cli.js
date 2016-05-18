@@ -240,18 +240,6 @@ function cli(inputArgs) {
 
     var args = nopt(knownOpts, shortHands, inputArgs);
 
-    if (args.version) {
-        var cliVersion = require('../package').version;
-        var libVersion = require('cordova-lib/package').version;
-        var toPrint = cliVersion;
-        if (cliVersion != libVersion || /-dev$/.exec(libVersion)) {
-            toPrint += ' (cordova-lib@' + libVersion + ')';
-        }
-        console.log(toPrint);
-        return Q();
-    }
-
-
     // For CordovaError print only the message without stack trace unless we
     // are in a verbose mode.
     process.on('uncaughtException', function(err) {
@@ -262,7 +250,7 @@ function cli(inputArgs) {
         }
         process.exit(1);
     });
-    
+
     logger.subscribe(events);
 
     if (args.silent) {
@@ -271,6 +259,25 @@ function cli(inputArgs) {
 
     if (args.verbose) {
         logger.setLevel('verbose');
+    }
+
+    var cliVersion = require('../package').version;
+    // TODO: Use semver.prerelease when it gets released
+    var usingPrerelease = /-nightly|-dev$/.exec(cliVersion);
+    if (args.version || usingPrerelease) {
+        var libVersion = require('cordova-lib/package').version;
+        var toPrint = cliVersion;
+        if (cliVersion != libVersion || usingPrerelease) {
+            toPrint += ' (cordova-lib@' + libVersion + ')';
+        }
+
+        if (args.version) {
+            logger.results(toPrint);
+            return Q();
+        } else {
+            // Show a warning and continue
+            logger.warn('Warning: using prerelease version ' + toPrint);
+        }
     }
 
     // TODO: Example wanted, is this functionality ever used?
@@ -320,7 +327,7 @@ function cli(inputArgs) {
         nohooks: args.nohooks || [],
         searchpath : args.searchpath
     };
-    
+
 
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run' || cmd === 'clean') {
         // All options without dashes are assumed to be platform names
