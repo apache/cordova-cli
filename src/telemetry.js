@@ -66,12 +66,14 @@ function showPrompt() {
 
 function track() {
     
-    // Remove empty, null or undefined strings
-    var args = arguments.filter(function(str) {
-        return (!str || str.length === 0);
-    });
-    
-    insight.track.apply(insight, args);
+    // Remove empty, null or undefined strings from arguments
+    for(var property in arguments) {
+        var val = arguments[property];
+        if(!val || val.length === 0) {
+            delete arguments.property;
+        }
+    }
+    insight.track.apply(insight, arguments);
 }
 
 function turnOn() {

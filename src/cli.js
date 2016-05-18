@@ -103,6 +103,8 @@ module.exports = function (inputArgs, cb) {
     
     init();
     
+    checkForUpdates();
+    
     var args = parseArguments(inputArgs || process.argv);
         
     logger.subscribe(events); 
@@ -151,7 +153,7 @@ module.exports = function (inputArgs, cb) {
         return cli(args);
     }).then(function () {
         // ToDO: test this
-        // Always track opt-outs, even if user didn't enable telemetry
+        // Always track telemetry opt-outs (whether user opted out or not!)
         var isOptingOut = (args.command === 'telemetry' && args.subcommand === 'off');
         if(isOptingOut) {
             telemetry.track(args.command, args.subcommand /* 'off' */, 'via-cordova-telemetry-cmd', 'successful');
@@ -163,7 +165,7 @@ module.exports = function (inputArgs, cb) {
         cb(null);
     }).fail(function (err) {
         // ToDO: test this
-        // Always track opt-outs, even if user didn't enable telemetry
+        // Always track telemetry opt-outs (whether user opted out or not!)
         var isOptingOut = (args.command === 'telemetry' && args.subcommand === 'off');
         if(isOptingOut) {
             telemetry.track(args.command, args.subcommand /* 'off' */, 'via-cordova-telemetry-cmd', 'unsuccessful');
@@ -239,12 +241,38 @@ function parseArguments(inputArgs) {
     // "undashed" stores only the undashed args without those after " -- " .
     var remain = args.argv.remain;
     var undashed = remain.slice(0, remain.length - unparsedArgs.length);
+    
     args.command = undashed[0];
-
-    if (args.command === 'platform' || args.command === 'platforms' || args.command === 'plugin' || args.command === 'plugins' || args.command === 'telemetry') {
+    
+    // ToDO: Test cordova, cordova --help, cordova --h, cordova bogus
+    if ( !args.command || args.command == 'help' || args.help ) {
+        if(!args.help && remain[0] === 'help') {
+            remain.shift();
+        } 
+        args.command = 'help';
+    } else if (args.command === 'platform' || args.command === 'platforms' || args.command === 'plugin' || args.command === 'plugins') {
         args.subcommand = undashed[1];
+        args.targets = undashed.slice(2); // array of targets, either platforms or plugins
+        var cli_vars = {};
+        if (args.variable) {
+            args.variable.forEach(function (s) {
+                // CB-9171
+                var eq = s.indexOf('=');
+                if (eq == -1)
+                    throw new CordovaError("invalid variable format: " + s);
+                var key = s.substr(0, eq).toUpperCase();
+                var val = s.substr(eq + 1, s.length);
+                cli_vars[key] = val;
+            });
+        }
+        args.cli_vars = cli_vars;
+    } else if(args.command === 'telemetry') {
+        args.subcommand = undashed[1];
+    } else if(args.command === 'serve') {
+        args.port = args.undashed[1];
     }
-
+    
+    args.undashed = undashed;
     args.remain = remain;
     args.unparsedArgs = unparsedArgs; 
     
@@ -252,8 +280,6 @@ function parseArguments(inputArgs) {
 }
 
 function cli(args) {
-
-    checkForUpdates(); // ToDO: Move this out ? How will it impact the current behavior ?
 
     if (args.version) {
         var cliVersion = require('../package').version;
@@ -269,10 +295,7 @@ function cli(args) {
     var msg;
     var known_platforms = Object.keys(cordova_lib.cordova_platforms);
 
-    if ( !args.command || args.command == 'help' || args.help ) {
-        if (!args.help && args.remain[0] == 'help') {
-            args.remain.shift();
-        }
+    if ( args.command == 'help' ) {
         return help(args.remain);
     }
 
@@ -355,36 +378,20 @@ function cli(args) {
                 if (someChecksFailed) throw new CordovaError('Some of requirements check failed');
             });
     } else if (args.command == 'serve') {
-        var port = args.undashed[1];
-        return cordova.raw.serve(port);
+        return cordova.raw.serve(args.port);
     } else if (args.command == 'create') {
         return create();
     } else {
         // platform/plugins add/rm [target(s)]
         // ToDO: test this //subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
-        subcommand = args.subcommand;
-        
-        // ToDO: parse targets
-        // ToDO: args.targets
-        var targets = undashed.slice(2); // array of targets, either platforms or plugins
+        // ToDO: test targets  
         
         // ToDO: move this to parsing
-        var cli_vars = {};
-        if (args.variable) {
-            args.variable.forEach(function (s) {
-                // CB-9171
-                var eq = s.indexOf('=');
-                if (eq == -1)
-                    throw new CordovaError("invalid variable format: " + s);
-                var key = s.substr(0, eq).toUpperCase();
-                var val = s.substr(eq + 1, s.length);
-                cli_vars[key] = val;
-            });
-        }
+        
         var download_opts = { searchpath : args.searchpath
                             , noregistry : args.noregistry
                             , nohooks : args.nohooks
-                            , cli_variables : cli_vars
+                            , cli_variables : args.cli_vars
                             , browserify: args.browserify || false
                             , fetch: args.fetch || false
                             , link: args.link || false
@@ -392,7 +399,7 @@ function cli(args) {
                             , shrinkwrap: args.shrinkwrap || false
                             , force: args.force || false
                             };
-        return cordova.raw[args.command](args.subcommand, targets, download_opts);
+        return cordova.raw[args.command](args.subcommand, args.targets, download_opts);
     }
 
     function create() {
@@ -401,8 +408,8 @@ function cli(args) {
         var wwwCfg;         // Template config
 
         // If we got a fourth parameter, consider it to be JSON to init the config.
-        if (undashed[4])
-            cfg = JSON.parse(undashed[4]);
+        if (args.undashed[4])
+            cfg = JSON.parse(args.undashed[4]);
         else
             cfg = {};
 
@@ -434,9 +441,9 @@ function cli(args) {
         }
 
         // create(dir, id, name, cfg)
-        return cordova.raw.create( undashed[1]  // dir to create the project in
-            , undashed[2]  // App id
-            , undashed[3]  // App name
+        return cordova.raw.create( args.undashed[1]  // dir to create the project in
+            , args.undashed[2]  // App id
+            , args.undashed[3]  // App name
             , cfg
         );
     }
@@ -444,11 +451,11 @@ function cli(args) {
     // ToDO: Move telemetry tracking upwards
     // ToDO: Check if command succeeded or failed upwards
     function handleTelemetryCmd(args) {
-
+        
         if (args.subcommand !== 'on' && args.subcommand !== 'off') {
             return help(['telemetry']);
         }
-
+        
         var turnOn = args.subcommand === 'on' ? true : false;
 
         // turn telemetry on or off
@@ -459,19 +466,7 @@ function cli(args) {
             telemetry.turnOff();
             console.log("You have been opted out of telemetry. To change this, run: cordova telemetry on.");
         }
-
-        // track or not track ?, that is the question
-
-        if (!turnOn) {
-            // Always track telemetry opt-outs (whether user opted out or not!)
-            telemetry.track('telemetry', 'off', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful' : 'unsuccessful');
-            return Q();
-        }
-
-        if (isOptedIn) {
-            telemetry.track('telemetry', 'on', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful' : 'unsuccessful');
-        }
-
+   
         return Q();
     }
 }
