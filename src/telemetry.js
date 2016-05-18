@@ -65,7 +65,13 @@ function showPrompt() {
 }
 
 function track() {
-    insight.track.apply(insight, arguments);
+    
+    // Remove empty, null or undefined strings
+    var args = arguments.filter(function(str) {
+        return (!str || str.length === 0);
+    });
+    
+    insight.track.apply(insight, args);
 }
 
 function turnOn() {
