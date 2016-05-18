@@ -16,8 +16,13 @@ install:
   - git clone https://github.com/apache/cordova-lib --depth 10
   - cd cordova-lib/cordova-lib
   - npm link cordova-js
+  - (cd ../cordova-common && npm install && npm link)
+  - npm link cordova-common
+  - (cd ../cordova-fetch && npm link cordova-common && npm install && npm link)
+  - npm link cordova-fetch
   - npm install
   - npm link
   - cd ../../cordova-cli
   - npm link cordova-lib
+  - npm link cordova-common
   - npm install

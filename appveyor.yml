@@ -15,8 +15,13 @@ install:
   - npm link cordova-js
   - npm install
   - npm link
+  - (cd ..\cordova-common && npm install && npm link)
+  - npm link cordova-common
+  - (cd ..\cordova-fetch && npm link cordova-common && npm install && npm link)
+  - npm link cordova-fetch
   - cd ..\..\cordova-cli
   - npm link cordova-lib
+  - npm link cordova-common
   - npm install
 
 build: off
