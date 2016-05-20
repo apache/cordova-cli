@@ -94,6 +94,7 @@ module.exports = function (inputArgs, cb) {
     // If no inputArgs given, use process.argv.
     inputArgs = inputArgs || process.argv;
     var cmd = inputArgs[2]; // e.g: inputArgs= 'node cordova run ios'
+    var subcommand = getSubCommand(inputArgs, cmd);
     var isTelemetryCmd = (cmd === 'telemetry');
 
     // ToDO: Move nopt-based parsing of args up here
@@ -121,7 +122,6 @@ module.exports = function (inputArgs, cb) {
          * Also, if the user has already been prompted and made a decision, use his saved answer
          */
         if(isTelemetryCmd) {
-            var subcommand = inputArgs[3];
             var isOptedIn = telemetry.isOptedIn();
             return handleTelemetryCmd(subcommand, isOptedIn);
         }
@@ -143,19 +143,26 @@ module.exports = function (inputArgs, cb) {
         return cli(inputArgs);
     }).then(function () {
         if (shouldCollectTelemetry && !isTelemetryCmd) {
-            telemetry.track(cmd, 'successful');
+            telemetry.track(cmd, subcommand, 'successful');
         }
         // call cb with error as arg if something failed
         cb(null);
     }).fail(function (err) {
         if (shouldCollectTelemetry && !isTelemetryCmd) {
-            telemetry.track(cmd, 'unsuccessful');
+            telemetry.track(cmd, subcommand, 'unsuccessful');
         }
         // call cb with error as arg if something failed
         cb(err);
         throw err;
     }).done();
 };
+
+function getSubCommand(args, cmd) {
+    if(cmd === 'platform' || cmd === 'platforms' || cmd === 'plugin' || cmd === 'plugins' || cmd === 'telemetry') {
+        return args[3]; // e.g: args='node cordova platform rm ios', 'node cordova telemetry on'
+    }
+    return "";
+}
 
 function handleTelemetryCmd(subcommand, isOptedIn) {
     
