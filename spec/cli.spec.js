@@ -231,6 +231,20 @@ describe("cordova cli", function () {
            });
        });
        
+       it("tracks platforms/plugins subcommands", function(done) {
+           spyOn(telemetry, "isOptedIn").andReturn(true);
+           spyOn(telemetry, "isCI").andReturn(false);
+           spyOn(telemetry, "hasUserOptedInOrOut").andReturn(true);
+           spyOn(cordova.raw, "platform").andReturn(Q());
+           
+           spyOn(telemetry, "track");
+           
+           cli(["node", "cordova", "platform", "add", "ios"], function () {
+               expect(telemetry.track).toHaveBeenCalledWith("platform", "add", "successful");
+               done();
+           });
+       });
+       
        it("shows prompt if user neither opted in or out yet", function(done) {
            spyOn(cordova.raw, "prepare").andReturn(Q());
            spyOn(telemetry, "hasUserOptedInOrOut").andReturn(false);

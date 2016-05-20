@@ -67,7 +67,8 @@ function showPrompt() {
 function track() {
     // Remove empty, null or undefined strings from arguments
     for (var property in arguments) {
-        var val = arguments[property]; if (!val || val.length === 0) {
+        var val = arguments[property]; 
+        if (!val || val.length === 0) {
             delete arguments.property;
         }
     }

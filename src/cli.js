@@ -161,7 +161,7 @@ function getSubCommand(args, cmd) {
     if(cmd === 'platform' || cmd === 'platforms' || cmd === 'plugin' || cmd === 'plugins' || cmd === 'telemetry') {
         return args[3]; // e.g: args='node cordova platform rm ios', 'node cordova telemetry on'
     }
-    return "";
+    return null;
 }
 
 function handleTelemetryCmd(subcommand, isOptedIn) {
@@ -287,7 +287,6 @@ function cli(inputArgs) {
         }
     }
 
-    // TODO: Example wanted, is this functionality ever used?
     // If there were arguments protected from nopt with a double dash, keep
     // them in unparsedArgs. For example:
     // cordova build ios -- --verbose --whatever
