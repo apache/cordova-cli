@@ -26,9 +26,10 @@
 var path = require('path'),
     fs = require('fs'),
     help = require('./help'),
-    telemetry = require('./telemetry'),
+    telemetryHelper = require('./telemetry'),
     utils = require('./utils'),
-    Q = require('q');
+    Q = require('q'),
+    _ = require('underscore');
 
 var cordova_lib = require('cordova-lib'),
     CordovaError = cordova_lib.CordovaError,
@@ -42,7 +43,7 @@ process.on('uncaughtException', function (err) {
     logger.error(err);
     // Don't send exception details, just send that it happened
     if (shouldCollectTelemetry) {
-        telemetry.track('uncaughtException');
+        telemetryHelper.track('uncaughtException');
     }
     process.exit(1);
 });
@@ -81,7 +82,7 @@ function main(inputArgs, cb) {
          * - Command ran is: `cordova telemetry on | off | ...`
          */
         
-        if(telemetry.isCI(process.env) || telemetry.isNoTelemetryFlag(inputArgs)) {
+        if(telemetryHelper.isCI(process.env) || telemetryHelper.isNoTelemetryFlag(inputArgs)) {
             return Q(false);
         }
         
@@ -90,52 +91,50 @@ function main(inputArgs, cb) {
          * Also, if the user has already been prompted and made a decision, use his saved answer
          */
         if(args.command === 'telemetry') {
-            return Q(telemetry.isOptedIn());
+            return Q(telemetryHelper.isOptedIn());
         }
         
-        if(telemetry.hasUserOptedInOrOut()) {
-            return Q(telemetry.isOptedIn());
+        if(telemetryHelper.hasUserOptedInOrOut()) {
+            return Q(telemetryHelper.isOptedIn());
         }
         
         /**
          * Otherwise, prompt user to opt-in or out
          * Note: the prompt is shown for 30 seconds. If no choice is made by that time, User is considered to have opted out.
          */
-        return telemetry.showPrompt();
+        return telemetryHelper.showPrompt();
     }).then(function (collectTelemetry) {
         shouldCollectTelemetry = collectTelemetry;
-        // ToDO: Test `cordova telemetry X` moved to `cli(...)`
         return cli(args);
     }).then(function () {
-        // ToDO: test this
-        // Always track telemetry opt-outs (whether user opted out or not!)
-        var isOptingOut = (args.command === 'telemetry' && args.subcommand === 'off');
-        if(isOptingOut) {
-            telemetry.track(args.command, args.subcommand /* 'off' */, 'via-cordova-telemetry-cmd', 'successful');
-        } else if(shouldCollectTelemetry) {
-            telemetry.track(args.command, args.subcommand, 'successful');
-        }
-
+        handleTelemetry(args, 'successful');
+        
         // call cb with error as arg if something failed
         cb(null);
     }).fail(function (err) {
-        // ToDO: test this
-        // Always track telemetry opt-outs (whether user opted out or not!)
-        var isOptingOut = (args.command === 'telemetry' && args.subcommand === 'off');
-        if(isOptingOut) {
-            telemetry.track(args.command, args.subcommand /* 'off' */, 'via-cordova-telemetry-cmd', 'unsuccessful');
-        } else if(shouldCollectTelemetry) {
-            telemetry.track(args.command, args.subcommand, 'unsuccessful');
-        }
- 
+        handleTelemetry(args, 'unsuccessful');
+        
         // call cb with error as arg if something failed
         cb(err);
         throw err;
     }).done();
 };
 
-function cli(args) {
+function handleTelemetry(args, status) {
+    // Always track telemetry opt-outs (whether user opted out or not!)
+    var isOptingOut = (args.command === 'telemetry' && args.subcommand === 'off');
+    if (isOptingOut) {
+        telemetryHelper.track(args.command, args.subcommand /*'off'*/, 'via-cordova-telemetry-cmd', status);
+    } else if (shouldCollectTelemetry) {
+        telemetryHelper.track(args.command, args.subcommand, status);
+    }
+}
 
+function cli(args) {
+     
+    var msg;
+    var known_platforms = Object.keys(cordova_lib.cordova_platforms);
+    
     if (args.version) {
         var cliVersion = require('../package').version;
         var libVersion = require('cordova-lib/package').version;
@@ -147,11 +146,12 @@ function cli(args) {
         return Q();
     }
 
-    var msg;
-    var known_platforms = Object.keys(cordova_lib.cordova_platforms);
-
-    if ( args.command == 'help' ) {
+    if (args.command === 'help') {
         return help(args.remain);
+    }
+    
+    if (args.command === 'telemetry') {
+        return telemetry(args.subcommand);
     }
 
     if ( !cordova.hasOwnProperty(args.command) ) {
@@ -175,7 +175,7 @@ function cli(args) {
 
     if (args.command == 'emulate' || args.command == 'build' || args.command == 'prepare' || args.command == 'compile' || args.command == 'run' || args.command === 'clean') {
         // All options without dashes are assumed to be platform names
-        opts.platforms = args.undashed.slice(1);
+        opts.platforms = args.platforms;
         var badPlatforms = _.difference(opts.platforms, known_platforms);
         if( !_.isEmpty(badPlatforms) ) {
             msg = 'Unknown platforms: ' + badPlatforms.join(', ');
@@ -183,7 +183,7 @@ function cli(args) {
         }
 
         // Pass nopt-parsed args to PlatformApi through opts.options
-        opts.options = args;
+        opts.options = utils.cleanArgs(args);
         opts.options.argv = args.unparsedArgs;
 
         if (args.command === 'run' && args.list && cordova.raw.targets) { // ToDO args.list ?
@@ -191,8 +191,6 @@ function cli(args) {
         }
 
         return cordova.raw[args.command].call(null, opts);
-    } else if (args.command === 'telemetry') {
-        return handleTelemetryCmd(args.subcommand);
     } else if (args.command === 'requirements') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
@@ -237,23 +235,18 @@ function cli(args) {
     } else if (args.command == 'create') {
         return create();
     } else {
-        // platform/plugins add/rm [target(s)]
-        // ToDO: test this //subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
-        // ToDO: test targets  
-        
-        // ToDO: move this to parsing
-        
-        var download_opts = { searchpath : args.searchpath
-                            , noregistry : args.noregistry
-                            , nohooks : args.nohooks
-                            , cli_variables : args.cli_vars
-                            , browserify: args.browserify || false
-                            , fetch: args.fetch || false
-                            , link: args.link || false
-                            , save: args.save || false
-                            , shrinkwrap: args.shrinkwrap || false
-                            , force: args.force || false
-                            };
+        var download_opts = {
+            searchpath: args.searchpath
+            , noregistry: args.noregistry
+            , nohooks: args.nohooks
+            , cli_variables: args.cli_vars
+            , browserify: args.browserify || false
+            , fetch: args.fetch || false
+            , link: args.link || false
+            , save: args.save || false
+            , shrinkwrap: args.shrinkwrap || false
+            , force: args.force || false
+        };
         return cordova.raw[args.command](args.subcommand, args.targets, download_opts);
     }
 
@@ -303,10 +296,8 @@ function cli(args) {
         );
     }
     
-    // ToDO: Move telemetry tracking upwards
-    // ToDO: Check if command succeeded or failed upwards
-    function handleTelemetryCmd(subcommand) {
-        
+    function telemetry(subcommand) {
+
         if (subcommand !== 'on' && subcommand !== 'off') {
             return help(['telemetry']);
         }
@@ -315,10 +306,10 @@ function cli(args) {
 
         // turn telemetry on or off
         if (turnOn) {
-            telemetry.turnOn();
+            telemetryHelper.turnOn();
             console.log("Thanks for opting into telemetry to help us improve cordova.");
         } else {
-            telemetry.turnOff();
+            telemetryHelper.turnOff();
             console.log("You have been opted out of telemetry. To change this, run: cordova telemetry on.");
         }
    

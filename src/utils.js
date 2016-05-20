@@ -135,12 +135,17 @@ function parseArguments(inputArgs) {
     
     args.command = undashed[0];
     
+    
+    
     // ToDO: Test cordova, cordova --help, cordova --h, cordova bogus
     if ( !args.command || args.command == 'help' || args.help ) {
         if(!args.help && remain[0] === 'help') {
             remain.shift();
         } 
         args.command = 'help';
+    } else if (args.command == 'emulate' || args.command == 'build' || args.command == 'prepare' || args.command == 'compile' || args.command == 'run' || args.command === 'clean') {
+        // All options without dashes are assumed to be platform names
+        args.platforms = args.undashed.slice(1);
     } else if (args.command === 'platform' || args.command === 'platforms' || args.command === 'plugin' || args.command === 'plugins') {
         args.subcommand = undashed[1];
         args.targets = undashed.slice(2); // array of targets, either platforms or plugins
@@ -170,8 +175,19 @@ function parseArguments(inputArgs) {
     return args;
 }
 
+function cleanArgs(args) {
+    var args_to_pass_to_cordova_lib = [];
+    for(prop in args) {
+        if(_.contains(args_to_pass_to_cordova_lib, prop)) {
+            delete args.prop;
+        }
+    }
+    return args;
+}
+
 module.exports = {
     init: init,
     parseArguments: parseArguments,
-    checkForUpdates: checkForUpdates
+    checkForUpdates: checkForUpdates,
+    cleanArgs: cleanArgs
 }
