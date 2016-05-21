@@ -183,9 +183,9 @@ function cli(args) {
         }
 
         // Pass nopt-parsed args to PlatformApi through opts.options
-        opts.options = utils.cleanArgs(args);
+        opts.options = args.nopt; 
         opts.options.argv = args.unparsedArgs;
-
+        
         if (args.command === 'run' && args.list && cordova.raw.targets) { // ToDO args.list ?
             return cordova.raw.targets.call(null, opts);
         }

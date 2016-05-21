@@ -113,7 +113,13 @@ function parseArguments(inputArgs) {
             , 't': '--template'
         };
 
-    var args = nopt(knownOpts, shortHands, inputArgs); 
+    var nopt_args = nopt(knownOpts, shortHands, inputArgs); 
+    
+    var args = {};
+    args.nopt = nopt_args;
+    for(p in args.nopt) {
+        args[p] = args.nopt[p];
+    }
     
     // If there were arguments protected from nopt with a double dash, keep
     // them in unparsedArgs. For example:
@@ -134,9 +140,11 @@ function parseArguments(inputArgs) {
     var undashed = remain.slice(0, remain.length - unparsedArgs.length);
     
     args.command = undashed[0];
-    
-    
-    
+    args.undashed = undashed;
+    args.remain = remain;
+    args.unparsedArgs = unparsedArgs;
+
+
     // ToDO: Test cordova, cordova --help, cordova --h, cordova bogus
     if ( !args.command || args.command == 'help' || args.help ) {
         if(!args.help && remain[0] === 'help') {
@@ -167,10 +175,6 @@ function parseArguments(inputArgs) {
     } else if(args.command === 'serve') {
         args.port = args.undashed[1];
     }
-    
-    args.undashed = undashed;
-    args.remain = remain;
-    args.unparsedArgs = unparsedArgs; 
     
     return args;
 }
