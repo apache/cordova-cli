@@ -140,7 +140,7 @@ describe("cordova cli", function () {
 
         it("calls cordova raw create", function (done) {
             cli(["node", "cordova", "create", "a", "b", "c", "--link-to", "c:\\personalWWW"], function () {
-                expect(cordova.raw.create).toHaveBeenCalledWith("a", "b", "c", jasmine.any(Object));
+                expect(cordova.raw.create).toHaveBeenCalledWith("a", "b", "c", jasmine.any(Object), false);
                 done();
             });
         });

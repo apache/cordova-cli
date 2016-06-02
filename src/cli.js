@@ -464,12 +464,11 @@ function cli(inputArgs) {
             cfg.lib = cfg.lib || {};
             cfg.lib.www = wwwCfg;
         }
-
-        // create(dir, id, name, cfg)
         return cordova.raw.create( undashed[1]  // dir to create the project in
             , undashed[2]  // App id
             , undashed[3]  // App name
             , cfg
+            , args['fetch'] != undefined
         );
     }
 }
