@@ -441,7 +441,7 @@ function cli(inputArgs) {
         customWww = args['copy-from'] || args['link-to'] || args.template;
 
         if (customWww) {
-            if (!args.template && customWww.indexOf('http') === 0) {
+            if ((!args.template || !args['copy-from']) && customWww.indexOf('http') === 0) {
                 throw new CordovaError(
                     'Only local paths for custom www assets are supported.'
                 );
@@ -456,10 +456,13 @@ function cli(inputArgs) {
                 template: false
             };
 
-            if (args['link-to'])
-                wwwCfg.link = true;
-            else if (args.template)
+            
+            if (args.template) {
                 wwwCfg.template = true;
+            } else if (args['copy-from']) {
+                logger.warn('Warning: --copy-from option is being deprecated. Consider using --template instead.');
+                wwwCfg.template = true;
+            }
 
             cfg.lib = cfg.lib || {};
             cfg.lib.www = wwwCfg;
