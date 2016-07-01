@@ -441,9 +441,9 @@ function cli(inputArgs) {
         customWww = args['copy-from'] || args['link-to'] || args.template;
 
         if (customWww) {
-            if ((!args.template || !args['copy-from']) && customWww.indexOf('http') === 0) {
+            if (!args.template && !args['copy-from'] && customWww.indexOf('http') === 0) {
                 throw new CordovaError(
-                    'Only local paths for custom www assets are supported.'
+                    'Only local paths for custom www assets are supported for linking' + customWww
                 );
             }
 
@@ -453,10 +453,13 @@ function cli(inputArgs) {
 
             wwwCfg = {
                 url: customWww,
-                template: false
+                template: false,
+                link: false
             };
 
-            
+            if (args['link-to']) {
+                wwwCfg.link = true;
+            }
             if (args.template) {
                 wwwCfg.template = true;
             } else if (args['copy-from']) {
@@ -471,7 +474,7 @@ function cli(inputArgs) {
             , undashed[2]  // App id
             , undashed[3]  // App name
             , cfg
-            , args['fetch'] != undefined
+            , events || undefined
         );
     }
 }
