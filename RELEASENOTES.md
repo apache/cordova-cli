@@ -20,6 +20,13 @@
 -->
 # Cordova-cli Release Notes
 
+### 6.3.0 (Jul 12, 2016)
+* [CB-11412](https://issues.apache.org/jira/browse/CB-11412) removed link-to, aliased copy-from to template
+* [CB-11349](https://issues.apache.org/jira/browse/CB-11349) passing --fetch to create
+* [CB-11284](https://issues.apache.org/jira/browse/CB-11284) Telemetry: Track platforms/plugins subcommands(add/rm/etc...)
+* [CB-11262](https://issues.apache.org/jira/browse/CB-11262) Add a warning about prerelease lib/cli usage
+* [CB-11263](https://issues.apache.org/jira/browse/CB-11263) 'cordova telemetry help' should display help text
+
 ### 6.2.0 (May 12, 2016)
 * [Telemetry](https://github.com/apache/cordova-cli/pull/247) Added telemetry to cordova-cli to collect data for data driven development
 * [CB-11250](https://issues.apache.org/jira/browse/CB-11250) Fix CLI tests verifying the version
