@@ -1,6 +1,6 @@
 {
     "name": "cordova",
-    "version": "6.2.1-dev",
+    "version": "6.3.0",
     "preferGlobal": "true",
     "description": "Cordova command line interface tool",
     "main": "cordova",
@@ -29,8 +29,8 @@
         "cli"
     ],
     "dependencies": {
-        "cordova-lib": "6.2.0",
-        "cordova-common": "1.3.x",
+        "cordova-lib": "6.3.0",
+        "cordova-common": "1.4.x",
         "q": "1.0.1",
         "nopt": "3.0.1",
         "underscore": "1.7.0",
