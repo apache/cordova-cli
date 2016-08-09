@@ -20,6 +20,9 @@
 -->
 # Cordova-cli Release Notes
 
+### 6.3.1 (Aug 09, 2016)
+* [CB-11685](https://issues.apache.org/jira/browse/CB-11685) Updated cordova-lib dependency to 6.3.1
+
 ### 6.3.0 (Jul 12, 2016)
 * [CB-11412](https://issues.apache.org/jira/browse/CB-11412) removed link-to, aliased copy-from to template
 * [CB-11349](https://issues.apache.org/jira/browse/CB-11349) passing --fetch to create
