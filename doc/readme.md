@@ -272,7 +272,7 @@ There are a number of ways to specify a platform:
 
         cordova platform add android ios --save
 
-- Add pinned version of the `android` and `ios` platform and save the downloaded version to `config.xml`. Install 
+- Add pinned version of the `android` and `ios` platform and save the downloaded version to `config.xml`. Install
 to the project using `npm install` and store it in the apps `node_modules` directory:
 
         cordova platform add android ios --save --fetch
@@ -408,6 +408,13 @@ based on the following criteria (listed in order of precedence):
 - List all plugins installed in the project:
 
         cordova plugin ls
+
+### Conflicting plugins
+Conflicting plugins may occur when adding plugins that use `edit-config` tags in their plugin.xml file. `edit-config` allows plugins to add or replace attributes of XML elements.  
+
+This feature can cause issues with the application if more than one plugin tries to modify the same XML element. Conflict detection has been implemented to prevent plugins from being added so one plugin doesn't try to overwrite another plugin's `edit-config` changes. An error will be thrown when a conflict in `edit-config` has been found and the plugin won't be added. The error message will mention that all conflicts must be resolved before the plugin can be added. One option to resolving the `edit-config` conflict is to make changes to the affected plugins' plugin.xml so that they do not modify the same XML element. The other option is to use the `--force` flag to force add the plugin. This option should be used with caution as it ignores the conflict detection and will overwrite all conflicts it has with other plugins, thus may leave the other plugins in a bad state.
+
+Refer to the [plugin.xml guide](https://cordova.apache.org/docs/en/latest/plugin_ref/spec.html#edit-config) for managing `edit-config`, resolving conflicts, and examples.
 
 ## cordova prepare command
 
