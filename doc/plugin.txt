@@ -60,5 +60,6 @@ Examples
     cordova-cli plugin add https://github.com/myfork/cordova-plugin-camera.git#2.1.0 --save
     cordova-cli plugin add ../cordova-plugin-camera --save
     cordova-cli plugin add ../cordova-plugin-camera.tgz --save
+    cordova-cli plugin save
     cordova-cli plugin rm camera --save
     cordova-cli plugin ls
