@@ -4,6 +4,10 @@ git:
   depth: 10
 node_js:
   - "0.10"
+  - "0.12"
+  - "4"
+  - "6"
+
 # getting cordova tools dependencies from github
 # to make sure we're using their latest versions
 install:
@@ -15,14 +19,9 @@ install:
   - cd ..
   - git clone https://github.com/apache/cordova-lib --depth 10
   - cd cordova-lib/cordova-lib
-  - npm link cordova-js
-  - (cd ../cordova-common && npm install && npm link)
-  - npm link cordova-common
-  - (cd ../cordova-fetch && npm link cordova-common && npm install && npm link)
-  - npm link cordova-fetch
   - npm install
+  - npm link cordova-js
   - npm link
   - cd ../../cordova-cli
   - npm link cordova-lib
-  - npm link cordova-common
   - npm install
