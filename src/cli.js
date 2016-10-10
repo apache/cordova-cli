@@ -287,6 +287,12 @@ function cli(inputArgs) {
         }
     }
 
+    if (/^v0.\d+[.\d+]*/.exec(process.version)) { // matches v0.* 
+        var msg = 'Warning: using node version ' + process.version +
+                ' which has been deprecated. Please upgrade to the latest node version available (v6.x is recommended).';
+        logger.warn(msg);
+    }
+
     // If there were arguments protected from nopt with a double dash, keep
     // them in unparsedArgs. For example:
     // cordova build ios -- --verbose --whatever
