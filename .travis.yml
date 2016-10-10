@@ -7,6 +7,9 @@ node_js:
   - "0.12"
   - "4"
   - "6"
+  
+before_install:
+    - npm cache clean -f
 
 # getting cordova tools dependencies from github
 # to make sure we're using their latest versions
