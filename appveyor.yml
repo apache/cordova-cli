@@ -11,6 +11,9 @@ environment:
 # getting cordova tools dependencies from github
 # to make sure we're using their latest versions
 install:
+  - npm cache clean -f
+  - npm install -g npm@2
+  - ps: Install-Product node $env:nodejs_version
   - cd ..
   - git clone https://github.com/apache/cordova-js --depth 10
   - cd cordova-js
@@ -25,7 +28,16 @@ install:
   - cd ../../cordova-cli
   - npm link cordova-lib
   - npm install
-
+  # # Workaround for npm/npm#10343
+  # - npm install
+  # - cd ../cordova-js
+  # - npm install
+  # - npm link
+  # - cd ../cordova-lib/cordova-lib
+  # - npm install
+  # - npm link ../../cordova-js
+  # - cd ../../cordova-cli
+  
 build: off
 
 test_script:
