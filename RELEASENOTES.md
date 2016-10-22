@@ -20,6 +20,16 @@
 -->
 # Cordova-cli Release Notes
 
+### 6.4.0 (Oct 21, 2016)
+* [CB-12039](https://issues.apache.org/jira/browse/CB-12039) updated `cordova-lib` to `6.4.0`
+* [CB-11976](https://issues.apache.org/jira/browse/CB-11976) Updated `package.json` engine key
+* [CB-11976](https://issues.apache.org/jira/browse/CB-11976) Add deprecated node version warning for 0.x
+* Add github pull request template
+* [CB-11607](https://issues.apache.org/jira/browse/CB-11607) breakout `cordova-create` from `cordova-lib`
+*  [CB-11623](https://issues.apache.org/jira/browse/CB-11623) added back linking
+* Document cli - cordova plugin save
+* [CB-11023](https://issues.apache.org/jira/browse/CB-11023) Add doc for conflicting plugins
+
 ### 6.3.1 (Aug 09, 2016)
 * [CB-11685](https://issues.apache.org/jira/browse/CB-11685) Updated cordova-lib dependency to 6.3.1
 
@@ -458,7 +468,7 @@
 * [CB-4837]: Version 3.0.10. Depends on Plugman 0.12.x.
 * Add missing license headers
 * Update repo versions to 3.1.0-rc1
-* Add `cordova update foo` command, with tests. [CB-4777]
+* Add `cordova update foo` command, with tests. [CB-4777](https://issues.apache.org/jira/browse/CB-4777)
 * Add version numbers to `platform ls` output.
 * [CB-4545](https://issues.apache.org/jira/browse/CB-4545) support for merges directory on both wp7 & wp8
 * Rename CHANGELOG.md -> RELEASENOTES.md
