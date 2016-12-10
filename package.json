@@ -11,8 +11,8 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "node node_modules/jasmine-node/bin/jasmine-node --captureExceptions --color spec",
-    "cover": "node node_modules/istanbul/lib/cli.js cover --root src --print detail node_modules/jasmine-node/bin/jasmine-node -- spec"
+    "test": "jasmine --captureExceptions --color",
+    "cover": "jasmine"
   },
   "repository": {
     "type": "git",
@@ -37,8 +37,8 @@
     "update-notifier": "^0.5.0"
   },
   "devDependencies": {
-    "istanbul": "^0.4.5",
-    "jasmine-node": "1.14.5"
+    "jasmine": "^2.5.2",
+    "istanbul": "^0.4.5"
   },
   "author": "Anis Kadri",
   "contributors": [

@@ -38,7 +38,7 @@ describe("cordova cli", function () {
 
         describe("parseConfig", function() { 
 
-            it("should be defined", function () {
+            it("Test#001 : should be defined", function () {
                 expect(clicreate.parseConfig).toEqual(jasmine.any(Function));    
             });
 
@@ -46,7 +46,7 @@ describe("cordova cli", function () {
 
         describe("create", function() { 
 
-            it("should be defined", function () {
+            it("Test#002 : should be defined", function () {
                 expect(clicreate.run).toEqual(jasmine.any(Function));    
             });
 

@@ -31,7 +31,7 @@ describe('help', function() {
         afterEach(function() {
             cordova.removeAllListeners('results');
         });
-        describe('emit results', function (done) {
+        describe('emit results', function () {
             allcommands.forEach(function (k) {
                 it(k, function(done) {
                     cordova.on('results', function(h) {
@@ -44,7 +44,7 @@ describe('help', function() {
                 });
             });
         });
-        describe('not have overly long lines:', function (done) {
+        describe('not have overly long lines:', function () {
             allcommands.forEach(function (k) {
                 it(k || '(default)', function(done) {
                     cordova.on('results', function(h) {
@@ -57,7 +57,7 @@ describe('help', function() {
                 });
             });
         });
-        describe('use cordova-cli instead of cordova:', function (done) {
+        describe('use cordova-cli instead of cordova:', function () {
             var binname = cordova.binname,
                 testname = 'testgap';
             beforeEach(function() {
