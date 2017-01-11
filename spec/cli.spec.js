@@ -55,33 +55,30 @@ describe("cordova cli", function () {
     });
 
     describe("options", function () {
-      describe("version", function () {
-        var version = require("../package").version;
-
-        beforeEach(function () {
-        });
+        describe("version", function () {
+            var version = require("../package").version;
         
-        it("Test#001 : will spit out the version with -v", function (done) {
-          cli(["node", "cordova", "-v"], function() {
-            expect(logger.results.calls.mostRecent().args[0]).toMatch(version);
-            done();
-          });
-        }, 60000);
+            it("Test#001 : will spit out the version with -v", function (done) {
+              cli(["node", "cordova", "-v"], function() {
+                expect(logger.results.calls.mostRecent().args[0]).toMatch(version);
+                done();
+              });
+            }, 60000);
 
-        it("Test#002 : will spit out the version with --version", function (done) {  
-          cli(["node", "cordova", "--version"], function () {
-            expect(logger.results.calls.mostRecent().args[0]).toMatch(version);
-            done()
-          }, 60000);
+            it("Test#002 : will spit out the version with --version", function (done) {  
+              cli(["node", "cordova", "--version"], function () {
+                expect(logger.results.calls.mostRecent().args[0]).toMatch(version);
+                done()
+              }, 60000);
+            });
+
+            it("Test#003 : will spit out the version with -v anywhere", function (done) {
+              cli(["node", "cordova", "one", "-v", "three"], function () {
+                expect(logger.results.calls.mostRecent().args[0]).toMatch(version);
+                done();
+              });
+            }, 60000);
         });
-
-        it("Test#003 : will spit out the version with -v anywhere", function (done) {
-          cli(["node", "cordova", "one", "-v", "three"], function () {
-            expect(logger.results.calls.mostRecent().args[0]).toMatch(version);
-            done();
-          });
-        }, 60000);
-      });
     });
 
     describe("Test#004 : project commands other than plugin and platform", function () {
@@ -131,11 +128,11 @@ describe("cordova cli", function () {
             });
         });
     });
-
+    
     describe("create", function () {
         beforeEach(function () {
             spyOn(cordova.raw, "create").and.returnValue(Q());
-            // spyOn(cordova_lib, "CordovaError");
+            spyOn(cordova_lib, "CordovaError");
         });
 
         it("Test#011 : calls cordova raw create", function (done) {

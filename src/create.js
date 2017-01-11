@@ -36,10 +36,10 @@ CordovaCliCreate.prototype.run = function (args, undashed) {
     cfg = this.parseConfig(undashed[4]);
     
     // create(dir, id, name, cfg)
-    cordova.raw.create( undashed[1]  // dir to create the project in
-                      , undashed[2]  // App id
-                      , undashed[3]  // App name
-                      , cfg
+    cordova.raw.create(undashed[1] , // dir to create the project in
+                       undashed[2] , // App id
+                       undashed[3] , // App name
+                       cfg
     ).done();
 };
 
@@ -65,7 +65,7 @@ CordovaCliCreate.prototype.parseConfig = function (jsondata) {
 CordovaCliCreate.prototype.customWww = function (args) {
 
     // handle custom www
-    if (customWww = args['copy-from'] || args['link-to']) {
+    if (!!(customWww = args['copy-from'] || args['link-to'])) {
 
         if (customWww.indexOf(':') != -1) {
             throw new CordovaError(

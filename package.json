@@ -11,8 +11,10 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "jasmine --captureExceptions --color",
-    "cover": "jasmine"
+    "test": "npm run jshint && npm run jasmine",
+    "jshint": "jshint spec && jshint src",
+    "cover": "istanbul cover --root src --print detail jasmine",
+    "jasmine": "jasmine --captureExceptions --color"
   },
   "repository": {
     "type": "git",
@@ -38,7 +40,8 @@
   },
   "devDependencies": {
     "jasmine": "^2.5.2",
-    "istanbul": "^0.4.5"
+    "istanbul": "^0.4.5",
+    "jshint": "^2.9.4"
   },
   "author": "Anis Kadri",
   "contributors": [

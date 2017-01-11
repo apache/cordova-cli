@@ -24,7 +24,6 @@
 
 
 var path = require('path'),
-    fs = require('fs'),
     help = require('./help'),
     nopt,
     _,
@@ -38,6 +37,9 @@ var cordova_lib = require('cordova-lib'),
     cordova = cordova_lib.cordova,
     events = cordova_lib.events,
     logger = require('cordova-common').CordovaLogger.get();
+
+var msg,
+    badPlatforms;
 
 
 /*
@@ -178,10 +180,10 @@ function handleTelemetryCmd(subcommand, isOptedIn) {
     try {
         if (turnOn) {
             telemetry.turnOn();
-            console.log("Thanks for opting into telemetry to help us improve cordova.");
+            console.log('Thanks for opting into telemetry to help us improve cordova.');
         } else {
             telemetry.turnOff();
-            console.log("You have been opted out of telemetry. To change this, run: cordova telemetry on.");
+            console.log('You have been opted out of telemetry. To change this, run: cordova telemetry on.');
         }
     } catch (ex) {
         cmdSuccess = false;
@@ -288,7 +290,7 @@ function cli(inputArgs) {
     }
 
     if (/^v0.\d+[.\d+]*/.exec(process.version)) { // matches v0.* 
-        var msg = 'Warning: using node version ' + process.version +
+        msg = 'Warning: using node version ' + process.version +
                 ' which has been deprecated. Please upgrade to the latest node version available (v6.x is recommended).';
         logger.warn(msg);
     }
@@ -312,8 +314,8 @@ function cli(inputArgs) {
     var undashed = remain.slice(0, remain.length - unparsedArgs.length);
     var cmd = undashed[0];
     var subcommand;
-    var msg;
     var known_platforms = Object.keys(cordova_lib.cordova_platforms);
+    msg = '';
 
     if ( !cmd || cmd == 'help' || args.help ) {
         if (!args.help && remain[0] == 'help') {
@@ -344,7 +346,7 @@ function cli(inputArgs) {
     if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run' || cmd === 'clean') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
-        var badPlatforms = _.difference(opts.platforms, known_platforms);
+        badPlatforms = _.difference(opts.platforms, known_platforms);
         if( !_.isEmpty(badPlatforms) ) {
             msg = 'Unknown platforms: ' + badPlatforms.join(', ');
             throw new CordovaError(msg);
@@ -362,7 +364,7 @@ function cli(inputArgs) {
     } else if (cmd === 'requirements') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
-        var badPlatforms = _.difference(opts.platforms, known_platforms);
+        badPlatforms = _.difference(opts.platforms, known_platforms);
         if( !_.isEmpty(badPlatforms) ) {
             msg = 'Unknown platforms: ' + badPlatforms.join(', ');
             throw new CordovaError(msg);
@@ -413,7 +415,7 @@ function cli(inputArgs) {
                 // CB-9171
                 var eq = s.indexOf('=');
                 if (eq == -1)
-                    throw new CordovaError("invalid variable format: " + s);
+                    throw new CordovaError('invalid variable format: ' + s);
                 var key = s.substr(0, eq).toUpperCase();
                 var val = s.substr(eq + 1, s.length);
                 cli_vars[key] = val;
