@@ -68,7 +68,7 @@ describe("cordova cli", function () {
             it("Test#002 : will spit out the version with --version", function (done) {  
               cli(["node", "cordova", "--version"], function () {
                 expect(logger.results.calls.mostRecent().args[0]).toMatch(version);
-                done()
+                done();
               }, 60000);
             });
 
@@ -132,7 +132,6 @@ describe("cordova cli", function () {
     describe("create", function () {
         beforeEach(function () {
             spyOn(cordova.raw, "create").and.returnValue(Q());
-            spyOn(cordova_lib, "CordovaError");
         });
 
         it("Test#011 : calls cordova raw create", function (done) {
