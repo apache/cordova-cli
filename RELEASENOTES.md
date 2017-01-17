@@ -20,6 +20,9 @@
 -->
 # Cordova-cli Release Notes
 
+### 6.5.0 (Jan 17, 2017)
+* [CB-12018](https://issues.apache.org/jira/browse/CB-12018) : updated tests to function with `jasmine` instead of `jasmine-node`
+
 ### 6.4.0 (Oct 21, 2016)
 * [CB-12039](https://issues.apache.org/jira/browse/CB-12039) updated `cordova-lib` to `6.4.0`
 * [CB-11976](https://issues.apache.org/jira/browse/CB-11976) Updated `package.json` engine key
