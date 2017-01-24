@@ -219,6 +219,45 @@ function handleTelemetryCmd(subcommand, isOptedIn) {
 
 function cli(inputArgs) {
     // When changing command line arguments, update doc/help.txt accordingly.
+    var knownOpts =
+        { 'verbose' : Boolean
+        , 'version' : Boolean
+        , 'help' : Boolean
+        , 'silent' : Boolean
+        , 'experimental' : Boolean
+        , 'noregistry' : Boolean
+        , 'nohooks': Array
+        , 'shrinkwrap' : Boolean
+        , 'copy-from' : String
+        , 'link-to' : path
+        , 'searchpath' : String
+        , 'variable' : Array
+        , 'link': Boolean
+        , 'force': Boolean
+        // Flags to be passed to `cordova build/run/emulate`
+        , 'debug' : Boolean
+        , 'release' : Boolean
+        , 'archs' : String
+        , 'device' : Boolean
+        , 'emulator': Boolean
+        , 'target' : String
+        , 'browserify': Boolean
+        , 'noprepare': Boolean
+        , 'fetch': Boolean
+        , 'nobuild': Boolean
+        , 'list': Boolean
+        , 'buildConfig' : String
+        , 'template' : String
+        , 'nosave' : Boolean
+        };
+
+    var shortHands =
+        { 'd' : '--verbose'
+        , 'v' : '--version'
+        , 'h' : '--help'
+        , 'src' : '--copy-from'
+        , 't' : '--template'
+        };
 
     checkForUpdates();
 
@@ -390,6 +429,12 @@ function cli(inputArgs) {
             });
         }
 
+        if (args.nosave) {
+            args.save = false;
+        } else {
+            args.save = true;
+        }
+        
         var download_opts = { searchpath : args.searchpath
                             , noregistry : args.noregistry
                             , nohooks : args.nohooks
@@ -397,7 +442,7 @@ function cli(inputArgs) {
                             , browserify: args.browserify || false
                             , fetch: args.fetch || false
                             , link: args.link || false
-                            , save: args.save || false
+                            , save: args.save
                             , shrinkwrap: args.shrinkwrap || false
                             , force: args.force || false
         };

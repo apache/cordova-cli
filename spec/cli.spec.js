@@ -186,10 +186,61 @@ describe("cordova cli", function () {
             });
         });
 
-    });
-    
+        it("Test #015 : will pass save:false", function (done) {
+            cli(["node", "cordova", "plugin", "add", "device", "--nosave"], function () {
+                expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                    "add",
+                    ["device"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.plugin.calls.argsFor(0)[2];
+                expect(opts.save).toBe(false);
+                done();
+            });
+        });
+
+        it("Test #016 : autosave is default and will pass save:true", function (done) {
+            cli(["node", "cordova", "plugin", "add", "device"], function () {
+                expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                    "add",
+                    ["device"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.plugin.calls.argsFor(0)[2];
+                expect(opts.save).toBe(true);
+                done();
+            });
+        });
+
+        it("Test #017 : will pass save:false", function (done) {
+            cli(["node", "cordova", "plugin", "remove", "device", "--nosave"], function () {
+                expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                    "remove",
+                    ["device"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.plugin.calls.argsFor(0)[2];
+                expect(opts.save).toBe(false);
+                done();
+            });
+        });
+
+        it("Test #018 : autosave is default and will pass save:true", function (done) {
+            cli(["node", "cordova", "plugin", "remove", "device"], function () {
+                expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                    "remove",
+                    ["device"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.plugin.calls.argsFor(0)[2];
+                expect(opts.save).toBe(true);
+                done();
+            });
+        });
+    }); 
+
     describe("telemetry", function() {
-       it("Test#015 : skips prompt when user runs 'cordova telemetry X'", function(done) {
+       it("Test#019 : skips prompt when user runs 'cordova telemetry X'", function(done) {
            var wasPromptShown = false;
            spyOn(telemetry, "showPrompt").and.callFake(function () {
                wasPromptShown = true;
@@ -203,7 +254,7 @@ describe("cordova cli", function () {
            });         
        });
        
-       it("Test#016 : is NOT collected when user runs 'cordova telemetry on' while NOT opted-in", function(done) {
+       it("Test#020 : is NOT collected when user runs 'cordova telemetry on' while NOT opted-in", function(done) {
            spyOn(telemetry, "isOptedIn").and.returnValue(false);
            spyOn(telemetry, "isCI").and.returnValue(false);
            
@@ -215,7 +266,7 @@ describe("cordova cli", function () {
            });
        });
        
-       it("Test#017 : is collected when user runs 'cordova telemetry off' while opted-in", function(done) {
+       it("Test#021 : is collected when user runs 'cordova telemetry off' while opted-in", function(done) {
            spyOn(telemetry, "isOptedIn").and.returnValue(true);
            spyOn(telemetry, "isCI").and.returnValue(false);
            
@@ -227,7 +278,7 @@ describe("cordova cli", function () {
            });
        });
        
-       it("Test#018 : tracks platforms/plugins subcommands", function(done) {
+       it("Test#022 : tracks platforms/plugins subcommands", function(done) {
            spyOn(telemetry, "isOptedIn").and.returnValue(true);
            spyOn(telemetry, "isCI").and.returnValue(false);
            spyOn(telemetry, "hasUserOptedInOrOut").and.returnValue(true);
@@ -241,7 +292,7 @@ describe("cordova cli", function () {
            });
        });
        
-       it("Test#019 : shows prompt if user neither opted in or out yet", function(done) {
+       it("Test#023 : shows prompt if user neither opted in or out yet", function(done) {
            spyOn(cordova.raw, "prepare").and.returnValue(Q());
            spyOn(telemetry, "hasUserOptedInOrOut").and.returnValue(false);
            
@@ -257,7 +308,7 @@ describe("cordova cli", function () {
 
        // ToDO: Figure out a way to modify default timeout
        // ... Timeout overriding isn't working anymore due to a bug with jasmine-node
-       xit("Test#020 : opts-out if prompt times out AND it tracks opt-out", function(done) {
+       xit("Test#024 : opts-out if prompt times out AND it tracks opt-out", function(done) {
            // Remove any optOut settings that might have been saved
            // ... and force prompt to be shown
            telemetry.clear();
@@ -272,7 +323,7 @@ describe("cordova cli", function () {
            });
        }/*, 45000*/);
        
-       it("Test#021 : is NOT collected in CI environments and doesn't prompt", function(done) {
+       it("Test#025 : is NOT collected in CI environments and doesn't prompt", function(done) {
            spyOn(telemetry, "hasUserOptedInOrOut").and.returnValue(true);
            spyOn(telemetry, "isOptedIn").and.returnValue(true);
            spyOn(telemetry, "isCI").and.returnValue(true);
@@ -287,7 +338,7 @@ describe("cordova cli", function () {
            });
        });
        
-       it("Test#022 : is NOT collected when --no-telemetry flag found and doesn't prompt", function(done) {
+       it("Test#026 : is NOT collected when --no-telemetry flag found and doesn't prompt", function(done) {
            spyOn(telemetry, "hasUserOptedInOrOut").and.returnValue(false);
            spyOn(telemetry, "isOptedIn").and.returnValue(true);
            spyOn(telemetry, "isCI").and.returnValue(false);
@@ -302,7 +353,7 @@ describe("cordova cli", function () {
            });
        });
        
-       it("Test#023 : is NOT collected if user opted out", function(done) {
+       it("Test#027 : is NOT collected if user opted out", function(done) {
            spyOn(telemetry, "hasUserOptedInOrOut").and.returnValue(true);
            spyOn(telemetry, "isOptedIn").and.returnValue(false);
            spyOn(telemetry, "isCI").and.returnValue(false);
@@ -317,7 +368,7 @@ describe("cordova cli", function () {
            });
        });
        
-       it("Test#024 : is collected if user opted in", function(done) {
+       it("Test#028 : is collected if user opted in", function(done) {
            spyOn(telemetry, "hasUserOptedInOrOut").and.returnValue(true);
            spyOn(telemetry, "isOptedIn").and.returnValue(true);
            spyOn(telemetry, "isCI").and.returnValue(false);
@@ -332,7 +383,7 @@ describe("cordova cli", function () {
            });
        });
        
-       it("Test#025 : track opt-out that happened via 'cordova telemetry off' even if user is NOT opted-in ", function(done) {
+       it("Test#029 : track opt-out that happened via 'cordova telemetry off' even if user is NOT opted-in ", function(done) {
            spyOn(telemetry, "isCI").and.returnValue(false);
            spyOn(telemetry, "isOptedIn").and.returnValue(false); // same as calling `telemetry.turnOff();`
            spyOn(telemetry, "hasUserOptedInOrOut").and.returnValue(true);
@@ -348,3 +399,61 @@ describe("cordova cli", function () {
        });
     });
 });
+
+    describe("platform", function () {
+        beforeEach(function () {
+            spyOn(cordova.raw, "platform").and.returnValue(Q());
+        });
+
+        it("Test #030 : autosave is the default setting for platform add", function (done) {
+            cli(["node", "cordova", "platform", "add", "ios"], function () {
+                expect(cordova.raw.platform).toHaveBeenCalledWith(
+                    "add",
+                    ["ios"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.platform.calls.argsFor(0)[2];
+                expect(opts.save).toBe(true);
+                done();
+            });
+        });
+
+        it("Test #031 : platform is not saved when --nosave is passed in", function (done) {
+            cli(["node", "cordova", "platform", "add", "ios", "--nosave"], function () {
+                expect(cordova.raw.platform).toHaveBeenCalledWith(
+                    "add",
+                    ["ios"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.platform.calls.argsFor(0)[2];
+                expect(opts.save).toBe(false);
+                done();
+            });
+        });
+
+        it("Test #032 : autosave is the default setting for platform remove", function (done) {
+            cli(["node", "cordova", "platform", "remove", "ios"], function () {
+                expect(cordova.raw.platform).toHaveBeenCalledWith(
+                    "remove",
+                    ["ios"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.platform.calls.argsFor(0)[2];
+                expect(opts.save).toBe(true);
+                done();
+            });
+        });
+
+        it("Test #033 : platform is not removed when --nosave is passed in", function (done) {
+            cli(["node", "cordova", "platform", "remove", "ios", "--nosave"], function () {
+                expect(cordova.raw.platform).toHaveBeenCalledWith(
+                    "remove",
+                    ["ios"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.platform.calls.argsFor(0)[2];
+                expect(opts.save).toBe(false);
+                done();
+            });
+        });
+    }); 
