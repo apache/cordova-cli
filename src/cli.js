@@ -76,6 +76,9 @@ var shortHands = {
     ,'t' : '--template'
 };
 
+var Configstore = require('configstore');
+var conf = new Configstore(pkg.name + '-config');
+
 
 function checkForUpdates() {
     try {
@@ -83,7 +86,6 @@ function checkForUpdates() {
         var notifier = updateNotifier({
             pkg: pkg
         });
-
         // Notify using the built-in convenience method
         notifier.notify();
     } catch (e) {
@@ -111,6 +113,7 @@ module.exports = function (inputArgs, cb) {
     var cmd = inputArgs[2]; // e.g: inputArgs= 'node cordova run ios'
     var subcommand = getSubCommand(inputArgs, cmd);
     var isTelemetryCmd = (cmd === 'telemetry');
+    var isConfigCmd = (cmd === 'config');
 
     // ToDO: Move nopt-based parsing of args up here
     if(cmd === '--version' || cmd === '-v') {
@@ -119,8 +122,32 @@ module.exports = function (inputArgs, cb) {
         cmd = 'help';
     }
 
+    // Q.then is here or after this?
     Q().then(function() {
 
+    // If get is called
+    if (isConfigCmd && inputArgs[3] === 'get') {
+        conf.get(inputArgs[4]);
+    }
+    // If set is called
+    if (isConfigCmd && inputArgs[3] === 'set') {
+        if (inputArgs[5] === undefined) {
+            conf.set(inputArgs[4], null);
+        }
+
+        if(inputArgs[5]) {
+            conf.set(inputArgs[4], inputArgs[5]);
+        }
+    }
+
+    // If delete is called
+    if (isConfigCmd && inputArgs[3] === 'delete') {
+        if (inputArgs[4]) {
+            conf.del(inputArgs[4]);
+        }
+    }
+    // or should q.then be here?
+    Q().then(function() {
         /**
          * Skip telemetry prompt if:
          * - CI environment variable is present
@@ -173,7 +200,7 @@ module.exports = function (inputArgs, cb) {
 };
 
 function getSubCommand(args, cmd) {
-    if(cmd === 'platform' || cmd === 'platforms' || cmd === 'plugin' || cmd === 'plugins' || cmd === 'telemetry') {
+    if(cmd === 'platform' || cmd === 'platforms' || cmd === 'plugin' || cmd === 'plugins' || cmd === 'telemetry' || cmd === 'config') {
         return args[3]; // e.g: args='node cordova platform rm ios', 'node cordova telemetry on'
     }
     return null;
