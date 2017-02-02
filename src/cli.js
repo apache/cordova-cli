@@ -129,10 +129,11 @@ module.exports = function (inputArgs, cb) {
     if (isConfigCmd && inputArgs[3] === 'get') {
         conf.get(inputArgs[4]);
     }
+
     // If set is called
     if (isConfigCmd && inputArgs[3] === 'set') {
         if (inputArgs[5] === undefined) {
-            conf.set(inputArgs[4], null);
+            conf.set(inputArgs[4], true);
         }
 
         if(inputArgs[5]) {
