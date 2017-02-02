@@ -423,6 +423,19 @@ function cli(inputArgs) {
             args.save = true;
         }
 
+        if (args.save === undefined) {
+            // User explicitly did not pass in save
+            args.save = conf.get('autosave');
+        }
+        if (args.fetch === undefined) {
+            // User explicitly did not pass in fetch
+            args.fetch = conf.get('fetch');
+        }
+        if(args.browserify === undefined) {
+           // User explicitly did not pass in browserify
+           args.browserify = conf.get('browserify');
+        }
+
         var download_opts = { searchpath : args.searchpath
                             , noregistry : args.noregistry
                             , nohooks : args.nohooks
