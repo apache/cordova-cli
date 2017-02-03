@@ -34,8 +34,11 @@ var path = require('path'),
     CordovaError = cordova_lib.CordovaError,
     cordova = cordova_lib.cordova,
     events = cordova_lib.events,
-    logger = require('cordova-common').CordovaLogger.get();
-
+    logger = require('cordova-common').CordovaLogger.get(),
+    Configstore = require('configstore'),
+    conf = new Configstore(pkg.name + '-config'),
+    editor = require('editor'),
+    fs = require('fs');
 
 var knownOpts = {
     'verbose' : Boolean
@@ -125,12 +128,21 @@ module.exports = function (inputArgs, cb) {
     // Q.then is here or after this?
     Q().then(function() {
 
-    // If get is called
+    // If "get" is called
+
     if (isConfigCmd && inputArgs[3] === 'get') {
-        conf.get(inputArgs[4]);
+        if (inputArgs[4]) {
+            logger.subscribe(events);
+            conf.get(inputArgs[4]);
+            if(conf.get(inputArgs[4]) !== undefined) {
+                events.emit('log', conf.get(inputArgs[4]).toString());
+            } else {
+                events.emit('log', 'undefined');
+            }
+        }
     }
 
-    // If set is called
+    // If "set" is called
     if (isConfigCmd && inputArgs[3] === 'set') {
         if (inputArgs[5] === undefined) {
             conf.set(inputArgs[4], true);
@@ -141,13 +153,30 @@ module.exports = function (inputArgs, cb) {
         }
     }
 
-    // If delete is called
+    // If "delete" is called
     if (isConfigCmd && inputArgs[3] === 'delete') {
         if (inputArgs[4]) {
             conf.del(inputArgs[4]);
         }
     }
-    // or should q.then be here?
+
+    // If "edit" is called
+    if (isConfigCmd && inputArgs[3] === 'edit') {
+        editor(conf.path, function (code, sig) {
+            console.log('Finished editing with code ' + code);
+        });
+    }
+
+    // If "ls" is called
+    if (isConfigCmd && inputArgs[3] === 'ls' || inputArgs[3] === 'list') {
+        fs.readFile(conf.path, 'utf8', function (err,data) {
+          if (err) {
+            return console.log(err);
+          }
+          console.log(data);
+        });
+    }
+    
     Q().then(function() {
         /**
          * Skip telemetry prompt if:
