@@ -456,8 +456,29 @@ describe("platform", function () {
             done();
         });
     });
-});
 
+    it("Test #044 : config edit is called", function (done) {
+        cli(["node", "cordova", "config", "edit"], function () {
+            expect(cordova.raw.config).toHaveBeenCalledWith(
+                'edit',
+                [ ],
+                jasmine.any(Object)
+            );
+            done();
+        });
+    });
+
+    it("Test #045 : config edit is called", function (done) {
+        cli(["node", "cordova", "config", "ls"], function () {
+            expect(cordova.raw.config).toHaveBeenCalledWith(
+                'ls',
+                [ ],
+                jasmine.any(Object)
+            );
+            done();
+        });
+    });
+});
 describe("config", function () {
     beforeEach(function () {
         spyOn(cordova.raw, "config").and.returnValue(Q());
