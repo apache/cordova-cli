@@ -1,7 +1,7 @@
 {
   "name": "cordova",
   "version": "6.5.1-dev",
-  "preferGlobal": "true",
+  "preferGlobal": true,
   "description": "Cordova command line interface tool",
   "main": "cordova",
   "engines": {
@@ -36,7 +36,6 @@
     "insight": "~0.8.2",
     "nopt": "3.0.1",
     "q": "1.0.1",
-    "underscore": "1.7.0",
     "update-notifier": "^0.5.0"
   },
   "devDependencies": {
@@ -139,7 +138,7 @@
       "email": "stevengill97@gmail.com"
     },
     {
-      "name": "Jesse",
+      "name": "Jesse MacFadyen",
       "email": "purplecabbage@gmail.com"
     }
   ],
