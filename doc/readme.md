@@ -573,7 +573,7 @@ cordova clean [<platform> [...]]
 
 ### Example
 
-- Clean `android` platform build artifiacts:
+- Clean `android` platform build artifacts:
 
         cordova clean android
 
