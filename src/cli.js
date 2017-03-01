@@ -265,9 +265,9 @@ function cli(inputArgs) {
     }
 
     if (/^v0.\d+[.\d+]*/.exec(process.version)) { // matches v0.*
-        var msg = 'Warning: using node version ' + process.version +
+        var msg1 = 'Warning: using node version ' + process.version +
                 ' which has been deprecated. Please upgrade to the latest node version available (v6.x is recommended).';
-        logger.warn(msg);
+        logger.warn(msg1);
     }
 
     // If there were arguments protected from nopt with a double dash, keep
@@ -289,7 +289,6 @@ function cli(inputArgs) {
     var undashed = remain.slice(0, remain.length - unparsedArgs.length);
     var cmd = undashed[0];
     var subcommand;
-    var known_platforms = Object.keys(cordova_lib.cordova_platforms);
 
     if ( !cmd || cmd == 'help' || args.help ) {
         if (!args.help && remain[0] == 'help') {
@@ -299,9 +298,9 @@ function cli(inputArgs) {
     }
 
     if ( !cordova.hasOwnProperty(cmd) ) {
-        var msg = 'Cordova does not know ' + cmd + '; try `' + cordova_lib.binname +
+        var msg2 = 'Cordova does not know ' + cmd + '; try `' + cordova_lib.binname +
             ' help` for a list of all the available commands.';
-        throw new CordovaError(msg);
+        throw new CordovaError(msg2);
     }
 
     var opts = {
@@ -379,13 +378,13 @@ function cli(inputArgs) {
         if (args.variable) {
             args.variable.forEach(function (strVar) {
                 // CB-9171
-                var keyVal = strVar.split("=");
+                var keyVal = strVar.split('=');
                 if(keyVal.length < 2) {
                     throw new CordovaError('invalid variable format: ' + strVar);
                 }
                 else {
                     var key = keyVal.shift().toUpperCase();
-                    var val = keyVal.join("=");
+                    var val = keyVal.join('=');
                     cli_vars[key] = val;
                 }
             });
