@@ -24,44 +24,58 @@
 
 
 var path = require('path'),
-    help = require('./help'),
-    nopt,
-    _,
-    updateNotifier,
+    Q = require('q'),
+    nopt = require('nopt'),
+    updateNotifier = require('update-notifier'),
     pkg = require('../package.json'),
     telemetry = require('./telemetry'),
-    Q = require('q');
-
-var cordova_lib = require('cordova-lib'),
+    help = require('./help'),
+    cordova_lib = require('cordova-lib'),
     CordovaError = cordova_lib.CordovaError,
     cordova = cordova_lib.cordova,
     events = cordova_lib.events,
     logger = require('cordova-common').CordovaLogger.get();
 
-var msg,
-    badPlatforms;
 
+var knownOpts = {
+    'verbose' : Boolean
+    ,'version' : Boolean
+    ,'help' : Boolean
+    ,'silent' : Boolean
+    ,'experimental' : Boolean
+    ,'noregistry' : Boolean
+    ,'nohooks': Array
+    ,'shrinkwrap' : Boolean
+    ,'copy-from' : String
+    ,'link-to' : path
+    ,'searchpath' : String
+    ,'variable' : Array
+    ,'link': Boolean
+    ,'force': Boolean
+    // Flags to be passed to `cordova build/run/emulate`
+    ,'debug' : Boolean
+    ,'release' : Boolean
+    ,'archs' : String
+    ,'device' : Boolean
+    ,'emulator': Boolean
+    ,'target' : String
+    ,'browserify': Boolean
+    ,'noprepare': Boolean
+    ,'fetch': Boolean
+    ,'nobuild': Boolean
+    ,'list': Boolean
+    ,'buildConfig' : String
+    ,'template' : String
+};
 
-/*
- * init
- *
- * initializes nopt and underscore
- * nopt and underscore are require()d in try-catch below to print a nice error
- * message if one of them is not installed.
- */
-function init() {
-    try {
-        nopt = require('nopt');
-        _ = require('underscore');
-        updateNotifier = require('update-notifier');
-    } catch (e) {
-        console.error(
-            'Please run npm install from this directory:\n\t' +
-            path.dirname(__dirname)
-        );
-        process.exit(2);
-    }
-}
+var shortHands = {
+    'd' : '--verbose'
+    ,'v' : '--version'
+    ,'h' : '--help'
+    ,'src' : '--copy-from'
+    ,'t' : '--template'
+};
+
 
 function checkForUpdates() {
     try {
@@ -84,15 +98,14 @@ function checkForUpdates() {
 }
 
 var shouldCollectTelemetry = false;
+
 module.exports = function (inputArgs, cb) {
-    
+
     /**
      * mainly used for testing.
      */
     cb = cb || function(){};
-    
-    init();
-    
+
     // If no inputArgs given, use process.argv.
     inputArgs = inputArgs || process.argv;
     var cmd = inputArgs[2]; // e.g: inputArgs= 'node cordova run ios'
@@ -105,20 +118,20 @@ module.exports = function (inputArgs, cb) {
     } else if(!cmd || cmd === '--help' || cmd === 'h') {
         cmd = 'help';
     }
-            
+
     Q().then(function() {
-        
+
         /**
          * Skip telemetry prompt if:
          * - CI environment variable is present
          * - Command is run with `--no-telemetry` flag
          * - Command ran is: `cordova telemetry on | off | ...`
          */
-        
+
         if(telemetry.isCI(process.env) || telemetry.isNoTelemetryFlag(inputArgs)) {
             return Q(false);
         }
-        
+
         /**
          * We shouldn't prompt for telemetry if user issues a command of the form: `cordova telemetry on | off | ...x`
          * Also, if the user has already been prompted and made a decision, use his saved answer
@@ -127,11 +140,11 @@ module.exports = function (inputArgs, cb) {
             var isOptedIn = telemetry.isOptedIn();
             return handleTelemetryCmd(subcommand, isOptedIn);
         }
-        
+
         if(telemetry.hasUserOptedInOrOut()) {
             return Q(telemetry.isOptedIn());
         }
-        
+
         /**
          * Otherwise, prompt user to opt-in or out
          * Note: the prompt is shown for 30 seconds. If no choice is made by that time, User is considered to have opted out.
@@ -167,12 +180,12 @@ function getSubCommand(args, cmd) {
 }
 
 function handleTelemetryCmd(subcommand, isOptedIn) {
-    
+
     if (subcommand !== 'on' && subcommand !== 'off') {
         logger.subscribe(events);
         return help(['telemetry']);
     }
-    
+
     var turnOn = subcommand === 'on' ? true : false;
     var cmdSuccess = true;
 
@@ -196,54 +209,16 @@ function handleTelemetryCmd(subcommand, isOptedIn) {
         telemetry.track('telemetry', 'off', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful': 'unsuccessful');
         return Q();
     }
-    
+
     if(isOptedIn) {
         telemetry.track('telemetry', 'on', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful' : 'unsuccessful');
     }
-    
+
     return Q();
 }
 
 function cli(inputArgs) {
     // When changing command line arguments, update doc/help.txt accordingly.
-    var knownOpts =
-        { 'verbose' : Boolean
-        , 'version' : Boolean
-        , 'help' : Boolean
-        , 'silent' : Boolean
-        , 'experimental' : Boolean
-        , 'noregistry' : Boolean
-        , 'nohooks': Array
-        , 'shrinkwrap' : Boolean
-        , 'copy-from' : String
-        , 'link-to' : path
-        , 'searchpath' : String
-        , 'variable' : Array
-        , 'link': Boolean
-        , 'force': Boolean
-        // Flags to be passed to `cordova build/run/emulate`
-        , 'debug' : Boolean
-        , 'release' : Boolean
-        , 'archs' : String
-        , 'device' : Boolean
-        , 'emulator': Boolean
-        , 'target' : String
-        , 'browserify': Boolean
-        , 'noprepare': Boolean
-        , 'fetch': Boolean
-        , 'nobuild': Boolean
-        , 'list': Boolean
-        , 'buildConfig' : String
-        , 'template' : String
-        };
-
-    var shortHands =
-        { 'd' : '--verbose'
-        , 'v' : '--version'
-        , 'h' : '--help'
-        , 'src' : '--copy-from'
-        , 't' : '--template'
-        };
 
     checkForUpdates();
 
@@ -289,8 +264,8 @@ function cli(inputArgs) {
         }
     }
 
-    if (/^v0.\d+[.\d+]*/.exec(process.version)) { // matches v0.* 
-        msg = 'Warning: using node version ' + process.version +
+    if (/^v0.\d+[.\d+]*/.exec(process.version)) { // matches v0.*
+        var msg = 'Warning: using node version ' + process.version +
                 ' which has been deprecated. Please upgrade to the latest node version available (v6.x is recommended).';
         logger.warn(msg);
     }
@@ -315,7 +290,6 @@ function cli(inputArgs) {
     var cmd = undashed[0];
     var subcommand;
     var known_platforms = Object.keys(cordova_lib.cordova_platforms);
-    msg = '';
 
     if ( !cmd || cmd == 'help' || args.help ) {
         if (!args.help && remain[0] == 'help') {
@@ -325,8 +299,7 @@ function cli(inputArgs) {
     }
 
     if ( !cordova.hasOwnProperty(cmd) ) {
-        msg =
-            'Cordova does not know ' + cmd + '; try `' + cordova_lib.binname +
+        var msg = 'Cordova does not know ' + cmd + '; try `' + cordova_lib.binname +
             ' help` for a list of all the available commands.';
         throw new CordovaError(msg);
     }
@@ -342,33 +315,24 @@ function cli(inputArgs) {
         searchpath : args.searchpath
     };
 
+    var platformCommands = ['emulate', 'build', 'prepare', 'compile', 'run', 'clean'];
+    if (platformCommands.indexOf(cmd) !== -1) {
 
-    if (cmd == 'emulate' || cmd == 'build' || cmd == 'prepare' || cmd == 'compile' || cmd == 'run' || cmd === 'clean') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
-        badPlatforms = _.difference(opts.platforms, known_platforms);
-        if( !_.isEmpty(badPlatforms) ) {
-            msg = 'Unknown platforms: ' + badPlatforms.join(', ');
-            throw new CordovaError(msg);
-        }
 
         // Pass nopt-parsed args to PlatformApi through opts.options
         opts.options = args;
         opts.options.argv = unparsedArgs;
-
         if (cmd === 'run' && args.list && cordova.raw.targets) {
             return cordova.raw.targets.call(null, opts);
         }
 
         return cordova.raw[cmd].call(null, opts);
+
     } else if (cmd === 'requirements') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
-        badPlatforms = _.difference(opts.platforms, known_platforms);
-        if( !_.isEmpty(badPlatforms) ) {
-            msg = 'Unknown platforms: ' + badPlatforms.join(', ');
-            throw new CordovaError(msg);
-        }
 
         return cordova.raw[cmd].call(null, opts.platforms)
             .then(function(platformChecks) {
@@ -398,29 +362,35 @@ function cli(inputArgs) {
                     return isCheckFailedForPlatform;
                 });
 
-                if (someChecksFailed) throw new CordovaError('Some of requirements check failed');
+                if (someChecksFailed) {
+                    throw new CordovaError('Some of requirements check failed');
+                }
             });
     } else if (cmd == 'serve') {
         var port = undashed[1];
         return cordova.raw.serve(port);
     } else if (cmd == 'create') {
-        return create();
+        return create(undashed,args);
     } else {
         // platform/plugins add/rm [target(s)]
         subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
         var targets = undashed.slice(2); // array of targets, either platforms or plugins
         var cli_vars = {};
         if (args.variable) {
-            args.variable.forEach(function (s) {
+            args.variable.forEach(function (strVar) {
                 // CB-9171
-                var eq = s.indexOf('=');
-                if (eq == -1)
-                    throw new CordovaError('invalid variable format: ' + s);
-                var key = s.substr(0, eq).toUpperCase();
-                var val = s.substr(eq + 1, s.length);
-                cli_vars[key] = val;
+                var keyVal = strVar.split("=");
+                if(keyVal.length < 2) {
+                    throw new CordovaError('invalid variable format: ' + strVar);
+                }
+                else {
+                    var key = keyVal.shift().toUpperCase();
+                    var val = keyVal.join("=");
+                    cli_vars[key] = val;
+                }
             });
         }
+
         var download_opts = { searchpath : args.searchpath
                             , noregistry : args.noregistry
                             , nohooks : args.nohooks
@@ -431,11 +401,12 @@ function cli(inputArgs) {
                             , save: args.save || false
                             , shrinkwrap: args.shrinkwrap || false
                             , force: args.force || false
-                            };
+        };
         return cordova.raw[cmd](subcommand, targets, download_opts);
     }
+}
 
-    function create() {
+ function create(undashed, args) {
         var cfg;            // Create config
         var customWww;      // Template path
         var wwwCfg;         // Template config
@@ -485,4 +456,3 @@ function cli(inputArgs) {
             , events || undefined
         );
     }
-}
