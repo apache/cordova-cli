@@ -39,8 +39,10 @@ Options
 
 Examples
     cordova-cli create myApp org.apache.cordova.myApp myApp
-    cordova-cli plugin add cordova-plugin-camera --save
-    cordova-cli platform add android --save
+    cordova-cli plugin add cordova-plugin-camera
+    cordova-cli platform add android
+    cordova-cli plugin add cordova-plugin-camera --nosave
+    cordova-cli platform add android --nosave
     cordova-cli requirements android    
     cordova-cli build android --verbose
     cordova-cli run android

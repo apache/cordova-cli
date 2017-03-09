@@ -4,8 +4,11 @@ Synopsis
 
 Manage project platforms
 
-    add <plat-spec> [...].............. Add specified platforms
-        --save ........................ Save specified platforms into config.xml after installing them
+    add <plat-spec> [...].............. Add specified platforms and save platforms
+                                        into config.xml & package.json after installing them
+
+        --nosave ...................... Prevent saving platforms into
+                                        config.xml & package.json after installing them
 
         --link ........................ When <plat-spec> is a local path, links the platform
                                         library directly instead of making a copy of it (support
@@ -18,7 +21,9 @@ Manage project platforms
 
 
     remove <platform> [...] ........... Remove specified platforms
-        --save ........................ Delete specified platforms from config.xml after removing them
+        --nosave ...................... Prevent deleting specified platforms from 
+                                        config.xml & package.json after removing them
+
         --fetch ....................... Removes the plugin from the project's node_modules directory.
                                         Runs `npm uninstall` under the hood.
 
@@ -26,14 +31,13 @@ Manage project platforms
     update <plat-spec> ................ Update the version of Cordova used for a specific platform;
                                         update to the latest <version> if no <plat-spec> is specified
 
-        --save ........................ Save the latest versions for specified platforms into config.xml
-
         --fetch ....................... Fetches the plugin into the project's node_modules directory. 
                                         Uses `npm install` to do the fetching.
 
     list .............................. List all installed and available platforms
     check ............................. List platforms which can be updated by `cordova-cli platform update`
-    save .............................. Save version of all platforms added to config.xml
+    nosave ............................ Prevents saving version of all platforms added to 
+                                        config.xml & package.json
 
 
 Syntax
@@ -51,10 +55,10 @@ Aliases
     ls -> list
 
 Examples
-    cordova-cli platform add android ios --save
-    cordova-cli platform add android@^5.0.0 --save
-    cordova-cli platform add https://github.com/myfork/cordova-android.git#4.0.0 --save
-    cordova-cli platform add ../android --save
-    cordova-cli platform add ../cordova-android.tgz --save
-    cordova-cli platform rm android --save
+    cordova-cli platform add android ios
+    cordova-cli platform add android@^5.0.0
+    cordova-cli platform add https://github.com/myfork/cordova-android.git#4.0.0
+    cordova-cli platform add ../android
+    cordova-cli platform add ../cordova-android.tgz
+    cordova-cli platform rm android --nosave
     cordova-cli platform ls
