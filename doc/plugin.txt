@@ -4,7 +4,8 @@ Synopsis
 
 Manage project plugins
 
-    add <plugin-spec> [...] ............ Add specified plugins
+    add <plugin-spec> [...] ............ Add specified plugins and save them to 
+                                         config.xml & package.json.
         --searchpath <directory> ....... When looking up plugins by ID, look in this directory and
                                          each of its subdirectories before hitting the registry.
                                          Multiple search paths can be specified.
@@ -14,7 +15,8 @@ Manage project plugins
         --link ......................... When installing from a local path, creates a symbolic link
                                          instead of copying files. The extent to which files are linked
                                          varies by platform. Useful for plugin development.
-        --save ......................... Save the information for specified plugin into config.xml
+        --nosave ....................... Prevent saving the information for specified plugin 
+                                         into config.xml & package.json.
         --shrinkwrap ................... Used together with --save, saves the
                                          installed version numbers to config.xml
         --browserify ................... Compile plugin JS at build time using
@@ -27,8 +29,10 @@ Manage project plugins
                                          node_modules directory. Uses
                                          `npm install` to do the fetching
 
-    remove <pluginid>|<name> [...] ..... Remove plugins with the given IDs/name.
-        --save ......................... Remove the information for specified plugin from config.xml
+    remove <pluginid>|<name> [...] ..... Remove plugins with the given IDs/name and 
+                                         removes the information for specified plugin from config.xml & package.json.
+        --nosave ....................... Prevents removing the information for
+                                         specified plugin from config.xml & package.json.
 
         --fetch ........................ Removes the plugin from the project's
                                          node_modules directory. Uses
@@ -37,6 +41,7 @@ Manage project plugins
 
     list .............................. List currently installed plugins
     save .............................. Saves the information for all currently added plugins to config.xml
+
     search [<keyword>] [...] .......... Search http://plugins.cordova.io for plugins matching the keywords
 
 Syntax
@@ -55,10 +60,10 @@ Aliases
     ls -> list
 
 Examples
-    cordova-cli plugin add cordova-plugin-camera cordova-plugin-file --save --searchpath ~/plugins
-    cordova-cli plugin add cordova-plugin-camera@^2.0.0 --save
-    cordova-cli plugin add https://github.com/myfork/cordova-plugin-camera.git#2.1.0 --save
-    cordova-cli plugin add ../cordova-plugin-camera --save
-    cordova-cli plugin add ../cordova-plugin-camera.tgz --save
-    cordova-cli plugin rm camera --save
+    cordova-cli plugin add cordova-plugin-camera cordova-plugin-file --nosave --searchpath ~/plugins
+    cordova-cli plugin add cordova-plugin-camera@^2.0.0 --nosave
+    cordova-cli plugin add https://github.com/myfork/cordova-plugin-camera.git#2.1.0 --nosave
+    cordova-cli plugin add ../cordova-plugin-camera --nosave
+    cordova-cli plugin add ../cordova-plugin-camera.tgz --nosave
+    cordova-cli plugin rm camera --nosave
     cordova-cli plugin ls
