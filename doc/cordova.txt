@@ -6,6 +6,8 @@ Global Commands
     create ............................. Create a project
     help ............................... Get help for a command
     telemetry .......................... Turn telemetry collection on or off
+    config ............................. Store and retrieve environment variables 
+                                         (set, get, delete, edit, list)
 
 Project Commands
     info ............................... Generate project information
@@ -47,3 +49,4 @@ Examples
     cordova-cli build android --verbose
     cordova-cli run android
     cordova-cli build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
+    cordova-cli config ls

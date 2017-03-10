@@ -3,7 +3,7 @@ Synopsis
     cordova-cli config <command> [options]
     
 
-The config command can be used to set, get, delete, and edit the 
+The config command can be used to set, get, delete, edit, and list the 
 contents of the user files.
 
 Options
