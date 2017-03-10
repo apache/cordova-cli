@@ -125,11 +125,7 @@ module.exports = function (inputArgs, cb) {
         cmd = 'help';
     }
 
-    // Q.then is here or after this?
-    Q().then(function() {
-
     // If "get" is called
-
     if (isConfigCmd && inputArgs[3] === 'get') {
         if (inputArgs[4]) {
             logger.subscribe(events);
