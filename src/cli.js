@@ -302,13 +302,19 @@ function cli(inputArgs) {
         throw new CordovaError(msg2);
     }
 
+    if (args.nofetch) {
+        args.fetch = false;
+    } else {
+        args.fetch = true;
+    }
+
     var opts = {
         platforms: [],
         options: [],
         verbose: args.verbose || false,
         silent: args.silent || false,
         browserify: args.browserify || false,
-        fetch: args.fetch || false,
+        fetch: args.fetch,
         nohooks: args.nohooks || [],
         searchpath : args.searchpath
     };
@@ -325,7 +331,6 @@ function cli(inputArgs) {
         if (cmd === 'run' && args.list && cordova.raw.targets) {
             return cordova.raw.targets.call(null, opts);
         }
-
         return cordova.raw[cmd].call(null, opts);
 
     } else if (cmd === 'requirements') {
@@ -393,18 +398,18 @@ function cli(inputArgs) {
             args.save = false;
         } else {
             args.save = true;
-        }
 
         var download_opts = { searchpath : args.searchpath
                             , noregistry : args.noregistry
                             , nohooks : args.nohooks
                             , cli_variables : cli_vars
                             , browserify: args.browserify || false
-                            , fetch: args.fetch || false
+                            , fetch: args.fetch
                             , link: args.link || false
                             , save: args.save
                             , shrinkwrap: args.shrinkwrap || false
                             , force: args.force || false
+
         };
         return cordova.raw[cmd](subcommand, targets, download_opts);
     }
