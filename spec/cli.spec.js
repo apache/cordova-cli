@@ -206,6 +206,32 @@ describe("cordova cli", function () {
         it("Test #017 : will pass save:false", function (done) {
             cli(["node", "cordova", "plugin", "remove", "device", "--nosave"], function () {
                 expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                    "add",
+                    ["device"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.plugin.calls.argsFor(0)[2];
+                expect(opts.save).toBe(false);
+                done();
+            });
+        });
+
+        it("Test #034 : (add) will pass fetch:false", function (done) {
+            cli(["node", "cordova", "plugin", "add", "device", "--nofetch"], function () {
+              expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                  "add",
+                  ["device"],
+                  jasmine.any(Object)
+              );
+              var opts = cordova.raw.plugin.calls.argsFor(0)[2];
+              expect(opts.fetch).toBe(false);
+              done();
+            });
+        });
+
+        it("Test #035 : (add) fetch is true by default and will pass fetch:true", function (done) {
+            cli(["node", "cordova", "plugin", "add", "device"], function () {
+                expect(cordova.raw.plugin).toHaveBeenCalledWith(
                     "remove",
                     ["device"],
                     jasmine.any(Object)
@@ -228,8 +254,34 @@ describe("cordova cli", function () {
                 done();
             });
         });
-    }); 
 
+        it("Test #036 : (remove) fetch is true by default and will pass fetch:true", function (done) {
+            cli(["node", "cordova", "plugin", "remove", "device"], function () {
+                expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                    "remove",
+                    ["device"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.plugin.calls.argsFor(0)[2];
+                expect(opts.save).toBe(true);
+                done();
+            });
+        });
+
+        it("Test #037 : (remove) will pass fetch:false", function (done) {
+            cli(["node", "cordova", "plugin", "remove", "device", "--nofetch"], function () {
+                expect(cordova.raw.plugin).toHaveBeenCalledWith(
+                    "remove",
+                    ["device"],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.raw.plugin.calls.argsFor(0)[2];
+                expect(opts.fetch).toBe(false);
+                done();
+            });
+        });
+    });
+    
     describe("telemetry", function() {
        it("Test#019 : skips prompt when user runs 'cordova telemetry X'", function(done) {
            var wasPromptShown = false;
@@ -470,6 +522,58 @@ describe("platform", function () {
             );
             var opts = cordova.raw.platform.calls.argsFor(0)[2];
             expect(opts.fetch).toBe(true);
+            done();
+        });
+    });
+
+    it("Test #038 : (add) will pass fetch:false", function (done) {
+        cli(["node", "cordova", "platform", "add", "device", "--nofetch"], function () {
+          expect(cordova.raw.platform).toHaveBeenCalledWith(
+              "add",
+              ["device"],
+              jasmine.any(Object)
+          );
+          var opts = cordova.raw.platform.calls.argsFor(0)[2];
+          expect(opts.fetch).toBe(false);
+          done();
+        });
+    });
+
+    it("Test #039 : (add) fetch is true by default and will pass fetch:true", function (done) {
+        cli(["node", "cordova", "platform", "add", "device"], function () {
+            expect(cordova.raw.platform).toHaveBeenCalledWith(
+                "add",
+                ["device"],
+                jasmine.any(Object)
+            );
+            var opts = cordova.raw.platform.calls.argsFor(0)[2];
+            expect(opts.fetch).toBe(true);
+            done();
+        });
+    });
+
+    it("Test #040 : (remove) fetch is true by default and will pass fetch:true", function (done) {
+        cli(["node", "cordova", "platform", "remove", "device"], function () {
+            expect(cordova.raw.platform).toHaveBeenCalledWith(
+                "remove",
+                ["device"],
+                jasmine.any(Object)
+            );
+            var opts = cordova.raw.platform.calls.argsFor(0)[2];
+            expect(opts.fetch).toBe(true);
+            done();
+        });
+    });
+
+    it("Test #041 : (remove) will pass fetch:false", function (done) {
+        cli(["node", "cordova", "platform", "remove", "device", "--nofetch"], function () {
+            expect(cordova.raw.platform).toHaveBeenCalledWith(
+                "remove",
+                ["device"],
+                jasmine.any(Object)
+            );
+            var opts = cordova.raw.platform.calls.argsFor(0)[2];
+            expect(opts.fetch).toBe(false);
             done();
         });
     });
