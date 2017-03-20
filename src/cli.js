@@ -398,6 +398,7 @@ function cli(inputArgs) {
             args.save = false;
         } else {
             args.save = true;
+        }
 
         var download_opts = { searchpath : args.searchpath
                             , noregistry : args.noregistry
@@ -409,59 +410,58 @@ function cli(inputArgs) {
                             , save: args.save
                             , shrinkwrap: args.shrinkwrap || false
                             , force: args.force || false
-
         };
         return cordova.raw[cmd](subcommand, targets, download_opts);
     }
 }
 
- function create(undashed, args) {
-        var cfg;            // Create config
-        var customWww;      // Template path
-        var wwwCfg;         // Template config
+function create(undashed, args) {
+    var cfg;            // Create config
+    var customWww;      // Template path
+    var wwwCfg;         // Template config
 
-        // If we got a fourth parameter, consider it to be JSON to init the config.
-        if (undashed[4])
-            cfg = JSON.parse(undashed[4]);
-        else
-            cfg = {};
+    // If we got a fourth parameter, consider it to be JSON to init the config.
+    if (undashed[4])
+        cfg = JSON.parse(undashed[4]);
+    else
+        cfg = {};
 
-        customWww = args['copy-from'] || args['link-to'] || args.template;
+    customWww = args['copy-from'] || args['link-to'] || args.template;
 
-        if (customWww) {
-            if (!args.template && !args['copy-from'] && customWww.indexOf('http') === 0) {
-                throw new CordovaError(
-                    'Only local paths for custom www assets are supported for linking' + customWww
-                );
-            }
-
-            // Resolve tilda
-            if (customWww.substr(0,1) === '~')
-                customWww = path.join(process.env.HOME,  customWww.substr(1));
-
-            wwwCfg = {
-                url: customWww,
-                template: false,
-                link: false
-            };
-
-            if (args['link-to']) {
-                wwwCfg.link = true;
-            }
-            if (args.template) {
-                wwwCfg.template = true;
-            } else if (args['copy-from']) {
-                logger.warn('Warning: --copy-from option is being deprecated. Consider using --template instead.');
-                wwwCfg.template = true;
-            }
-
-            cfg.lib = cfg.lib || {};
-            cfg.lib.www = wwwCfg;
+    if (customWww) {
+        if (!args.template && !args['copy-from'] && customWww.indexOf('http') === 0) {
+            throw new CordovaError(
+                'Only local paths for custom www assets are supported for linking' + customWww
+            );
         }
-        return cordova.raw.create( undashed[1]  // dir to create the project in
-            , undashed[2]  // App id
-            , undashed[3]  // App name
-            , cfg
-            , events || undefined
-        );
+
+        // Resolve tilda
+        if (customWww.substr(0,1) === '~')
+            customWww = path.join(process.env.HOME,  customWww.substr(1));
+
+        wwwCfg = {
+            url: customWww,
+            template: false,
+            link: false
+        };
+
+        if (args['link-to']) {
+            wwwCfg.link = true;
+        }
+        if (args.template) {
+            wwwCfg.template = true;
+        } else if (args['copy-from']) {
+            logger.warn('Warning: --copy-from option is being deprecated. Consider using --template instead.');
+            wwwCfg.template = true;
+        }
+
+        cfg.lib = cfg.lib || {};
+        cfg.lib.www = wwwCfg;
     }
+    return cordova.raw.create( undashed[1]  // dir to create the project in
+        , undashed[2]  // App id
+        , undashed[3]  // App name
+        , cfg
+        , events || undefined
+    );
+}

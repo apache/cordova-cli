@@ -15,14 +15,16 @@ Manage project platforms
                                         varies by platform; useful for platform development)
         
         --nofetch ..................... Prevent fetching the plugin into the project's node_modules 
-                                        directory. Prevent using `npm install` to do the fetching.
+                                        directory. Uses older fetching method (pre cordova-7) 
+                                        instead of using npm install under the hood
 
     remove <platform> [...] ........... Remove specified platforms
 
         --nosave ...................... Prevent deleting specified platforms from 
                                         config.xml & package.json after removing them
         --nofetch ..................... Prevent removing the plugin from the project's node_modules 
-                                        directory. Prevent running `npm uninstall` under the hood.
+                                        directory. Uses older fetching method (pre cordova-7) 
+                                        instead of using npm install under the hood
 
     update <plat-spec> ................ Update the version of Cordova used for a specific platform;
                                         update to the latest <version> if no <plat-spec> is specified
@@ -31,8 +33,6 @@ Manage project platforms
     check ............................. List platforms which can be updated by `cordova-cli platform update`
     nosave ............................ Prevents saving version of all platforms added to 
                                         config.xml & package.json
-    nofetch ........................... Prevents fetching the plugin into the project's node_modules 
-                                        directory.
 Syntax
     <plat-spec> : <platform>[@<version>]|<path>|<url>[#<commit-ish>]
 
