@@ -83,12 +83,10 @@ Certain commands have options (`platformOpts`) that are specific to a particular
         cd myApp
         # Add camera plugin to the project and remember that in config.xml & package.json. Do not use npm install to fetch.
         cordova plugin add cordova-plugin-camera --nofetch
-        # Add camera plugin to the project and remember that in config.xml. Use npm install to fetch.
-        cordova plugin add cordova-plugin-camera --save --fetch
-        # Add android platform to the project and remember that in config.xml & package.json.
-        cordova platform add android
-        # Add android platform to the project and remember that in config.xml. Do not use npm install to fetch.
-        cordova platform add android --save --nofetch
+        # Add camera plugin to the project and remember that in config.xml and package.json. Uses pre cordova@7 fetching methods instead of cordova-fetch which uses npm install under the hood.
+        cordova plugin add cordova-plugin-camera --nofetch
+        # Add android platform to the project and remember that in config.xml & package.json. Uses pre cordova@7 fetching methods instead of cordova-fetch which uses npm install under the hood
+        cordova platform add android --nofetch
         # Check to see if your system is configured for building android platform.
         cordova requirements android
         # Build the android and emit verbose logs.
@@ -404,7 +402,7 @@ based on the following criteria (listed in order of precedence):
 
         cordova plugin rm camera --nosave
 
-- Do not remove the plugin from the project and `npm uninstall` it. Do not remove it from the `node_modules` directory:
+- Remove the plugin from the project. Do not remove it from the node_modules directory and don't run npm uninstall under the hood:
 
         cordova plugin rm camera --nofetch
 
