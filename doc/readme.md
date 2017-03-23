@@ -41,6 +41,7 @@ These commands are available at all times.
 | create | Create a project
 | help <command> | Get help for a command
 | telemetry | Turn telemetry collection on or off
+| config | Store and retrieve environment variables
 
 ## Project Command List
 
@@ -668,6 +669,22 @@ Show syntax summary, or the help for a specific command.
 cordova help [command]
 cordova [command] -h
 cordova -h [command]
+```
+
+## cordova config command
+
+### Synopsis
+
+Store and retrieve environment variables.
+
+### Syntax
+
+```
+cordova config ls
+cordova config edit
+cordova config set <key> <value>
+cordova config get <key>
+cordova config delete <key>
 ```
 
 [Hooks guide]: http://cordova.apache.org/docs/en/latest/guide_appdev_hooks_index.md.html
