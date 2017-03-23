@@ -34,8 +34,11 @@ var path = require('path'),
     CordovaError = cordova_lib.CordovaError,
     cordova = cordova_lib.cordova,
     events = cordova_lib.events,
-    logger = require('cordova-common').CordovaLogger.get();
-
+    logger = require('cordova-common').CordovaLogger.get(),
+    Configstore = require('configstore'),
+    conf = new Configstore(pkg.name + '-config'),
+    editor = require('editor'),
+    fs = require('fs');
 
 var knownOpts = {
     'verbose' : Boolean
@@ -76,6 +79,9 @@ var shortHands = {
     ,'t' : '--template'
 };
 
+var Configstore = require('configstore');
+var conf = new Configstore(pkg.name + '-config');
+
 
 function checkForUpdates() {
     try {
@@ -83,7 +89,6 @@ function checkForUpdates() {
         var notifier = updateNotifier({
             pkg: pkg
         });
-
         // Notify using the built-in convenience method
         notifier.notify();
     } catch (e) {
@@ -111,6 +116,7 @@ module.exports = function (inputArgs, cb) {
     var cmd = inputArgs[2]; // e.g: inputArgs= 'node cordova run ios'
     var subcommand = getSubCommand(inputArgs, cmd);
     var isTelemetryCmd = (cmd === 'telemetry');
+    var isConfigCmd = (cmd === 'config');
 
     // ToDO: Move nopt-based parsing of args up here
     if(cmd === '--version' || cmd === '-v') {
@@ -119,8 +125,55 @@ module.exports = function (inputArgs, cb) {
         cmd = 'help';
     }
 
-    Q().then(function() {
+    // If "get" is called
+    if (isConfigCmd && inputArgs[3] === 'get') {
+        if (inputArgs[4]) {
+            logger.subscribe(events);
+            conf.get(inputArgs[4]);
+            if(conf.get(inputArgs[4]) !== undefined) {
+                events.emit('log', conf.get(inputArgs[4]).toString());
+            } else {
+                events.emit('log', 'undefined');
+            }
+        }
+    }
 
+    // If "set" is called
+    if (isConfigCmd && inputArgs[3] === 'set') {
+        if (inputArgs[5] === undefined) {
+            conf.set(inputArgs[4], true);
+        }
+
+        if(inputArgs[5]) {
+            conf.set(inputArgs[4], inputArgs[5]);
+        }
+    }
+
+    // If "delete" is called
+    if (isConfigCmd && inputArgs[3] === 'delete') {
+        if (inputArgs[4]) {
+            conf.del(inputArgs[4]);
+        }
+    }
+
+    // If "edit" is called
+    if (isConfigCmd && inputArgs[3] === 'edit') {
+        editor(conf.path, function (code, sig) {
+            console.log('Finished editing with code ' + code);
+        });
+    }
+
+    // If "ls" is called
+    if (isConfigCmd && inputArgs[3] === 'ls' || inputArgs[3] === 'list') {
+        fs.readFile(conf.path, 'utf8', function (err,data) {
+          if (err) {
+            return console.log(err);
+          }
+          console.log(data);
+        });
+    }
+    
+    Q().then(function() {
         /**
          * Skip telemetry prompt if:
          * - CI environment variable is present
@@ -173,7 +226,7 @@ module.exports = function (inputArgs, cb) {
 };
 
 function getSubCommand(args, cmd) {
-    if(cmd === 'platform' || cmd === 'platforms' || cmd === 'plugin' || cmd === 'plugins' || cmd === 'telemetry') {
+    if(cmd === 'platform' || cmd === 'platforms' || cmd === 'plugin' || cmd === 'plugins' || cmd === 'telemetry' || cmd === 'config') {
         return args[3]; // e.g: args='node cordova platform rm ios', 'node cordova telemetry on'
     }
     return null;
@@ -393,6 +446,19 @@ function cli(inputArgs) {
             args.save = false;
         } else {
             args.save = true;
+        }
+
+        if (args.save === undefined) {
+            // User explicitly did not pass in save
+            args.save = conf.get('autosave');
+        }
+        if (args.fetch === undefined) {
+            // User explicitly did not pass in fetch
+            args.fetch = conf.get('fetch');
+        }
+        if(args.browserify === undefined) {
+           // User explicitly did not pass in browserify
+           args.browserify = conf.get('browserify');
         }
 
         var download_opts = { searchpath : args.searchpath

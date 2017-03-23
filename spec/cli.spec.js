@@ -400,60 +400,139 @@ describe("cordova cli", function () {
     });
 });
 
-    describe("platform", function () {
-        beforeEach(function () {
-            spyOn(cordova.raw, "platform").and.returnValue(Q());
-        });
+describe("platform", function () {
+    beforeEach(function () {
+        spyOn(cordova.raw, "platform").and.returnValue(Q());
+    });
 
-        it("Test #030 : autosave is the default setting for platform add", function (done) {
-            cli(["node", "cordova", "platform", "add", "ios"], function () {
-                expect(cordova.raw.platform).toHaveBeenCalledWith(
-                    "add",
-                    ["ios"],
-                    jasmine.any(Object)
-                );
-                var opts = cordova.raw.platform.calls.argsFor(0)[2];
-                expect(opts.save).toBe(true);
-                done();
-            });
+    it("Test #030 : autosave is the default setting for platform add", function (done) {
+        cli(["node", "cordova", "platform", "add", "ios"], function () {
+            expect(cordova.raw.platform).toHaveBeenCalledWith(
+                "add",
+                ["ios"],
+                jasmine.any(Object)
+            );
+            var opts = cordova.raw.platform.calls.argsFor(0)[2];
+            expect(opts.save).toBe(true);
+            done();
         });
+    });
 
-        it("Test #031 : platform is not saved when --nosave is passed in", function (done) {
-            cli(["node", "cordova", "platform", "add", "ios", "--nosave"], function () {
-                expect(cordova.raw.platform).toHaveBeenCalledWith(
-                    "add",
-                    ["ios"],
-                    jasmine.any(Object)
-                );
-                var opts = cordova.raw.platform.calls.argsFor(0)[2];
-                expect(opts.save).toBe(false);
-                done();
-            });
+    it("Test #031 : platform is not saved when --nosave is passed in", function (done) {
+        cli(["node", "cordova", "platform", "add", "ios", "--nosave"], function () {
+            expect(cordova.raw.platform).toHaveBeenCalledWith(
+                "add",
+                ["ios"],
+                jasmine.any(Object)
+            );
+            var opts = cordova.raw.platform.calls.argsFor(0)[2];
+            expect(opts.save).toBe(false);
+            done();
         });
+    });
 
-        it("Test #032 : autosave is the default setting for platform remove", function (done) {
-            cli(["node", "cordova", "platform", "remove", "ios"], function () {
-                expect(cordova.raw.platform).toHaveBeenCalledWith(
-                    "remove",
-                    ["ios"],
-                    jasmine.any(Object)
-                );
-                var opts = cordova.raw.platform.calls.argsFor(0)[2];
-                expect(opts.save).toBe(true);
-                done();
-            });
+    it("Test #032 : autosave is the default setting for platform remove", function (done) {
+        cli(["node", "cordova", "platform", "remove", "ios"], function () {
+            expect(cordova.raw.platform).toHaveBeenCalledWith(
+                "remove",
+                ["ios"],
+                jasmine.any(Object)
+            );
+            var opts = cordova.raw.platform.calls.argsFor(0)[2];
+            expect(opts.save).toBe(true);
+            done();
         });
+    });
 
-        it("Test #033 : platform is not removed when --nosave is passed in", function (done) {
-            cli(["node", "cordova", "platform", "remove", "ios", "--nosave"], function () {
-                expect(cordova.raw.platform).toHaveBeenCalledWith(
-                    "remove",
-                    ["ios"],
-                    jasmine.any(Object)
-                );
-                var opts = cordova.raw.platform.calls.argsFor(0)[2];
-                expect(opts.save).toBe(false);
-                done();
-            });
+    it("Test #033 : platform is not removed when --nosave is passed in", function (done) {
+        cli(["node", "cordova", "platform", "remove", "ios", "--nosave"], function () {
+            expect(cordova.raw.platform).toHaveBeenCalledWith(
+                "remove",
+                ["ios"],
+                jasmine.any(Object)
+            );
+            var opts = cordova.raw.platform.calls.argsFor(0)[2];
+            expect(opts.save).toBe(false);
+            done();
         });
-    }); 
+    });
+});
+
+describe("config", function () {
+    beforeEach(function () {
+        spyOn(cordova.raw, "config").and.returnValue(Q());
+    });
+
+    it("Test#040 : config set is called with true and config delete is called", function (done) {
+        cli(["node", "cordova", "config", "set", "autosave", "true"], function () {
+            expect(cordova.raw.config).toHaveBeenCalledWith(
+                'set', 
+                [ 'autosave', 'true' ],
+                jasmine.any(Object)
+            );
+            done();
+        });
+        cordova.raw.config('delete', 'autosave')
+        .then(function () {
+            expect(cordova.raw.config).toHaveBeenCalledWith(
+                 'delete', 'autosave'
+            );
+            done();
+        });
+    });
+
+    it("Test#041 : config set is called with false", function (done) {
+        cli(["node", "cordova", "config", "set", "autosave", "false"], function () {
+            expect(cordova.raw.config).toHaveBeenCalledWith(
+                'set', 
+                [ 'autosave', 'false' ],
+                jasmine.any(Object)
+            );
+            done();
+        });
+    });
+
+    it("Test#042 : config set is called even without true or false", function (done) {
+        cli(["node", "cordova", "config", "set", "autosave"], function () {
+            expect(cordova.raw.config).toHaveBeenCalledWith(
+                'set', 
+                [ 'autosave' ],
+                jasmine.any(Object)
+            );
+            done();
+        });
+    });
+
+    it("Test #043 : config get is called", function (done) {
+        cli(["node", "cordova", "config", "get", "autosave"], function () {
+            expect(cordova.raw.config).toHaveBeenCalledWith(
+                'get', 
+                [ 'autosave' ],
+                jasmine.any(Object)
+            );
+            done();
+        });
+    });
+
+    it("Test #044 : config edit is called", function (done) {
+        cli(["node", "cordova", "config", "edit"], function () {
+            expect(cordova.raw.config).toHaveBeenCalledWith(
+                'edit',
+                [ ],
+                jasmine.any(Object)
+            );
+            done();
+        });
+    });
+
+    it("Test #045 : config edit is called", function (done) {
+        cli(["node", "cordova", "config", "ls"], function () {
+            expect(cordova.raw.config).toHaveBeenCalledWith(
+                'ls',
+                [ ],
+                jasmine.any(Object)
+            );
+            done();
+        });
+    });
+});
