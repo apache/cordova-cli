@@ -6,8 +6,7 @@ Global Commands
     create ............................. Create a project
     help ............................... Get help for a command
     telemetry .......................... Turn telemetry collection on or off
-    config ............................. Store and retrieve environment variables 
-                                         (set, get, delete, edit, list)
+    config ............................. Set, get, delete, edit, and list global cordova options
 
 Project Commands
     info ............................... Generate project information
