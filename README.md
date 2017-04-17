@@ -28,7 +28,7 @@
 [Apache Cordova](http://cordova.apache.org) allows for building native mobile applications using HTML, CSS and JavaScript. 
 This tool helps with management of multi-platform Cordova applications as well as Cordova plugin integration.
 
-#Installation
+# Installation
 In your command-line on Windows:    
 ```bash    
     c:\> npm install -g cordova
