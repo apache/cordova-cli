@@ -434,7 +434,7 @@ cordova prepare [<platform> [..]]
      [--browserify | --fetch]
 ```
 
-###Options
+### Options
 
 | Option     | Description
 |------------|------------------
@@ -450,7 +450,7 @@ cordova prepare [<platform> [..]]
 `cordova compile` is a subset of the [cordova build command](#cordova-build-command).
 It only performs the compilation step without doing prepare. It's common to invoke `cordova build` instead of this command - however, this stage is useful to allow extending using [hooks][Hooks guide].
 
-###Syntax
+### Syntax
 
 ```bash
 cordova build [<platform> [...]]
@@ -510,7 +510,7 @@ cordova build [<platform> [...]]
 
 Prepares, builds, and deploys app on specified platform devices/emulators. If a device is connected it will be used, unless an eligible emulator is already running.
 
-###Syntax
+### Syntax
 
 ```bash
 cordova run [<platform> [...]]
@@ -537,7 +537,7 @@ cordova run [<platform> [...]]
 | --browserify | Compile plugin JS at build time using browserify instead of runtime
 | `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.
 
-###Examples
+### Examples
 
 - Run a release build of current cordova project on `android` platform emulator named `Nexus_5_API_23_x86`. Use the spcified build configuration when running:
 
