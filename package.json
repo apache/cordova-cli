@@ -31,7 +31,7 @@
     "cli"
   ],
   "dependencies": {
-    "cordova-common": "2.0.0",
+    "cordova-common": "2.0.2",
     "cordova-lib": "6.5.0",
     "insight": "~0.8.2",
     "nopt": "3.0.1",
