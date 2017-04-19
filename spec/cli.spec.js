@@ -17,12 +17,16 @@
     under the License.
 */
 
-var cli = require("../src/cli"),
+var rewire = require('rewire'),
+    cli = rewire("../src/cli"),
     Q = require('q'),
     cordova_lib = require('cordova-lib'),
     events = cordova_lib.events,
     cordova = cordova_lib.cordova,
     telemetry = require('../src/telemetry'),
+    path = require('path'),
+    Configstore = require('configstore'),
+    fs = require('fs'),
     logger = require('cordova-common').CordovaLogger.get();
 
 //avoid node complaining of too many event listener added
@@ -459,79 +463,89 @@ describe("platform", function () {
 });
 
 describe("config", function () {
+    var clirevert,
+        confrevert,
+        editorArgs,
+        cordovaConfig = {},
+        confHolder;
+
+    var confMock = {
+        set: function(key, value) {
+            cordovaConfig[key] = value;
+        },
+        del: function(key) {
+            delete cordovaConfig[key];
+        },
+        path: function() {
+            confHolder = 'Pathcalled';
+            return 'some/path/cordova-config.json';
+        },
+        get: function(key) {
+            confHolder = cordovaConfig[key];
+            return cordovaConfig[key];
+        }
+    };
+
     beforeEach(function () {
-        spyOn(cordova.raw, "config").and.returnValue(Q());
+        clirevert = cli.__set__('editor', function(path1, cb) {
+            editorArgs = path1();
+            cb();
+        });
+
+        confrevert = cli.__set__('conf', confMock); 
+
+        spyOn(console, 'log');
     });
 
-    it("Test#040 : config set is called with true and config delete is called", function (done) {
+    afterEach(function() {
+        clirevert();
+        confrevert();
+        confHolder = undefined;
+    });
+
+    it("Test#040 : config set autosave is called with true", function (done) {
         cli(["node", "cordova", "config", "set", "autosave", "true"], function () {
-            expect(cordova.raw.config).toHaveBeenCalledWith(
-                'set', 
-                [ 'autosave', 'true' ],
-                jasmine.any(Object)
-            );
-            done();
-        });
-        cordova.raw.config('delete', 'autosave')
-        .then(function () {
-            expect(cordova.raw.config).toHaveBeenCalledWith(
-                 'delete', 'autosave'
-            );
+            expect(cordovaConfig.autosave).toBe('true');
             done();
         });
     });
 
-    it("Test#041 : config set is called with false", function (done) {
-        cli(["node", "cordova", "config", "set", "autosave", "false"], function () {
-            expect(cordova.raw.config).toHaveBeenCalledWith(
-                'set', 
-                [ 'autosave', 'false' ],
-                jasmine.any(Object)
-            );
+    it("Test#041 : config delete autosave is called", function (done) {
+        cli(["node", "cordova", "config", "delete", "autosave"], function () {
+            expect(cordovaConfig.autosave).toBeUndefined();
             done();
         });
     });
 
-    it("Test#042 : config set is called even without true or false", function (done) {
+    it("Test#042 : config set is called even without value, defaults to true", function (done) {
         cli(["node", "cordova", "config", "set", "autosave"], function () {
-            expect(cordova.raw.config).toHaveBeenCalledWith(
-                'set', 
-                [ 'autosave' ],
-                jasmine.any(Object)
-            );
+            expect(cordovaConfig.autosave).toBe(true);
             done();
         });
     });
 
     it("Test #043 : config get is called", function (done) {
         cli(["node", "cordova", "config", "get", "autosave"], function () {
-            expect(cordova.raw.config).toHaveBeenCalledWith(
-                'get', 
-                [ 'autosave' ],
-                jasmine.any(Object)
-            );
+            expect(confHolder).toBe(true);
             done();
         });
     });
 
     it("Test #044 : config edit is called", function (done) {
         cli(["node", "cordova", "config", "edit"], function () {
-            expect(cordova.raw.config).toHaveBeenCalledWith(
-                'edit',
-                [ ],
-                jasmine.any(Object)
-            );
+            expect(path.basename(editorArgs)).toEqual('cordova-config.json');
+            expect(confHolder).toEqual('Pathcalled');
             done();
         });
     });
 
-    it("Test #045 : config edit is called", function (done) {
+    it("Test #045 : config ls is called", function (done) {
+        spyOn(fs, 'readFile').and.callFake(function(confPath, cb){
+            confHolder = confPath();
+        });
+
         cli(["node", "cordova", "config", "ls"], function () {
-            expect(cordova.raw.config).toHaveBeenCalledWith(
-                'ls',
-                [ ],
-                jasmine.any(Object)
-            );
+            expect(path.basename(confHolder)).toEqual('cordova-config.json');
             done();
         });
     });

@@ -105,7 +105,6 @@ function checkForUpdates() {
 var shouldCollectTelemetry = false;
 
 module.exports = function (inputArgs, cb) {
-
     /**
      * mainly used for testing.
      */
@@ -417,11 +416,14 @@ function cli(inputArgs) {
                     throw new CordovaError('Some of requirements check failed');
                 }
             });
-    } else if (cmd == 'serve') {
+    } else if (cmd === 'serve') {
         var port = undashed[1];
         return cordova.raw.serve(port);
-    } else if (cmd == 'create') {
+    } else if (cmd === 'create') {
         return create(undashed,args);
+    } else if (cmd === 'config') {
+        //Don't need to do anything with cordova-lib since config was handled above
+        return true;
     } else {
         // platform/plugins add/rm [target(s)]
         subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
