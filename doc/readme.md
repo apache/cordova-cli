@@ -80,14 +80,12 @@ Certain commands have options (`platformOpts`) that are specific to a particular
         # Create a cordova project
         cordova create myApp com.myCompany.myApp myApp
         cd myApp
-        # Add camera plugin to the project and remember that in config.xml & package.json
-        cordova plugin add cordova-plugin-camera
-        # Add camera plugin to the project and remember that in config.xml. Use npm install to fetch.
-        cordova plugin add cordova-plugin-camera --save --fetch
-        # Add android platform to the project and remember that in config.xml & package.json.
-        cordova platform add android
-        # Add android platform to the project and remember that in config.xml. Use npm install to fetch.
-        cordova platform add android --save --fetch
+        # Add camera plugin to the project and remember that in config.xml & package.json. Do not use npm install to fetch.
+        cordova plugin add cordova-plugin-camera --nofetch
+        # Add camera plugin to the project and remember that in config.xml and package.json. Uses pre cordova@7 fetching methods instead of cordova-fetch which uses npm install under the hood.
+        cordova plugin add cordova-plugin-camera --nofetch
+        # Add android platform to the project and remember that in config.xml & package.json. Uses pre cordova@7 fetching methods instead of cordova-fetch which uses npm install under the hood
+        cordova platform add android --nofetch
         # Check to see if your system is configured for building android platform.
         cordova requirements android
         # Build the android and emit verbose logs.
@@ -223,13 +221,13 @@ cordova {platform | platforms} [
 | add `<platform-spec>` [...] |  | Add specified platforms |
 |     | --nosave                 | Do not save `<platform-spec>` into `config.xml` & `package.json` after installing them using `<engine>` tag |
 |     | --link=`<path>`          | When `<platform-spec>` is a local path, links the platform library directly instead of making a copy of it (support varies by platform; useful for platform development)
-|     | --fetch                  | Fetches the platform using `npm install` and stores it into the apps `node_modules` directory |
+|     | --nofetch                | Do not fetch the platform using `npm install` and do not store it into the apps `node_modules` directory |
 | remove `<platform>` [...] |    | Remove specified platforms |
 |     | --nosave                 | Do not delete specified platforms from `config.xml` & `package.json` after removing them |
-|     | --fetch                  | Removes the platform using `npm uninstall` and removes it from the apps `node_modules` directory |
+|     | --nofetch                | Prevent removing the platform using `npm uninstall` and prevent removing it from the apps `node_modules` directory |
 | update `platform` [...] |      | Update specified platforms |
 |     | --save                   | Updates the version specified in `config.xml` |
-|     | --fetch                  | Fetches the platform using `npm install` and stores it into the apps `node_modules` directory |
+|     | --nofetch                | Do not fetch the platform using `npm install` and do not store it into the apps `node_modules` directory |
 | list |                         | List all installed and available platforms |
 | check |                        | List platforms which can be updated by `cordova-cli platform update` |
 | save  |                        | Save `<platform-spec>` of all platforms added to config.xml |
@@ -272,10 +270,9 @@ There are a number of ways to specify a platform:
 
         cordova platform add android ios
 
-- Add pinned version of the `android` and `ios` platform and save the downloaded version to `config.xml` & `package.json`. Install
-to the project using `npm install` and store it in the apps `node_modules` directory:
+- Add pinned version of the `android` and `ios` platform and save the downloaded version to `config.xml` & `package.json`. Do not install to the project using `npm install` and do not store it in the apps `node_modules` directory:
 
-        cordova platform add android ios --save --fetch
+        cordova platform add android ios --nofetch
 
 - Add `android` platform with [semver](http://semver.org/) version ^5.0.0 and save it to `config.xml` & `package.json`:
 
@@ -301,10 +298,9 @@ to the project using `npm install` and store it in the apps `node_modules` direc
 
         cordova platform rm android --nosave
 
-- Remove `android` platform from the project and from `config.xml` & `package.json`. Run `npm uninstall` to remove it
-from the `node_modules` directory.
+- Remove `android` platform from the project and do NOT remove from `config.xml` & 'package.json. Do not run `npm uninstall` to remove it
 
-        cordova platform rm android --save --fetch
+        cordova platform rm android --nosave --nofetch
 
 - List available and installed platforms with version numbers. This is useful to find version numbers when reporting issues:
 
@@ -324,8 +320,8 @@ Manage project plugins
 
 ```bash
 cordova {plugin | plugins} [
-    add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --browserify | --force | --fetch} |
-    {remove | rm} {<pluginid> | <name>} --save --fetch |
+    add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --browserify | --force | --nofetch} |
+    {remove | rm} {<pluginid> | <name>} --save --nofetch |
     {list | ls} |
     search [<keyword>] |
     save |
@@ -341,10 +337,10 @@ cordova {plugin | plugins} [
 |       |--nosave                 | Do NOT save the `<plugin-spec>` as part of the `plugin` element  into `config.xml` or `package.json`.
 |       |--browserify             | Compile plugin JS at build time using browserify instead of runtime.
 |       |--force                  | _Introduced in version 6.1._ Forces copying source files from the plugin even if the same file already exists in the target directory.
-|       |--fetch                 | Fetches the plugin using `npm install` and stores it into the apps `node_modules` directory |
+|       |--nofetch                 | Do not fetch the plugin using `npm install` and do not store it into the apps `node_modules` directory |
 | remove `<pluginid>|<name>` [...]| | Remove plugins with the given IDs/name.
 |       |--nosave                 | Do NOT remove the specified plugin from config.xml or package.json
-|       |--fetch                  | Removes the plugin using `npm uninstall` and removes it from the apps `node_modules` directory |
+|       |--nofetch                | Do not remove the plugin using `npm uninstall` and do not remove it from the apps `node_modules` directory |
 |list                           |  | List currently installed plugins
 |search `[<keyword>]` [...]     |  | Search http://plugins.cordova.io for plugins matching the keywords
 |save                           |  | Save `<plugin-spec>` of all plugins currently added to the project
@@ -385,9 +381,9 @@ based on the following criteria (listed in order of precedence):
 
         cordova plugin add cordova-plugin-camera@^2.0.0
 
-- Add `cordova-plugin-camera` with [semver](http://semver.org/) version ^2.0.0 and `npm install` it. It will be stored in the `node_modules` directory:
+- Add `cordova-plugin-camera` with [semver](http://semver.org/) version ^2.0.0 and do not`npm install` it. It will not be stored in the `node_modules` directory:
 
-        cordova plugin add cordova-plugin-camera@^2.0.0 --fetch
+        cordova plugin add cordova-plugin-camera@^2.0.0 --nofetch
 
 - Add the plugin from the specified local directory:
 
@@ -405,9 +401,9 @@ based on the following criteria (listed in order of precedence):
 
         cordova plugin rm camera --nosave
 
-- Remove the plugin from the project and `npm uninstall` it. Removes it from the `node_modules` directory:
+- Remove the plugin from the project. Do not remove it from the node_modules directory and don't run npm uninstall under the hood:
 
-        cordova plugin rm camera --fetch
+        cordova plugin rm camera --nofetch
 
 - List all plugins installed in the project:
 
