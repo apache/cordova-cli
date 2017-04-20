@@ -607,35 +607,35 @@ describe("config", function () {
         confHolder = undefined;
     });
 
-    it("Test#040 : config set autosave is called with true", function (done) {
+    it("Test#042 : config set autosave is called with true", function (done) {
         cli(["node", "cordova", "config", "set", "autosave", "true"], function () {
             expect(cordovaConfig.autosave).toBe('true');
             done();
         });
     });
 
-    it("Test#041 : config delete autosave is called", function (done) {
+    it("Test#043 : config delete autosave is called", function (done) {
         cli(["node", "cordova", "config", "delete", "autosave"], function () {
             expect(cordovaConfig.autosave).toBeUndefined();
             done();
         });
     });
 
-    it("Test#042 : config set is called even without value, defaults to true", function (done) {
+    it("Test#044 : config set is called even without value, defaults to true", function (done) {
         cli(["node", "cordova", "config", "set", "autosave"], function () {
             expect(cordovaConfig.autosave).toBe(true);
             done();
         });
     });
 
-    it("Test #043 : config get is called", function (done) {
+    it("Test #045 : config get is called", function (done) {
         cli(["node", "cordova", "config", "get", "autosave"], function () {
             expect(confHolder).toBe(true);
             done();
         });
     });
 
-    it("Test #044 : config edit is called", function (done) {
+    it("Test #046 : config edit is called", function (done) {
         cli(["node", "cordova", "config", "edit"], function () {
             expect(path.basename(editorArgs)).toEqual('cordova-config.json');
             expect(confHolder).toEqual('Pathcalled');
@@ -643,7 +643,7 @@ describe("config", function () {
         });
     });
 
-    it("Test #045 : config ls is called", function (done) {
+    it("Test #047 : config ls is called", function (done) {
         spyOn(fs, 'readFile').and.callFake(function(confPath, cb){
             confHolder = confPath();
         });
