@@ -275,10 +275,12 @@ function cli(inputArgs) {
 
     var args = nopt(knownOpts, shortHands, inputArgs);
 
-    // For CordovaError print only the message without stack trace unless we
-    // are in a verbose mode.
     process.on('uncaughtException', function(err) {
-        logger.error(err);
+        if(err.message) {
+            logger.error(err.message);
+        } else {
+            logger.error(err);
+        }
         // Don't send exception details, just send that it happened
         if(shouldCollectTelemetry) {
             telemetry.track('uncaughtException');
