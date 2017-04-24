@@ -2,10 +2,8 @@ Synopsis
 
     cordova-cli config <command> [options]
     
-
 The config command can be used to set, get, delete, edit, and list global cordova options.
 
-Options
 --set <key> <value> .............................. Sets the config key to the 																		   value.If value is omitted, 																		   then it sets it to "true".
 --get <key> ...................................... Echo the config value to 																		   stdout.
 --delete <key> ................................... Deletes the key from all 																		   configuration files.
@@ -18,6 +16,16 @@ Syntax
 	cordova-cli config delete <key> ............ cordova config delete autosave
 	cordova-cli config edit .................... cordova config edit
 	cordova-cli config ls ...................... cordova config ls
+
+Options
+	autosave ...................... default setting = true
+	Allows the user to set save to true or false when adding platforms or plugins. When false, platforms/plugins are not saved to `config.xml` and `package.json`.
+
+	fetch .......................... default setting = true
+	Allows the user to set fetch to true or false when adding platforms or plugins. When false, platforms/plugins are fetched. It does not install to the project using `npm install` and it does not store it in the apps `node_modules`directory. It uses the fetching logic of previous cordova versions.
+
+	browserify ...................... default setting = false
+	Allows the user to use the browserify module to bundle the JavaScript files of the included plugins at build time versus our traditional run time loading of those files.
 
 Examples
 	cordova config set autosave false
