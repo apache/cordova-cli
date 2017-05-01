@@ -14,7 +14,7 @@
     "test": "npm run jshint && npm run jasmine",
     "jshint": "jshint spec && jshint src",
     "cover": "istanbul cover --root src --print detail jasmine",
-    "jasmine": "jasmine --captureExceptions --color"
+    "jasmine": "jasmine"
   },
   "repository": {
     "type": "git",
