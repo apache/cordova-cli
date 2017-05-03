@@ -24,7 +24,7 @@
 * [CB-12570](https://issues.apache.org/jira/browse/CB-12570): `cordova-fetch` is true by default. Use `--nofetch` flag to fetch platforms and plugins using old fetching logic.
 * [CB-12665](https://issues.apache.org/jira/browse/CB-12665): removed `engineStrict` as it is no longer supported
 * [CB-11982](https://issues.apache.org/jira/browse/CB-11982): added `edit` and `ls` to `cordova config`
-* [CB-11982](https://issues.apache.org/jira/browse/CB-11982): added new `cordova config  command that `sets`, `gets`, and `deletes` global enviroment variables.
+* [CB-11982](https://issues.apache.org/jira/browse/CB-11982): added new `cordova config` command that `sets`, `gets`, and `deletes` global enviroment variables.
 * [CB-12008](https://issues.apache.org/jira/browse/CB-12008): updated docs to reflect new autosave changes and removed variables missed due to rebase
 * [CB-12008](https://issues.apache.org/jira/browse/CB-12008): made autosave the default for platform and plugin add/remove
 * [CB-11977](https://issues.apache.org/jira/browse/CB-11977): removed support for `node 0.x`
