@@ -21,7 +21,7 @@
 # Cordova-cli Release Notes
 
 ### 7.0.1 (May 08, 2017)
-* [CB-12769](https://issues.apache.org/jira/browse/CB-12769): Updated 'cordova-lib` dependency to 7.0.1.
+* [CB-12769](https://issues.apache.org/jira/browse/CB-12769): Updated `cordova-lib` dependency to 7.0.1.
 
 ### 7.0.0 (May 02, 2017)
 * [CB-12570](https://issues.apache.org/jira/browse/CB-12570): `cordova-fetch` is true by default. Use `--nofetch` flag to fetch platforms and plugins using old fetching logic.
