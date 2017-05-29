@@ -469,6 +469,10 @@ function cli(inputArgs) {
            // User explicitly did not pass in browserify
            args.browserify = conf.get('browserify');
         }
+        if (args.searchpath === undefined) {
+            // User explicitly did not pass in searchpath
+            args.searchpath = conf.get('searchpath');
+        }
 
         var download_opts = { searchpath : args.searchpath
                             , noregistry : args.noregistry
