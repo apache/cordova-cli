@@ -11,8 +11,8 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "npm run jshint && npm run jasmine",
-    "jshint": "jshint spec && jshint src",
+    "test": "npm run eslint && npm run jasmine",
+    "eslint": "eslint spec  && eslint src ",
     "cover": "istanbul cover --root src --print detail jasmine",
     "jasmine": "jasmine"
   },
@@ -40,9 +40,14 @@
     "update-notifier": "0.5.0"
   },
   "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-semistandard": "^11.0.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-node": "^5.0.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
     "istanbul": "^0.4.5",
     "jasmine": "^2.5.2",
-    "jshint": "^2.9.4",
     "rewire": "^2.5.2"
   },
   "author": "Anis Kadri",
