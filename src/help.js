@@ -16,11 +16,11 @@
     specific language governing permissions and limitations
     under the License.
 */
-var fs = require('fs'),
-    cordova_lib = require('cordova-lib'),
-    cordova = cordova_lib.cordova,
-    Q = require('q'),
-    path = require('path');
+var fs = require('fs');
+var cordova_lib = require('cordova-lib');
+var cordova = cordova_lib.cordova;
+var Q = require('q');
+var path = require('path');
 
 module.exports = function help (args) {
     var command,
@@ -31,14 +31,14 @@ module.exports = function help (args) {
     command = ((args)[0] || 'cordova');
     docdir = path.join(__dirname, '..', 'doc');
     file = [
-      command + '.md',
-      command + '.txt',
-      'cordova.md',
-      'cordova.txt',
+        command + '.md',
+        command + '.txt',
+        'cordova.md',
+        'cordova.txt'
     ].map(function (file) {
         var f = path.join(docdir, file);
         if (fs.existsSync(f)) {
-           return f;
+            return f;
         }
     }).filter(function (f) {
         return !!f;

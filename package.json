@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test": "npm run eslint && npm run jasmine",
-    "eslint": "eslint spec  && eslint src ",
+    "eslint": "eslint spec  && eslint src",
     "cover": "istanbul cover --root src --print detail jasmine",
     "jasmine": "jasmine"
   },
@@ -40,9 +40,10 @@
     "update-notifier": "0.5.0"
   },
   "devDependencies": {
-    "eslint": "^3.19.0",
+    "eslint": "^4.0.0",
     "eslint-config-semistandard": "^11.0.0",
     "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.3.0",
     "eslint-plugin-node": "^5.0.0",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
