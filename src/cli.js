@@ -382,16 +382,16 @@ function cli(inputArgs) {
         // Pass nopt-parsed args to PlatformApi through opts.options
         opts.options = args;
         opts.options.argv = unparsedArgs;
-        if (cmd === 'run' && args.list && cordova.raw.targets) {
-            return cordova.raw.targets.call(null, opts);
+        if (cmd === 'run' && args.list && cordova.targets) {
+            return cordova.targets.call(null, opts);
         }
-        return cordova.raw[cmd].call(null, opts);
+        return cordova[cmd].call(null, opts);
 
     } else if (cmd === 'requirements') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
 
-        return cordova.raw[cmd].call(null, opts.platforms)
+        return cordova[cmd].call(null, opts.platforms)
             .then(function(platformChecks) {
 
                 var someChecksFailed = Object.keys(platformChecks).map(function(platformName) {
@@ -425,7 +425,7 @@ function cli(inputArgs) {
             });
     } else if (cmd === 'serve') {
         var port = undashed[1];
-        return cordova.raw.serve(port);
+        return cordova.serve(port);
     } else if (cmd === 'create') {
         return create(undashed,args);
     } else if (cmd === 'config') {
@@ -481,7 +481,7 @@ function cli(inputArgs) {
                             , shrinkwrap: args.shrinkwrap || false
                             , force: args.force || false
         };
-        return cordova.raw[cmd](subcommand, targets, download_opts);
+        return cordova[cmd](subcommand, targets, download_opts);
     }
 }
 
@@ -528,7 +528,7 @@ function create(undashed, args) {
         cfg.lib = cfg.lib || {};
         cfg.lib.www = wwwCfg;
     }
-    return cordova.raw.create( undashed[1]  // dir to create the project in
+    return cordova.create( undashed[1]  // dir to create the project in
         , undashed[2]  // App id
         , undashed[3]  // App name
         , cfg
