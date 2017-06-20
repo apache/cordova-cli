@@ -31,29 +31,13 @@ describe('help', function() {
         afterEach(function() {
             cordova.removeAllListeners('results');
         });
-        describe('emit results', function () {
+        describe('return results, and no long lines', function () {
             allcommands.forEach(function (k) {
                 it(k, function(done) {
-                    cordova.on('results', function(h) {
-                        expect(h).toMatch(/^Synopsis/);
-                        done();
-                    });
-                    help([k]).then(function () {
-                        expect(done).toHaveBeenCalled();
-                    });
-                });
-            });
-        });
-        describe('not have overly long lines:', function () {
-            allcommands.forEach(function (k) {
-                it(k || '(default)', function(done) {
-                    cordova.on('results', function(h) {
-                        expect(h.split("\n").filter(function (l) { return l.length > 130; }).length).toBe(0);
-                        done();
-                    });
-                    help([k]).then(function () {
-                        expect(done).toHaveBeenCalled();
-                    });
+                    var result = help([k]);
+                    expect(result).toMatch(/^Synopsis/);
+                    expect(result.split("\n").filter(function (l) { return l.length > 130; }).length).toBe(0);
+                    done();
                 });
             });
         });
@@ -68,13 +52,9 @@ describe('help', function() {
             });
             allcommands.forEach(function (k) {
                 it(k || '(default)', function(done) {
-                    cordova.on('results', function(h) {
-                        expect(h.split("\n")[2]).toMatch(RegExp(testname + ' (?:' + k + '|command)\\b'));
-                        done();
-                    });
-                    help([k]).then(function () {
-                        expect(done).toHaveBeenCalled();
-                    });
+                    var result = help([k]);
+                    expect(result.split("\n")[2]).toMatch(RegExp(testname + ' (?:' + k + '|command)\\b'));
+                    done();
                 });
             });
         });

@@ -158,20 +158,22 @@ module.exports = function (inputArgs, cb) {
     // If "edit" is called
     if (isConfigCmd && inputArgs[3] === 'edit') {
         editor(conf.path, function (code, sig) {
-            console.log('Finished editing with code ' + code);
+            logger.warn('Finished editing with code ' + code);
         });
     }
 
     // If "ls" is called
     if (isConfigCmd && inputArgs[3] === 'ls' || inputArgs[3] === 'list') {
         fs.readFile(conf.path, 'utf8', function (err,data) {
-          if (err) {
-            return console.log(err);
-          }
-          console.log(data);
+            if (err) {
+                logger.error(err);
+            }
+            else {
+                logger.log(data);
+            }
         });
     }
-    
+
     Q().then(function() {
         /**
          * Skip telemetry prompt if:
@@ -225,17 +227,23 @@ module.exports = function (inputArgs, cb) {
 };
 
 function getSubCommand(args, cmd) {
-    if(cmd === 'platform' || cmd === 'platforms' || cmd === 'plugin' || cmd === 'plugins' || cmd === 'telemetry' || cmd === 'config') {
+    if(['platform','platforms','plugin','plugins','telemetry','config'].indexOf(cmd) > -1) {
         return args[3]; // e.g: args='node cordova platform rm ios', 'node cordova telemetry on'
     }
     return null;
+}
+
+function printHelp(command) {
+    var result = help([command]);
+    cordova.emit('results', result);
 }
 
 function handleTelemetryCmd(subcommand, isOptedIn) {
 
     if (subcommand !== 'on' && subcommand !== 'off') {
         logger.subscribe(events);
-        return help(['telemetry']);
+        printHelp('telemetry');
+        return;
     }
 
     var turnOn = subcommand === 'on' ? true : false;
@@ -293,8 +301,7 @@ function cli(inputArgs) {
     if (args.silent) {
         logger.setLevel('error');
     }
-
-    if (args.verbose) {
+    else if (args.verbose) { // can't be both silent AND verbose, silent wins
         logger.setLevel('verbose');
     }
 
@@ -310,8 +317,8 @@ function cli(inputArgs) {
 
         if (args.version) {
             logger.results(toPrint);
-            return Q();
-        } else {
+            return Q(); // Important! this will return and cease execution
+        } else { // must be usingPrerelease
             // Show a warning and continue
             logger.warn('Warning: using prerelease version ' + toPrint);
         }
@@ -347,7 +354,7 @@ function cli(inputArgs) {
         if (!args.help && remain[0] == 'help') {
             remain.shift();
         }
-        return help(remain);
+        return printHelp(remain);
     }
 
     if ( !cordova.hasOwnProperty(cmd) ) {
