@@ -19,11 +19,11 @@ install:
   - npm link
   - cd ..
   - git clone https://github.com/apache/cordova-lib --depth 10
-  - cd cordova-lib/cordova-lib
+  - cd cordova-lib
   - npm install
   - npm link cordova-js
   - npm link
-  - cd ../../cordova-cli
+  - cd ../cordova-cli
   - npm link cordova-lib
   - npm install
   # # Workaround for npm/npm#10343
@@ -35,7 +35,7 @@ install:
   # - npm install
   # - npm link ../../cordova-js
   # - cd ../../cordova-cli
-  
+
 build: off
 
 test_script:
