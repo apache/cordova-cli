@@ -1,16 +1,16 @@
 Synopsis
 
     cordova-cli config <command> [options]
-    
+
 
 The config command can be used to set, get, delete, edit, and list global cordova options.
 
 Options
---set <key> <value> .............................. Sets the config key to the 																		   value.If value is omitted, 																		   then it sets it to "true".
---get <key> ...................................... Echo the config value to 																		   stdout.
---delete <key> ................................... Deletes the key from all 																		   configuration files.
---edit ........................................... Opens the config file in an 																		   editor.
---ls ............................................. Lists contents of config file.
+--set <key> <value> ... Sets the config key to the value. If value is omitted, then it sets it to "true".
+--get <key> ........... Echo the config value to stdout.
+--delete <key> ........ Deletes the key from all configuration files.
+--edit ................ Opens the config file in an editor.
+--ls .................. Lists contents of config file.
 
 Syntax
 	cordova-cli config set <key> <value> ....... cordova config set autosave true
