@@ -369,7 +369,12 @@ describe("cordova cli", function () {
 
            telemetry.timeoutInSecs = 1;
            cli(["node", "cordova", "--version"], function () {
-               expect(telemetry.isOptedIn()).toBeFalsy();
+               if(process.env.CI) {
+                   expect(telemetry.isOptedIn()).toBeTruthy();
+               }
+               else {
+                   expect(telemetry.isOptedIn()).toBeFalsy();
+               }
                expect(telemetry.track).toHaveBeenCalledWith("telemetry", "off", "via-cli-prompt-choice", "successful");
                done();
            });
