@@ -40,11 +40,11 @@ module.exports = function help (args) {
         if (fs.existsSync(f)) {
            return f;
         }
-        return null;
     }).filter(function (f) {
-        return f !== null;
+        return !!f;
     });
     raw = fs.readFileSync(file[0]).toString('utf8').replace(/cordova-cli/g, cordova_lib.binname);
-    cordova.emit('results', raw);
-    return Q();
+    //cordova.emit('results', raw);
+
+    return raw;
 };
