@@ -14,44 +14,43 @@
     specific language governing permissions and limitations
     under the License.
 */
-var cordova_lib = require('cordova-lib'),
-    cordova = cordova_lib.cordova,
-    help = require('../src/help'),
-    allcommands;
+var cordova_lib = require('cordova-lib');
+var cordova = cordova_lib.cordova;
+var help = require('../src/help');
+var allcommands;
 
-describe('help', function() {
-    allcommands = [''].concat(Object.keys(cordova).map(function(k) {
-        if (k in cordova.raw)
-            return k;
+describe('help', function () {
+    allcommands = [''].concat(Object.keys(cordova).map(function (k) {
+        if (k in cordova.raw) { return k; }
         return null;
     }).filter(function (k) { return k; }));
-    describe('commands should', function() {
-        afterEach(function() {
+    describe('commands should', function () {
+        afterEach(function () {
             cordova.removeAllListeners('results');
         });
         describe('return results, and no long lines', function () {
             allcommands.forEach(function (k) {
-                it(k, function(done) {
+                it(k, function (done) {
                     var result = help([k]);
                     expect(result).toMatch(/^Synopsis/);
-                    expect(result.split("\n").filter(function (l) { return l.length > 130; }).length).toBe(0);
+                    expect(result.split('\n').filter(function (l) { return l.length > 130; }).length).toBe(0);
                     done();
                 });
             });
         });
         describe('use cordova-cli instead of cordova:', function () {
-            var binname = cordova.binname,
-                testname = 'testgap';
-            beforeEach(function() {
+            var binname = cordova.binname;
+            var testname = 'testgap';
+            beforeEach(function () {
                 cordova.binname = testname;
             });
-            afterEach(function() {
+            afterEach(function () {
                 cordova.binname = binname;
             });
             allcommands.forEach(function (k) {
-                it(k || '(default)', function(done) {
+                it(k || '(default)', function (done) {
                     var result = help([k]);
-                    expect(result.split("\n")[2]).toMatch(RegExp(testname + ' (?:' + k + '|command)\\b'));
+                    expect(result.split('\n')[2]).toMatch(RegExp(testname + ' (?:' + k + '|command)\\b'));
                     done();
                 });
             });

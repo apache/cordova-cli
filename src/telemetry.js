@@ -20,8 +20,6 @@
           laxcomma:true
 */
 
-
-
 // For further details on telemetry, see:
 // https://github.com/cordova/cordova-discuss/pull/43
 
@@ -37,11 +35,10 @@ var insight = new Insight({
     pkg: pkg
 });
 
-
 /**
  * Returns true if the user opted in, and false otherwise
  */
-function showPrompt() {
+function showPrompt () {
 
     var deferred = Q.defer();
 
@@ -63,7 +60,7 @@ function showPrompt() {
     return deferred.promise;
 }
 
-function track() {
+function track () {
     // Remove empty, null or undefined strings from arguments
     for (var property in arguments) {
         var val = arguments[property];
@@ -74,11 +71,11 @@ function track() {
     insight.track.apply(insight, arguments);
 }
 
-function turnOn() {
+function turnOn () {
     insight.optOut = false;
 }
 
-function turnOff() {
+function turnOff () {
     insight.optOut = true;
 }
 
@@ -87,18 +84,18 @@ function turnOff() {
  * Has the same effect as if user never answered the telemetry prompt
  * Useful for testing purposes
  */
-function clear() {
+function clear () {
     insight.optOut = undefined;
 }
 
-function isOptedIn() {
+function isOptedIn () {
     return !insight.optOut;
 }
 
 /**
  * Has the user already answered the telemetry prompt? (thereby opting in or out?)
  */
-function hasUserOptedInOrOut() {
+function hasUserOptedInOrOut () {
     var insightOptOut = insight.optOut === undefined;
     return !(insightOptOut);
 }
@@ -106,14 +103,14 @@ function hasUserOptedInOrOut() {
 /**
  * Is the environment variable 'CI' specified ?
  */
-function isCI(env) {
+function isCI (env) {
     return !!env.CI;
 }
 
 /**
  * Has the user ran a command of the form: `cordova run --no-telemetry` ?
  */
-function isNoTelemetryFlag(args) {
+function isNoTelemetryFlag (args) {
     return args.indexOf('--no-telemetry') > -1;
 }
 
@@ -128,5 +125,5 @@ module.exports = {
     isCI: isCI,
     showPrompt: showPrompt,
     isNoTelemetryFlag: isNoTelemetryFlag,
-    timeoutInSecs:30
+    timeoutInSecs: 30
 };

@@ -20,68 +20,63 @@
           laxcomma:true
 */
 
-
-var path = require('path'),
-    Q = require('q'),
-    nopt = require('nopt'),
-    updateNotifier = require('update-notifier'),
-    pkg = require('../package.json'),
-    telemetry = require('./telemetry'),
-    help = require('./help'),
-    cordova_lib = require('cordova-lib'),
-    CordovaError = cordova_lib.CordovaError,
-    cordova = cordova_lib.cordova,
-    events = cordova_lib.events,
-    logger = require('cordova-common').CordovaLogger.get(),
-    Configstore = require('configstore'),
-    conf = new Configstore(pkg.name + '-config'),
-    editor = require('editor'),
-    fs = require('fs');
+var path = require('path');
+var Q = require('q');
+var nopt = require('nopt');
+var updateNotifier = require('update-notifier');
+var pkg = require('../package.json');
+var telemetry = require('./telemetry');
+var help = require('./help');
+var cordova_lib = require('cordova-lib');
+var CordovaError = cordova_lib.CordovaError;
+var cordova = cordova_lib.cordova;
+var events = cordova_lib.events;
+var logger = require('cordova-common').CordovaLogger.get();
+var Configstore = require('configstore');
+var conf = new Configstore(pkg.name + '-config');
+var editor = require('editor');
+var fs = require('fs');
 
 var knownOpts = {
-    'verbose' : Boolean
-    ,'version' : Boolean
-    ,'help' : Boolean
-    ,'silent' : Boolean
-    ,'experimental' : Boolean
-    ,'noregistry' : Boolean
-    ,'nohooks': Array
-    ,'shrinkwrap' : Boolean
-    ,'copy-from' : String
-    ,'link-to' : path
-    ,'searchpath' : String
-    ,'variable' : Array
-    ,'link': Boolean
-    ,'force': Boolean
+    'verbose': Boolean,
+    'version': Boolean,
+    'help': Boolean,
+    'silent': Boolean,
+    'experimental': Boolean,
+    'noregistry': Boolean,
+    'nohooks': Array,
+    'shrinkwrap': Boolean,
+    'copy-from': String,
+    'link-to': path,
+    'searchpath': String,
+    'variable': Array,
+    'link': Boolean,
+    'force': Boolean,
     // Flags to be passed to `cordova build/run/emulate`
-    ,'debug' : Boolean
-    ,'release' : Boolean
-    ,'archs' : String
-    ,'device' : Boolean
-    ,'emulator': Boolean
-    ,'target' : String
-    ,'browserify': Boolean
-    ,'noprepare': Boolean
-    ,'fetch': Boolean
-    ,'nobuild': Boolean
-    ,'list': Boolean
-    ,'buildConfig' : String
-    ,'template' : String
+    'debug': Boolean,
+    'release': Boolean,
+    'archs': String,
+    'device': Boolean,
+    'emulator': Boolean,
+    'target': String,
+    'browserify': Boolean,
+    'noprepare': Boolean,
+    'fetch': Boolean,
+    'nobuild': Boolean,
+    'list': Boolean,
+    'buildConfig': String,
+    'template': String
 };
 
 var shortHands = {
-    'd' : '--verbose'
-    ,'v' : '--version'
-    ,'h' : '--help'
-    ,'src' : '--copy-from'
-    ,'t' : '--template'
+    'd': '--verbose',
+    'v': '--version',
+    'h': '--help',
+    'src': '--copy-from',
+    't': '--template'
 };
 
-var Configstore = require('configstore');
-var conf = new Configstore(pkg.name + '-config');
-
-
-function checkForUpdates() {
+function checkForUpdates () {
     try {
         // Checks for available update and returns an instance
         var notifier = updateNotifier({
@@ -106,7 +101,7 @@ module.exports = function (inputArgs, cb) {
     /**
      * mainly used for testing.
      */
-    cb = cb || function(){};
+    cb = cb || function () {};
 
     // If no inputArgs given, use process.argv.
     inputArgs = inputArgs || process.argv;
@@ -116,9 +111,9 @@ module.exports = function (inputArgs, cb) {
     var isConfigCmd = (cmd === 'config');
 
     // ToDO: Move nopt-based parsing of args up here
-    if(cmd === '--version' || cmd === '-v') {
+    if (cmd === '--version' || cmd === '-v') {
         cmd = 'version';
-    } else if(!cmd || cmd === '--help' || cmd === 'h') {
+    } else if (!cmd || cmd === '--help' || cmd === 'h') {
         cmd = 'help';
     }
 
@@ -127,7 +122,7 @@ module.exports = function (inputArgs, cb) {
         if (inputArgs[4]) {
             logger.subscribe(events);
             conf.get(inputArgs[4]);
-            if(conf.get(inputArgs[4]) !== undefined) {
+            if (conf.get(inputArgs[4]) !== undefined) {
                 events.emit('log', conf.get(inputArgs[4]).toString());
             } else {
                 events.emit('log', 'undefined');
@@ -141,7 +136,7 @@ module.exports = function (inputArgs, cb) {
             conf.set(inputArgs[4], true);
         }
 
-        if(inputArgs[5]) {
+        if (inputArgs[5]) {
             conf.set(inputArgs[4], inputArgs[5]);
         }
     }
@@ -161,18 +156,17 @@ module.exports = function (inputArgs, cb) {
     }
 
     // If "ls" is called
-    if (isConfigCmd && inputArgs[3] === 'ls' || inputArgs[3] === 'list') {
-        fs.readFile(conf.path, 'utf8', function (err,data) {
+    if ((isConfigCmd && inputArgs[3] === 'ls') || (inputArgs[3] === 'list')) {
+        fs.readFile(conf.path, 'utf8', function (err, data) {
             if (err) {
                 logger.error(err);
-            }
-            else {
+            } else {
                 logger.log(data);
             }
         });
     }
 
-    Q().then(function() {
+    Q().then(function () {
         /**
          * Skip telemetry prompt if:
          * - CI environment variable is present
@@ -180,7 +174,7 @@ module.exports = function (inputArgs, cb) {
          * - Command ran is: `cordova telemetry on | off | ...`
          */
 
-        if(telemetry.isCI(process.env) || telemetry.isNoTelemetryFlag(inputArgs)) {
+        if (telemetry.isCI(process.env) || telemetry.isNoTelemetryFlag(inputArgs)) {
             return Q(false);
         }
 
@@ -188,12 +182,12 @@ module.exports = function (inputArgs, cb) {
          * We shouldn't prompt for telemetry if user issues a command of the form: `cordova telemetry on | off | ...x`
          * Also, if the user has already been prompted and made a decision, use his saved answer
          */
-        if(isTelemetryCmd) {
+        if (isTelemetryCmd) {
             var isOptedIn = telemetry.isOptedIn();
             return handleTelemetryCmd(subcommand, isOptedIn);
         }
 
-        if(telemetry.hasUserOptedInOrOut()) {
+        if (telemetry.hasUserOptedInOrOut()) {
             return Q(telemetry.isOptedIn());
         }
 
@@ -204,7 +198,7 @@ module.exports = function (inputArgs, cb) {
         return telemetry.showPrompt();
     }).then(function (collectTelemetry) {
         shouldCollectTelemetry = collectTelemetry;
-        if(isTelemetryCmd) {
+        if (isTelemetryCmd) {
             return Q();
         }
         return cli(inputArgs);
@@ -224,19 +218,19 @@ module.exports = function (inputArgs, cb) {
     }).done();
 };
 
-function getSubCommand(args, cmd) {
-    if(['platform','platforms','plugin','plugins','telemetry','config'].indexOf(cmd) > -1) {
+function getSubCommand (args, cmd) {
+    if (['platform', 'platforms', 'plugin', 'plugins', 'telemetry', 'config'].indexOf(cmd) > -1) {
         return args[3]; // e.g: args='node cordova platform rm ios', 'node cordova telemetry on'
     }
     return null;
 }
 
-function printHelp(command) {
+function printHelp (command) {
     var result = help([command]);
     cordova.emit('results', result);
 }
 
-function handleTelemetryCmd(subcommand, isOptedIn) {
+function handleTelemetryCmd (subcommand, isOptedIn) {
 
     if (subcommand !== 'on' && subcommand !== 'off') {
         logger.subscribe(events);
@@ -244,7 +238,7 @@ function handleTelemetryCmd(subcommand, isOptedIn) {
         return;
     }
 
-    var turnOn = subcommand === 'on' ? true : false;
+    var turnOn = subcommand === 'on';
     var cmdSuccess = true;
 
     // turn telemetry on or off
@@ -264,31 +258,31 @@ function handleTelemetryCmd(subcommand, isOptedIn) {
 
     if (!turnOn) {
         // Always track telemetry opt-outs (whether user opted out or not!)
-        telemetry.track('telemetry', 'off', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful': 'unsuccessful');
+        telemetry.track('telemetry', 'off', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful' : 'unsuccessful');
         return Q();
     }
 
-    if(isOptedIn) {
+    if (isOptedIn) {
         telemetry.track('telemetry', 'on', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful' : 'unsuccessful');
     }
 
     return Q();
 }
 
-function cli(inputArgs) {
+function cli (inputArgs) {
 
     checkForUpdates();
 
     var args = nopt(knownOpts, shortHands, inputArgs);
 
-    process.on('uncaughtException', function(err) {
-        if(err.message) {
+    process.on('uncaughtException', function (err) {
+        if (err.message) {
             logger.error(err.message);
         } else {
             logger.error(err);
         }
         // Don't send exception details, just send that it happened
-        if(shouldCollectTelemetry) {
+        if (shouldCollectTelemetry) {
             telemetry.track('uncaughtException');
         }
         process.exit(1);
@@ -298,8 +292,7 @@ function cli(inputArgs) {
 
     if (args.silent) {
         logger.setLevel('error');
-    }
-    else if (args.verbose) { // can't be both silent AND verbose, silent wins
+    } else if (args.verbose) { // can't be both silent AND verbose, silent wins
         logger.setLevel('verbose');
     }
 
@@ -309,7 +302,7 @@ function cli(inputArgs) {
     if (args.version || usingPrerelease) {
         var libVersion = require('cordova-lib/package').version;
         var toPrint = cliVersion;
-        if (cliVersion != libVersion || usingPrerelease) {
+        if (cliVersion !== libVersion || usingPrerelease) {
             toPrint += ' (cordova-lib@' + libVersion + ')';
         }
 
@@ -335,8 +328,8 @@ function cli(inputArgs) {
     // false, the unparsed args after -- are kept in unparsedArgs and can be
     // passed downstream to some scripts invoked by Cordova.
     var unparsedArgs = [];
-    var parseStopperIdx =  args.argv.original.indexOf('--');
-    if (parseStopperIdx != -1) {
+    var parseStopperIdx = args.argv.original.indexOf('--');
+    if (parseStopperIdx !== -1) {
         unparsedArgs = args.argv.original.slice(parseStopperIdx + 1);
     }
 
@@ -348,14 +341,14 @@ function cli(inputArgs) {
     var cmd = undashed[0];
     var subcommand;
 
-    if ( !cmd || cmd == 'help' || args.help ) {
-        if (!args.help && remain[0] == 'help') {
+    if (!cmd || cmd === 'help' || args.help) {
+        if (!args.help && remain[0] === 'help') {
             remain.shift();
         }
         return printHelp(remain);
     }
 
-    if ( !cordova.hasOwnProperty(cmd) ) {
+    if (!cordova.hasOwnProperty(cmd)) {
         var msg2 = 'Cordova does not know ' + cmd + '; try `' + cordova_lib.binname +
             ' help` for a list of all the available commands.';
         throw new CordovaError(msg2);
@@ -375,7 +368,7 @@ function cli(inputArgs) {
         browserify: args.browserify || false,
         fetch: args.fetch,
         nohooks: args.nohooks || [],
-        searchpath : args.searchpath
+        searchpath: args.searchpath
     };
 
     var platformCommands = ['emulate', 'build', 'prepare', 'compile', 'run', 'clean'];
@@ -397,9 +390,9 @@ function cli(inputArgs) {
         opts.platforms = undashed.slice(1);
 
         return cordova[cmd].call(null, opts.platforms)
-            .then(function(platformChecks) {
+            .then(function (platformChecks) {
 
-                var someChecksFailed = Object.keys(platformChecks).map(function(platformName) {
+                var someChecksFailed = Object.keys(platformChecks).map(function (platformName) {
                     events.emit('log', '\nRequirements check results for ' + platformName + ':');
                     var platformCheck = platformChecks[platformName];
                     if (platformCheck instanceof CordovaError) {
@@ -408,7 +401,7 @@ function cli(inputArgs) {
                     }
 
                     var someChecksFailed = false;
-                    platformCheck.forEach(function(checkItem) {
+                    platformCheck.forEach(function (checkItem) {
                         var checkSummary = checkItem.name + ': ' +
                             (checkItem.installed ? 'installed ' : 'not installed ') +
                             (checkItem.metadata.version || '');
@@ -420,7 +413,7 @@ function cli(inputArgs) {
                     });
 
                     return someChecksFailed;
-                }).some(function(isCheckFailedForPlatform) {
+                }).some(function (isCheckFailedForPlatform) {
                     return isCheckFailedForPlatform;
                 });
 
@@ -432,9 +425,9 @@ function cli(inputArgs) {
         var port = undashed[1];
         return cordova.serve(port);
     } else if (cmd === 'create') {
-        return create(undashed,args);
+        return create(undashed, args);
     } else if (cmd === 'config') {
-        //Don't need to do anything with cordova-lib since config was handled above
+        // Don't need to do anything with cordova-lib since config was handled above
         return true;
     } else {
         // platform/plugins add/rm [target(s)]
@@ -445,10 +438,9 @@ function cli(inputArgs) {
             args.variable.forEach(function (strVar) {
                 // CB-9171
                 var keyVal = strVar.split('=');
-                if(keyVal.length < 2) {
+                if (keyVal.length < 2) {
                     throw new CordovaError('invalid variable format: ' + strVar);
-                }
-                else {
+                } else {
                     var key = keyVal.shift().toUpperCase();
                     var val = keyVal.join('=');
                     cli_vars[key] = val;
@@ -470,40 +462,37 @@ function cli(inputArgs) {
             // User explicitly did not pass in fetch
             args.fetch = conf.get('fetch');
         }
-        if(args.browserify === undefined) {
-           // User explicitly did not pass in browserify
-           args.browserify = conf.get('browserify');
+        if (args.browserify === undefined) {
+            // User explicitly did not pass in browserify
+            args.browserify = conf.get('browserify');
         }
         if (args.searchpath === undefined) {
             // User explicitly did not pass in searchpath
             args.searchpath = conf.get('searchpath');
         }
 
-        var download_opts = { searchpath : args.searchpath
-                            , noregistry : args.noregistry
-                            , nohooks : args.nohooks
-                            , cli_variables : cli_vars
-                            , browserify: args.browserify || false
-                            , fetch: args.fetch
-                            , link: args.link || false
-                            , save: args.save
-                            , shrinkwrap: args.shrinkwrap || false
-                            , force: args.force || false
+        var download_opts = { searchpath: args.searchpath,
+            noregistry: args.noregistry,
+            nohooks: args.nohooks,
+            cli_variables: cli_vars,
+            browserify: args.browserify || false,
+            fetch: args.fetch,
+            link: args.link || false,
+            save: args.save,
+            shrinkwrap: args.shrinkwrap || false,
+            force: args.force || false
         };
         return cordova[cmd](subcommand, targets, download_opts);
     }
 }
 
-function create(undashed, args) {
-    var cfg;            // Create config
-    var customWww;      // Template path
-    var wwwCfg;         // Template config
+function create (undashed, args) {
+    var cfg; // Create config
+    var customWww; // Template path
+    var wwwCfg; // Template config
 
     // If we got a fourth parameter, consider it to be JSON to init the config.
-    if (undashed[4])
-        cfg = JSON.parse(undashed[4]);
-    else
-        cfg = {};
+    if (undashed[4]) { cfg = JSON.parse(undashed[4]); } else { cfg = {}; }
 
     customWww = args['copy-from'] || args['link-to'] || args.template;
 
@@ -515,8 +504,7 @@ function create(undashed, args) {
         }
 
         // Resolve tilda
-        if (customWww.substr(0,1) === '~')
-            customWww = path.join(process.env.HOME,  customWww.substr(1));
+        if (customWww.substr(0, 1) === '~') { customWww = path.join(process.env.HOME, customWww.substr(1)); }
 
         wwwCfg = {
             url: customWww,
@@ -537,9 +525,9 @@ function create(undashed, args) {
         cfg.lib = cfg.lib || {};
         cfg.lib.www = wwwCfg;
     }
-    return cordova.create( undashed[1]  // dir to create the project in
-        , undashed[2]  // App id
-        , undashed[3]  // App name
+    return cordova.create(undashed[1] // dir to create the project in
+        , undashed[2] // App id
+        , undashed[3] // App name
         , cfg
         , events || undefined
     );

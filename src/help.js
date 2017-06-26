@@ -18,8 +18,6 @@
 */
 var fs = require('fs');
 var cordova_lib = require('cordova-lib');
-var cordova = cordova_lib.cordova;
-var Q = require('q');
 var path = require('path');
 
 module.exports = function help (args) {
@@ -44,7 +42,7 @@ module.exports = function help (args) {
         return !!f;
     });
     raw = fs.readFileSync(file[0]).toString('utf8').replace(/cordova-cli/g, cordova_lib.binname);
-    //cordova.emit('results', raw);
+    // cordova.emit('results', raw);
 
     return raw;
 };
