@@ -230,7 +230,7 @@ cordova {platform | platforms} [
 |     | --save                   | Updates the version specified in `config.xml` |
 |     | --nofetch                | Do not fetch the platform using `npm install` and do not store it into the apps `node_modules` directory |
 | list |                         | List all installed and available platforms |
-| check |                        | List platforms which can be updated by `cordova-cli platform update` |
+| check |                        | List platforms which can be updated from cordova-cli with the command `platform update` |
 | save  |                        | Save `<platform-spec>` of all platforms added to config.xml |
 
 ### Platform-spec
