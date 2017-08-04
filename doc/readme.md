@@ -186,7 +186,7 @@ After building the Android and iOS projects, the Android application will contai
 
 #### Version control
 
-It is recommended not to check in `platforms/` and `plugins/` directories into version control as they are considered a build artifact. Your platforms and plugins will be saved in config.xml & package.json automatically. These platforms/plugins will be downloaded when on the machine when `cordova prepare` is invoked.
+It is recommended not to check in `platforms/` and `plugins/` directories into version control as they are considered a build artifact. Your platforms and plugins will be saved in config.xml & package.json automatically. These platforms/plugins will be downloaded to the machine when `cordova prepare` is invoked.
 
 ### Examples
 
