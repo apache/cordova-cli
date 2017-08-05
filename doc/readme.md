@@ -374,7 +374,7 @@ based on the following criteria (listed in order of precedence):
 
 ### Examples
 
-- Add `cordova-plugin-camera` and `cordova-plugin-file` to the project and it be be saved to `config.xml` & `package.json`. Use `../plugins` directory to search for the plugins.
+- Add `cordova-plugin-camera` and `cordova-plugin-file` to the project and save it to `config.xml` & `package.json`. Use `../plugins` directory to search for the plugins.
 
         cordova plugin add cordova-plugin-camera cordova-plugin-file --save --searchpath ../plugins
 
