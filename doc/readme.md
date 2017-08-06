@@ -564,7 +564,7 @@ See [cordova run command docs](#cordova-run-command) for more details.
 
 ### Synopsis
 
-Cleans the build artifacts for the specified platform, or all platforms by running platform-specific build cleanup.
+Cleans the build artifacts for the all the platforms, or the specified platform by running platform-specific build cleanup.
 
 ### Syntax
 
