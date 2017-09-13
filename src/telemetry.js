@@ -15,11 +15,6 @@
     under the License.
 */
 
-/* jshint node:true, bitwise:true, undef:true, trailing:true, quotmark:true,
-          indent:4, unused:vars, latedef:nofunc,
-          laxcomma:true
-*/
-
 // For further details on telemetry, see:
 // https://github.com/cordova/cordova-discuss/pull/43
 
