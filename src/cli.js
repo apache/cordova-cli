@@ -47,6 +47,7 @@ var knownOpts = {
     'variable': Array,
     'link': Boolean,
     'force': Boolean,
+    'save-exact': Boolean,
     // Flags to be passed to `cordova build/run/emulate`
     'debug': Boolean,
     'release': Boolean,
@@ -466,6 +467,11 @@ function cli (inputArgs) {
             args.searchpath = conf.get('searchpath');
         }
 
+        if (args['save-exact'] === undefined) {
+            // User explicitly did not pass in save-exact
+            args['save-exact'] = conf.get('save-exact');
+        }
+
         var download_opts = { searchpath: args.searchpath,
             noregistry: args.noregistry,
             nohooks: args.nohooks,
@@ -474,6 +480,7 @@ function cli (inputArgs) {
             fetch: args.fetch,
             link: args.link || false,
             save: args.save,
+            save_exact: args['save-exact'] || false,
             shrinkwrap: args.shrinkwrap || false,
             force: args.force || false
         };
