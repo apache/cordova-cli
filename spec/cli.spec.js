@@ -265,6 +265,19 @@ describe('cordova cli', function () {
             });
         });
 
+        it('(add) will pass save-exact:true', function (done) {
+            cli(['node', 'cordova', 'plugin', 'add', 'device', '--save-exact'], function () {
+                expect(cordova.plugin).toHaveBeenCalledWith(
+                    'add',
+                    ['device'],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.plugin.calls.argsFor(0)[2];
+                expect(opts.save_exact).toBe(true);
+                done();
+            });
+        });
+
         it('Test #021 : (remove) fetch is true by default and will pass fetch:true', function (done) {
             cli(['node', 'cordova', 'plugin', 'remove', 'device'], function () {
                 expect(cordova.plugin).toHaveBeenCalledWith(
