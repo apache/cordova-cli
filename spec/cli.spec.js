@@ -290,6 +290,19 @@ describe('cordova cli', function () {
                 done();
             });
         });
+
+        it('(add) will pass noprod:true and production:false', function (done) {
+            cli(['node', 'cordova', 'plugin', 'add', 'device', '--noprod'], function () {
+                expect(cordova.plugin).toHaveBeenCalledWith(
+                    'add',
+                    ['device'],
+                    jasmine.any(Object)
+                );
+                var opts = cordova.plugin.calls.argsFor(0)[2];
+                expect(opts.production).toBe(false);
+                done();
+            });
+        });
     });
 
     describe('telemetry', function () {
