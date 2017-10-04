@@ -61,7 +61,9 @@ var knownOpts = {
     'nobuild': Boolean,
     'list': Boolean,
     'buildConfig': String,
-    'template': String
+    'template': String,
+    'production': Boolean,
+    'noprod': Boolean
 };
 
 var shortHands = {
@@ -450,6 +452,12 @@ function cli (inputArgs) {
             args.save = true;
         }
 
+        if (args.noprod) {
+            args.production = false;
+        } else {
+            args.production = true;
+        }
+
         if (args.save === undefined) {
             // User explicitly did not pass in save
             args.save = conf.get('autosave');
@@ -465,6 +473,10 @@ function cli (inputArgs) {
         if (args.searchpath === undefined) {
             // User explicitly did not pass in searchpath
             args.searchpath = conf.get('searchpath');
+        }
+        if (args.production === undefined) {
+            // User explicitly did not pass in noprod
+            args.production = conf.get('production');
         }
 
         if (args['save-exact'] === undefined) {
@@ -482,7 +494,8 @@ function cli (inputArgs) {
             save: args.save,
             save_exact: args['save-exact'] || false,
             shrinkwrap: args.shrinkwrap || false,
-            force: args.force || false
+            force: args.force || false,
+            production: args.production
         };
         return cordova[cmd](subcommand, targets, download_opts);
     }
