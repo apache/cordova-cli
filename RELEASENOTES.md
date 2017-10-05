@@ -20,6 +20,15 @@
 -->
 # Cordova-cli Release Notes
 
+### 7.1.0 (Oct 04, 2017)
+* [CB-13303](https://issues.apache.org/jira/browse/CB-13303) added `--noprod` and `--production` flags as options, `--noprod` turns off our auto adding of `--production` flag
+* [CB-13353](https://issues.apache.org/jira/browse/CB-13353) added `--save-exact` flag to cli and unit test
+* [CB-12895](https://issues.apache.org/jira/browse/CB-12895) Added `eslint` and removed `jshint`
+* [CB-12862](https://issues.apache.org/jira/browse/CB-12862) Added `searchpath` as a config option
+* [CB-12762](https://issues.apache.org/jira/browse/CB-12762) point `package.json` repo items to github mirrors instead of apache repos site
+* [CB-12693](https://issues.apache.org/jira/browse/CB-12693) Included examples for `Browserify`, `fetch`, and `autosave` and include options with a more detailed description.
+* [CB-12901](https://issues.apache.org/jira/browse/CB-12901) removed `.raw` from `cordova-lib` calls
+
 ### 7.0.1 (May 08, 2017)
 * [CB-12769](https://issues.apache.org/jira/browse/CB-12769): Updated `cordova-lib` dependency to 7.0.1.
 
