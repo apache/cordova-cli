@@ -5,6 +5,7 @@ environment:
   matrix:
   - nodejs_version: "4"
   - nodejs_version: "6"
+  - nodejs_version: "8"
 
 # getting cordova tools dependencies from github
 # to make sure we're using their latest versions
