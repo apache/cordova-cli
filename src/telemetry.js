@@ -18,8 +18,6 @@
 // For further details on telemetry, see:
 // https://github.com/cordova/cordova-discuss/pull/43
 
-var Q = require('q');
-
 // Google Analytics tracking code
 var GA_TRACKING_CODE = 'UA-64283057-7';
 
@@ -34,25 +32,22 @@ var insight = new Insight({
  * Returns true if the user opted in, and false otherwise
  */
 function showPrompt () {
-
-    var deferred = Q.defer();
-
-    var msg = 'May Cordova anonymously report usage statistics to improve the tool over time?';
-    insight._permissionTimeout = module.exports.timeoutInSecs || 30;
-    insight.askPermission(msg, function (unused, optIn) {
-        var EOL = require('os').EOL;
-        if (optIn) {
-            console.log(EOL + 'Thanks for opting into telemetry to help us improve cordova.');
-            module.exports.track('telemetry', 'on', 'via-cli-prompt-choice', 'successful');
-        } else {
-            console.log(EOL + 'You have been opted out of telemetry. To change this, run: cordova telemetry on.');
-            // Always track telemetry opt-outs! (whether opted-in or opted-out)
-            module.exports.track('telemetry', 'off', 'via-cli-prompt-choice', 'successful');
-        }
-        deferred.resolve(optIn);
+    return new Promise(function (resolve, reject) {
+        var msg = 'May Cordova anonymously report usage statistics to improve the tool over time?';
+        insight._permissionTimeout = module.exports.timeoutInSecs || 30;
+        insight.askPermission(msg, function (unused, optIn) {
+            var EOL = require('os').EOL;
+            if (optIn) {
+                console.log(EOL + 'Thanks for opting into telemetry to help us improve cordova.');
+                module.exports.track('telemetry', 'on', 'via-cli-prompt-choice', 'successful');
+            } else {
+                console.log(EOL + 'You have been opted out of telemetry. To change this, run: cordova telemetry on.');
+                // Always track telemetry opt-outs! (whether opted-in or opted-out)
+                module.exports.track('telemetry', 'off', 'via-cli-prompt-choice', 'successful');
+            }
+            resolve(optIn);
+        });
     });
-
-    return deferred.promise;
 }
 
 function track () {
