@@ -77,9 +77,9 @@ var shortHands = {
 function checkForUpdates () {
     try {
         // Checks for available update and returns an instance
-        var notifier = updateNotifier({pkg:pkg});
+        var notifier = updateNotifier({pkg: pkg});
 
-        if(notifier.update &&
+        if (notifier.update &&
            notifier.update.latest !== pkg.version) {
             // Notify using the built-in convenience method
             notifier.notify();
