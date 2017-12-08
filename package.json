@@ -31,10 +31,10 @@
   ],
   "dependencies": {
     "configstore": "2.1.0",
-    "cordova-common": "2.1.1",
+    "cordova-common": "^2.2.0",
     "cordova-lib": "7.1.0",
     "editor": "1.0.0",
-    "insight": "0.8.2",
+    "insight": "0.8.4",
     "nopt": "3.0.1",
     "q": "1.0.1",
     "update-notifier": "0.5.0"
