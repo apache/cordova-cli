@@ -77,11 +77,13 @@ var shortHands = {
 function checkForUpdates () {
     try {
         // Checks for available update and returns an instance
-        var notifier = updateNotifier({
-            pkg: pkg
-        });
-        // Notify using the built-in convenience method
-        notifier.notify();
+        var notifier = updateNotifier({pkg:pkg});
+
+        if(notifier.update &&
+           notifier.update.latest !== pkg.version) {
+            // Notify using the built-in convenience method
+            notifier.notify();
+        }
     } catch (e) {
         // https://issues.apache.org/jira/browse/CB-10062
         if (e && e.message && /EACCES/.test(e.message)) {
