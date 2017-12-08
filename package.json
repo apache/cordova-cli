@@ -36,7 +36,6 @@
     "editor": "1.0.0",
     "insight": "0.8.4",
     "nopt": "3.0.1",
-    "q": "1.0.1",
     "update-notifier": "0.5.0"
   },
   "devDependencies": {

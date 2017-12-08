@@ -17,7 +17,6 @@
 
 var rewire = require('rewire');
 var cli = rewire('../src/cli');
-var Q = require('q');
 var cordova_lib = require('cordova-lib');
 var events = cordova_lib.events;
 var cordova = cordova_lib.cordova;
@@ -84,7 +83,7 @@ describe('cordova cli', function () {
 
     describe('Test#004 : project commands other than plugin and platform', function () {
         beforeEach(function () {
-            spyOn(cordova, 'build').and.returnValue(Q());
+            spyOn(cordova, 'build').and.returnValue(Promise.resolve());
         });
 
         it('Test#005 : will call command with all arguments passed through', function (done) {
@@ -132,7 +131,7 @@ describe('cordova cli', function () {
 
     describe('create', function () {
         beforeEach(function () {
-            spyOn(cordova, 'create').and.returnValue(Q());
+            spyOn(cordova, 'create').and.returnValue(Promise.resolve());
         });
 
         it('Test#011 : calls cordova create', function (done) {
@@ -145,7 +144,7 @@ describe('cordova cli', function () {
 
     describe('plugin', function () {
         beforeEach(function () {
-            spyOn(cordova, 'plugin').and.returnValue(Q());
+            spyOn(cordova, 'plugin').and.returnValue(Promise.resolve());
         });
 
         it('Test#012 : will pass variables', function (done) {
@@ -359,7 +358,7 @@ describe('cordova cli', function () {
             spyOn(telemetry, 'isOptedIn').and.returnValue(true);
             spyOn(telemetry, 'isCI').and.returnValue(false);
             spyOn(telemetry, 'hasUserOptedInOrOut').and.returnValue(true);
-            spyOn(cordova, 'platform').and.returnValue(Q());
+            spyOn(cordova, 'platform').and.returnValue(Promise.resolve());
             spyOn(telemetry, 'track');
 
             cli(['node', 'cordova', 'platform', 'add', 'ios'], function () {
@@ -369,11 +368,11 @@ describe('cordova cli', function () {
         });
 
         it('Test#027 : shows prompt if user neither opted in or out yet', function (done) {
-            spyOn(cordova, 'prepare').and.returnValue(Q());
+            spyOn(cordova, 'prepare').and.returnValue(Promise.resolve());
             spyOn(telemetry, 'hasUserOptedInOrOut').and.returnValue(false);
             spyOn(telemetry, 'isCI').and.returnValue(false);
             spyOn(telemetry, 'isNoTelemetryFlag').and.returnValue(false);
-            spyOn(telemetry, 'showPrompt').and.returnValue(Q(false));
+            spyOn(telemetry, 'showPrompt').and.returnValue(Promise.resolve(false));
 
             cli(['node', 'cordova', 'prepare'], function () {
                 expect(telemetry.showPrompt).toHaveBeenCalled();
@@ -491,7 +490,7 @@ describe('raw', function () {
 describe('platform', function () {
 
     beforeEach(function () {
-        spyOn(cordova, 'platform').and.returnValue(Q());
+        spyOn(cordova, 'platform').and.returnValue(Promise.resolve());
         logger.setLevel('error');
     });
 

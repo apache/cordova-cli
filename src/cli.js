@@ -16,7 +16,6 @@
 */
 
 var path = require('path');
-var Q = require('q');
 var nopt = require('nopt');
 var updateNotifier = require('update-notifier');
 var pkg = require('../package.json');
@@ -166,7 +165,7 @@ module.exports = function (inputArgs, cb) {
         });
     }
 
-    Q().then(function () {
+    Promise.resolve().then(function () {
         /**
          * Skip telemetry prompt if:
          * - CI environment variable is present
@@ -175,7 +174,7 @@ module.exports = function (inputArgs, cb) {
          */
 
         if (telemetry.isCI(process.env) || telemetry.isNoTelemetryFlag(inputArgs)) {
-            return Q(false);
+            return Promise.resolve(false);
         }
 
         /**
@@ -188,7 +187,7 @@ module.exports = function (inputArgs, cb) {
         }
 
         if (telemetry.hasUserOptedInOrOut()) {
-            return Q(telemetry.isOptedIn());
+            return Promise.resolve(telemetry.isOptedIn());
         }
 
         /**
@@ -199,7 +198,7 @@ module.exports = function (inputArgs, cb) {
     }).then(function (collectTelemetry) {
         shouldCollectTelemetry = collectTelemetry;
         if (isTelemetryCmd) {
-            return Q();
+            return Promise.resolve();
         }
         return cli(inputArgs);
     }).then(function () {
@@ -208,14 +207,14 @@ module.exports = function (inputArgs, cb) {
         }
         // call cb with error as arg if something failed
         cb(null);
-    }).fail(function (err) {
+    }).catch(function (err) {
         if (shouldCollectTelemetry && !isTelemetryCmd) {
             telemetry.track(cmd, subcommand, 'unsuccessful');
         }
         // call cb with error as arg if something failed
         cb(err);
         throw err;
-    }).done();
+    });
 };
 
 function getSubCommand (args, cmd) {
@@ -259,14 +258,14 @@ function handleTelemetryCmd (subcommand, isOptedIn) {
     if (!turnOn) {
         // Always track telemetry opt-outs (whether user opted out or not!)
         telemetry.track('telemetry', 'off', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful' : 'unsuccessful');
-        return Q();
+        return Promise.resolve();
     }
 
     if (isOptedIn) {
         telemetry.track('telemetry', 'on', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful' : 'unsuccessful');
     }
 
-    return Q();
+    return Promise.resolve();
 }
 
 function cli (inputArgs) {
@@ -308,7 +307,7 @@ function cli (inputArgs) {
 
         if (args.version) {
             logger.results(toPrint);
-            return Q(); // Important! this will return and cease execution
+            return Promise.resolve(); // Important! this will return and cease execution
         } else { // must be usingPrerelease
             // Show a warning and continue
             logger.warn('Warning: using prerelease version ' + toPrint);
