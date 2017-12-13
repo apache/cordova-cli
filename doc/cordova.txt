@@ -49,5 +49,3 @@ Examples
     cordova-cli run android
     cordova-cli build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
     cordova-cli config ls
-    cordova-cli platform add ios --nofetch
-    cordova-cli plugin add cordova-plugin-camera --nofetch
