@@ -456,7 +456,7 @@ function cli (inputArgs) {
         if (args.save === undefined) {
             // User explicitly did not pass in save
             args.save = conf.get('autosave');
-        } 
+        }
         if (args.browserify === undefined) {
             // User explicitly did not pass in browserify
             args.browserify = conf.get('browserify');
