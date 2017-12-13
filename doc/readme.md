@@ -81,12 +81,12 @@ Certain commands have options (`platformOpts`) that are specific to a particular
         # Create a cordova project
         cordova create myApp com.myCompany.myApp myApp
         cd myApp
-        # Add camera plugin to the project and remember that in config.xml & package.json. Do not use npm install to fetch.
-        cordova plugin add cordova-plugin-camera --nofetch
-        # Add camera plugin to the project and remember that in config.xml and package.json. Uses pre cordova@7 fetching methods instead of cordova-fetch which uses npm install under the hood.
-        cordova plugin add cordova-plugin-camera --nofetch
-        # Add android platform to the project and remember that in config.xml & package.json. Uses pre cordova@7 fetching methods instead of cordova-fetch which uses npm install under the hood
-        cordova platform add android --nofetch
+        # Add camera plugin to the project and remember that in config.xml & package.json.
+        cordova plugin add cordova-plugin-camera
+        # Add camera plugin to the project and remember that in config.xml and package.json. 
+        cordova plugin add cordova-plugin-camera
+        # Add android platform to the project and remember that in config.xml & package.json.
+        cordova platform add android
         # Check to see if your system is configured for building android platform.
         cordova requirements android
         # Build the android and emit verbose logs.
@@ -209,8 +209,8 @@ Manage cordova platforms - allowing you to add, remove, update, list and check f
 
 ```bash
 cordova {platform | platforms} [
-    add <platform-spec> [...] {--save | link=<path> | --fetch } |
-    {remove | rm}  platform [...] {--save | --fetch}|
+    add <platform-spec> [...] {--save | link=<path> } |
+    {remove | rm}  platform [...] {--save}|
     {list | ls}  |
     check |
     save |
@@ -222,13 +222,10 @@ cordova {platform | platforms} [
 | add `<platform-spec>` [...] |  | Add specified platforms |
 |     | --nosave                 | Do not save `<platform-spec>` into `config.xml` & `package.json` after installing them using `<engine>` tag |
 |     | --link=`<path>`          | When `<platform-spec>` is a local path, links the platform library directly instead of making a copy of it (support varies by platform; useful for platform development)
-|     | --nofetch                | Do not fetch the platform using `npm install` and do not store it into the apps `node_modules` directory |
 | remove `<platform>` [...] |    | Remove specified platforms |
 |     | --nosave                 | Do not delete specified platforms from `config.xml` & `package.json` after removing them |
-|     | --nofetch                | Prevent removing the platform using `npm uninstall` and prevent removing it from the apps `node_modules` directory |
 | update `platform` [...] |      | Update specified platforms |
 |     | --save                   | Updates the version specified in `config.xml` |
-|     | --nofetch                | Do not fetch the platform using `npm install` and do not store it into the apps `node_modules` directory |
 | list |                         | List all installed and available platforms |
 | check |                        | List platforms which can be updated by `cordova-cli platform update` |
 | save  |                        | Save `<platform-spec>` of all platforms added to config.xml |
@@ -271,10 +268,6 @@ There are a number of ways to specify a platform:
 
         cordova platform add android ios
 
-- Add pinned version of the `android` and `ios` platform and save the downloaded version to `config.xml` & `package.json`. Do not install to the project using `npm install` and do not store it in the apps `node_modules` directory:
-
-        cordova platform add android ios --nofetch
-
 - Add `android` platform with [semver](http://semver.org/) version ^5.0.0 and save it to `config.xml` & `package.json`:
 
         cordova platform add android@^5.0.0
@@ -299,10 +292,6 @@ There are a number of ways to specify a platform:
 
         cordova platform rm android --nosave
 
-- Remove `android` platform from the project and do NOT remove from `config.xml` & 'package.json. Do not run `npm uninstall` to remove it
-
-        cordova platform rm android --nosave --nofetch
-
 - List available and installed platforms with version numbers. This is useful to find version numbers when reporting issues:
 
         cordova platform ls
@@ -321,8 +310,8 @@ Manage project plugins
 
 ```bash
 cordova {plugin | plugins} [
-    add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --browserify | --force | --nofetch} |
-    {remove | rm} {<pluginid> | <name>} --save --nofetch |
+    add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --browserify | --force} |
+    {remove | rm} {<pluginid> | <name>} --save |
     {list | ls} |
     search [<keyword>] |
     save |
@@ -338,10 +327,8 @@ cordova {plugin | plugins} [
 |       |--nosave                 | Do NOT save the `<plugin-spec>` as part of the `plugin` element  into `config.xml` or `package.json`.
 |       |--browserify             | Compile plugin JS at build time using browserify instead of runtime.
 |       |--force                  | _Introduced in version 6.1._ Forces copying source files from the plugin even if the same file already exists in the target directory.
-|       |--nofetch                 | Do not fetch the plugin using `npm install` and do not store it into the apps `node_modules` directory |
 | remove `<pluginid>|<name>` [...]| | Remove plugins with the given IDs/name.
 |       |--nosave                 | Do NOT remove the specified plugin from config.xml or package.json
-|       |--nofetch                | Do not remove the plugin using `npm uninstall` and do not remove it from the apps `node_modules` directory |
 |list                           |  | List currently installed plugins
 |search `[<keyword>]` [...]     |  | Search http://plugins.cordova.io for plugins matching the keywords
 |save                           |  | Save `<plugin-spec>` of all plugins currently added to the project
@@ -360,7 +347,6 @@ There are a number of ways to specify a plugin:
 | directory   | Directory containing plugin.xml
 | url         | Url to a git repository containing a plugin.xml
 | commit-ish  | Commit/tag/branch reference. If none is specified, 'master' is used
-| subdir      | Sub-directory to find plugin.xml for the specified plugin. (Doesn't work with `--fetch` option)
 
 ### Algorithm for resolving plugins
 
@@ -382,10 +368,6 @@ based on the following criteria (listed in order of precedence):
 
         cordova plugin add cordova-plugin-camera@^2.0.0
 
-- Add `cordova-plugin-camera` with [semver](http://semver.org/) version ^2.0.0 and do not`npm install` it. It will not be stored in the `node_modules` directory:
-
-        cordova plugin add cordova-plugin-camera@^2.0.0 --nofetch
-
 - Add the plugin from the specified local directory:
 
         cordova plugin add ../cordova-plugin-camera
@@ -401,10 +383,6 @@ based on the following criteria (listed in order of precedence):
 - Remove the plugin from the project, but not the `config.xml` or `package.json`:
 
         cordova plugin rm camera --nosave
-
-- Remove the plugin from the project. Do not remove it from the node_modules directory and don't run npm uninstall under the hood:
-
-        cordova plugin rm camera --nofetch
 
 - List all plugins installed in the project:
 
@@ -428,7 +406,7 @@ copies plugin files for specified platforms so that the project is ready to buil
 
 ```
 cordova prepare [<platform> [..]]
-     [--browserify | --fetch]
+     [--browserify]
 ```
 
 ### Options
@@ -437,8 +415,6 @@ cordova prepare [<platform> [..]]
 |------------|------------------
 | `<platform> [..]` | Platform name(s) to prepare. If not specified, all platforms are built.
 |--browserify | Compile plugin JS at build time using browserify instead of runtime.
-|--fetch | When restoring plugins or platforms, fetch will `npm install` the missing modules.
-
 
 ## cordova compile command
 
@@ -687,7 +663,6 @@ cordova config delete <key>
 ```
 cordova config set autosave false
 cordova config set browserify false
-cordova config set fetch true
 ```
 
 [Hooks guide]: http://cordova.apache.org/docs/en/latest/guide_appdev_hooks_index.md.html
