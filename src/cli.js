@@ -353,19 +353,13 @@ function cli (inputArgs) {
         throw new CordovaError(msg2);
     }
 
-    if (args.nofetch) {
-        args.fetch = false;
-    } else {
-        args.fetch = true;
-    }
-
     var opts = {
         platforms: [],
         options: [],
         verbose: args.verbose || false,
         silent: args.silent || false,
         browserify: args.browserify || false,
-        fetch: args.fetch,
+        fetch: true,
         nohooks: args.nohooks || [],
         searchpath: args.searchpath
     };
@@ -462,11 +456,7 @@ function cli (inputArgs) {
         if (args.save === undefined) {
             // User explicitly did not pass in save
             args.save = conf.get('autosave');
-        }
-        if (args.fetch === undefined) {
-            // User explicitly did not pass in fetch
-            args.fetch = conf.get('fetch');
-        }
+        } 
         if (args.browserify === undefined) {
             // User explicitly did not pass in browserify
             args.browserify = conf.get('browserify');
@@ -490,7 +480,7 @@ function cli (inputArgs) {
             nohooks: args.nohooks,
             cli_variables: cli_vars,
             browserify: args.browserify || false,
-            fetch: args.fetch,
+            fetch: true,
             link: args.link || false,
             save: args.save,
             save_exact: args['save-exact'] || false,
