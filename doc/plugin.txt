@@ -24,19 +24,12 @@ Manage project plugins
 
         --force ........................ Forces copying source files from the plugin even if the
                                          same file already exists in the target directory.
-
-        --nofetch ...................... Prevents fetching the plugin into the project's
-                                         node_modules directory. Prevents using
-                                         `npm install` to do the fetching.
+ 
 
     remove <pluginid>|<name> [...] ..... Remove plugins with the given IDs/name and 
                                          removes the information for specified plugin from config.xml & package.json.
         --nosave ....................... Prevents removing the information for
                                          specified plugin from config.xml & package.json.
-
-        --nofetch ...................... Prevents removing the plugin from the project's
-                                         node_modules directory. Prevents using
-                                         `npm uninstall` under the hood.
 
 
     list .............................. List currently installed plugins
@@ -67,5 +60,3 @@ Examples
     cordova-cli plugin add ../cordova-plugin-camera.tgz --nosave
     cordova-cli plugin rm camera --nosave
     cordova-cli plugin ls
-    cordova-cli plugin add cordova-plugin-camera --nofetch
-    cordova-cli plugin rm cordova-plugin-camera --nofetch

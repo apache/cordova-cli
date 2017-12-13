@@ -14,17 +14,10 @@ Manage project platforms
                                         library directly instead of making a copy of it (support
                                         varies by platform; useful for platform development)
         
-        --nofetch ..................... Prevent fetching the plugin into the project's node_modules 
-                                        directory. Uses older fetching method (pre cordova-7) 
-                                        instead of using npm install under the hood
-
     remove <platform> [...] ........... Remove specified platforms
 
         --nosave ...................... Prevent deleting specified platforms from 
                                         config.xml & package.json after removing them
-        --nofetch ..................... Prevent removing the plugin from the project's node_modules 
-                                        directory. Uses older fetching method (pre cordova-7) 
-                                        instead of using npm install under the hood
 
     update <plat-spec> ................ Update the version of Cordova used for a specific platform;
                                         update to the latest <version> if no <plat-spec> is specified
@@ -55,5 +48,3 @@ Examples
     cordova-cli platform add ../cordova-android.tgz
     cordova-cli platform rm android --nosave
     cordova-cli platform ls
-    cordova-cli platform add android --nofetch
-    cordova-cli platform rm android --nofetch
