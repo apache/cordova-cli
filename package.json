@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "7.1.1-dev",
+  "version": "8.0.0",
   "preferGlobal": true,
   "description": "Cordova command line interface tool",
   "main": "cordova",
@@ -32,7 +32,7 @@
   "dependencies": {
     "configstore": "2.1.0",
     "cordova-common": "^2.2.0",
-    "cordova-lib": "7.1.0",
+    "cordova-lib": "8.0.0",
     "editor": "1.0.0",
     "insight": "0.8.4",
     "nopt": "3.0.1",

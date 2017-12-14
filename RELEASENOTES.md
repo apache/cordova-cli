@@ -20,6 +20,12 @@
 -->
 # Cordova-cli Release Notes
 
+### 8.0.0 (Dec 14, 2017)
+* [CB-13055](https://issues.apache.org/jira/browse/CB-13055): removed `--nofetch` flag
+* Use native Promises instead of `Q`
+* [CB-12853](https://issues.apache.org/jira/browse/CB-12853): re-check version before notifying.
+* [CB-13501](https://issues.apache.org/jira/browse/CB-13501): updated to include node 8 to tests
+
 ### 7.1.0 (Oct 04, 2017)
 * [CB-13303](https://issues.apache.org/jira/browse/CB-13303) added `--noprod` and `--production` flags as options, `--noprod` turns off our auto adding of `--production` flag
 * [CB-13353](https://issues.apache.org/jira/browse/CB-13353) added `--save-exact` flag to cli and unit test
