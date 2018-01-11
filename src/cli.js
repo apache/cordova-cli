@@ -397,7 +397,7 @@ function cli (inputArgs) {
                     platformCheck.forEach(function (checkItem) {
                         var checkSummary = checkItem.name + ': ' +
                             (checkItem.installed ? 'installed ' : 'not installed ') +
-                            (checkItem.metadata.version || '');
+                            (checkItem.installed ? checkItem.metadata.version.version || checkItem.metadata.version : '');
                         events.emit('log', checkSummary);
                         if (!checkItem.installed) {
                             someChecksFailed = true;
