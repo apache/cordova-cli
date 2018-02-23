@@ -453,6 +453,12 @@ function cli (inputArgs) {
             args.production = true;
         }
 
+        if (args.yarn) {
+            args.manager = 'yarn';
+        } else {
+            args.manager = 'npm';
+        }
+
         if (args.save === undefined) {
             // User explicitly did not pass in save
             args.save = conf.get('autosave');
@@ -486,7 +492,8 @@ function cli (inputArgs) {
             save_exact: args['save-exact'] || false,
             shrinkwrap: args.shrinkwrap || false,
             force: args.force || false,
-            production: args.production
+            production: args.production,
+            manager: args.manager
         };
         return cordova[cmd](subcommand, targets, download_opts);
     }
