@@ -186,7 +186,7 @@ After building the Android and iOS projects, the Android application will contai
 
 #### Version control
 
-It is recommended not to check in `platforms/` and `plugins/` directories into version control as they are considered a build artifact. Your platforms and plugins will be saved in config.xml & package.json automatically. These platforms/plugins will be downloaded to the machine when `cordova prepare` is invoked.
+It is recommended not to check in `platforms/` and `plugins/` directories into version control as they are considered a build artifact. Your platforms and plugins will be saved in config.xml & package.json automatically. These platforms/plugins will be downloaded when `cordova prepare` is invoked.
 
 ### Examples
 
@@ -230,7 +230,7 @@ cordova {platform | platforms} [
 |     | --save                   | Updates the version specified in `config.xml` |
 |     | --nofetch                | Do not fetch the platform using `npm install` and do not store it into the apps `node_modules` directory |
 | list |                         | List all installed and available platforms |
-| check |                        | List platforms which can be updated from cordova-cli with the command `platform update` |
+| check |                        | List platforms which can be updated via cordova-cli with the command `platform update` |
 | save  |                        | Save `<platform-spec>` of all platforms added to config.xml |
 
 ### Platform-spec
