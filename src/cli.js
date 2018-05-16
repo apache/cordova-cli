@@ -500,6 +500,7 @@ function create ([_, dir, id, name, cfgJson], args) {
     var customWww = args['link-to'] || args.template;
 
     if (customWww) {
+        // TODO Handle in create
         if (!args.template && customWww.indexOf('http') === 0) {
             throw new CordovaError(
                 'Only local paths for custom www assets are supported for linking' + customWww
@@ -507,6 +508,7 @@ function create ([_, dir, id, name, cfgJson], args) {
         }
 
         // Resolve tilda
+        // TODO: move to create and use sindresorhus/untildify
         if (customWww.substr(0, 1) === '~') { customWww = path.join(process.env.HOME, customWww.substr(1)); }
 
         // Template config
