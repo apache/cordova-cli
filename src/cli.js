@@ -497,10 +497,10 @@ function create ([_, dir, id, name, cfgJson], args) {
     var cfg = JSON.parse(cfgJson || '{}');
 
     // Template path
-    var customWww = args['copy-from'] || args['link-to'] || args.template;
+    var customWww = args['link-to'] || args.template;
 
     if (customWww) {
-        if (!args.template && !args['copy-from'] && customWww.indexOf('http') === 0) {
+        if (!args.template && customWww.indexOf('http') === 0) {
             throw new CordovaError(
                 'Only local paths for custom www assets are supported for linking' + customWww
             );
@@ -515,11 +515,6 @@ function create ([_, dir, id, name, cfgJson], args) {
             template: 'template' in args,
             link: 'link-to' in args
         };
-
-        if ('copy-from' in args) {
-            logger.warn('Warning: --copy-from option is being deprecated. Consider using --template instead.');
-            wwwCfg.template = true;
-        }
 
         cfg.lib = cfg.lib || {};
         cfg.lib.www = wwwCfg;
