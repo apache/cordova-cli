@@ -34,7 +34,7 @@
     "cordova-common": "^2.2.0",
     "cordova-lib": "github:apache/cordova-lib#b42ccc6cbc52a9fc02c2d9eb6ab983d802825853",
     "editor": "1.0.0",
-    "insight": "0.8.4",
+    "insight": "^0.10.1",
     "nopt": "3.0.1",
     "update-notifier": "0.5.0"
   },
