@@ -165,7 +165,7 @@ module.exports = function (inputArgs, cb) {
         });
     }
 
-    Promise.resolve().then(function () {
+    return Promise.resolve().then(function () {
         /**
          * Skip telemetry prompt if:
          * - CI environment variable is present
