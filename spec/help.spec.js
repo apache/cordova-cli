@@ -30,11 +30,10 @@ describe('help', function () {
         });
         describe('return results, and no long lines', function () {
             allcommands.forEach(function (k) {
-                it(k, function (done) {
+                it(k, () => {
                     var result = help([k]);
                     expect(result).toMatch(/^Synopsis/);
                     expect(result.split('\n').filter(function (l) { return l.length > 130; }).length).toBe(0);
-                    done();
                 });
             });
         });
@@ -48,10 +47,9 @@ describe('help', function () {
                 cordova.binname = binname;
             });
             allcommands.forEach(function (k) {
-                it(k || '(default)', function (done) {
+                it(k || '(default)', () => {
                     var result = help([k]);
                     expect(result.split('\n')[2]).toMatch(RegExp(testname + ' (?:' + k + '|command)\\b'));
-                    done();
                 });
             });
         });
