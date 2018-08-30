@@ -30,14 +30,14 @@
     "cli"
   ],
   "dependencies": {
-    "configstore": "2.1.0",
+    "configstore": "^4.0.0",
     "cordova-common": "^2.2.0",
     "cordova-lib": "8.0.0",
     "editor": "1.0.0",
     "insight": "0.8.4",
     "loud-rejection": "^1.6.0",
-    "nopt": "3.0.1",
-    "update-notifier": "0.5.0"
+    "nopt": "^4.0.1",
+    "update-notifier": "^2.5.0"
   },
   "devDependencies": {
     "eslint": "^5.4.0",
@@ -48,8 +48,8 @@
     "eslint-plugin-promise": "^4.0.0",
     "eslint-plugin-standard": "^4.0.0",
     "istanbul": "^0.4.5",
-    "jasmine": "^2.5.2",
-    "rewire": "^2.5.2"
+    "jasmine": "^3.1.0",
+    "rewire": "^4.0.1"
   },
   "author": "Anis Kadri",
   "contributors": [
