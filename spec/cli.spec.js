@@ -15,33 +15,26 @@
     under the License.
 */
 
-var rewire = require('rewire');
-var cli = rewire('../src/cli');
-var cordova_lib = require('cordova-lib');
-var events = cordova_lib.events;
-var cordova = cordova_lib.cordova;
-var telemetry = require('../src/telemetry');
-var path = require('path');
-var fs = require('fs');
-var logger = require('cordova-common').CordovaLogger.get();
+const fs = require('fs');
+const path = require('path');
+const rewire = require('rewire');
+const { events, cordova } = require('cordova-lib');
+const logger = require('cordova-common').CordovaLogger.get();
+const telemetry = require('../src/telemetry');
+const cli = rewire('../src/cli');
 
 // avoid node complaining of too many event listener added
 process.setMaxListeners(0);
 
-describe('cordova cli', function () {
-    beforeEach(function () {
+describe('cordova cli', () => {
+    beforeEach(() => {
         // Event registration is currently process-global. Since all jasmine
         // tests in a directory run in a single process (and in parallel),
         // logging events registered as a result of the "--verbose" flag in
         // CLI testing below would cause lots of logging messages printed out by other specs.
 
         // This is required so that fake events chaining works (events.on('log').on('verbose')...)
-        var FakeEvents = function FakeEvents () {};
-        FakeEvents.prototype.on = function fakeOn () {
-            return new FakeEvents();
-        };
-
-        spyOn(events, 'on').and.returnValue(new FakeEvents());
+        spyOn(events, 'on').and.returnValue({ on () { return this; } });
 
         // Spy and mute output
         spyOn(logger, 'results');
@@ -49,14 +42,14 @@ describe('cordova cli', function () {
         spyOn(console, 'log');
 
         // Prevent accidentally turning telemetry on/off during testing
-        telemetry.turnOn = function () {};
-        telemetry.turnOff = function () {};
-        telemetry.track = function () {};
+        telemetry.turnOn = () => {};
+        telemetry.turnOff = () => {};
+        telemetry.track = () => {};
     });
 
-    describe('options', function () {
-        describe('version', function () {
-            var version = require('../package').version;
+    describe('options', () => {
+        describe('version', () => {
+            const version = require('../package').version;
 
             it('Test#001 : will spit out the version with -v', () => {
                 return cli(['node', 'cordova', '-v']).then(() => {
@@ -78,8 +71,8 @@ describe('cordova cli', function () {
         });
     });
 
-    describe('Test#004 : project commands other than plugin and platform', function () {
-        beforeEach(function () {
+    describe('Test#004 : project commands other than plugin and platform', () => {
+        beforeEach(() => {
             spyOn(cordova, 'build').and.returnValue(Promise.resolve());
         });
 
@@ -120,8 +113,8 @@ describe('cordova cli', function () {
         });
     });
 
-    describe('create', function () {
-        beforeEach(function () {
+    describe('create', () => {
+        beforeEach(() => {
             spyOn(cordova, 'create').and.returnValue(Promise.resolve());
         });
 
@@ -132,8 +125,8 @@ describe('cordova cli', function () {
         });
     });
 
-    describe('plugin', function () {
-        beforeEach(function () {
+    describe('plugin', () => {
+        beforeEach(() => {
             spyOn(cordova, 'plugin').and.returnValue(Promise.resolve());
         });
 
@@ -144,7 +137,7 @@ describe('cordova cli', function () {
                     ['facebook'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.cli_variables.FOO).toBe('foo');
             });
         });
@@ -156,7 +149,7 @@ describe('cordova cli', function () {
                     ['facebook'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.cli_variables.MOTO).toBe('DELTA=WAS=HERE');
             });
         });
@@ -168,7 +161,7 @@ describe('cordova cli', function () {
                     ['facebook'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.nohooks[0]).toBe('before_plugin_add');
             });
         });
@@ -180,7 +173,7 @@ describe('cordova cli', function () {
                     ['device'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.save).toBe(true);
             });
         });
@@ -192,7 +185,7 @@ describe('cordova cli', function () {
                     ['device'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.save).toBe(false);
             });
         });
@@ -204,7 +197,7 @@ describe('cordova cli', function () {
                     ['device'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.save).toBe(false);
             });
         });
@@ -216,7 +209,7 @@ describe('cordova cli', function () {
                     ['device'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.save).toBe(true);
             });
         });
@@ -228,7 +221,7 @@ describe('cordova cli', function () {
                     ['device'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.fetch).toBe(true);
             });
         });
@@ -240,7 +233,7 @@ describe('cordova cli', function () {
                     ['device'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.save_exact).toBe(true);
             });
         });
@@ -252,7 +245,7 @@ describe('cordova cli', function () {
                     ['device'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.fetch).toBe(true);
             });
         });
@@ -264,16 +257,16 @@ describe('cordova cli', function () {
                     ['device'],
                     jasmine.any(Object)
                 );
-                var opts = cordova.plugin.calls.argsFor(0)[2];
+                const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.production).toBe(false);
             });
         });
     });
 
-    describe('telemetry', function () {
+    describe('telemetry', () => {
         it("Test#023 : skips prompt when user runs 'cordova telemetry X'", () => {
-            var wasPromptShown = false;
-            spyOn(telemetry, 'showPrompt').and.callFake(function () {
+            let wasPromptShown = false;
+            spyOn(telemetry, 'showPrompt').and.callFake(() => {
                 wasPromptShown = true;
             });
 
@@ -417,9 +410,9 @@ describe('cordova cli', function () {
     });
 });
 
-describe('platform', function () {
+describe('platform', () => {
 
-    beforeEach(function () {
+    beforeEach(() => {
         spyOn(cordova, 'platform').and.returnValue(Promise.resolve());
         logger.setLevel('error');
     });
@@ -431,7 +424,7 @@ describe('platform', function () {
                 ['ios'],
                 jasmine.any(Object)
             );
-            var opts = cordova.platform.calls.argsFor(0)[2];
+            const opts = cordova.platform.calls.argsFor(0)[2];
             expect(opts.save).toBe(true);
         });
     });
@@ -443,7 +436,7 @@ describe('platform', function () {
                 ['ios'],
                 jasmine.any(Object)
             );
-            var opts = cordova.platform.calls.argsFor(0)[2];
+            const opts = cordova.platform.calls.argsFor(0)[2];
             expect(opts.save).toBe(false);
         });
     });
@@ -455,7 +448,7 @@ describe('platform', function () {
                 ['ios'],
                 jasmine.any(Object)
             );
-            var opts = cordova.platform.calls.argsFor(0)[2];
+            const opts = cordova.platform.calls.argsFor(0)[2];
             expect(opts.save).toBe(true);
         });
     });
@@ -467,7 +460,7 @@ describe('platform', function () {
                 ['ios'],
                 jasmine.any(Object)
             );
-            var opts = cordova.platform.calls.argsFor(0)[2];
+            const opts = cordova.platform.calls.argsFor(0)[2];
             expect(opts.save).toBe(false);
         });
     });
@@ -479,7 +472,7 @@ describe('platform', function () {
                 ['device'],
                 jasmine.any(Object)
             );
-            var opts = cordova.platform.calls.argsFor(0)[2];
+            const opts = cordova.platform.calls.argsFor(0)[2];
             expect(opts.fetch).toBe(true);
         });
     });
@@ -491,38 +484,35 @@ describe('platform', function () {
                 ['device'],
                 jasmine.any(Object)
             );
-            var opts = cordova.platform.calls.argsFor(0)[2];
+            const opts = cordova.platform.calls.argsFor(0)[2];
             expect(opts.fetch).toBe(true);
         });
     });
 });
 
-describe('config', function () {
-    var clirevert;
-    var confrevert;
-    var editorArgs;
-    var cordovaConfig = {};
-    var confHolder;
+describe('config', () => {
+    let clirevert, confrevert, editorArgs, confHolder;
+    const cordovaConfig = {};
 
-    var confMock = {
-        set: function (key, value) {
+    const confMock = {
+        set (key, value) {
             cordovaConfig[key] = value;
         },
-        del: function (key) {
+        del (key) {
             delete cordovaConfig[key];
         },
-        path: function () {
+        path () {
             confHolder = 'Pathcalled';
             return 'some/path/cordova-config.json';
         },
-        get: function (key) {
+        get (key) {
             confHolder = cordovaConfig[key];
             return cordovaConfig[key];
         }
     };
 
-    beforeEach(function () {
-        clirevert = cli.__set__('editor', function (path1, cb) {
+    beforeEach(() => {
+        clirevert = cli.__set__('editor', (path1, cb) => {
             editorArgs = path1();
             cb();
         });
@@ -532,7 +522,7 @@ describe('config', function () {
         // spyOn(console, 'log');
     });
 
-    afterEach(function () {
+    afterEach(() => {
         clirevert();
         confrevert();
         confHolder = undefined;
@@ -570,7 +560,7 @@ describe('config', function () {
     });
 
     it('Test #047 : config ls is called', () => {
-        spyOn(fs, 'readFile').and.callFake(function (confPath, cb) {
+        spyOn(fs, 'readFile').and.callFake((confPath, cb) => {
             confHolder = confPath();
         });
 
