@@ -1,34 +1,13 @@
 language: node_js
-sudo: false
+
+# Performance optimization
 git:
   depth: 10
+cache:
+  directories:
+    - $HOME/.npm
+
 node_js:
   - "6"
   - "8"
   - "10"
-
-before_install:
-  - npm cache clean -f
-  - npm install -g npm@2
-
-# getting cordova tools dependencies from github
-# to make sure we're using their latest versions
-install:
-  - cd ..
-  - git clone https://github.com/apache/cordova-js --depth 10
-  - cd cordova-js
-  - npm install
-  - npm link
-  - cd ..
-  - git clone https://github.com/apache/cordova-lib --depth 10
-  - cd cordova-lib/
-  - npm install
-  - npm link cordova-js
-  - npm link
-  - cd ../cordova-cli
-  - npm link cordova-lib
-  - npm install
-  # # Workaround for npm/npm#10343
-  # - npm install
-  # - (cd ../cordova-js && npm install && npm link)
-  # - (cd ../cordova-lib/cordova-lib && npm install && npm link ../../cordova-js)
