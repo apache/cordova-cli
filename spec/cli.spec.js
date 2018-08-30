@@ -448,19 +448,6 @@ describe('cordova cli', function () {
     });
 });
 
-describe('raw', function () {
-    var rawInterface = cordova.raw;
-    it('has a raw implementation of previously callable commands', function (done) {
-        Object.keys(rawInterface).forEach(function (key) {
-            expect(typeof rawInterface[key]).toBe('function');
-            spyOn(cordova, key);
-            rawInterface[key](); // call the raw version
-            expect(cordova[key]).toHaveBeenCalled();
-        });
-        done();
-    });
-});
-
 describe('platform', function () {
 
     beforeEach(function () {
