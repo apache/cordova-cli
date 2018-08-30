@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test": "npm run eslint && jasmine",
-    "eslint": "eslint spec  && eslint src",
+    "eslint": "eslint . bin/cordova",
     "cover": "istanbul cover --root src --print detail jasmine"
   },
   "repository": {
