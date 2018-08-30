@@ -313,7 +313,6 @@ cordova {plugin | plugins} [
     add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --browserify | --force} |
     {remove | rm} {<pluginid> | <name>} --save |
     {list | ls} |
-    search [<keyword>] |
     save |
 ]
 ```
@@ -330,7 +329,6 @@ cordova {plugin | plugins} [
 | remove `<pluginid>|<name>` [...]| | Remove plugins with the given IDs/name.
 |       |--nosave                 | Do NOT remove the specified plugin from config.xml or package.json
 |list                           |  | List currently installed plugins
-|search `[<keyword>]` [...]     |  | Search http://plugins.cordova.io for plugins matching the keywords
 |save                           |  | Save `<plugin-spec>` of all plugins currently added to the project
 
 ### Plugin-spec
