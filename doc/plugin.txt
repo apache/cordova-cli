@@ -35,8 +35,6 @@ Manage project plugins
     list .............................. List currently installed plugins
     save .............................. Saves the information for all currently added plugins to config.xml
 
-    search [<keyword>] [...] .......... Search http://plugins.cordova.io for plugins matching the keywords
-
 Syntax
     <plugin-spec> : <pluginID>[@<version>]|<directory>|<url>[#<commit-ish>][:subdir]
 
