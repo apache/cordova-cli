@@ -69,8 +69,8 @@ describe('cordova cli', function () {
                 cli(['node', 'cordova', '--version'], function () {
                     expect(logger.results.calls.mostRecent().args[0]).toMatch(version);
                     done();
-                }, 60000);
-            });
+                });
+            }, 60000);
 
             it('Test#003 : will spit out the version with -v anywhere', function (done) {
                 cli(['node', 'cordova', 'one', '-v', 'three'], function () {
