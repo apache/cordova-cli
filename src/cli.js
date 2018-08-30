@@ -96,12 +96,7 @@ function checkForUpdates () {
 
 var shouldCollectTelemetry = false;
 
-module.exports = function (inputArgs, cb) {
-    /**
-     * mainly used for testing.
-     */
-    cb = cb || function () {};
-
+module.exports = function (inputArgs) {
     // If no inputArgs given, use process.argv.
     inputArgs = inputArgs || process.argv;
     var cmd = inputArgs[2]; // e.g: inputArgs= 'node cordova run ios'
@@ -205,14 +200,10 @@ module.exports = function (inputArgs, cb) {
         if (shouldCollectTelemetry && !isTelemetryCmd) {
             telemetry.track(cmd, subcommand, 'successful');
         }
-        // call cb with error as arg if something failed
-        cb(null);
     }).catch(function (err) {
         if (shouldCollectTelemetry && !isTelemetryCmd) {
             telemetry.track(cmd, subcommand, 'unsuccessful');
         }
-        // call cb with error as arg if something failed
-        cb(err);
         throw err;
     });
 };
