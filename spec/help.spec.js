@@ -17,13 +17,13 @@
 var cordova_lib = require('cordova-lib');
 var cordova = cordova_lib.cordova;
 var help = require('../src/help');
-var allcommands;
+var allcommands = [
+    '', 'prepare', 'build', 'config', 'emulate', 'plugin', 'plugins',
+    'serve', 'platform', 'platforms', 'compile', 'run', 'info', 'targets',
+    'requirements', 'projectMetadata', 'clean'
+];
 
 describe('help', function () {
-    allcommands = [''].concat(Object.keys(cordova).map(function (k) {
-        if (k in cordova.raw) { return k; }
-        return null;
-    }).filter(function (k) { return k; }));
     describe('commands should', function () {
         afterEach(function () {
             cordova.removeAllListeners('results');
