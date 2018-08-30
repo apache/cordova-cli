@@ -271,16 +271,13 @@ describe('cordova cli', () => {
 
     describe('telemetry', () => {
         it("Test#023 : skips prompt when user runs 'cordova telemetry X'", () => {
-            let wasPromptShown = false;
-            spyOn(telemetry, 'showPrompt').and.callFake(() => {
-                wasPromptShown = true;
-            });
+            spyOn(telemetry, 'showPrompt').and.returnValue(Promise.resolve());
 
             return Promise.resolve()
                 .then(_ => cli(['node', 'cordova', 'telemetry', 'on']))
                 .then(_ => cli(['node', 'cordova', 'telemetry', 'off']))
                 .then(() => {
-                    expect(wasPromptShown).toBeFalsy();
+                    expect(telemetry.showPrompt).not.toHaveBeenCalled();
                 });
         });
 
