@@ -11,10 +11,9 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "npm run eslint && npm run jasmine",
+    "test": "npm run eslint && jasmine",
     "eslint": "eslint spec  && eslint src",
-    "cover": "istanbul cover --root src --print detail jasmine",
-    "jasmine": "jasmine"
+    "cover": "istanbul cover --root src --print detail jasmine"
   },
   "repository": {
     "type": "git",
