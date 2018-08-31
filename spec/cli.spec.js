@@ -51,6 +51,7 @@ describe('cordova cli', () => {
         spyOn(telemetry, 'track');
         spyOn(telemetry, 'turnOn');
         spyOn(telemetry, 'turnOff');
+        spyOn(telemetry, 'showPrompt').and.returnValue(Promise.resolve());
     });
 
     describe('options', () => {
@@ -275,7 +276,6 @@ describe('cordova cli', () => {
             spyOn(telemetry, 'isCI').and.returnValue(false);
             spyOn(telemetry, 'isOptedIn').and.returnValue(true);
             spyOn(telemetry, 'hasUserOptedInOrOut').and.returnValue(true);
-            spyOn(telemetry, 'showPrompt').and.returnValue(Promise.resolve());
         });
 
         it("Test#023 : skips prompt when user runs 'cordova telemetry X'", () => {
