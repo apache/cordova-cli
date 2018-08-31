@@ -323,6 +323,9 @@ describe('cordova cli', () => {
             // 30 seconds. 0s is impossible with the current implementation.
             telemetry.timeoutInSecs = 0.01;
 
+            // Don't display the prompt
+            spyOn(process.stdout, 'write');
+
             telemetry.isOptedIn.and.callThrough();
             telemetry.showPrompt.and.callThrough();
             telemetry.hasUserOptedInOrOut.and.returnValue(false);
