@@ -492,49 +492,34 @@ function cli (inputArgs) {
     }
 }
 
-function create (undashed, args) {
-    var cfg; // Create config
-    var customWww; // Template path
-    var wwwCfg; // Template config
-
+function create ([_, dir, id, name, cfgJson], args) {
     // If we got a fourth parameter, consider it to be JSON to init the config.
-    if (undashed[4]) { cfg = JSON.parse(undashed[4]); } else { cfg = {}; }
+    var cfg = JSON.parse(cfgJson || '{}');
 
-    customWww = args['copy-from'] || args['link-to'] || args.template;
+    // Template path
+    var customWww = args['link-to'] || args.template;
 
     if (customWww) {
-        if (!args.template && !args['copy-from'] && customWww.indexOf('http') === 0) {
+        // TODO Handle in create
+        if (!args.template && customWww.indexOf('http') === 0) {
             throw new CordovaError(
                 'Only local paths for custom www assets are supported for linking' + customWww
             );
         }
 
         // Resolve tilda
+        // TODO: move to create and use sindresorhus/untildify
         if (customWww.substr(0, 1) === '~') { customWww = path.join(process.env.HOME, customWww.substr(1)); }
 
-        wwwCfg = {
+        // Template config
+        var wwwCfg = {
             url: customWww,
-            template: false,
-            link: false
+            template: 'template' in args,
+            link: 'link-to' in args
         };
-
-        if (args['link-to']) {
-            wwwCfg.link = true;
-        }
-        if (args.template) {
-            wwwCfg.template = true;
-        } else if (args['copy-from']) {
-            logger.warn('Warning: --copy-from option is being deprecated. Consider using --template instead.');
-            wwwCfg.template = true;
-        }
 
         cfg.lib = cfg.lib || {};
         cfg.lib.www = wwwCfg;
     }
-    return cordova.create(undashed[1] // dir to create the project in
-        , undashed[2] // App id
-        , undashed[3] // App name
-        , cfg
-        , events || undefined
-    );
+    return cordova.create(dir, id, name, cfg, events || undefined);
 }
