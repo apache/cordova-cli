@@ -29,9 +29,6 @@ Deploys app on specified platform devices / emulators
     --buildConfig....................... Use the specified build configuration
                                          instead of default build.json
 
-    --browserify ....................... Compile plugin JS at build time using
-                                         browserify instead of runtime.
-
 To provide platform specific options, you must include them after `--`.
 
 Technical details

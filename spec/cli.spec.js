@@ -79,37 +79,37 @@ describe('cordova cli', () => {
 
         it('Test#005 : will call command with all arguments passed through', () => {
             return cli(['node', 'cordova', 'build', 'blackberry10', '--', '-k', 'abcd1234']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { argv: ['-k', 'abcd1234'] }, verbose: false, silent: false, browserify: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { argv: ['-k', 'abcd1234'] }, verbose: false, silent: false, fetch: true, nohooks: [ ], searchpath: undefined });
             });
         }, 60000);
 
         it('Test#006 : will consume the first instance of -d', () => {
             return cli(['node', 'cordova', '-d', 'build', 'blackberry10', '--', '-k', 'abcd1234', '-d']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, browserify: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, fetch: true, nohooks: [ ], searchpath: undefined });
             });
         });
 
         it('Test#007 : will consume the first instance of --verbose', () => {
             return cli(['node', 'cordova', '--verbose', 'build', 'blackberry10', '--', '-k', 'abcd1234', '--verbose']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, browserify: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, fetch: true, nohooks: [ ], searchpath: undefined });
             });
         });
 
         it('Test#008 : will consume the first instance of either --verbose or -d', () => {
             return cli(['node', 'cordova', '--verbose', 'build', 'blackberry10', '--', '-k', 'abcd1234', '-d']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, browserify: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, fetch: true, nohooks: [ ], searchpath: undefined });
             });
         });
 
         it('Test#009 : will consume the first instance of either --verbose or -d', () => {
             return cli(['node', 'cordova', '-d', 'build', 'blackberry10', '--', '-k', 'abcd1234', '--verbose']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, browserify: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, fetch: true, nohooks: [ ], searchpath: undefined });
             });
         });
 
         it('Test#010 : will consume the first instance of --silent', () => {
             return cli(['node', 'cordova', '--silent', 'build', 'blackberry10', '--', '-k', 'abcd1234', '--silent']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { silent: true, argv: ['-k', 'abcd1234', '--silent'] }, verbose: false, silent: true, browserify: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { silent: true, argv: ['-k', 'abcd1234', '--silent'] }, verbose: false, silent: true, fetch: true, nohooks: [ ], searchpath: undefined });
             });
         });
     });

@@ -20,12 +20,9 @@ all/the specified platforms.
     --buildConfig....................... Use the specified build configuration
                                          instead of default build.json
 
-    --browserify ....................... Compile plugin JS at build time using 
-                                         browserify instead of runtime.
-                                                                           
 To provide platform specific options, you must include them after `--`.
 
 Example
     cordova-cli build android windows --debug --device
     cordova-cli build android --release --buildConfig=..\myBuildConfig.json
-    cordova-cli build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey 
+    cordova-cli build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey

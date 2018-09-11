@@ -54,7 +54,6 @@ var knownOpts = {
     'device': Boolean,
     'emulator': Boolean,
     'target': String,
-    'browserify': Boolean,
     'noprepare': Boolean,
     'fetch': Boolean,
     'nobuild': Boolean,
@@ -349,7 +348,6 @@ function cli (inputArgs) {
         options: [],
         verbose: args.verbose || false,
         silent: args.silent || false,
-        browserify: args.browserify || false,
         fetch: true,
         nohooks: args.nohooks || [],
         searchpath: args.searchpath
@@ -448,10 +446,6 @@ function cli (inputArgs) {
             // User explicitly did not pass in save
             args.save = conf.get('autosave');
         }
-        if (args.browserify === undefined) {
-            // User explicitly did not pass in browserify
-            args.browserify = conf.get('browserify');
-        }
         if (args.searchpath === undefined) {
             // User explicitly did not pass in searchpath
             args.searchpath = conf.get('searchpath');
@@ -470,7 +464,6 @@ function cli (inputArgs) {
             noregistry: args.noregistry,
             nohooks: args.nohooks,
             cli_variables: cli_vars,
-            browserify: args.browserify || false,
             fetch: true,
             link: args.link || false,
             save: args.save,

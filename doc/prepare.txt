@@ -5,9 +5,5 @@ Synopsis
 Copies files for specified platforms, or all platforms,
 so that the project is ready to build with each SDK.
 
-Options
-     --browserify .............................. Compile plugin JS at build time using 
-                                                 browserify instead of runtime.
-
 Example
-     cordova-cli prepare --browserify
+     cordova-cli prepare
