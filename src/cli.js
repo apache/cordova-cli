@@ -55,7 +55,6 @@ var knownOpts = {
     'emulator': Boolean,
     'target': String,
     'noprepare': Boolean,
-    'fetch': Boolean,
     'nobuild': Boolean,
     'list': Boolean,
     'buildConfig': String,
@@ -348,7 +347,6 @@ function cli (inputArgs) {
         options: [],
         verbose: args.verbose || false,
         silent: args.silent || false,
-        fetch: true,
         nohooks: args.nohooks || [],
         searchpath: args.searchpath
     };
@@ -464,7 +462,6 @@ function cli (inputArgs) {
             noregistry: args.noregistry,
             nohooks: args.nohooks,
             cli_variables: cli_vars,
-            fetch: true,
             link: args.link || false,
             save: args.save,
             save_exact: args['save-exact'] || false,
