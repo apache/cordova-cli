@@ -79,37 +79,37 @@ describe('cordova cli', () => {
 
         it('Test#005 : will call command with all arguments passed through', () => {
             return cli(['node', 'cordova', 'build', 'blackberry10', '--', '-k', 'abcd1234']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { argv: ['-k', 'abcd1234'] }, verbose: false, silent: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { argv: ['-k', 'abcd1234'] }, verbose: false, silent: false, nohooks: [ ], searchpath: undefined });
             });
         }, 60000);
 
         it('Test#006 : will consume the first instance of -d', () => {
             return cli(['node', 'cordova', '-d', 'build', 'blackberry10', '--', '-k', 'abcd1234', '-d']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, nohooks: [ ], searchpath: undefined });
             });
         });
 
         it('Test#007 : will consume the first instance of --verbose', () => {
             return cli(['node', 'cordova', '--verbose', 'build', 'blackberry10', '--', '-k', 'abcd1234', '--verbose']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, nohooks: [ ], searchpath: undefined });
             });
         });
 
         it('Test#008 : will consume the first instance of either --verbose or -d', () => {
             return cli(['node', 'cordova', '--verbose', 'build', 'blackberry10', '--', '-k', 'abcd1234', '-d']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '-d'] }, verbose: true, silent: false, nohooks: [ ], searchpath: undefined });
             });
         });
 
         it('Test#009 : will consume the first instance of either --verbose or -d', () => {
             return cli(['node', 'cordova', '-d', 'build', 'blackberry10', '--', '-k', 'abcd1234', '--verbose']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { verbose: true, argv: ['-k', 'abcd1234', '--verbose'] }, verbose: true, silent: false, nohooks: [ ], searchpath: undefined });
             });
         });
 
         it('Test#010 : will consume the first instance of --silent', () => {
             return cli(['node', 'cordova', '--silent', 'build', 'blackberry10', '--', '-k', 'abcd1234', '--silent']).then(() => {
-                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { silent: true, argv: ['-k', 'abcd1234', '--silent'] }, verbose: false, silent: true, fetch: true, nohooks: [ ], searchpath: undefined });
+                expect(cordova.build).toHaveBeenCalledWith({ platforms: ['blackberry10'], options: { silent: true, argv: ['-k', 'abcd1234', '--silent'] }, verbose: false, silent: true, nohooks: [ ], searchpath: undefined });
             });
         });
     });
@@ -215,18 +215,6 @@ describe('cordova cli', () => {
             });
         });
 
-        it('Test #020 : (add) fetch is true by default and will pass fetch:true', () => {
-            return cli(['node', 'cordova', 'plugin', 'add', 'device']).then(() => {
-                expect(cordova.plugin).toHaveBeenCalledWith(
-                    'add',
-                    ['device'],
-                    jasmine.any(Object)
-                );
-                const opts = cordova.plugin.calls.argsFor(0)[2];
-                expect(opts.fetch).toBe(true);
-            });
-        });
-
         it('(add) will pass save-exact:true', () => {
             return cli(['node', 'cordova', 'plugin', 'add', 'device', '--save-exact']).then(() => {
                 expect(cordova.plugin).toHaveBeenCalledWith(
@@ -236,18 +224,6 @@ describe('cordova cli', () => {
                 );
                 const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.save_exact).toBe(true);
-            });
-        });
-
-        it('Test #021 : (remove) fetch is true by default and will pass fetch:true', () => {
-            return cli(['node', 'cordova', 'plugin', 'remove', 'device']).then(() => {
-                expect(cordova.plugin).toHaveBeenCalledWith(
-                    'remove',
-                    ['device'],
-                    jasmine.any(Object)
-                );
-                const opts = cordova.plugin.calls.argsFor(0)[2];
-                expect(opts.fetch).toBe(true);
             });
         });
 
@@ -438,30 +414,6 @@ describe('platform', () => {
             );
             const opts = cordova.platform.calls.argsFor(0)[2];
             expect(opts.save).toBe(false);
-        });
-    });
-
-    it('Test #039 : (add) fetch is true by default and will pass fetch:true', () => {
-        return cli(['node', 'cordova', 'platform', 'add', 'device']).then(() => {
-            expect(cordova.platform).toHaveBeenCalledWith(
-                'add',
-                ['device'],
-                jasmine.any(Object)
-            );
-            const opts = cordova.platform.calls.argsFor(0)[2];
-            expect(opts.fetch).toBe(true);
-        });
-    });
-
-    it('Test #040 : (remove) fetch is true by default and will pass fetch:true', () => {
-        return cli(['node', 'cordova', 'platform', 'remove', 'device']).then(() => {
-            expect(cordova.platform).toHaveBeenCalledWith(
-                'remove',
-                ['device'],
-                jasmine.any(Object)
-            );
-            const opts = cordova.platform.calls.argsFor(0)[2];
-            expect(opts.fetch).toBe(true);
         });
     });
 });
