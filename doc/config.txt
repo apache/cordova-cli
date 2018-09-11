@@ -24,11 +24,5 @@ Options
 	Allows the user to set save to true or false when adding platforms or plugins.
 	When false, platforms/plugins are not saved to `config.xml` and `package.json`.
 
-	browserify ...................... default setting = false
-	Allows the user to use the browserify module to bundle the JavaScript files of
-	the included plugins at build time versus our traditional run time loading of
-	those files.
-
 Examples
 	cordova config set autosave false
-	cordova config set browserify true

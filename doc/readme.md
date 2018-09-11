@@ -83,7 +83,7 @@ Certain commands have options (`platformOpts`) that are specific to a particular
         cd myApp
         # Add camera plugin to the project and remember that in config.xml & package.json.
         cordova plugin add cordova-plugin-camera
-        # Add camera plugin to the project and remember that in config.xml and package.json. 
+        # Add camera plugin to the project and remember that in config.xml and package.json.
         cordova plugin add cordova-plugin-camera
         # Add android platform to the project and remember that in config.xml & package.json.
         cordova platform add android
@@ -310,7 +310,7 @@ Manage project plugins
 
 ```bash
 cordova {plugin | plugins} [
-    add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --browserify | --force} |
+    add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --force} |
     {remove | rm} {<pluginid> | <name>} --save |
     {list | ls} |
     save |
@@ -324,7 +324,6 @@ cordova {plugin | plugins} [
 |       |--noregistry             | Don't search the registry for plugins.
 |       |--link                   | When installing from a local path, creates a symbolic link instead of copying files. The extent to which files are linked varies by platform. Useful for plugin development.
 |       |--nosave                 | Do NOT save the `<plugin-spec>` as part of the `plugin` element  into `config.xml` or `package.json`.
-|       |--browserify             | Compile plugin JS at build time using browserify instead of runtime.
 |       |--force                  | _Introduced in version 6.1._ Forces copying source files from the plugin even if the same file already exists in the target directory.
 | remove `<pluginid>|<name>` [...]| | Remove plugins with the given IDs/name.
 |       |--nosave                 | Do NOT remove the specified plugin from config.xml or package.json
@@ -404,7 +403,6 @@ copies plugin files for specified platforms so that the project is ready to buil
 
 ```
 cordova prepare [<platform> [..]]
-     [--browserify]
 ```
 
 ### Options
@@ -412,7 +410,6 @@ cordova prepare [<platform> [..]]
 | Option     | Description
 |------------|------------------
 | `<platform> [..]` | Platform name(s) to prepare. If not specified, all platforms are built.
-|--browserify | Compile plugin JS at build time using browserify instead of runtime.
 
 ## cordova compile command
 
@@ -428,7 +425,6 @@ cordova build [<platform> [...]]
     [--debug|--release]
     [--device|--emulator|--target=<targetName>]
     [--buildConfig=<configfile>]
-    [--browserify]
     [-- <platformOpts>]
 ```
 For detailed documentation see [cordova build command](#cordova-build-command) docs below.
@@ -446,7 +442,6 @@ cordova build [<platform> [...]]
     [--debug|--release]
     [--device|--emulator]
     [--buildConfig=<configfile>]
-    [--browserify]
     [-- <platformOpts>]
 ```
 
@@ -458,7 +453,6 @@ cordova build [<platform> [...]]
 | --device   | Build it for a device
 | --emulator | Build it for an emulator. In particular, the platform architecture might be different for a device Vs emulator.
 | --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process esecially related to signing the package.
-| --browserify | Compile plugin JS at build time using browserify instead of runtime
 | `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.
 
 ### Examples
@@ -489,7 +483,6 @@ cordova run [<platform> [...]]
     [--noprepare] [--nobuild]
     [--device|--emulator|--target=<targetName>]
     [--buildConfig=<configfile>]
-    [--browserify]
     [-- <platformOpts>]
 ```
 
@@ -505,7 +498,6 @@ cordova run [<platform> [...]]
 | --emulator  | Deploy to an emulator
 | --target    | Deploy to a specific target emulator/device. Use `--list` to display target options
 | --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process esecially related to signing the package.
-| --browserify | Compile plugin JS at build time using browserify instead of runtime
 | `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.
 
 ### Examples
@@ -660,7 +652,6 @@ cordova config delete <key>
 
 ```
 cordova config set autosave false
-cordova config set browserify false
 ```
 
 [Hooks guide]: http://cordova.apache.org/docs/en/latest/guide_appdev_hooks_index.md.html

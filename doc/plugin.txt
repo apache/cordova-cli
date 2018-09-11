@@ -4,7 +4,7 @@ Synopsis
 
 Manage project plugins
 
-    add <plugin-spec> [...] ............ Add specified plugins and save them to 
+    add <plugin-spec> [...] ............ Add specified plugins and save them to
                                          config.xml & package.json.
         --searchpath <directory> ....... When looking up plugins by ID, look in this directory and
                                          each of its subdirectories before hitting the registry.
@@ -15,18 +15,16 @@ Manage project plugins
         --link ......................... When installing from a local path, creates a symbolic link
                                          instead of copying files. The extent to which files are linked
                                          varies by platform. Useful for plugin development.
-        --nosave ....................... Prevent saving the information for specified plugin 
+        --nosave ....................... Prevent saving the information for specified plugin
                                          into config.xml & package.json.
         --shrinkwrap ................... Used together with --save, saves the
                                          installed version numbers to config.xml
-        --browserify ................... Compile plugin JS at build time using
-                                         browserify instead of runtime.
 
         --force ........................ Forces copying source files from the plugin even if the
                                          same file already exists in the target directory.
- 
 
-    remove <pluginid>|<name> [...] ..... Remove plugins with the given IDs/name and 
+
+    remove <pluginid>|<name> [...] ..... Remove plugins with the given IDs/name and
                                          removes the information for specified plugin from config.xml & package.json.
         --nosave ....................... Prevents removing the information for
                                          specified plugin from config.xml & package.json.
