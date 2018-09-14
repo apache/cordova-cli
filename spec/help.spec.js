@@ -15,7 +15,7 @@
     under the License.
 */
 
-const { cordova } = require('cordova-lib');
+const cordova = require('cordova-lib').cordova;
 const help = require('../src/help');
 const allcommands = [
     '', 'prepare', 'build', 'config', 'emulate', 'plugin', 'plugins',
