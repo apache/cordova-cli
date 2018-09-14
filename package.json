@@ -31,7 +31,7 @@
   "dependencies": {
     "configstore": "^4.0.0",
     "cordova-common": "^2.2.0",
-    "cordova-lib": "8.0.0",
+    "cordova-lib": "git+https://github.com/apache/cordova-lib.git#8.1.x",
     "editor": "1.0.0",
     "insight": "^0.10.1",
     "loud-rejection": "^1.6.0",
