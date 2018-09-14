@@ -29,7 +29,7 @@
     "cli"
   ],
   "dependencies": {
-    "configstore": "^4.0.0",
+    "configstore": "^3.1.2",
     "cordova-common": "^2.2.0",
     "cordova-lib": "git+https://github.com/apache/cordova-lib.git#8.1.x",
     "editor": "1.0.0",
