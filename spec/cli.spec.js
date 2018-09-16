@@ -290,32 +290,6 @@ describe('cordova cli', () => {
             });
         });
 
-        it('Test#028 : opts-out if prompt times out AND it tracks opt-out', () => {
-            // Remove any optOut settings that might have been saved
-            // ... and force prompt to be shown
-            telemetry.clear();
-
-            // We override telemetry timeout here so we don't need to wait
-            // 30 seconds. 0s is impossible with the current implementation.
-            telemetry.timeoutInSecs = 0.01;
-
-            // Don't display the prompt
-            spyOn(process.stdout, 'write');
-
-            telemetry.isOptedIn.and.callThrough();
-            telemetry.showPrompt.and.callThrough();
-            telemetry.hasUserOptedInOrOut.and.returnValue(false);
-
-            return cli(['node', 'cordova', '--version']).then(() => {
-                if (process.env.CI) {
-                    expect(telemetry.isOptedIn()).toBeTruthy();
-                } else {
-                    expect(telemetry.isOptedIn()).toBeFalsy();
-                }
-                expect(telemetry.track).toHaveBeenCalledWith('telemetry', 'off', 'via-cli-prompt-choice', 'successful');
-            });
-        });
-
         it("Test#029 : is NOT collected in CI environments and doesn't prompt", () => {
             telemetry.isCI.and.returnValue(true);
 
