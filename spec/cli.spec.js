@@ -390,165 +390,167 @@ describe('cordova cli', () => {
             });
         });
     });
-});
 
-describe('platform', () => {
+    describe('platform', () => {
 
-    beforeEach(() => {
-        spyOn(cordova, 'platform').and.returnValue(Promise.resolve());
-        logger.setLevel('error');
-    });
+        beforeEach(() => {
+            spyOn(cordova, 'platform').and.returnValue(Promise.resolve());
+            logger.setLevel('error');
+        });
 
-    it('Test #034 : (add) autosave is the default setting for platform add', () => {
-        return cli(['node', 'cordova', 'platform', 'add', 'ios']).then(() => {
-            expect(cordova.platform).toHaveBeenCalledWith(
-                'add',
-                ['ios'],
-                jasmine.any(Object)
-            );
-            const opts = cordova.platform.calls.argsFor(0)[2];
-            expect(opts.save).toBe(true);
+        it('Test #034 : (add) autosave is the default setting for platform add', () => {
+            return cli(['node', 'cordova', 'platform', 'add', 'ios']).then(() => {
+                expect(cordova.platform).toHaveBeenCalledWith(
+                    'add',
+                    ['ios'],
+                    jasmine.any(Object)
+                );
+                const opts = cordova.platform.calls.argsFor(0)[2];
+                expect(opts.save).toBe(true);
+            });
+        });
+
+        it('Test #035 : (add) platform is not saved when --nosave is passed in', () => {
+            return cli(['node', 'cordova', 'platform', 'add', 'ios', '--nosave']).then(() => {
+                expect(cordova.platform).toHaveBeenCalledWith(
+                    'add',
+                    ['ios'],
+                    jasmine.any(Object)
+                );
+                const opts = cordova.platform.calls.argsFor(0)[2];
+                expect(opts.save).toBe(false);
+            });
+        });
+
+        it('Test #036 : (remove) autosave is the default setting for platform remove', () => {
+            return cli(['node', 'cordova', 'platform', 'remove', 'ios']).then(() => {
+                expect(cordova.platform).toHaveBeenCalledWith(
+                    'remove',
+                    ['ios'],
+                    jasmine.any(Object)
+                );
+                const opts = cordova.platform.calls.argsFor(0)[2];
+                expect(opts.save).toBe(true);
+            });
+        });
+
+        it('Test #037 : (remove) platform is not removed when --nosave is passed in', () => {
+            return cli(['node', 'cordova', 'platform', 'remove', 'ios', '--nosave']).then(() => {
+                expect(cordova.platform).toHaveBeenCalledWith(
+                    'remove',
+                    ['ios'],
+                    jasmine.any(Object)
+                );
+                const opts = cordova.platform.calls.argsFor(0)[2];
+                expect(opts.save).toBe(false);
+            });
+        });
+
+        // TBD Test #039 GONE in master:
+        it('Test #039 : (add) fetch is true by default and will pass fetch:true', () => {
+            return cli(['node', 'cordova', 'platform', 'add', 'device']).then(() => {
+                expect(cordova.platform).toHaveBeenCalledWith(
+                    'add',
+                    ['device'],
+                    jasmine.any(Object)
+                );
+                const opts = cordova.platform.calls.argsFor(0)[2];
+                expect(opts.fetch).toBe(true);
+            });
+        });
+
+        // TBD Test #040 GONE in master:
+        it('Test #040 : (remove) fetch is true by default and will pass fetch:true', () => {
+            return cli(['node', 'cordova', 'platform', 'remove', 'device']).then(() => {
+                expect(cordova.platform).toHaveBeenCalledWith(
+                    'remove',
+                    ['device'],
+                    jasmine.any(Object)
+                );
+                const opts = cordova.platform.calls.argsFor(0)[2];
+                expect(opts.fetch).toBe(true);
+            });
         });
     });
 
-    it('Test #035 : (add) platform is not saved when --nosave is passed in', () => {
-        return cli(['node', 'cordova', 'platform', 'add', 'ios', '--nosave']).then(() => {
-            expect(cordova.platform).toHaveBeenCalledWith(
-                'add',
-                ['ios'],
-                jasmine.any(Object)
-            );
-            const opts = cordova.platform.calls.argsFor(0)[2];
-            expect(opts.save).toBe(false);
-        });
-    });
+    describe('config', () => {
+        let clirevert, confrevert, editorArgs, confHolder;
+        const cordovaConfig = {};
 
-    it('Test #036 : (remove) autosave is the default setting for platform remove', () => {
-        return cli(['node', 'cordova', 'platform', 'remove', 'ios']).then(() => {
-            expect(cordova.platform).toHaveBeenCalledWith(
-                'remove',
-                ['ios'],
-                jasmine.any(Object)
-            );
-            const opts = cordova.platform.calls.argsFor(0)[2];
-            expect(opts.save).toBe(true);
-        });
-    });
+        const confMock = {
+            set (key, value) {
+                cordovaConfig[key] = value;
+            },
+            del (key) {
+                delete cordovaConfig[key];
+            },
+            path () {
+                confHolder = 'Pathcalled';
+                return 'some/path/cordova-config.json';
+            },
+            get (key) {
+                confHolder = cordovaConfig[key];
+                return cordovaConfig[key];
+            }
+        };
 
-    it('Test #037 : (remove) platform is not removed when --nosave is passed in', () => {
-        return cli(['node', 'cordova', 'platform', 'remove', 'ios', '--nosave']).then(() => {
-            expect(cordova.platform).toHaveBeenCalledWith(
-                'remove',
-                ['ios'],
-                jasmine.any(Object)
-            );
-            const opts = cordova.platform.calls.argsFor(0)[2];
-            expect(opts.save).toBe(false);
-        });
-    });
+        beforeEach(() => {
+            clirevert = cli.__set__('editor', (path1, cb) => {
+                editorArgs = path1();
+                cb();
+            });
 
-    it('Test #039 : (add) fetch is true by default and will pass fetch:true', () => {
-        return cli(['node', 'cordova', 'platform', 'add', 'device']).then(() => {
-            expect(cordova.platform).toHaveBeenCalledWith(
-                'add',
-                ['device'],
-                jasmine.any(Object)
-            );
-            const opts = cordova.platform.calls.argsFor(0)[2];
-            expect(opts.fetch).toBe(true);
-        });
-    });
-
-    it('Test #040 : (remove) fetch is true by default and will pass fetch:true', () => {
-        return cli(['node', 'cordova', 'platform', 'remove', 'device']).then(() => {
-            expect(cordova.platform).toHaveBeenCalledWith(
-                'remove',
-                ['device'],
-                jasmine.any(Object)
-            );
-            const opts = cordova.platform.calls.argsFor(0)[2];
-            expect(opts.fetch).toBe(true);
-        });
-    });
-});
-
-describe('config', () => {
-    let clirevert, confrevert, editorArgs, confHolder;
-    const cordovaConfig = {};
-
-    const confMock = {
-        set (key, value) {
-            cordovaConfig[key] = value;
-        },
-        del (key) {
-            delete cordovaConfig[key];
-        },
-        path () {
-            confHolder = 'Pathcalled';
-            return 'some/path/cordova-config.json';
-        },
-        get (key) {
-            confHolder = cordovaConfig[key];
-            return cordovaConfig[key];
-        }
-    };
-
-    beforeEach(() => {
-        clirevert = cli.__set__('editor', (path1, cb) => {
-            editorArgs = path1();
-            cb();
+            confrevert = cli.__set__('conf', confMock);
+            logger.setLevel('error');
+            // spyOn(console, 'log');
         });
 
-        confrevert = cli.__set__('conf', confMock);
-        logger.setLevel('error');
-        // spyOn(console, 'log');
-    });
-
-    afterEach(() => {
-        clirevert();
-        confrevert();
-        confHolder = undefined;
-    });
-
-    it('Test#042 : config set autosave is called with true', () => {
-        return cli(['node', 'cordova', 'config', 'set', 'autosave', 'true', '--silent']).then(() => {
-            expect(cordovaConfig.autosave).toBe('true');
-        });
-    });
-
-    it('Test#043 : config delete autosave is called', () => {
-        return cli(['node', 'cordova', 'config', 'delete', 'autosave']).then(() => {
-            expect(cordovaConfig.autosave).toBeUndefined();
-        });
-    });
-
-    it('Test#044 : config set is called even without value, defaults to true', () => {
-        return cli(['node', 'cordova', 'config', 'set', 'autosave']).then(() => {
-            expect(cordovaConfig.autosave).toBe(true);
-        });
-    });
-
-    it('Test #045 : config get is called', () => {
-        return cli(['node', 'cordova', 'config', 'get', 'autosave']).then(() => {
-            expect(confHolder).toBe(true);
-        });
-    });
-
-    it('Test #046 : config edit is called', () => {
-        return cli(['node', 'cordova', 'config', 'edit']).then(() => {
-            expect(path.basename(editorArgs)).toEqual('cordova-config.json');
-            expect(confHolder).toEqual('Pathcalled');
-        });
-    });
-
-    it('Test #047 : config ls is called', () => {
-        spyOn(fs, 'readFile').and.callFake((confPath, cb) => {
-            confHolder = confPath();
+        afterEach(() => {
+            clirevert();
+            confrevert();
+            confHolder = undefined;
         });
 
-        return cli(['node', 'cordova', 'config', 'ls']).then(() => {
-            expect(path.basename(confHolder)).toEqual('cordova-config.json');
+        it('Test#042 : config set autosave is called with true', () => {
+            return cli(['node', 'cordova', 'config', 'set', 'autosave', 'true', '--silent']).then(() => {
+                expect(cordovaConfig.autosave).toBe('true');
+            });
         });
-    });
 
+        it('Test#043 : config delete autosave is called', () => {
+            return cli(['node', 'cordova', 'config', 'delete', 'autosave']).then(() => {
+                expect(cordovaConfig.autosave).toBeUndefined();
+            });
+        });
+
+        it('Test#044 : config set is called even without value, defaults to true', () => {
+            return cli(['node', 'cordova', 'config', 'set', 'autosave']).then(() => {
+                expect(cordovaConfig.autosave).toBe(true);
+            });
+        });
+
+        it('Test #045 : config get is called', () => {
+            return cli(['node', 'cordova', 'config', 'get', 'autosave']).then(() => {
+                expect(confHolder).toBe(true);
+            });
+        });
+
+        it('Test #046 : config edit is called', () => {
+            return cli(['node', 'cordova', 'config', 'edit']).then(() => {
+                expect(path.basename(editorArgs)).toEqual('cordova-config.json');
+                expect(confHolder).toEqual('Pathcalled');
+            });
+        });
+
+        it('Test #047 : config ls is called', () => {
+            spyOn(fs, 'readFile').and.callFake((confPath, cb) => {
+                confHolder = confPath();
+            });
+
+            return cli(['node', 'cordova', 'config', 'ls']).then(() => {
+                expect(path.basename(confHolder)).toEqual('cordova-config.json');
+            });
+        });
+
+    });
 });
