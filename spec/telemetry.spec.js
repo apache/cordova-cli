@@ -122,8 +122,7 @@ describe('telemetry', () => {
             expect(insight.track).toHaveBeenCalledWith(...args);
         });
 
-        // FIXME filtering is currently broken
-        xit('filters falsy and empty arguments [T010]', () => {
+        it('filters falsy and empty arguments [T010]', () => {
             const args = [null, [23], [], 42, ''];
             telemetry.track(...args);
             expect(insight.track).toHaveBeenCalledWith([23], 42);

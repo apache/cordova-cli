@@ -50,15 +50,10 @@ function showPrompt () {
     });
 }
 
-function track () {
+function track (...args) {
     // Remove empty, null or undefined strings from arguments
-    for (var property in arguments) {
-        var val = arguments[property];
-        if (!val || val.length === 0) {
-            delete arguments.property;
-        }
-    }
-    insight.track.apply(insight, arguments);
+    const filteredArgs = args.filter(val => val && val.length !== 0);
+    insight.track(...filteredArgs);
 }
 
 function turnOn () {
