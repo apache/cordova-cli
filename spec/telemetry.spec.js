@@ -39,9 +39,12 @@ describe('telemetry', () => {
 
         // Prevent any settings from being persisted during testing
         insight.config = {
-            get: jasmine.createSpy('insight.config.get'),
-            set: jasmine.createSpy('insight.config.set')
+            get (key) { return this[key]; },
+            set (key, val) { this[key] = val; }
         };
+        for (const key in insight.config) {
+            spyOn(insight.config, key).and.callThrough();
+        }
 
         // Prevent tracking anything during testing
         spyOn(Insight.prototype, '_save');
@@ -135,9 +138,12 @@ describe('telemetry', () => {
 
         beforeEach(() => {
             spyOn(console, 'log');
-            spyOn(telemetry, 'track');
+            spyOn(telemetry, 'track').and.callThrough();
             response = Symbol('response');
-            insight.askPermission.and.callFake((_, cb) => cb(null, response));
+            insight.askPermission.and.callFake((_, cb) => {
+                insight.optOut = !response;
+                cb(null, response);
+            });
         });
 
         it('calls insight.askPermission [T011]', () => {
@@ -170,6 +176,7 @@ describe('telemetry', () => {
                     expect(telemetry.track).toHaveBeenCalledWith(
                         'telemetry', 'on', 'via-cli-prompt-choice', 'successful'
                     );
+                    expect(Insight.prototype._save).toHaveBeenCalled();
                 });
             });
         });
@@ -198,6 +205,7 @@ describe('telemetry', () => {
                     expect(telemetry.track).toHaveBeenCalledWith(
                         'telemetry', 'off', 'via-cli-prompt-choice', 'successful'
                     );
+                    expect(Insight.prototype._save).toHaveBeenCalled();
                 });
             });
         });
