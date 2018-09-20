@@ -33,6 +33,7 @@
     "cordova-common": "^2.2.0",
     "cordova-lib": "8.1.0",
     "editor": "1.0.0",
+    "inquirer": "^3.3.0",
     "insight": "^0.8.4",
     "loud-rejection": "^1.6.0",
     "nopt": "^4.0.1",
