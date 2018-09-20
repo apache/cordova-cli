@@ -76,7 +76,7 @@ var shortHands = {
 function checkForUpdates () {
     try {
         // Checks for available update and returns an instance
-        var notifier = updateNotifier({pkg: pkg});
+        var notifier = updateNotifier({ pkg: pkg });
 
         if (notifier.update &&
            notifier.update.latest !== pkg.version) {
@@ -165,7 +165,7 @@ module.exports = function (inputArgs, cb) {
         });
     }
 
-    Promise.resolve().then(function () {
+    return Promise.resolve().then(function () {
         /**
          * Skip telemetry prompt if:
          * - CI environment variable is present
@@ -397,7 +397,7 @@ function cli (inputArgs) {
                     platformCheck.forEach(function (checkItem) {
                         var checkSummary = checkItem.name + ': ' +
                             (checkItem.installed ? 'installed ' : 'not installed ') +
-                            (checkItem.metadata.version || '');
+                            (checkItem.installed ? checkItem.metadata.version.version || checkItem.metadata.version : '');
                         events.emit('log', checkSummary);
                         if (!checkItem.installed) {
                             someChecksFailed = true;

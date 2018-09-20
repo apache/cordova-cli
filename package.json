@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "8.0.1-dev",
+  "version": "8.1.0-dev",
   "preferGlobal": true,
   "description": "Cordova command line interface tool",
   "main": "cordova",
@@ -11,10 +11,9 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "npm run eslint && npm run jasmine",
-    "eslint": "eslint spec  && eslint src",
-    "cover": "istanbul cover --root src --print detail jasmine",
-    "jasmine": "jasmine"
+    "test": "npm run eslint && jasmine",
+    "eslint": "eslint . bin/cordova",
+    "cover": "istanbul cover --root src --print detail jasmine"
   },
   "repository": {
     "type": "git",
@@ -30,25 +29,27 @@
     "cli"
   ],
   "dependencies": {
-    "configstore": "2.1.0",
+    "configstore": "^3.1.2",
     "cordova-common": "^2.2.0",
-    "cordova-lib": "8.0.0",
+    "cordova-lib": "8.1.0",
     "editor": "1.0.0",
-    "insight": "0.8.4",
-    "nopt": "3.0.1",
-    "update-notifier": "0.5.0"
+    "inquirer": "^3.3.0",
+    "insight": "^0.8.4",
+    "loud-rejection": "^1.6.0",
+    "nopt": "^4.0.1",
+    "update-notifier": "^2.5.0"
   },
   "devDependencies": {
-    "eslint": "^4.0.0",
-    "eslint-config-semistandard": "^11.0.0",
-    "eslint-config-standard": "^10.2.1",
+    "eslint": "^4.19.1",
+    "eslint-config-semistandard": "^12.0.1",
+    "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.3.0",
-    "eslint-plugin-node": "^5.0.0",
-    "eslint-plugin-promise": "^3.5.0",
-    "eslint-plugin-standard": "^3.0.1",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
     "istanbul": "^0.4.5",
-    "jasmine": "^2.5.2",
-    "rewire": "^2.5.2"
+    "jasmine": "~3.1.0",
+    "rewire": "^4.0.1"
   },
   "author": "Anis Kadri",
   "contributors": [

@@ -186,7 +186,7 @@ After building the Android and iOS projects, the Android application will contai
 
 #### Version control
 
-It is recommended not to check in `platforms/` and `plugins/` directories into version control as they are considered a build artifact. Your platforms and plugins will be saved in config.xml & package.json automatically. These platforms/plugins will be downloaded when on the machine when `cordova prepare` is invoked.
+It is recommended not to check in `platforms/` and `plugins/` directories into version control as they are considered a build artifact. Your platforms and plugins will be saved in config.xml & package.json automatically. These platforms/plugins will be downloaded when `cordova prepare` is invoked.
 
 ### Examples
 
@@ -227,7 +227,7 @@ cordova {platform | platforms} [
 | update `platform` [...] |      | Update specified platforms |
 |     | --save                   | Updates the version specified in `config.xml` |
 | list |                         | List all installed and available platforms |
-| check |                        | List platforms which can be updated by `cordova-cli platform update` |
+| check |                        | List platforms which can be updated via cordova-cli with the command `platform update` |
 | save  |                        | Save `<platform-spec>` of all platforms added to config.xml |
 
 ### Platform-spec
@@ -313,7 +313,6 @@ cordova {plugin | plugins} [
     add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --browserify | --force} |
     {remove | rm} {<pluginid> | <name>} --save |
     {list | ls} |
-    search [<keyword>] |
     save |
 ]
 ```
@@ -330,7 +329,6 @@ cordova {plugin | plugins} [
 | remove `<pluginid>|<name>` [...]| | Remove plugins with the given IDs/name.
 |       |--nosave                 | Do NOT remove the specified plugin from config.xml or package.json
 |list                           |  | List currently installed plugins
-|search `[<keyword>]` [...]     |  | Search http://plugins.cordova.io for plugins matching the keywords
 |save                           |  | Save `<plugin-spec>` of all plugins currently added to the project
 
 ### Plugin-spec
@@ -360,7 +358,7 @@ based on the following criteria (listed in order of precedence):
 
 ### Examples
 
-- Add `cordova-plugin-camera` and `cordova-plugin-file` to the project and it be be saved to `config.xml` & `package.json`. Use `../plugins` directory to search for the plugins.
+- Add `cordova-plugin-camera` and `cordova-plugin-file` to the project and save it to `config.xml` & `package.json`. Use `../plugins` directory to search for the plugins.
 
         cordova plugin add cordova-plugin-camera cordova-plugin-file --save --searchpath ../plugins
 
@@ -540,7 +538,7 @@ See [cordova run command docs](#cordova-run-command) for more details.
 
 ### Synopsis
 
-Cleans the build artifacts for the specified platform, or all platforms by running platform-specific build cleanup.
+Cleans the build artifacts for all the platforms, or the specified platform by running platform-specific build cleanup.
 
 ### Syntax
 
