@@ -15,13 +15,19 @@
     under the License.
 */
 
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 const rewire = require('rewire');
-const { events, cordova } = require('cordova-lib');
+
 const logger = require('cordova-common').CordovaLogger.get();
 const telemetry = require('../src/telemetry');
 const cli = rewire('../src/cli');
+
+const lib = require('cordova-lib');
+const events = lib.events;
+const cordova = lib.cordova;
 
 // avoid node complaining of too many event listener added
 process.setMaxListeners(0);
