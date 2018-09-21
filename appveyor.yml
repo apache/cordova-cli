@@ -1,45 +1,26 @@
-# appveyor file
 # http://www.appveyor.com/docs/appveyor-yml
+
+# Performance optimization
+shallow_clone: true
+cache:
+  - '%APPDATA%\npm-cache'
 
 environment:
   matrix:
-  - nodejs_version: "4"
-  - nodejs_version: "6"
-  - nodejs_version: "8"
+    - nodejs_version: "4"
+    - nodejs_version: "6"
+    - nodejs_version: "8"
+    - nodejs_version: "10"
 
-# getting cordova tools dependencies from github
-# to make sure we're using their latest versions
 install:
-  - npm cache clean -f
-  - npm install -g npm@2
   - ps: Install-Product node $env:nodejs_version
-  - cd ..
-  - git clone https://github.com/apache/cordova-js --depth 10
-  - cd cordova-js
   - npm install
-  - npm link
-  - cd ..
-  - git clone https://github.com/apache/cordova-lib --depth 10
-  - cd cordova-lib
-  - npm install
-  - npm link cordova-js
-  - npm link
-  - cd ../cordova-cli
-  - npm link cordova-lib
-  - npm install
-  # # Workaround for npm/npm#10343
-  # - npm install
-  # - cd ../cordova-js
-  # - npm install
-  # - npm link
-  # - cd ../cordova-lib/cordova-lib
-  # - npm install
-  # - npm link ../../cordova-js
-  # - cd ../../cordova-cli
 
 build: off
 
 test_script:
+  # Workaround for https://github.com/appveyor/ci/issues/2420
+  - set "PATH=%PATH%;C:\Program Files\Git\mingw64\libexec\git-core"
   - node --version
   - npm --version
   - npm test

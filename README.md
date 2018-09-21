@@ -63,12 +63,10 @@ This simple example demonstrates how Cordova CLI can be used to create a `myApp`
 Cordova is an open source Apache project and contributors are needed to keep this project moving forward. Learn more on 
 [how to contribute on our website][contribute]. 
 
-# TO-DO + Issues
+# Reporting Issues
 
-If you find issues with this tool, please follow our guidelines for [reporting issues]. 
-We do not use github issue system as an Apache project, we have a JIRA issue management system which covers over 30+ cli, platform, 
-plugin repos in the Cordova project. Use the "CLI" component for Cordova CLI issues. However, most of the 
-functionality of Cordova CLI is implemented in cordova-lib npm module. You can also use "CordovaLib" component to file issues.
+If you find issues with the Cordova CLI, please follow our guidelines for [reporting issues]. Please bear in mind that most of `cordova-cli`'s functionality is implemented in [cordova-lib], so that could be the place to report your issue.
+Platform-specific issues should be reported in the relevant repositories, such as [cordova-android] and [cordova-ios].
 
 [Overview of Cordova]: http://cordova.apache.org/docs/en/latest/guide/overview/
 [Create your first Cordova app]: http://cordova.apache.org/docs/en/latest/guide/cli/index.html
@@ -77,3 +75,6 @@ functionality of Cordova CLI is implemented in cordova-lib npm module. You can a
 [Project directory structure]: http://cordova.apache.org/docs/en/latest/cordova-cli/index.html#directory-structure
 [Contribute]: http://cordova.apache.org/contribute/
 [Reporting issues]: http://cordova.apache.org/contribute/issues.html
+[cordova-lib]: https://github.com/apache/cordova-lib
+[cordova-android]: https://github.com/apache/cordova-android
+[cordova-ios]: https://github.com/apache/cordova-ios
