@@ -2363,7 +2363,7 @@
         "async": "^1.4.2",
         "chalk": "^1.0.0",
         "configstore": "^1.0.0",
-        "inquirer": "^3.0.6",
+        "inquirer": "^0.10.0",
         "lodash.debounce": "^3.0.1",
         "object-assign": "^4.0.1",
         "os-name": "^1.0.0",
