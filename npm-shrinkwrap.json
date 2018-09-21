@@ -1735,11 +1735,6 @@
         "strip-eof": "^1.0.0"
       }
     },
-    "exit-hook": {
-      "version": "1.1.1",
-      "resolved": "https://registry.npmjs.org/exit-hook/-/exit-hook-1.1.1.tgz",
-      "integrity": "sha1-8FyiM7SMBdVP/wd2XfhQfpXAL/g="
-    },
     "express": {
       "version": "4.16.3",
       "resolved": "http://registry.npmjs.org/express/-/express-4.16.3.tgz",
@@ -2441,7 +2436,6 @@
           "resolved": "https://registry.npmjs.org/restore-cursor/-/restore-cursor-1.0.1.tgz",
           "integrity": "sha1-NGYfRohjJ/7SmRR5FSJS35LapUE=",
           "requires": {
-            "exit-hook": "^1.0.0",
             "onetime": "^1.0.0"
           }
         },
