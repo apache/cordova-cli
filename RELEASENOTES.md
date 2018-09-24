@@ -20,6 +20,18 @@
 -->
 # Cordova-cli Release Notes
 
+### 8.1.0 (Sep 24, 2018)
+* README.md fixes
+* [GH-295](https://github.com/apache/cordova-cli/pull/GH-295) Proper error code and message when failing
+* [GH-296](https://github.com/apache/cordova-cli/pull/GH-296) Remove leftover makeshift benchmarking code
+* [GH-296](https://github.com/apache/cordova-cli/pull/GH-296) Use multi-line comment for license headers
+* [CB-13772](https://issues.apache.org/jira/browse/CB-13772) print version numbers correctly in cordova requirements [GH-291](https://github.com/apache/cordova-cli/pull/291)
+* [GH-307](https://github.com/apache/cordova-cli/pull/GH-307) Remove outdated docs translations
+* [GH-306](https://github.com/apache/cordova-cli/pull/GH-306) Remove mentions of 'cordova plugin search' from docs
+* [GH-312](https://github.com/apache/cordova-cli/pull/GH-312) Update ESLint and fix linting errors
+* [GH-312](https://github.com/apache/cordova-cli/pull/GH-312) Update dependencies
+* [GH-300](https://github.com/apache/cordova-cli/issues/300) Update `insight` to resolve `npm audit` warning
+
 ### 8.0.0 (Dec 14, 2017)
 * [CB-13055](https://issues.apache.org/jira/browse/CB-13055): removed `--nofetch` flag
 * Use native Promises instead of `Q`
