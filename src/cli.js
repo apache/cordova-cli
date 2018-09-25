@@ -381,17 +381,21 @@ function cli (inputArgs) {
                     }
 
                     var someChecksFailed = false;
-                    platformCheck.forEach(function (checkItem) {
-                        var checkSummary = checkItem.name + ': ' +
-                            (checkItem.installed ? 'installed ' : 'not installed ') +
-                            (checkItem.installed ? checkItem.metadata.version.version || checkItem.metadata.version : '');
-                        events.emit('log', checkSummary);
-                        if (!checkItem.installed) {
-                            someChecksFailed = true;
-                            events.emit('warn', checkItem.metadata.reason);
-                        }
-                    });
 
+                    // platformCheck is expected to be an array of conditions that must be met
+                    // the browser platform currently returns nothing, which was breaking here.
+                    if (platformCheck && platformCheck.forEach) {
+                        platformCheck.forEach(function (checkItem) {
+                            var checkSummary = checkItem.name + ': ' +
+                                (checkItem.installed ? 'installed ' : 'not installed ') +
+                                (checkItem.installed ? checkItem.metadata.version.version || checkItem.metadata.version : '');
+                            events.emit('log', checkSummary);
+                            if (!checkItem.installed) {
+                                someChecksFailed = true;
+                                events.emit('warn', checkItem.metadata.reason);
+                            }
+                        });
+                    }
                     return someChecksFailed;
                 }).some(function (isCheckFailedForPlatform) {
                     return isCheckFailedForPlatform;
