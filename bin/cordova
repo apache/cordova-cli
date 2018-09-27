@@ -21,7 +21,8 @@
 
 require('loud-rejection/register');
 const util = require('util');
-const { events, CordovaError } = require('cordova-common');
+const events = require('cordova-common').events;
+const CordovaError = require('cordova-common').CordovaError;
 const cli = require('../src/cli');
 
 cli(process.argv).catch(err => {
