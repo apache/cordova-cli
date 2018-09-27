@@ -20,6 +20,10 @@
 -->
 # Cordova-cli Release Notes
 
+### 8.1.1 (Sep 27, 2018)
+* [GH-339](https://github.com/apache/cordova-cli/issues/339) Fix bin/cordova on Node.js 4
+* [GH-337](https://github.com/apache/cordova-cli/issues/337) Revert messing with transitive dependencies in `npm-shrinkwrap.json` (re-introduces a _low-severity_ `npm audit` warning)
+
 ### 8.1.0 (Sep 24, 2018)
 * README.md fixes
 * [GH-295](https://github.com/apache/cordova-cli/pull/GH-295) Proper error code and message when failing
