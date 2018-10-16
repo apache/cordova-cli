@@ -23,4 +23,5 @@ test_script:
   - set "PATH=%PATH%;C:\Program Files\Git\mingw64\libexec\git-core"
   - node --version
   - npm --version
+  - bin\cordova --version
   - npm test
