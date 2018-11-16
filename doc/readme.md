@@ -497,7 +497,7 @@ cordova run [<platform> [...]]
 | --device    | Deploy to a device
 | --emulator  | Deploy to an emulator
 | --target    | Deploy to a specific target emulator/device. Use `--list` to display target options
-| --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process esecially related to signing the package.
+| --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process esecially related to signing the package.<br/> Use `~` to target to `HOME` enviroment variable.
 | `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.
 
 ### Examples
