@@ -497,4 +497,16 @@ describe('cordova cli', () => {
         });
 
     });
+
+    describe('requirements', () => {
+        beforeEach(() => {
+            spyOn(cordova, 'requirements').and.returnValue(Promise.resolve({browser: []}));
+        });
+
+        it('Test#050 : requirements browser', () => {
+            return cli(['node', 'cordova', 'requirements', 'browser']).then(() => {
+                expect(cordova.requirements).toHaveBeenCalledWith(['browser']);
+            });
+        });
+    });
 });
