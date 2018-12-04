@@ -72,7 +72,7 @@ describe('cordova cli', () => {
         });
     });
 
-    describe('Test#004 : project commands other than plugin and platform', () => {
+    describe('build', () => {
         beforeEach(() => {
             spyOn(cordova, 'build').and.returnValue(Promise.resolve());
         });
