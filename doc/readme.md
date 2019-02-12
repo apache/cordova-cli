@@ -388,8 +388,8 @@ It only performs the compilation step without doing prepare. It's common to invo
 
 ```bash
 cordova compile [<platform> [...]]
-    [--debug|--release]
-    [--device|--emulator|--target=<targetName>]
+    [--debug | --release]
+    [--device | --emulator | --target=<targetName>]
     [--buildConfig=<configfile>]
     [-- <platformOpts>]
 ```
@@ -405,8 +405,8 @@ Shortcut for `cordova prepare` + `cordova compile` for all/the specified platfor
 
 ```bash
 cordova build [<platform> [...]]
-    [--debug|--release]
-    [--device|--emulator]
+    [--debug | --release]
+    [--device | --emulator]
     [--buildConfig=<configfile>]
     [-- <platformOpts>]
 ```
@@ -446,9 +446,9 @@ Prepares, builds, and deploys app on specified platform devices/emulators. If a 
 ```bash
 cordova run [<platform> [...]]
     [--list | --debug | --release]
-    [--noprepare] [--nobuild]
-    [--device|
-    |--target=<targetName>]
+    [--noprepare]
+    [--nobuild]
+    [--device | --emulator | --target=<targetName>]
     [--buildConfig=<configfile>]
     [-- <platformOpts>]
 ```
