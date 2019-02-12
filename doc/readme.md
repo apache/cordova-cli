@@ -417,7 +417,7 @@ cordova build [<platform> [...]]
 | --debug    | Perform a debug build. This typically translates to debug mode for the underlying platform being built.
 | --release  | Perform a release build. This typically translates to release mode for the underlying platform being built.
 | --device   | Build it for a device
-| --emulator | Build it for an emulator. In particular, the platform architecture might be different for a device Vs emulator.
+| --emulator | Build it for an emulator. In particular, the platform architecture might be different for a device vs. emulator.
 | --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process especially related to signing the package.
 | `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.
 
@@ -447,7 +447,8 @@ Prepares, builds, and deploys app on specified platform devices/emulators. If a 
 cordova run [<platform> [...]]
     [--list | --debug | --release]
     [--noprepare] [--nobuild]
-    [--device|--emulator|--target=<targetName>]
+    [--device|
+    |--target=<targetName>]
     [--buildConfig=<configfile>]
     [-- <platformOpts>]
 ```
