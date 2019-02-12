@@ -387,7 +387,7 @@ It only performs the compilation step without doing prepare. It's common to invo
 ### Syntax
 
 ```bash
-cordova build [<platform> [...]]
+cordova compile [<platform> [...]]
     [--debug|--release]
     [--device|--emulator|--target=<targetName>]
     [--buildConfig=<configfile>]
