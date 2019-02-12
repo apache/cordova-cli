@@ -38,10 +38,10 @@ These commands are available at all times.
 
 | Command  | Description
 |----------|--------------
-| create | Create a project
-| help `<command>` | Get help for a command
-| telemetry | Turn telemetry collection on or off
-| config | Set, get, delete, edit, and list global cordova options
+| `create` | Create a project
+| `help <command>` | Get help for a command
+| `telemetry` | Turn telemetry collection on or off
+| `config` | Set, get, delete, edit, and list global cordova options
 
 ## Project Command List
 
@@ -49,15 +49,16 @@ These commands are supported when the current working directory is a valid Cordo
 
 | Command      | Description
 |--------------|--------------
-| info         | Generate project information
-| requirements | Checks and print out all the installation requirements for platforms specified
-| platform     | Manage project platforms
-| plugin       | Manage project plugins
-| prepare      | Copy files into platform(s) for building
-| compile      | Build platform(s)
-| clean        | Cleanup project from build artifacts
-| run          | Run project (including prepare && compile)
-| serve        | Run project with a local webserver (including prepare)
+| `info`         | Generate project information
+| `requirements` | Checks and print out all the installation requirements for platforms specified
+| `platform`     | Manage project platforms
+| `plugin`       | Manage project plugins
+| `prepare`      | Copy files into platform(s) for building
+| `compile`      | Compile project for platform(s)
+| `build`        | Build project for platform(s) (`prepare` + `compile`)
+| `clean`        | Cleanup project from build artifacts
+| `run`          | Run project (including prepare && compile)
+| `serve`        | Run project with a local webserver (including prepare)
 
 ## Common options
 
@@ -374,7 +375,7 @@ cordova prepare [<platform> [..]]
 
 | Option     | Description
 |------------|------------------
-| `<platform> [..]` | Platform name(s) to prepare. If not specified, all platforms are built.
+| `<platform> [..]` | Platform name(s) to prepare. If not specified, all platforms are prepared.
 
 ## cordova compile command
 
