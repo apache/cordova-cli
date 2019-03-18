@@ -305,7 +305,7 @@ function cli (inputArgs) {
 
     if (/^v0.\d+[.\d+]*/.exec(process.version)) { // matches v0.*
         var msg1 = 'Warning: using node version ' + process.version +
-                ' which has been deprecated. Please upgrade to the latest node version available (v6.x is recommended).';
+                ' which has been deprecated. Please upgrade to the latest Node.js version available (LTS version recommended).';
         logger.warn(msg1);
     }
 
