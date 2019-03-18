@@ -34,7 +34,7 @@
     "cordova-lib": "^9.0.0",
     "editor": "^1.0.0",
     "insight": "^0.10.1",
-    "loud-rejection": "^1.6.0",
+    "loud-rejection": "^2.0.0",
     "nopt": "^4.0.1",
     "update-notifier": "^2.5.0"
   },
