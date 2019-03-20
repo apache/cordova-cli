@@ -18,6 +18,22 @@
 const fs = require('fs');
 const path = require('path');
 const rewire = require('rewire');
+/*
+    After Cordova-Common 3.1.0, logger[level] property becomes not writable.
+    Therefore we re-define addLevel function here to use SpyOn logger[level]
+*/
+const CordovaLogger = require('cordova-common').CordovaLogger;
+CordovaLogger.prototype.addLevel = function (level, severity, color) {
+    this.levels[level] = severity;
+    if (color) {
+        this.colors[level] = color;
+    }
+    // Define own method with corresponding name
+    if (!this[level]) {
+        this[level] = this.log.bind(this, level);
+    }
+    return this;
+};
 const { events, cordova } = require('cordova-lib');
 const logger = require('cordova-common').CordovaLogger.get();
 const telemetry = require('../src/telemetry');
