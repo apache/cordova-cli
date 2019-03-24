@@ -516,7 +516,7 @@ describe('cordova cli', () => {
 
     describe('requirements', () => {
         beforeEach(() => {
-            spyOn(cordova, 'requirements').and.returnValue(Promise.resolve({browser: []}));
+            spyOn(cordova, 'requirements').and.returnValue(Promise.resolve({ browser: [] }));
         });
 
         it('should succeed on browser as the platform argument to the requirement check method.', () => {
