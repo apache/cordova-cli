@@ -20,6 +20,53 @@
 -->
 # Cordova-cli Release Notes
 
+### 9.0.0 (Mar 20, 2019)
+
+* [GH-414](https://github.com/apache/cordova-cli/pull/414) Cordova CLI Release Preparation (Cordova 9)
+  * **Bumped Dependencies**
+    * `cordova-lib@^9.0.0`
+    * `cordova-common@^3.1.0`
+    * `editor@^1.0.0` (Prepended `^` only)
+    * `loud-rejection@^2.0.0`
+  * **Bumped Dev Dependencies**
+    * `jasmine@^3.3.1`
+    * `eslint-plugin-promise@^4.0.1`
+    * `eslint-plugin-node@^8.0.1`
+    * `eslint-plugin-import@^2.16.0`
+    * `eslint-config-standard@^12.0.0`
+    * `eslint-config-semistandard@^13.0.0`
+    * `eslint@^5.15.2`
+  * Fix `logger[level]` spy in Jasmine
+* [GH-397](https://github.com/apache/cordova-cli/pull/397) Update Node.js Deprecation Notice Message
+* Add or update GitHub pull request and issue template
+* [GH-395](https://github.com/apache/cordova-cli/pull/395) Fix typo: "esecially" to especially
+* [GH-364](https://github.com/apache/cordova-cli/pull/364) Fix spec label for build tests
+* [GH-344](https://github.com/apache/cordova-cli/pull/344) Check that `bin/cordova` works on Travis CI
+* [CB-13740](https://issues.apache.org/jira/browse/CB-13740) gracefully handle platforms that don't pass back requirements to check
+* [GH-327](https://github.com/apache/cordova-cli/pull/327) Stub telemetry calls during all tests
+* [GH-322](https://github.com/apache/cordova-cli/pull/322) Remove support for `fetch` option
+* [GH-321](https://github.com/apache/cordova-cli/pull/321) Remove support for `browserify`
+* [GH-317](https://github.com/apache/cordova-cli/pull/317) cli.spec: Telemetry-Related Improvements
+* [GH-316](https://github.com/apache/cordova-cli/pull/316) Remove `callback` parameter of main CLI function
+* [GH-298](https://github.com/apache/cordova-cli/pull/298) Remove support for deprecated `--copy-from`
+* [GH-298](https://github.com/apache/cordova-cli/pull/298) Cleanup code calling `cordova-create`
+
+### 8.1.1 (Sep 27, 2018)
+* [GH-339](https://github.com/apache/cordova-cli/issues/339) Fix bin/cordova on Node.js 4
+* [GH-337](https://github.com/apache/cordova-cli/issues/337) Revert messing with transitive dependencies in `npm-shrinkwrap.json` (re-introduces a _low-severity_ `npm audit` warning)
+
+### 8.1.0 (Sep 24, 2018)
+* README.md fixes
+* [GH-295](https://github.com/apache/cordova-cli/pull/GH-295) Proper error code and message when failing
+* [GH-296](https://github.com/apache/cordova-cli/pull/GH-296) Remove leftover makeshift benchmarking code
+* [GH-296](https://github.com/apache/cordova-cli/pull/GH-296) Use multi-line comment for license headers
+* [CB-13772](https://issues.apache.org/jira/browse/CB-13772) print version numbers correctly in cordova requirements [GH-291](https://github.com/apache/cordova-cli/pull/291)
+* [GH-307](https://github.com/apache/cordova-cli/pull/GH-307) Remove outdated docs translations
+* [GH-306](https://github.com/apache/cordova-cli/pull/GH-306) Remove mentions of 'cordova plugin search' from docs
+* [GH-312](https://github.com/apache/cordova-cli/pull/GH-312) Update ESLint and fix linting errors
+* [GH-312](https://github.com/apache/cordova-cli/pull/GH-312) Update dependencies
+* [GH-300](https://github.com/apache/cordova-cli/issues/300) Update `insight` to resolve `npm audit` warning
+
 ### 8.0.0 (Dec 14, 2017)
 * [CB-13055](https://issues.apache.org/jira/browse/CB-13055): removed `--nofetch` flag
 * Use native Promises instead of `Q`

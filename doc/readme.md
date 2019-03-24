@@ -452,7 +452,7 @@ cordova build [<platform> [...]]
 | --release  | Perform a release build. This typically translates to release mode for the underlying platform being built.
 | --device   | Build it for a device
 | --emulator | Build it for an emulator. In particular, the platform architecture might be different for a device Vs emulator.
-| --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process esecially related to signing the package.
+| --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process especially related to signing the package.
 | `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.
 
 ### Examples
@@ -497,7 +497,7 @@ cordova run [<platform> [...]]
 | --device    | Deploy to a device
 | --emulator  | Deploy to an emulator
 | --target    | Deploy to a specific target emulator/device. Use `--list` to display target options
-| --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process esecially related to signing the package.
+| --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process especially related to signing the package.
 | `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.
 
 ### Examples
