@@ -503,7 +503,7 @@ describe('cordova cli', () => {
             spyOn(cordova, 'requirements').and.returnValue(Promise.resolve({browser: []}));
         });
 
-        it('should pass browser as the platform argument to the requirement check method.', () => {
+        it('should succeed on browser as the platform argument to the requirement check method.', () => {
             return cli(['node', 'cordova', 'requirements', 'browser']).then(() => {
                 expect(cordova.requirements).toHaveBeenCalledWith(['browser']);
             });
