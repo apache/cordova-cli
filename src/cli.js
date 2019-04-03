@@ -148,7 +148,7 @@ module.exports = function (inputArgs) {
     }
 
     // If "ls" is called
-    if ((isConfigCmd && inputArgs[3] === 'ls') || (inputArgs[3] === 'list')) {
+    if (isConfigCmd && (inputArgs[3] === 'ls' || inputArgs[3] === 'list')) {
         fs.readFile(conf.path, 'utf8', function (err, data) {
             if (err) {
                 logger.error(err);
