@@ -15,7 +15,6 @@
     under the License.
 */
 
-const fs = require('fs');
 const path = require('path');
 const rewire = require('rewire');
 /*
@@ -438,6 +437,7 @@ describe('cordova cli', () => {
         const cordovaConfig = {};
 
         const confMock = {
+            all: cordovaConfig,
             set (key, value) {
                 cordovaConfig[key] = value;
             },
@@ -503,12 +503,10 @@ describe('cordova cli', () => {
         });
 
         it('Test #047 : config ls is called', () => {
-            spyOn(fs, 'readFile').and.callFake((confPath, cb) => {
-                confHolder = confPath();
-            });
+            const expectedOutput = JSON.stringify(cordovaConfig, null, 4);
 
             return cli(['node', 'cordova', 'config', 'ls']).then(() => {
-                expect(path.basename(confHolder)).toEqual('cordova-config.json');
+                expect(logger.results).toHaveBeenCalledWith(expectedOutput);
             });
         });
 
