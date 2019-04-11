@@ -17,24 +17,7 @@
 
 const path = require('path');
 const rewire = require('rewire');
-/*
-    After Cordova-Common 3.1.0, logger[level] property becomes not writable.
-    Therefore we re-define addLevel function here to use SpyOn logger[level]
-*/
-const CordovaLogger = require('cordova-common').CordovaLogger;
-CordovaLogger.prototype.addLevel = function (level, severity, color) {
-    this.levels[level] = severity;
-    if (color) {
-        this.colors[level] = color;
-    }
-    // Define own method with corresponding name
-    if (!this[level]) {
-        this[level] = this.log.bind(this, level);
-    }
-    return this;
-};
 const { events, cordova } = require('cordova-lib');
-const logger = require('cordova-common').CordovaLogger.get();
 const telemetry = require('../src/telemetry');
 const cli = rewire('../src/cli');
 
@@ -42,6 +25,8 @@ const cli = rewire('../src/cli');
 process.setMaxListeners(0);
 
 describe('cordova cli', () => {
+    let logger;
+
     beforeEach(() => {
         // Event registration is currently process-global. Since all jasmine
         // tests in a directory run in a single process (and in parallel),
@@ -52,8 +37,10 @@ describe('cordova cli', () => {
         spyOn(events, 'on').and.returnValue({ on () { return this; } });
 
         // Spy and mute output
-        spyOn(logger, 'results');
-        spyOn(logger, 'warn');
+        logger = jasmine.createSpyObj('logger', [
+            'subscribe', 'setLevel', 'results', 'warn'
+        ]);
+        cli.__set__({ logger });
         spyOn(console, 'log');
 
         // Prevent accidentally turning telemetry on/off during testing
@@ -380,7 +367,6 @@ describe('cordova cli', () => {
 
         beforeEach(() => {
             spyOn(cordova, 'platform').and.returnValue(Promise.resolve());
-            logger.setLevel('error');
         });
 
         it('Test #034 : (add) autosave is the default setting for platform add', () => {
@@ -461,8 +447,6 @@ describe('cordova cli', () => {
             });
 
             confrevert = cli.__set__('conf', confMock);
-            logger.setLevel('error');
-            // spyOn(console, 'log');
         });
 
         afterEach(() => {
