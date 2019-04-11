@@ -29,7 +29,6 @@ var logger = require('cordova-common').CordovaLogger.get();
 var Configstore = require('configstore');
 var conf = new Configstore(pkg.name + '-config');
 var editor = require('editor');
-var fs = require('fs');
 
 var knownOpts = {
     'verbose': Boolean,
@@ -149,13 +148,7 @@ module.exports = function (inputArgs) {
 
     // If "ls" is called
     if (isConfigCmd && (inputArgs[3] === 'ls' || inputArgs[3] === 'list')) {
-        fs.readFile(conf.path, 'utf8', function (err, data) {
-            if (err) {
-                logger.error(err);
-            } else {
-                logger.log(data);
-            }
-        });
+        logger.results(JSON.stringify(conf.all, null, 4));
     }
 
     return Promise.resolve().then(function () {
