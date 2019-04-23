@@ -26,10 +26,7 @@ const cli = require('../src/cli');
 
 cli(process.argv).catch(err => {
     if (!(err instanceof Error)) {
-        const errorOutput = typeof err === 'string'
-            ? err
-            : util.inspect(err);
-
+        const errorOutput = typeof err === 'string' ? err : util.inspect(err);
         throw new CordovaError('Promise rejected with non-error: ' + errorOutput);
     }
     process.exitCode = err.code || 1;
