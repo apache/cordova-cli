@@ -315,7 +315,7 @@ cordova {plugin | plugins} [
 |       |--link                   | When installing from a local path, creates a symbolic link instead of copying files. The extent to which files are linked varies by platform. Useful for plugin development.
 |       |--nosave                 | Do NOT save the `<plugin-spec>` as part of the `plugin` element  into `config.xml` or `package.json`.
 |       |--force                  | _Introduced in version 6.1._ Forces copying source files from the plugin even if the same file already exists in the target directory.
-| remove `<pluginid>` or remove `<name>` [...] | | Remove plugins with the given IDs/name.
+| remove `<pluginid>\|<name>` [...] | | Remove plugins with the given IDs/name.
 |       |--nosave                 | Do NOT remove the specified plugin from config.xml or package.json
 |list                           |  | List currently installed plugins
 |save                           |  | Save `<plugin-spec>` of all plugins currently added to the project
