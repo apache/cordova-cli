@@ -39,7 +39,7 @@ These commands are available at all times.
 | Command  | Description
 |----------|--------------
 | create | Create a project
-| help <command> | Get help for a command
+| help `<command>` | Get help for a command
 | telemetry | Turn telemetry collection on or off
 | config | Set, get, delete, edit, and list global cordova options
 
@@ -222,7 +222,7 @@ cordova {platform | platforms} [
 |     | --link=`<path>`          | When `<platform-spec>` is a local path, links the platform library directly instead of making a copy of it (support varies by platform; useful for platform development)
 | remove `<platform>` [...] |    | Remove specified platforms |
 |     | --nosave                 | Do not delete specified platforms from `config.xml` & `package.json` after removing them |
-| update `platform` [...] |      | Update specified platforms |
+| update `<platform>` [...] |      | Update specified platforms |
 |     | --save                   | Updates the version specified in `config.xml` |
 | list |                         | List all installed and available platforms |
 | check |                        | List platforms which can be updated via cordova-cli with the command `platform update` |
@@ -246,11 +246,11 @@ There are a number of ways to specify a platform:
 
 ### Supported Platforms
 
-- Android
-- iOS
-- Windows (8.1, Phone 8.1, UWP - Windows 10)
-- Browser
-- Electron
+- `android`
+- `ios`
+- `windows`
+- `browser`
+- `electron`
 
 ### Examples
 
@@ -315,7 +315,7 @@ cordova {plugin | plugins} [
 |       |--link                   | When installing from a local path, creates a symbolic link instead of copying files. The extent to which files are linked varies by platform. Useful for plugin development.
 |       |--nosave                 | Do NOT save the `<plugin-spec>` as part of the `plugin` element  into `config.xml` or `package.json`.
 |       |--force                  | _Introduced in version 6.1._ Forces copying source files from the plugin even if the same file already exists in the target directory.
-| remove `<pluginid>|<name>` [...]| | Remove plugins with the given IDs/name.
+| remove `<pluginid>` or remove `<name>` [...] | | Remove plugins with the given IDs/name.
 |       |--nosave                 | Do NOT remove the specified plugin from config.xml or package.json
 |list                           |  | List currently installed plugins
 |save                           |  | Save `<plugin-spec>` of all plugins currently added to the project
