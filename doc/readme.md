@@ -251,16 +251,8 @@ There are a number of ways to specify a platform:
 - Android
 - iOS
 - Windows (8.1, Phone 8.1, UWP - Windows 10)
-- Blackberry10
-- Ubuntu
 - Browser
-
-### Deprecated Platforms
-
-- Amazon-fireos (use Android platform instead)
-- WP8 (use Windows platform instead)
-- Windows 8.0 (use older versions of cordova)
-- Firefox OS (use older versions of cordova)
+- Electron
 
 ### Examples
 
