@@ -83,8 +83,6 @@ Certain commands have options (`platformOpts`) that are specific to a particular
         cd myApp
         # Add camera plugin to the project and remember that in config.xml & package.json.
         cordova plugin add cordova-plugin-camera
-        # Add camera plugin to the project and remember that in config.xml and package.json.
-        cordova plugin add cordova-plugin-camera
         # Add android platform to the project and remember that in config.xml & package.json.
         cordova platform add android
         # Check to see if your system is configured for building android platform.
