@@ -36,6 +36,7 @@
     "insight": "^0.10.1",
     "loud-rejection": "^2.0.0",
     "nopt": "^4.0.1",
+    "semver": "^6.2.0",
     "update-notifier": "^2.5.0"
   },
   "devDependencies": {
