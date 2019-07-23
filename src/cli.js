@@ -29,6 +29,9 @@ var logger = require('cordova-common').CordovaLogger.get();
 var Configstore = require('configstore');
 var conf = new Configstore(pkg.name + '-config');
 var editor = require('editor');
+const semver = require('semver');
+
+const NODE_VERSION_REQUIREMENT = '>=8';
 
 var knownOpts = {
     'verbose': Boolean,
@@ -296,10 +299,9 @@ function cli (inputArgs) {
         }
     }
 
-    if (/^v0.\d+[.\d+]*/.exec(process.version)) { // matches v0.*
-        var msg1 = 'Warning: using node version ' + process.version +
-                ' which has been deprecated. Please upgrade to the latest Node.js version available (LTS version recommended).';
-        logger.warn(msg1);
+    // If the Node.js versions does not meet our requirements, it will then display warning.
+    if (!semver.satisfies(process.version, NODE_VERSION_REQUIREMENT)) {
+        logger.warn(`Warning: Node.js ${process.version} is no longer supported. Please upgrade to the latest Node.js version available (LTS version recommended).`);
     }
 
     // If there were arguments protected from nopt with a double dash, keep
