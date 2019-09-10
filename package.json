@@ -11,9 +11,9 @@
     "cordova": "./bin/cordova"
   },
   "scripts": {
-    "test": "npm run eslint && jasmine",
+    "test": "npm run eslint && npm run cover",
     "eslint": "eslint . bin/cordova",
-    "cover": "istanbul cover --root src --print detail jasmine"
+    "cover": "nyc jasmine"
   },
   "repository": {
     "type": "git",
@@ -47,8 +47,8 @@
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "istanbul": "^0.4.5",
     "jasmine": "^3.3.1",
+    "nyc": "^14.1.1",
     "rewire": "^4.0.1"
   },
   "author": "Anis Kadri",
@@ -150,5 +150,15 @@
       "email": "purplecabbage@gmail.com"
     }
   ],
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "nyc": {
+    "include": [
+      "bin/**",
+      "src/**"
+    ],
+    "reporter": [
+      "lcov",
+      "text"
+    ]
+  }
 }
