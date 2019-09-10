@@ -507,4 +507,54 @@ describe('cordova cli', () => {
             });
         });
     });
+
+    describe('node requirement', () => {
+        it('should warn users about unsupported node version', () => {
+            cli.__set__('NODE_VERSION', 'v6.1.0');
+            cli.__set__('NODE_VERSION_DEPRECATING_RANGE1', null);
+            cli.__set__('NODE_VERSION_DEPRECATING_RANGE2', null);
+            cli.__set__('NODE_VERSION_REQUIREMENT', '>=8');
+
+            return cli(['node', 'cordova']).then(() => {
+                const errorMsg = logger.warn.calls.argsFor(1).toString();
+                expect(errorMsg).toMatch(/v6.1.0 is no longer supported./);
+            });
+        });
+
+        it('should not warn users about unsupported node version', () => {
+            cli.__set__('NODE_VERSION', 'v8.0.0');
+            cli.__set__('NODE_VERSION_DEPRECATING_RANGE1', null);
+            cli.__set__('NODE_VERSION_DEPRECATING_RANGE2', null);
+            cli.__set__('NODE_VERSION_REQUIREMENT', '>=8');
+
+            return cli(['node', 'cordova']).then(() => {
+                const errorMsg = logger.warn.calls.argsFor(1).toString();
+                expect(errorMsg).toBeFalsy();
+            });
+        });
+
+        it('should warn users about deprecated node version', () => {
+            cli.__set__('NODE_VERSION', 'v8.0.0');
+            cli.__set__('NODE_VERSION_DEPRECATING_RANGE1', '>=8');
+            cli.__set__('NODE_VERSION_DEPRECATING_RANGE2', '<10');
+            cli.__set__('NODE_VERSION_REQUIREMENT', '>=8');
+
+            return cli(['node', 'cordova']).then(() => {
+                const errorMsg = logger.warn.calls.argsFor(1).toString();
+                expect(errorMsg).toMatch(/v8.0.0 has been deprecated./);
+            });
+        });
+
+        it('should warn users about deprecated node version', () => {
+            cli.__set__('NODE_VERSION', 'v10.0.0');
+            cli.__set__('NODE_VERSION_DEPRECATING_RANGE1', '>=8');
+            cli.__set__('NODE_VERSION_DEPRECATING_RANGE2', '<10');
+            cli.__set__('NODE_VERSION_REQUIREMENT', '>=8');
+
+            return cli(['node', 'cordova']).then(() => {
+                const errorMsg = logger.warn.calls.argsFor(1).toString();
+                expect(errorMsg).toBeFalsy();
+            });
+        });
+    });
 });
