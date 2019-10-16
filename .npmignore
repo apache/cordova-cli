@@ -2,3 +2,4 @@ temp
 spec
 e2e
 coverage
+.nyc_output
