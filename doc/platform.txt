@@ -23,7 +23,6 @@ Manage project platforms
                                         update to the latest <version> if no <plat-spec> is specified
 
     list .............................. List all installed and available platforms
-    check ............................. List platforms which can be updated by `cordova-cli platform update`
     nosave ............................ Prevents saving version of all platforms added to 
                                         config.xml & package.json
 Syntax
