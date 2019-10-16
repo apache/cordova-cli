@@ -13,8 +13,15 @@ node_js:
   - 10
   - 12
 
+install:
+  - npm install
+  - npm install -g codecov
+
 before_script:
   # Ensure that bin script actually runs on used Node.js version
   # to detect and avoid bugs such as apache/cordova-cli#339
   # (<https://github.com/apache/cordova-cli/issues/339>)
   - ./bin/cordova --version
+
+after_script:
+  - codecov
