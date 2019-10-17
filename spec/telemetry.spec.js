@@ -207,6 +207,7 @@ describe('telemetry', () => {
             beforeEach(() => {
                 // Ensure that insight really shows a prompt
                 delete process.env.CI;
+                process.stdout.isTTY = true;
                 insight.askPermission.and.callThrough();
 
                 stdin = mockStdin.stdin();
@@ -221,6 +222,7 @@ describe('telemetry', () => {
                 stdin.restore();
             });
             restoreAfterEach(process.env, 'CI');
+            restoreAfterEach(process.stdout, 'isTTY');
 
             it('actually shows a prompt [T025]', () => {
                 return telemetry.showPrompt().then(() => {
