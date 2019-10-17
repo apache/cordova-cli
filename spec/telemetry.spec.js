@@ -222,6 +222,12 @@ describe('telemetry', () => {
             });
             restoreAfterEach(process.env, 'CI');
 
+            it('actually shows a prompt [T025]', () => {
+                return telemetry.showPrompt().then(() => {
+                    expect(process.stdout.write).toHaveBeenCalled();
+                });
+            });
+
             it('saves the user response [T018]', () => {
                 process.nextTick(_ => stdin.send('y\n'));
                 return telemetry.showPrompt().then(result => {
