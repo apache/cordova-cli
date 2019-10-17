@@ -31,7 +31,12 @@ var conf = new Configstore(pkg.name + '-config');
 var editor = require('editor');
 const semver = require('semver');
 
+// process.version is not declared writable or has no setter so storing in const for Jasmine.
+const NODE_VERSION = process.version;
+
+// When there is no node version in the deprecation stage, set to null or false.
 const NODE_VERSION_REQUIREMENT = '>=8';
+const NODE_VERSION_DEPRECATING_RANGE = '<10';
 
 var knownOpts = {
     'verbose': Boolean,
@@ -298,9 +303,19 @@ function cli (inputArgs) {
         }
     }
 
-    // If the Node.js versions does not meet our requirements, it will then display warning.
-    if (!semver.satisfies(process.version, NODE_VERSION_REQUIREMENT)) {
-        logger.warn(`Warning: Node.js ${process.version} is no longer supported. Please upgrade to the latest Node.js version available (LTS version recommended).`);
+    let warningPartial = null;
+
+    // If the Node.js versions does not meet our requirements or in a deprecation stage, display a warning.
+    if (!semver.satisfies(NODE_VERSION, NODE_VERSION_REQUIREMENT)) {
+        warningPartial = 'is no longer supported';
+    } else if (NODE_VERSION_DEPRECATING_RANGE &&
+               semver.satisfies(NODE_VERSION, NODE_VERSION_DEPRECATING_RANGE)) {
+        warningPartial = 'has been deprecated';
+    }
+
+    if (warningPartial) {
+        const upgradeMsg = `Please upgrade to the latest Node.js version available (LTS version recommended).`;
+        logger.warn(`Warning: Node.js ${NODE_VERSION} ${warningPartial}. ${upgradeMsg}`);
     }
 
     // If there were arguments protected from nopt with a double dash, keep
