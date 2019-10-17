@@ -280,9 +280,8 @@ function cli (inputArgs) {
         logger.setLevel('verbose');
     }
 
-    var cliVersion = require('../package').version;
-    // TODO: Use semver.prerelease when it gets released
-    var usingPrerelease = /-nightly|-dev$/.exec(cliVersion);
+    var cliVersion = pkg.version;
+    var usingPrerelease = !!semver.prerelease(cliVersion);
     if (args.version || usingPrerelease) {
         var libVersion = require('cordova-lib/package').version;
         var toPrint = cliVersion;
