@@ -21,6 +21,15 @@ const rewire = require('rewire');
 const Insight = require('insight');
 const mockStdin = require('mock-stdin');
 
+function restoreAfterEach (obj, prop) {
+    const originalValue = obj[prop];
+    const restoreProp = Object.prototype.hasOwnProperty.call(obj, prop)
+        ? () => { obj[prop] = originalValue; }
+        : () => { delete obj[prop]; };
+
+    afterEach(restoreProp);
+}
+
 describe('telemetry', () => {
     let telemetry, insight;
 
@@ -194,12 +203,13 @@ describe('telemetry', () => {
         });
 
         describe('gory details', () => {
-            let CI, stdin;
+            let stdin;
             beforeEach(() => {
-                CI = process.env.CI;
+                // Ensure that insight really shows a prompt
                 delete process.env.CI;
-                stdin = mockStdin.stdin();
                 insight.askPermission.and.callThrough();
+
+                stdin = mockStdin.stdin();
 
                 // To silence the prompts by insight
                 spyOn(process.stdout, 'write');
@@ -209,10 +219,8 @@ describe('telemetry', () => {
             });
             afterEach(() => {
                 stdin.restore();
-                if (CI !== undefined) {
-                    process.env.CI = CI;
-                }
             });
+            restoreAfterEach(process.env, 'CI');
 
             it('saves the user response [T018]', () => {
                 process.nextTick(_ => stdin.send('y\n'));
@@ -260,16 +268,10 @@ describe('telemetry', () => {
         });
 
         describe('on CI', () => {
-            let CI;
             beforeEach(() => {
-                CI = process.env.CI;
                 process.env.CI = 1;
             });
-            afterEach(() => {
-                if (CI !== undefined) {
-                    process.env.CI = CI;
-                }
-            });
+            restoreAfterEach(process.env, 'CI');
 
             it('does still track [T024]', () => {
                 insight.track();
