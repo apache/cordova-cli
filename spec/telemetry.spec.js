@@ -203,6 +203,9 @@ describe('telemetry', () => {
 
                 // To silence the prompts by insight
                 spyOn(process.stdout, 'write');
+
+                // Ensure that prompts are shown for 10ms at most
+                telemetry.timeoutInSecs = 0.01;
             });
             afterEach(() => {
                 stdin.restore();
@@ -221,7 +224,6 @@ describe('telemetry', () => {
             });
 
             it('is counted as a negative response if user does not decide [T019]', () => {
-                telemetry.timeoutInSecs = 0.01;
                 return telemetry.showPrompt().then(result => {
                     expect(result).toBe(false);
                     expect(insight.config.set)
