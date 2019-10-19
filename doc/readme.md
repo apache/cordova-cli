@@ -118,7 +118,6 @@ cordova create path [id [name [config]]] [options]
 | Option | Description |
 |--------|-------------|
 | --template |  Use a custom template located locally, in NPM, or GitHub. |
-| --copy-from\|--src | _Deprecated_ <br/> Use --template instead. Specifies a directory from which to copy the current Cordova project. |
 |--link-to | Symlink to specified `www` directory without creating a copy. |
 
 ### Directory structure

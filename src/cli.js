@@ -47,7 +47,6 @@ var knownOpts = {
     'noregistry': Boolean,
     'nohooks': Array,
     'shrinkwrap': Boolean,
-    'copy-from': String,
     'link-to': path,
     'searchpath': String,
     'variable': Array,
@@ -74,7 +73,6 @@ var shortHands = {
     'd': '--verbose',
     'v': '--version',
     'h': '--help',
-    'src': '--copy-from',
     't': '--template'
 };
 
