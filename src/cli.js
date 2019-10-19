@@ -471,9 +471,8 @@ function cli (inputArgs) {
     }
 }
 
-function create ([_, dir, id, name, cfgJson], args) {
-    // If we got a fourth parameter, consider it to be JSON to init the config.
-    var cfg = JSON.parse(cfgJson || '{}');
+function create ([_, dir, id, name], args) {
+    var cfg = {};
 
     // Template path
     var customWww = args['link-to'] || args.template;
@@ -491,14 +490,13 @@ function create ([_, dir, id, name, cfgJson], args) {
         if (customWww.substr(0, 1) === '~') { customWww = path.join(process.env.HOME, customWww.substr(1)); }
 
         // Template config
-        var wwwCfg = {
+        cfg.lib = {};
+        cfg.lib.www = {
             url: customWww,
             template: 'template' in args,
             link: 'link-to' in args
         };
 
-        cfg.lib = cfg.lib || {};
-        cfg.lib.www = wwwCfg;
     }
     return cordova.create(dir, id, name, cfg, events || undefined);
 }
