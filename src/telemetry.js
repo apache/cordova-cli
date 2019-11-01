@@ -23,7 +23,18 @@ var GA_TRACKING_CODE = 'UA-64283057-7';
 
 var pkg = require('../package.json');
 var Insight = require('insight');
-var insight = new Insight({
+
+/**
+ * By redefining `get optOut` we trick Insight into tracking
+ * even though the user might have opted out.
+ */
+class RelentlessInsight extends Insight {
+    get optOut () { return false; }
+    set optOut (value) { super.optOut = value; }
+    get realOptOut () { return super.optOut; }
+}
+
+var insight = new RelentlessInsight({
     trackingCode: GA_TRACKING_CODE,
     pkg: pkg
 });
@@ -74,14 +85,14 @@ function clear () {
 }
 
 function isOptedIn () {
-    return !insight.optOut;
+    return !insight.realOptOut;
 }
 
 /**
  * Has the user already answered the telemetry prompt? (thereby opting in or out?)
  */
 function hasUserOptedInOrOut () {
-    var insightOptOut = insight.optOut === undefined;
+    var insightOptOut = insight.realOptOut === undefined;
     return !(insightOptOut);
 }
 
