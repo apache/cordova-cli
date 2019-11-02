@@ -626,7 +626,7 @@ cordova config delete <key>
 ### Examples
 
 ```
-cordova config set autosave false
+cordova config set save-exact true
 ```
 
 [Hooks guide]: http://cordova.apache.org/docs/en/latest/guide_appdev_hooks_index.md.html
