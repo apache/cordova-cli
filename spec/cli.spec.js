@@ -21,9 +21,6 @@ const { events, cordova } = require('cordova-lib');
 const telemetry = require('../src/telemetry');
 const cli = rewire('../src/cli');
 
-// avoid node complaining of too many event listener added
-process.setMaxListeners(0);
-
 describe('cordova cli', () => {
     let logger;
 
@@ -33,8 +30,9 @@ describe('cordova cli', () => {
         // logging events registered as a result of the "--verbose" flag in
         // CLI testing below would cause lots of logging messages printed out by other specs.
 
-        // This is required so that fake events chaining works (events.on('log').on('verbose')...)
-        spyOn(events, 'on').and.returnValue({ on () { return this; } });
+        // Prevent listeners from piling up
+        spyOn(process, 'on');
+        events.removeAllListeners();
 
         // Spy and mute output
         logger = jasmine.createSpyObj('logger', [
