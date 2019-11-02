@@ -439,31 +439,13 @@ function cli (inputArgs) {
             });
         }
 
-        if (args.nosave) {
-            args.save = false;
-        } else {
-            args.save = true;
-        }
+        args.save = !args.nosave;
+        args.production = !args.noprod;
 
-        if (args.noprod) {
-            args.production = false;
-        } else {
-            args.production = true;
-        }
-
-        if (args.save === undefined) {
-            // User explicitly did not pass in save
-            args.save = conf.get('autosave');
-        }
         if (args.searchpath === undefined) {
             // User explicitly did not pass in searchpath
             args.searchpath = conf.get('searchpath');
         }
-        if (args.production === undefined) {
-            // User explicitly did not pass in noprod
-            args.production = conf.get('production');
-        }
-
         if (args['save-exact'] === undefined) {
             // User explicitly did not pass in save-exact
             args['save-exact'] = conf.get('save-exact');
