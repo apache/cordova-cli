@@ -225,7 +225,6 @@ cordova {platform | platforms} [
 |     | --save                   | Updates the version specified in `config.xml` |
 | list |                         | List all installed and available platforms |
 | check |                        | List platforms which can be updated via cordova-cli with the command `platform update` |
-| save  |                        | Save `<platform-spec>` of all platforms added to config.xml |
 
 ### Platform-spec
 
@@ -284,10 +283,6 @@ There are a number of ways to specify a platform:
 - List available and installed platforms with version numbers. This is useful to find version numbers when reporting issues:
 
         cordova platform ls
-
-- Save versions of all platforms currently added to the project to `config.xml` & `package.json`
-
-        cordova platform save
 
 ## cordova plugin command
 
