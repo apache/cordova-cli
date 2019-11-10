@@ -127,7 +127,6 @@ Cordova CLI works with the following directory structure:
 ```
 myapp/
 |-- config.xml
-|-- hooks/
 |-- merges/
 | | |-- android/
 | | |-- windows/
@@ -158,12 +157,6 @@ Contains all the source code and build scripts for the platforms that you add to
 #### plugins/
 
 Any added plugins will be extracted or copied into this directory.
-
-#### hooks/
-
-This directory may contains scripts used to customize cordova-cli commands. Any scripts you add to these directories will be executed before and after the commands corresponding to the directory name. Useful for integrating your own build systems or integrating with version control systems.
-
-Refer to [Hooks Guide] for more information.
 
 #### merges/
 
