@@ -287,8 +287,7 @@ Manage project plugins
 cordova {plugin | plugins} [
     add <plugin-spec> [..] {--searchpath=<directory> | --noregistry | --link | --save | --force} |
     {remove | rm} {<pluginid> | <name>} --save |
-    {list | ls} |
-    save |
+    {list | ls}
 ]
 ```
 
@@ -303,7 +302,6 @@ cordova {plugin | plugins} [
 | remove `<pluginid>\|<name>` [...] | | Remove plugins with the given IDs/name.
 |       |--nosave                 | Do NOT remove the specified plugin from config.xml or package.json
 |list                           |  | List currently installed plugins
-|save                           |  | Save `<plugin-spec>` of all plugins currently added to the project
 
 ### Plugin-spec
 
