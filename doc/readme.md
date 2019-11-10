@@ -117,7 +117,6 @@ cordova create path [id [name]] [options]
 | Option | Description |
 |--------|-------------|
 | --template |  Use a custom template located locally, in NPM, or GitHub. |
-|--link-to | Symlink to specified `www` directory without creating a copy. |
 
 ### Directory structure
 
@@ -182,11 +181,6 @@ It is recommended not to check in `platforms/` and `plugins/` directories into v
 - Create a Cordova project in `myapp` directory using the specified ID and display name:
 
         cordova create myapp com.mycompany.myteam.myapp MyApp
-
-- Create a Cordova project with a symlink to an existing `www` directory. This can be useful if you have a custom build process or existing web assets that you want to use in your Cordova app:
-
-        cordova create myapp --link-to=../www
-
 
 ## cordova platform command
 

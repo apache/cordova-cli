@@ -31,7 +31,7 @@
   "dependencies": {
     "configstore": "^4.0.0",
     "cordova-common": "^3.1.0",
-    "cordova-create": "^2.0.0",
+    "cordova-create": "^3.0.0-nightly.2019.11.19.1d0d67e0",
     "cordova-lib": "^9.0.0",
     "editor": "^1.0.0",
     "insight": "^0.10.1",
