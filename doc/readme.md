@@ -541,8 +541,7 @@ cordova requirements android
 ### Synopsis
 
 Print out useful information helpful for submitting bug
-reports and getting help.  Creates an info.txt file at the
-base of your project.
+reports and getting help.
 
 ### Syntax
 
