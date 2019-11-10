@@ -200,7 +200,7 @@ It is recommended not to check in `platforms/` and `plugins/` directories into v
 
 ### Synopsis
 
-Manage cordova platforms - allowing you to add, remove, update, list and check for updates. Running commands to add or remove platforms affects the contents of the project's platforms directory.
+Manage cordova platforms - allowing you to add, remove, update and list platforms. Running commands to add or remove platforms affects the contents of the project's platforms directory.
 
 ### Syntax
 
@@ -209,7 +209,6 @@ cordova {platform | platforms} [
     add <platform-spec> [...] {--save | link=<path> } |
     {remove | rm}  platform [...] {--save}|
     {list | ls}  |
-    check |
     save |
     update ]
 ```
@@ -224,7 +223,6 @@ cordova {platform | platforms} [
 | update `<platform>` [...] |      | Update specified platforms |
 |     | --save                   | Updates the version specified in `config.xml` |
 | list |                         | List all installed and available platforms |
-| check |                        | List platforms which can be updated via cordova-cli with the command `platform update` |
 
 ### Platform-spec
 
