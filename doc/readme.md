@@ -202,7 +202,6 @@ cordova {platform | platforms} [
     add <platform-spec> [...] {--save | link=<path> } |
     {remove | rm}  platform [...] {--save}|
     {list | ls}  |
-    save |
     update ]
 ```
 
