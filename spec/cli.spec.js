@@ -19,12 +19,13 @@ const path = require('path');
 const rewire = require('rewire');
 const { events, cordova } = require('cordova-lib');
 const telemetry = require('../src/telemetry');
-const cli = rewire('../src/cli');
 
 describe('cordova cli', () => {
-    let logger;
+    let cli, logger;
 
     beforeEach(() => {
+        cli = rewire('../src/cli');
+
         // Event registration is currently process-global. Since all jasmine
         // tests in a directory run in a single process (and in parallel),
         // logging events registered as a result of the "--verbose" flag in
@@ -116,12 +117,16 @@ describe('cordova cli', () => {
 
     describe('create', () => {
         beforeEach(() => {
-            spyOn(cordova, 'create').and.returnValue(Promise.resolve());
+            cli.__set__({
+                cordovaCreate: jasmine.createSpy('cordovaCreate').and.resolveTo()
+            });
         });
 
         it('Test#011 : calls cordova create', () => {
             return cli(['node', 'cordova', 'create', 'a', 'b', 'c', '--link-to', 'c:\\personalWWW']).then(() => {
-                expect(cordova.create).toHaveBeenCalledWith('a', 'b', 'c', jasmine.any(Object), jasmine.any(Object));
+                expect(cli.__get__('cordovaCreate')).toHaveBeenCalledWith(
+                    'a', 'b', 'c', jasmine.any(Object), jasmine.any(Object)
+                );
             });
         });
     });

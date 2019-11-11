@@ -26,6 +26,7 @@ var CordovaError = cordova_lib.CordovaError;
 var cordova = cordova_lib.cordova;
 var events = cordova_lib.events;
 var logger = require('cordova-common').CordovaLogger.get();
+var cordovaCreate = require('cordova-create');
 var Configstore = require('configstore');
 var conf = new Configstore(pkg.name + '-config');
 var editor = require('editor');
@@ -493,5 +494,5 @@ function create ([_, dir, id, name], args) {
         };
 
     }
-    return cordova.create(dir, id, name, cfg, events || undefined);
+    return cordovaCreate(dir, id, name, cfg, events || undefined);
 }
