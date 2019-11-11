@@ -428,26 +428,26 @@ describe('cordova cli', () => {
             confHolder = undefined;
         });
 
-        it('Test#042 : config set autosave is called with true', () => {
-            return cli(['node', 'cordova', 'config', 'set', 'autosave', 'true', '--silent']).then(() => {
-                expect(cordovaConfig.autosave).toBe('true');
+        it('Test#042 : config set is called with true', () => {
+            return cli(['node', 'cordova', 'config', 'set', 'foo', 'true', '--silent']).then(() => {
+                expect(cordovaConfig.foo).toBe('true');
             });
         });
 
-        it('Test#043 : config delete autosave is called', () => {
-            return cli(['node', 'cordova', 'config', 'delete', 'autosave']).then(() => {
-                expect(cordovaConfig.autosave).toBeUndefined();
+        it('Test#043 : config delete is called', () => {
+            return cli(['node', 'cordova', 'config', 'delete', 'foo']).then(() => {
+                expect(cordovaConfig.foo).toBeUndefined();
             });
         });
 
         it('Test#044 : config set is called even without value, defaults to true', () => {
-            return cli(['node', 'cordova', 'config', 'set', 'autosave']).then(() => {
-                expect(cordovaConfig.autosave).toBe(true);
+            return cli(['node', 'cordova', 'config', 'set', 'foo']).then(() => {
+                expect(cordovaConfig.foo).toBe(true);
             });
         });
 
         it('Test #045 : config get is called', () => {
-            return cli(['node', 'cordova', 'config', 'get', 'autosave']).then(() => {
+            return cli(['node', 'cordova', 'config', 'get', 'foo']).then(() => {
                 expect(confHolder).toBe(true);
             });
         });
