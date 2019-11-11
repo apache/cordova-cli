@@ -103,7 +103,7 @@ Create the directory structure for the Cordova project in the specified path.
 ### Syntax
 
 ```
-cordova create path [id [name [config]]] [options]
+cordova create path [id [name]] [options]
 ```
 
 | Value | Description   |
@@ -111,7 +111,6 @@ cordova create path [id [name [config]]] [options]
 | path  |  Directory which should not already exist. Cordova will create this directory. For more details on the directory structure, see below. |
 | id    | _Default_: `io.cordova.hellocordova` <br/>  Reverse domain-style identifier that maps to `id` attribute of `widget` element in `config.xml`. This can be changed but there may be code generated using this value, such as Java package names. It is recommended that you select an appropriate value.  |
 | name  | _Default_: `HelloCordova` <br/> Application's display title that maps `name` element in `config.xml` file. This can be changed but there may be code generated using this value, such as Java class names. The default value is `HelloCordova`, but it is recommended that you select an appropriate value. |
-| config | JSON string whose key/values will be included in `<path>`/.cordova/config.json |
 
 ### Options
 
