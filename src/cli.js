@@ -481,10 +481,6 @@ function create ([_, dir, id, name], args) {
             );
         }
 
-        // Resolve tilda
-        // TODO: move to create and use sindresorhus/untildify
-        if (customWww.substr(0, 1) === '~') { customWww = path.join(process.env.HOME, customWww.substr(1)); }
-
         // Template config
         cfg.lib = {};
         cfg.lib.www = {
