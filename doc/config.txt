@@ -13,16 +13,14 @@ Options
 
 
 Syntax
-	cordova-cli config set <key> <value> ....... cordova config set autosave true
-	cordova-cli config get <key> ............... cordova config get autosave
-	cordova-cli config delete <key> ............ cordova config delete autosave
+	cordova-cli config set <key> <value> ....... cordova config set save-exact true
+	cordova-cli config get <key> ............... cordova config get save-exact
+	cordova-cli config delete <key> ............ cordova config delete save-exact
 	cordova-cli config edit .................... cordova config edit
 	cordova-cli config ls ...................... cordova config ls
 
 Options
-	autosave ...................... default setting = true
-	Allows the user to set save to true or false when adding platforms or plugins.
-	When false, platforms/plugins are not saved to `config.xml` and `package.json`.
+	save-exact ...................... default setting = false
 
 Examples
-	cordova config set autosave false
+	cordova config set save-exact true
