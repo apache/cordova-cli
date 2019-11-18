@@ -30,7 +30,9 @@ var Insight = require('insight');
  */
 class RelentlessInsight extends Insight {
     get optOut () { return false; }
+
     set optOut (value) { super.optOut = value; }
+
     get realOptOut () { return super.optOut; }
 }
 

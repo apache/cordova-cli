@@ -40,41 +40,41 @@ const NODE_VERSION_REQUIREMENT = '>=8';
 const NODE_VERSION_DEPRECATING_RANGE = '<10';
 
 var knownOpts = {
-    'verbose': Boolean,
-    'version': Boolean,
-    'help': Boolean,
-    'silent': Boolean,
-    'experimental': Boolean,
-    'noregistry': Boolean,
-    'nohooks': Array,
-    'shrinkwrap': Boolean,
+    verbose: Boolean,
+    version: Boolean,
+    help: Boolean,
+    silent: Boolean,
+    experimental: Boolean,
+    noregistry: Boolean,
+    nohooks: Array,
+    shrinkwrap: Boolean,
     'link-to': path,
-    'searchpath': String,
-    'variable': Array,
-    'link': Boolean,
-    'force': Boolean,
+    searchpath: String,
+    variable: Array,
+    link: Boolean,
+    force: Boolean,
     'save-exact': Boolean,
     // Flags to be passed to `cordova build/run/emulate`
-    'debug': Boolean,
-    'release': Boolean,
-    'archs': String,
-    'device': Boolean,
-    'emulator': Boolean,
-    'target': String,
-    'noprepare': Boolean,
-    'nobuild': Boolean,
-    'list': Boolean,
-    'buildConfig': String,
-    'template': String,
-    'production': Boolean,
-    'noprod': Boolean
+    debug: Boolean,
+    release: Boolean,
+    archs: String,
+    device: Boolean,
+    emulator: Boolean,
+    target: String,
+    noprepare: Boolean,
+    nobuild: Boolean,
+    list: Boolean,
+    buildConfig: String,
+    template: String,
+    production: Boolean,
+    noprod: Boolean
 };
 
 var shortHands = {
-    'd': '--verbose',
-    'v': '--version',
-    'h': '--help',
-    't': '--template'
+    d: '--verbose',
+    v: '--version',
+    h: '--help',
+    t: '--template'
 };
 
 function checkForUpdates () {
@@ -219,7 +219,6 @@ function printHelp (command) {
 }
 
 function handleTelemetryCmd (subcommand, isOptedIn) {
-
     if (subcommand !== 'on' && subcommand !== 'off') {
         logger.subscribe(events);
         printHelp('telemetry');
@@ -258,7 +257,6 @@ function handleTelemetryCmd (subcommand, isOptedIn) {
 }
 
 function cli (inputArgs) {
-
     checkForUpdates();
 
     var args = nopt(knownOpts, shortHands, inputArgs);
@@ -344,7 +342,7 @@ function cli (inputArgs) {
         return printHelp(remain);
     }
 
-    if (!cordova.hasOwnProperty(cmd)) {
+    if (!Object.prototype.hasOwnProperty.call(cordova, cmd)) {
         var msg2 = 'Cordova does not know ' + cmd + '; try `' + cordova_lib.binname +
             ' help` for a list of all the available commands.';
         throw new CordovaError(msg2);
@@ -361,7 +359,6 @@ function cli (inputArgs) {
 
     var platformCommands = ['emulate', 'build', 'prepare', 'compile', 'run', 'clean'];
     if (platformCommands.indexOf(cmd) !== -1) {
-
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
 
@@ -372,14 +369,12 @@ function cli (inputArgs) {
             return cordova.targets.call(null, opts);
         }
         return cordova[cmd].call(null, opts);
-
     } else if (cmd === 'requirements') {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
 
         return cordova[cmd].call(null, opts.platforms)
             .then(function (platformChecks) {
-
                 var someChecksFailed = Object.keys(platformChecks).map(function (platformName) {
                     events.emit('log', '\nRequirements check results for ' + platformName + ':');
                     var platformCheck = platformChecks[platformName];
@@ -488,7 +483,6 @@ function create ([_, dir, id, name], args) {
             template: 'template' in args,
             link: 'link-to' in args
         };
-
     }
     return cordovaCreate(dir, id, name, cfg, events || undefined);
 }
