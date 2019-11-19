@@ -15,7 +15,6 @@
     under the License.
 */
 
-var path = require('path');
 var nopt = require('nopt');
 var updateNotifier = require('update-notifier');
 var pkg = require('../package.json');
@@ -48,7 +47,6 @@ var knownOpts = {
     noregistry: Boolean,
     nohooks: Array,
     shrinkwrap: Boolean,
-    'link-to': path,
     searchpath: String,
     variable: Array,
     link: Boolean,
@@ -412,7 +410,8 @@ function cli (inputArgs) {
         var port = undashed[1];
         return cordova.serve(port);
     } else if (cmd === 'create') {
-        return create(undashed, args);
+        const [, dest, id, name] = undashed;
+        return cordovaCreate(dest, { id, name, events, template: args.template });
     } else if (cmd === 'config') {
         // Don't need to do anything with cordova-lib since config was handled above
         return true;
@@ -460,29 +459,4 @@ function cli (inputArgs) {
         };
         return cordova[cmd](subcommand, targets, download_opts);
     }
-}
-
-function create ([_, dir, id, name], args) {
-    var cfg = {};
-
-    // Template path
-    var customWww = args['link-to'] || args.template;
-
-    if (customWww) {
-        // TODO Handle in create
-        if (!args.template && customWww.indexOf('http') === 0) {
-            throw new CordovaError(
-                'Only local paths for custom www assets are supported for linking' + customWww
-            );
-        }
-
-        // Template config
-        cfg.lib = {};
-        cfg.lib.www = {
-            url: customWww,
-            template: 'template' in args,
-            link: 'link-to' in args
-        };
-    }
-    return cordovaCreate(dir, id, name, cfg, events || undefined);
 }

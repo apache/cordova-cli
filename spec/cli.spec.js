@@ -122,12 +122,14 @@ describe('cordova cli', () => {
             });
         });
 
-        it('Test#011 : calls cordova create', () => {
-            return cli(['node', 'cordova', 'create', 'a', 'b', 'c', '--link-to', 'c:\\personalWWW']).then(() => {
-                expect(cli.__get__('cordovaCreate')).toHaveBeenCalledWith(
-                    'a', 'b', 'c', jasmine.any(Object), jasmine.any(Object)
-                );
-            });
+        it('Test#011 : calls cordova create', async () => {
+            const dest = 'a';
+            const opts = { id: 'b', name: 'c', template: '../my-template' };
+            await cli(['node', 'cordova', 'create', dest, opts.id, opts.name, '--template', opts.template]);
+
+            expect(cli.__get__('cordovaCreate')).toHaveBeenCalledWith(
+                dest, jasmine.objectContaining(opts)
+            );
         });
     });
 

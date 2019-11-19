@@ -11,7 +11,6 @@ Create a Cordova project
 Options
 
     --template=<PATH|NPM PACKAGE|GIT URL> ... use a custom template located locally, in NPM, or GitHub.
-    --link-to=<PATH> ........................ symlink to custom www assets without creating a copy.
 
 Example
     cordova-cli create myapp com.mycompany.myteam.myapp MyApp
