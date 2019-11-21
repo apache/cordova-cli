@@ -340,6 +340,14 @@ function cli (inputArgs) {
         return printHelp(remain);
     }
 
+    // Don't need to do anything with cordova-lib since config was handled above
+    if (cmd === 'config') return true;
+
+    if (cmd === 'create') {
+        const [, dest, id, name] = undashed;
+        return cordovaCreate(dest, { id, name, events, template: args.template });
+    }
+
     if (!Object.prototype.hasOwnProperty.call(cordova, cmd)) {
         var msg2 = 'Cordova does not know ' + cmd + '; try `' + cordova_lib.binname +
             ' help` for a list of all the available commands.';
@@ -409,12 +417,6 @@ function cli (inputArgs) {
     } else if (cmd === 'serve') {
         var port = undashed[1];
         return cordova.serve(port);
-    } else if (cmd === 'create') {
-        const [, dest, id, name] = undashed;
-        return cordovaCreate(dest, { id, name, events, template: args.template });
-    } else if (cmd === 'config') {
-        // Don't need to do anything with cordova-lib since config was handled above
-        return true;
     } else {
         // platform/plugins add/rm [target(s)]
         subcommand = undashed[1]; // sub-command like "add", "ls", "rm" etc.
