@@ -20,6 +20,7 @@ var updateNotifier = require('update-notifier');
 var pkg = require('../package.json');
 var telemetry = require('./telemetry');
 var help = require('./help');
+const info = require('./info');
 var cordova_lib = require('cordova-lib');
 var CordovaError = cordova_lib.CordovaError;
 var cordova = cordova_lib.cordova;
@@ -339,6 +340,8 @@ function cli (inputArgs) {
         }
         return printHelp(remain);
     }
+
+    if (cmd === 'info') return info();
 
     // Don't need to do anything with cordova-lib since config was handled above
     if (cmd === 'config') return true;
