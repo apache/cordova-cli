@@ -176,7 +176,7 @@ function _buildContentList (list, level = 1) {
     return content;
 }
 
-/*
+/**
  * @deprecated will be removed when platforms implement the calls.
  */
 async function _getPlatformInfo (platform) {
