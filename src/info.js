@@ -194,14 +194,11 @@ const _failSafeSpawn = (command, args) => execa(command, args).then(
 );
 
 const _createSection = section => {
-    let content = [];
-
-    content.push(''); // Start of new section
-    content.push(`${section.header}:`);
-    content.push('');
+    // Start of new section
+    const content = ['', `${section.header}:`, ''];
 
     if (Array.isArray(section.content)) {
-        content = content.concat(_buildContentList(section.content));
+        content.push(..._buildContentList(section.content));
     } else {
         content.push(section.content);
     }
