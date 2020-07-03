@@ -34,15 +34,11 @@ let _installedPlatformsList = null;
 async function getCordovaDependenciesInfo () {
     // get self "Cordova CLI"
     const cliPkg = require('../package');
-    const libPkg = require('cordova-lib/package');
     const cliDependencies = await _getLibDependenciesInfo(cliPkg.dependencies);
-    const libDependencies = await _getLibDependenciesInfo(libPkg.dependencies);
 
-    cliDependencies.forEach((i, x) => {
-        if (i.key === 'lib') {
-            cliDependencies[x].content = libDependencies;
-        }
-    });
+    const libPkg = require('cordova-lib/package');
+    const cliLibDep = cliDependencies.find(({ key }) => key === 'lib');
+    cliLibDep.content = await _getLibDependenciesInfo(libPkg.dependencies);
 
     return {
         header: 'Cordova Packages',
