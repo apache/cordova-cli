@@ -53,8 +53,8 @@ async function getCordovaDependenciesInfo () {
 async function getInstalledPlatforms (projectRoot) {
     return _getInstalledPlatforms(projectRoot).then(platforms => {
         const header = 'Project Installed Platforms';
-        const content = Object.keys(platforms)
-            .map(key => ({ key, data: platforms[key] }));
+        const content = Object.entries(platforms)
+            .map(([key, data]) => ({ key, data }));
 
         return { header, content };
     });
