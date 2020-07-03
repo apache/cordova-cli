@@ -223,7 +223,7 @@ function _buildContentList (list, indentionBy = 1) {
 /*
  * @deprecated will be removed when platforms implement the calls.
  */
-function _getPlatformInfo (platform) {
+async function _getPlatformInfo (platform) {
     switch (platform) {
     case 'ios':
         return _failSafeSpawn('xcodebuild', ['-version']);
