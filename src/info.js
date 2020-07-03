@@ -72,15 +72,12 @@ async function getEnvironmentInfo () {
     const [npmVersion, osInfoResult] = await Promise.all([_getNpmVersion(), osInfo()]);
     const { platform, distro, release, codename, kernel, arch, build } = osInfoResult;
 
-    let formatRelease = release;
-
-    if (build) {
-        formatRelease = `${formatRelease} (${build})`;
-    }
+    const optionalBuildSuffix = build ? ` (${build})` : '';
 
     const osFormat = [
         platform === 'darwin' ? codename : distro,
-        formatRelease,
+        release + optionalBuildSuffix,
+        build ? `(${build})` : '',
         `(${platform} ${kernel})`,
         `${arch}`
     ];
