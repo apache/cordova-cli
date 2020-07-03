@@ -209,28 +209,27 @@ const _createSection = section => {
 module.exports = async function () {
     const projectRoot = cdvLibUtil.cdProjectRoot();
 
-    Promise.all([
+    const results = await Promise.all([
         getCordovaDependenciesInfo(),
         getInstalledPlatforms(projectRoot),
         getInstalledPlugins(projectRoot),
         getEnvironmentInfo(),
         getPlatformEnvironmentData(projectRoot),
         getProjectSettingsFiles(projectRoot)
-    ]).then(results => {
-        let content = [];
+    ]);
 
-        results.forEach(section => {
-            if (Array.isArray(section)) {
-                // Handle a Group of Sections
-                section.forEach(grouppedSection => {
-                    content = content.concat(_createSection(grouppedSection));
-                });
-            } else {
-                // Handle a Single Section
-                content = content.concat(_createSection(section));
-            }
-        });
-
-        cordova.emit('results', content.join('\n'));
+    let content = [];
+    results.forEach(section => {
+        if (Array.isArray(section)) {
+            // Handle a Group of Sections
+            section.forEach(grouppedSection => {
+                content = content.concat(_createSection(grouppedSection));
+            });
+        } else {
+            // Handle a Single Section
+            content = content.concat(_createSection(section));
+        }
     });
+
+    cordova.emit('results', content.join('\n'));
 };
