@@ -140,14 +140,10 @@ async function _getLibDependenciesInfo (dependencies) {
 }
 
 async function _getInstalledPlatforms (projectRoot) {
-    if (_installedPlatformsList) {
-        return _installedPlatformsList;
-    } else {
-        return cdvLibUtil.getInstalledPlatformsWithVersions(projectRoot).then(platforms => {
-            _installedPlatformsList = platforms;
-            return _installedPlatformsList;
-        });
+    if (!_installedPlatformsList) {
+        _installedPlatformsList = await cdvLibUtil.getInstalledPlatformsWithVersions(projectRoot);
     }
+    return _installedPlatformsList;
 }
 
 async function _getNpmVersion () {
