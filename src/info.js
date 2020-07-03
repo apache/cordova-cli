@@ -218,16 +218,16 @@ module.exports = async function () {
         getProjectSettingsFiles(projectRoot)
     ]);
 
-    let content = [];
+    const content = [];
     results.forEach(section => {
         if (Array.isArray(section)) {
             // Handle a Group of Sections
             section.forEach(subSection => {
-                content = content.concat(_createSection(subSection));
+                content.push(..._createSection(subSection));
             });
         } else {
             // Handle a Single Section
-            content = content.concat(_createSection(section));
+            content.push(..._createSection(section));
         }
     });
 
