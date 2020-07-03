@@ -222,8 +222,8 @@ module.exports = async function () {
     results.forEach(section => {
         if (Array.isArray(section)) {
             // Handle a Group of Sections
-            section.forEach(grouppedSection => {
-                content = content.concat(_createSection(grouppedSection));
+            section.forEach(subSection => {
+                content = content.concat(_createSection(subSection));
             });
         } else {
             // Handle a Single Section
