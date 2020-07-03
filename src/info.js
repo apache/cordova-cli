@@ -147,8 +147,7 @@ async function _getInstalledPlatforms (projectRoot) {
 }
 
 async function _getNpmVersion () {
-    const { stdout: npmVersion } = await execa('npm', ['-v']);
-    return npmVersion;
+    return (await execa('npm', ['-v'])).stdout;
 }
 
 function _fetchFileContents (filePath) {
