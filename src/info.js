@@ -156,11 +156,11 @@ function _fetchFileContents (filePath) {
     return fs.readFileSync(filePath, 'utf-8');
 }
 
-function _buildContentList (list, indentionBy = 1) {
+function _buildContentList (list, level = 1) {
     const content = [];
 
     for (const item of list) {
-        const padding = String.prototype.padStart((4 * indentionBy), ' ');
+        const padding = String.prototype.padStart((4 * level), ' ');
 
         if (item.fromFile) {
             item.data = `\n\n${item.data}\n`;
@@ -169,7 +169,7 @@ function _buildContentList (list, indentionBy = 1) {
         content.push(`${padding}${item.key} : ${item.data}`);
 
         if (item.content && Array.isArray(item.content)) {
-            return content.concat(_buildContentList(item.content, ++indentionBy));
+            return content.concat(_buildContentList(item.content, level + 1));
         }
     }
 
