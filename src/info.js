@@ -130,7 +130,10 @@ async function getProjectSettingsFiles (projectRoot) {
     // Create package.json snippet
     const pkgRaw = _fetchFileContents(path.join(projectRoot, 'package.json'));
     const pkgJson = JSON.parse(pkgRaw);
-    const pkgSnippet = `--- Start of Cordova JSON Snippet ---\n${JSON.stringify(pkgJson.cordova, null, 2)}\n--- End of Cordova JSON Snippet ---`;
+    const pkgSnippet = ['--- Start of Cordova JSON Snippet ---',
+        JSON.stringify(pkgJson.cordova, null, 2),
+        '--- End of Cordova JSON Snippet ---'
+    ].join('\n');
 
     return {
         header: 'Project Setting Files',
