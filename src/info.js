@@ -21,8 +21,8 @@ const execa = require('execa');
 const { osInfo } = require('systeminformation');
 const { cordova, cordova_platforms: { getPlatformApi } } = require('cordova-lib');
 
-const cdvLibUtil = require(require.resolve('cordova-lib/src/cordova/util'));
-const cdvPluginUtil = require(require.resolve('cordova-lib/src/cordova/plugin/util'));
+const cdvLibUtil = require('cordova-lib/src/cordova/util');
+const cdvPluginUtil = require('cordova-lib/src/cordova/plugin/util');
 
 // Cache
 let _installedPlatformsList = null;
@@ -33,9 +33,8 @@ let _installedPlatformsList = null;
 
 async function getCordovaDependenciesInfo () {
     // get self "Cordova CLI"
-    const cliPath = require.resolve('../package');
-    const cliPkg = require(cliPath);
-    const libPkg = require(require.resolve('cordova-lib/package'));
+    const cliPkg = require('../package');
+    const libPkg = require('cordova-lib/package');
     const cliDependencies = await _getLibDependenciesInfo(cliPkg.dependencies);
     const libDependencies = await _getLibDependenciesInfo(libPkg.dependencies);
 
