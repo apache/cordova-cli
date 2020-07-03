@@ -16,7 +16,6 @@
 */
 
 const path = require('path');
-const os = require('os');
 const fs = require('fs-extra');
 const execa = require('execa');
 const { osInfo } = require('systeminformation');
@@ -71,28 +70,6 @@ async function getInstalledPlugins (projectRoot) {
 }
 
 async function getEnvironmentInfo () {
-    let formatOsInfo;
-    if (process.platform === 'darwin') {
-        const { stdout: osInfo } = await execa('sw_vers');
-
-        formatOsInfo = osInfo
-            .replace(/\t/g, '')
-            .replace(/\n/g, ':')
-            .split(':')
-            .filter((i, x) => x % 2 ? i : false)
-            .join(' ') + ')';
-
-        formatOsInfo.splice = function (start, delCount, newSubStr) {
-
-        };
-
-        const buildVersionStart = formatOsInfo.lastIndexOf(' ') + 1;
-        formatOsInfo = `${formatOsInfo.slice(0, buildVersionStart)}(${formatOsInfo.slice(buildVersionStart + Math.abs(0))}`;
-        formatOsInfo = `${formatOsInfo} (${process.arch})`;
-    } else {
-        formatOsInfo = `${os.type} ${os.release} (${process.arch})`;
-    }
-
     return Promise.all([
         _getNpmVersion(),
         osInfo()
