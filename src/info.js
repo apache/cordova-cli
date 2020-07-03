@@ -109,9 +109,9 @@ async function getPlatformEnvironmentData (projectRoot) {
 
 async function getProjectSettingsFiles (projectRoot) {
     const cfgXml = _fetchFileContents(cdvLibUtil.projectConfig(projectRoot)).replace(/\n$/, '');
+
     // Create package.json snippet
-    const pkgRaw = _fetchFileContents(path.join(projectRoot, 'package.json'));
-    const pkgJson = JSON.parse(pkgRaw);
+    const pkgJson = require(path.join(projectRoot, 'package'));
     const pkgSnippet = ['--- Start of Cordova JSON Snippet ---',
         JSON.stringify(pkgJson.cordova, null, 2),
         '--- End of Cordova JSON Snippet ---'
