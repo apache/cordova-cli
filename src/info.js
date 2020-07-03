@@ -99,30 +99,22 @@ async function getEnvironmentInfo () {
 }
 
 async function getPlatformEnvironmentData (projectRoot) {
-    return _getInstalledPlatforms(projectRoot).then(installedPlatforms => {
-        const sections = [];
+    const installedPlatforms = await _getInstalledPlatforms(projectRoot);
 
-        Object.keys(installedPlatforms).forEach(platform => {
-            const platformApi = getPlatformApi(platform);
-            if (platformApi && platformApi.getEnvironmentInfo) {
-                platformApi.getEnvironmentInfo().then(content => {
-                    sections.push({
-                        header: `${platform} Environment`,
-                        content
-                    });
-                });
-            } else {
-                _getPlatformInfo(platform).then(content => {
-                    sections.push({
-                        header: `${platform} Environment`,
-                        content: content
-                    });
-                });
-            }
-        });
+    const infoPromises = Object.keys(installedPlatforms).map(async platform => {
+        const platformApi = getPlatformApi(platform);
 
-        return sections;
+        const getPlatformInfo = platformApi && platformApi.getEnvironmentInfo
+            ? () => platformApi.getEnvironmentInfo()
+            : () => _getPlatformInfo(platform);
+
+        return {
+            header: `${platform} Environment`,
+            content: await getPlatformInfo()
+        };
     });
+
+    return Promise.all(infoPromises);
 }
 
 async function getProjectSettingsFiles (projectRoot) {
