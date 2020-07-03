@@ -69,33 +69,30 @@ async function getInstalledPlugins (projectRoot) {
 }
 
 async function getEnvironmentInfo () {
-    return Promise.all([
-        _getNpmVersion(),
-        osInfo()
-    ]).then(results => {
-        const { platform, distro, release, codename, kernel, arch, build } = results[1];
-        let formatRelease = release;
+    const [npmVersion, osInfoResult] = await Promise.all([_getNpmVersion(), osInfo()]);
+    const { platform, distro, release, codename, kernel, arch, build } = osInfoResult;
 
-        if (build) {
-            formatRelease = `${formatRelease} (${build})`;
-        }
+    let formatRelease = release;
 
-        const osFormat = [
-            platform === 'darwin' ? codename : distro,
-            formatRelease,
-            `(${platform} ${kernel})`,
-            `${arch}`
-        ];
+    if (build) {
+        formatRelease = `${formatRelease} (${build})`;
+    }
 
-        return {
-            header: 'Environment',
-            content: [
-                { key: 'OS', data: osFormat.join(' ') },
-                { key: 'Node', data: process.version },
-                { key: 'npm', data: results[0] }
-            ]
-        };
-    });
+    const osFormat = [
+        platform === 'darwin' ? codename : distro,
+        formatRelease,
+        `(${platform} ${kernel})`,
+        `${arch}`
+    ];
+
+    return {
+        header: 'Environment',
+        content: [
+            { key: 'OS', data: osFormat.join(' ') },
+            { key: 'Node', data: process.version },
+            { key: 'npm', data: npmVersion }
+        ]
+    };
 }
 
 async function getPlatformEnvironmentData (projectRoot) {
