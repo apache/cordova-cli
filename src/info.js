@@ -95,18 +95,21 @@ async function getEnvironmentInfo () {
 async function getPlatformEnvironmentData (projectRoot) {
     const installedPlatforms = await _getInstalledPlatforms(projectRoot);
 
-    const infoPromises = Object.keys(installedPlatforms).map(async platform => {
-        const platformApi = getPlatformApi(platform);
+    const infoPromises = Object.keys(installedPlatforms)
+        .map(platform => {
+            const platformApi = getPlatformApi(platform);
 
-        const getPlatformInfo = platformApi && platformApi.getEnvironmentInfo
-            ? () => platformApi.getEnvironmentInfo()
-            : () => _getPlatformInfo(platform);
+            const getPlatformInfo = platformApi && platformApi.getEnvironmentInfo
+                ? () => platformApi.getEnvironmentInfo()
+                : _legacyPlatformInfo[platform];
 
-        return {
+            return { platform, getPlatformInfo };
+        })
+        .filter(o => o.getPlatformInfo)
+        .map(async ({ platform, getPlatformInfo }) => ({
             key: `${platform} Environment`,
             children: await getPlatformInfo()
-        };
-    });
+        }));
 
     return Promise.all(infoPromises);
 }
@@ -191,22 +194,16 @@ function _buildContentList (list, options = {}, level = 1) {
 /**
  * @deprecated will be removed when platforms implement the calls.
  */
-async function _getPlatformInfo (platform) {
-    let key;
-    let value;
-    switch (platform) {
-    case 'ios':
-        key = 'xcodebuild';
-        value = await _failSafeSpawn(key, ['-version']);
-        break;
-    case 'android':
-        key = 'android';
-        value = await _failSafeSpawn(key, ['list', 'target']);
-        break;
-    }
-
-    return [{ key, value }];
-}
+const _legacyPlatformInfo = {
+    ios: async () => [{
+        key: 'xcodebuild',
+        value: await _failSafeSpawn('xcodebuild', ['-version'])
+    }],
+    android: async () => [{
+        key: 'android',
+        value: await _failSafeSpawn('android', ['list', 'target'])
+    }]
+};
 
 const _failSafeSpawn = (command, args) => execa(command, args).then(
     ({ stdout }) => stdout,
