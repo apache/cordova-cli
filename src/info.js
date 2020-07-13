@@ -77,7 +77,6 @@ async function getEnvironmentInfo () {
     const osFormat = [
         platform === 'darwin' ? codename : distro,
         release + optionalBuildSuffix,
-        build ? `(${build})` : '',
         `(${platform} ${kernel})`,
         `${arch}`
     ];
@@ -128,10 +127,7 @@ async function getProjectSettingsFiles (projectRoot) {
         children: [
             { key: 'config.xml', value: `${cfgXml}` },
             { key: 'package.json', value: pkgSnippet }
-        ],
-        options: {
-            addNewLineSep: true
-        }
+        ]
     };
 }
 
@@ -192,7 +188,7 @@ function _formatNodeList (list, level = 0) {
         let itemString = `${indent}${item.key}:`;
 
         if ('value' in item) {
-            // Start Multiline items on a new line
+            // Pad multi-line values with a new line on either end
             itemString += (/[\r\n]/.test(item.value))
                 ? `\n${item.value.trim()}\n`
                 : ` ${item.value}`;
