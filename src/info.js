@@ -116,7 +116,7 @@ async function getProjectSettingsFiles (projectRoot) {
 
     // Create package.json snippet
     const pkgJson = require(path.join(projectRoot, 'package'));
-    const pkgSnippet = ['--- Start of Cordova JSON Snippet ---',
+    const pkgSnippet = ['', '--- Start of Cordova JSON Snippet ---',
         JSON.stringify(pkgJson.cordova, null, 2),
         '--- End of Cordova JSON Snippet ---'
     ].join('\n');
@@ -124,9 +124,12 @@ async function getProjectSettingsFiles (projectRoot) {
     return {
         key: 'Project Setting Files',
         children: [
-            { key: 'config.xml', value: cfgXml },
+            { key: 'config.xml', value: `\n${cfgXml}` },
             { key: 'package.json', value: pkgSnippet }
-        ]
+        ],
+        options: {
+            addNewLineSep: true
+        }
     };
 }
 
@@ -160,8 +163,9 @@ function _fetchFileContents (filePath) {
     return fs.readFileSync(filePath, 'utf-8');
 }
 
-function _buildContentList (list, level = 1) {
+function _buildContentList (list, options = {}, level = 1) {
     const content = [];
+    let first = true;
 
     for (const item of list) {
         const padding = String.prototype.padStart((4 * level), ' ');
@@ -170,11 +174,15 @@ function _buildContentList (list, level = 1) {
             item.data = `\n\n${item.data}\n`;
         }
 
-        content.push(`${padding}${item.key} : ${item.value}`);
+        const newLineSep = options.addNewLineSep && !first ? '\n' : '';
+
+        content.push(`${newLineSep}${padding}${item.key} : ${item.value}`);
 
         if (item.children && Array.isArray(item.children)) {
-            return content.concat(_buildContentList(item.children, level + 1));
+            return content.concat(_buildContentList(item.children, options, level + 1));
         }
+
+        first = false;
     }
 
     return content;
@@ -214,7 +222,7 @@ const _createSection = section => {
     }
 
     if (section.children) {
-        content.push(..._buildContentList(section.children));
+        content.push(..._buildContentList(section.children, section.options));
     }
 
     return content;
