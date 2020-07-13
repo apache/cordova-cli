@@ -95,28 +95,30 @@ async function getEnvironmentInfo () {
 async function getPlatformEnvironmentData (projectRoot) {
     const installedPlatforms = await _getInstalledPlatforms(projectRoot);
 
-    const infoPromises = Object.keys(installedPlatforms).map(async platform => {
-        const platformApi = getPlatformApi(platform);
+    return Object.keys(installedPlatforms)
+        .map(platform => {
+            const platformApi = getPlatformApi(platform);
 
-        const getPlatformInfo = platformApi && platformApi.getEnvironmentInfo
-            ? () => platformApi.getEnvironmentInfo()
-            : () => _getPlatformInfo(platform);
+            const getPlatformInfo = platformApi && platformApi.getEnvironmentInfo
+                ? () => platformApi.getEnvironmentInfo()
+                : _legacyPlatformInfo[platform];
 
-        return {
+            return { platform, getPlatformInfo };
+        })
+        .filter(o => o.getPlatformInfo)
+        .map(async ({ platform, getPlatformInfo }) => ({
             key: `${platform} Environment`,
             children: await getPlatformInfo()
-        };
-    });
-
-    return Promise.all(infoPromises);
+        }));
 }
 
 async function getProjectSettingsFiles (projectRoot) {
-    const cfgXml = _fetchFileContents(cdvLibUtil.projectConfig(projectRoot)).replace(/\n$/, '');
+    const cfgXml = _fetchFileContents(cdvLibUtil.projectConfig(projectRoot));
 
     // Create package.json snippet
     const pkgJson = require(path.join(projectRoot, 'package'));
-    const pkgSnippet = ['', '--- Start of Cordova JSON Snippet ---',
+    const pkgSnippet = [
+        '--- Start of Cordova JSON Snippet ---',
         JSON.stringify(pkgJson.cordova, null, 2),
         '--- End of Cordova JSON Snippet ---'
     ].join('\n');
@@ -124,7 +126,7 @@ async function getProjectSettingsFiles (projectRoot) {
     return {
         key: 'Project Setting Files',
         children: [
-            { key: 'config.xml', value: `\n${cfgXml}` },
+            { key: 'config.xml', value: `${cfgXml}` },
             { key: 'package.json', value: pkgSnippet }
         ],
         options: {
@@ -163,70 +165,51 @@ function _fetchFileContents (filePath) {
     return fs.readFileSync(filePath, 'utf-8');
 }
 
-function _buildContentList (list, options = {}, level = 1) {
-    const content = [];
-    let first = true;
-
-    for (const item of list) {
-        const padding = String.prototype.padStart((4 * level), ' ');
-
-        if (item.fromFile) {
-            item.data = `\n\n${item.data}\n`;
-        }
-
-        const newLineSep = options.addNewLineSep && !first ? '\n' : '';
-
-        content.push(`${newLineSep}${padding}${item.key} : ${item.value}`);
-
-        if (item.children && Array.isArray(item.children)) {
-            return content.concat(_buildContentList(item.children, options, level + 1));
-        }
-
-        first = false;
-    }
-
-    return content;
-}
-
 /**
  * @deprecated will be removed when platforms implement the calls.
  */
-async function _getPlatformInfo (platform) {
-    let key;
-    let value;
-    switch (platform) {
-    case 'ios':
-        key = 'xcodebuild';
-        value = await _failSafeSpawn(key, ['-version']);
-        break;
-    case 'android':
-        key = 'android';
-        value = await _failSafeSpawn(key, ['list', 'target']);
-        break;
-    }
-
-    return [{ key, value }];
-}
+const _legacyPlatformInfo = {
+    ios: async () => [{
+        key: 'xcodebuild',
+        value: await _failSafeSpawn('xcodebuild', ['-version'])
+    }],
+    android: async () => [{
+        key: 'android',
+        value: await _failSafeSpawn('android', ['list', 'target'])
+    }]
+};
 
 const _failSafeSpawn = (command, args) => execa(command, args).then(
     ({ stdout }) => stdout,
     err => `ERROR: ${err.message}`
 );
 
-const _createSection = section => {
-    // Start of new section
-    const content = section.value ? [] : ['', `${section.key}:`, ''];
+function _formatNodeList (list, level = 0) {
+    const content = [];
 
-    if (section.value) {
-        content.push(section.value);
-    }
+    for (const item of list) {
+        const indent = String.prototype.padStart((4 * level), ' ');
+        let itemString = `${indent}${item.key}:`;
 
-    if (section.children) {
-        content.push(..._buildContentList(section.children, section.options));
+        if ('value' in item) {
+            // Start Multiline items on a new line
+            itemString += (/[\r\n]/.test(item.value))
+                ? `\n${item.value.trim()}\n`
+                : ` ${item.value}`;
+        } else {
+            // Start of section
+            itemString = `\n${itemString}\n`;
+        }
+
+        content.push(itemString);
+
+        if (item.children) {
+            content.push(..._formatNodeList(item.children, level + 1));
+        }
     }
 
     return content;
-};
+}
 
 module.exports = async function () {
     const projectRoot = cdvLibUtil.cdProjectRoot();
@@ -236,22 +219,10 @@ module.exports = async function () {
         getInstalledPlatforms(projectRoot),
         getInstalledPlugins(projectRoot),
         getEnvironmentInfo(),
-        getPlatformEnvironmentData(projectRoot),
+        ...(await getPlatformEnvironmentData(projectRoot)),
         getProjectSettingsFiles(projectRoot)
     ]);
 
-    const content = [];
-    results.forEach(section => {
-        if (Array.isArray(section)) {
-            // Handle a Group of Sections (List of Platforms)
-            section.forEach(subSection => {
-                content.push(..._createSection(subSection));
-            });
-        } else {
-            // Handle a Single Section
-            content.push(..._createSection(section));
-        }
-    });
-
+    const content = _formatNodeList(results);
     cordova.emit('results', content.join('\n'));
 };
