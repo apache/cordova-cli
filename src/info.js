@@ -38,30 +38,34 @@ async function getCordovaDependenciesInfo () {
 
     const libPkg = require('cordova-lib/package');
     const cliLibDep = cliDependencies.find(({ key }) => key === 'lib');
-    cliLibDep.content = await _getLibDependenciesInfo(libPkg.dependencies);
+    cliLibDep.children = await _getLibDependenciesInfo(libPkg.dependencies);
 
     return {
-        header: 'Cordova Packages',
-        content: [{ key: 'cli', data: cliPkg.version, content: cliDependencies }]
+        key: 'Cordova Packages',
+        children: [{
+            key: 'cli',
+            value: cliPkg.version,
+            children: cliDependencies
+        }]
     };
 }
 
 async function getInstalledPlatforms (projectRoot) {
     return _getInstalledPlatforms(projectRoot).then(platforms => {
-        const header = 'Project Installed Platforms';
-        const content = Object.entries(platforms)
-            .map(([key, data]) => ({ key, data }));
+        const key = 'Project Installed Platforms';
+        const children = Object.entries(platforms)
+            .map(([key, value]) => ({ key, value }));
 
-        return { header, content };
+        return { key, children };
     });
 }
 
 async function getInstalledPlugins (projectRoot) {
-    const header = 'Project Installed Plugins';
-    const content = cdvPluginUtil.getInstalledPlugins(projectRoot)
-        .map(plugin => ({ key: plugin.id, data: plugin.version }));
+    const key = 'Project Installed Plugins';
+    const children = cdvPluginUtil.getInstalledPlugins(projectRoot)
+        .map(plugin => ({ key: plugin.id, value: plugin.version }));
 
-    return { header, content };
+    return { key, children };
 }
 
 async function getEnvironmentInfo () {
@@ -79,11 +83,11 @@ async function getEnvironmentInfo () {
     ];
 
     return {
-        header: 'Environment',
-        content: [
-            { key: 'OS', data: osFormat.join(' ') },
-            { key: 'Node', data: process.version },
-            { key: 'npm', data: npmVersion }
+        key: 'Environment',
+        children: [
+            { key: 'OS', value: osFormat.join(' ') },
+            { key: 'Node', value: process.version },
+            { key: 'npm', value: npmVersion }
         ]
     };
 }
@@ -99,8 +103,8 @@ async function getPlatformEnvironmentData (projectRoot) {
             : () => _getPlatformInfo(platform);
 
         return {
-            header: `${platform} Environment`,
-            content: await getPlatformInfo()
+            key: `${platform} Environment`,
+            children: await getPlatformInfo()
         };
     });
 
@@ -112,17 +116,20 @@ async function getProjectSettingsFiles (projectRoot) {
 
     // Create package.json snippet
     const pkgJson = require(path.join(projectRoot, 'package'));
-    const pkgSnippet = ['--- Start of Cordova JSON Snippet ---',
+    const pkgSnippet = ['', '--- Start of Cordova JSON Snippet ---',
         JSON.stringify(pkgJson.cordova, null, 2),
         '--- End of Cordova JSON Snippet ---'
     ].join('\n');
 
     return {
-        header: 'Project Setting Files',
-        content: [
-            { key: 'config.xml', data: cfgXml, fromFile: true },
-            { key: 'package.json', data: pkgSnippet, fromFile: true }
-        ]
+        key: 'Project Setting Files',
+        children: [
+            { key: 'config.xml', value: `\n${cfgXml}` },
+            { key: 'package.json', value: pkgSnippet }
+        ],
+        options: {
+            addNewLineSep: true
+        }
     };
 }
 
@@ -136,7 +143,7 @@ async function _getLibDependenciesInfo (dependencies) {
 
     return Object.keys(dependencies)
         .filter(name => name.startsWith(cordovaPrefix))
-        .map(name => ({ key: name.slice(cordovaPrefix.length), data: versionFor(name) }));
+        .map(name => ({ key: name.slice(cordovaPrefix.length), value: versionFor(name) }));
 }
 
 async function _getInstalledPlatforms (projectRoot) {
@@ -156,8 +163,9 @@ function _fetchFileContents (filePath) {
     return fs.readFileSync(filePath, 'utf-8');
 }
 
-function _buildContentList (list, level = 1) {
+function _buildContentList (list, options = {}, level = 1) {
     const content = [];
+    let first = true;
 
     for (const item of list) {
         const padding = String.prototype.padStart((4 * level), ' ');
@@ -166,11 +174,15 @@ function _buildContentList (list, level = 1) {
             item.data = `\n\n${item.data}\n`;
         }
 
-        content.push(`${padding}${item.key} : ${item.data}`);
+        const newLineSep = options.addNewLineSep && !first ? '\n' : '';
 
-        if (item.content && Array.isArray(item.content)) {
-            return content.concat(_buildContentList(item.content, level + 1));
+        content.push(`${newLineSep}${padding}${item.key} : ${item.value}`);
+
+        if (item.children && Array.isArray(item.children)) {
+            return content.concat(_buildContentList(item.children, options, level + 1));
         }
+
+        first = false;
     }
 
     return content;
@@ -180,12 +192,20 @@ function _buildContentList (list, level = 1) {
  * @deprecated will be removed when platforms implement the calls.
  */
 async function _getPlatformInfo (platform) {
+    let key;
+    let value;
     switch (platform) {
     case 'ios':
-        return _failSafeSpawn('xcodebuild', ['-version']);
+        key = 'xcodebuild';
+        value = await _failSafeSpawn(key, ['-version']);
+        break;
     case 'android':
-        return _failSafeSpawn('android', ['list', 'target']);
+        key = 'android';
+        value = await _failSafeSpawn(key, ['list', 'target']);
+        break;
     }
+
+    return [{ key, value }];
 }
 
 const _failSafeSpawn = (command, args) => execa(command, args).then(
@@ -195,12 +215,14 @@ const _failSafeSpawn = (command, args) => execa(command, args).then(
 
 const _createSection = section => {
     // Start of new section
-    const content = ['', `${section.header}:`, ''];
+    const content = section.value ? [] : ['', `${section.key}:`, ''];
 
-    if (Array.isArray(section.content)) {
-        content.push(..._buildContentList(section.content));
-    } else {
-        content.push(section.content);
+    if (section.value) {
+        content.push(section.value);
+    }
+
+    if (section.children) {
+        content.push(..._buildContentList(section.children, section.options));
     }
 
     return content;
@@ -221,7 +243,7 @@ module.exports = async function () {
     const content = [];
     results.forEach(section => {
         if (Array.isArray(section)) {
-            // Handle a Group of Sections
+            // Handle a Group of Sections (List of Platforms)
             section.forEach(subSection => {
                 content.push(..._createSection(subSection));
             });
