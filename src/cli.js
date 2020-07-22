@@ -36,7 +36,7 @@ const semver = require('semver');
 const NODE_VERSION = process.version;
 
 // When there is no node version in the deprecation stage, set to null or false.
-const NODE_VERSION_REQUIREMENT = '>=8';
+const NODE_VERSION_REQUIREMENT = false;
 const NODE_VERSION_DEPRECATING_RANGE = '<10';
 
 var knownOpts = {
@@ -302,10 +302,15 @@ function cli (inputArgs) {
     let warningPartial = null;
 
     // If the Node.js versions does not meet our requirements or in a deprecation stage, display a warning.
-    if (!semver.satisfies(NODE_VERSION, NODE_VERSION_REQUIREMENT)) {
+    if (
+        NODE_VERSION_REQUIREMENT &&
+        !semver.satisfies(NODE_VERSION, NODE_VERSION_REQUIREMENT)
+    ) {
         warningPartial = 'is no longer supported';
-    } else if (NODE_VERSION_DEPRECATING_RANGE &&
-               semver.satisfies(NODE_VERSION, NODE_VERSION_DEPRECATING_RANGE)) {
+    } else if (
+        NODE_VERSION_DEPRECATING_RANGE &&
+        semver.satisfies(NODE_VERSION, NODE_VERSION_DEPRECATING_RANGE)
+    ) {
         warningPartial = 'has been deprecated';
     }
 
