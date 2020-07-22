@@ -18,10 +18,13 @@
 # under the License.
 #
 -->
-[![Build status](https://ci.appveyor.com/api/projects/status/github/apache/cordova-cli?branch=master)](https://ci.appveyor.com/project/ApacheSoftwareFoundation/cordova-cli)
-[![Build Status](https://travis-ci.org/apache/cordova-cli.svg?branch=master)](https://travis-ci.org/apache/cordova-cli)
 
 # Cordova CLI
+
+[![NPM](https://nodei.co/npm/cordova.png)](https://nodei.co/npm/cordova/)
+
+[![Node CI](https://github.com/apache/cordova-cli/workflows/Node%20CI/badge.svg?branch=master)](https://github.com/apache/cordova-cli/actions?query=branch%3Amaster)
+[![codecov.io](https://codecov.io/github/apache/cordova-cli/coverage.svg?branch=master)](https://codecov.io/github/apache/cordova-cli?branch=master)
 
 > The command line tool to build, deploy and manage [Cordova](http://cordova.apache.org)-based applications.
 
