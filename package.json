@@ -29,19 +29,19 @@
     "cli"
   ],
   "dependencies": {
-    "configstore": "^4.0.0",
-    "cordova-common": "^3.1.0",
-    "cordova-create": "^3.0.0-nightly.2019.11.19.1d0d67e0",
-    "cordova-lib": "^9.0.0",
+    "configstore": "^5.0.1",
+    "cordova-common": "^4.0.2",
+    "cordova-create": "^3.0.0",
+    "cordova-lib": "^9.0.1",
     "editor": "^1.0.0",
-    "execa": "^4.0.2",
+    "execa": "^4.0.3",
     "fs-extra": "^9.0.1",
-    "insight": "^0.10.1",
-    "loud-rejection": "^2.0.0",
-    "nopt": "^4.0.1",
-    "semver": "^6.2.0",
-    "systeminformation": "^4.26.9",
-    "update-notifier": "^2.5.0"
+    "insight": "^0.10.3",
+    "loud-rejection": "^2.2.0",
+    "nopt": "^4.0.3",
+    "semver": "^7.3.2",
+    "systeminformation": "^4.26.10",
+    "update-notifier": "^4.1.0"
   },
   "devDependencies": {
     "@cordova/eslint-config": "^2.0.0",
