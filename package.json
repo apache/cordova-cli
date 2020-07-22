@@ -15,14 +15,8 @@
     "lint": "eslint . bin/cordova",
     "cover": "nyc jasmine"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/apache/cordova-cli"
-  },
-  "bugs": {
-    "url": "https://issues.apache.org/jira/browse/CB",
-    "email": "dev@cordova.apache.org"
-  },
+  "repository": "github:apache/cordova-cli",
+  "bugs": "https://github.com/apache/cordova-cli/issues",
   "keywords": [
     "cordova",
     "client",
@@ -50,7 +44,7 @@
     "nyc": "^14.1.1",
     "rewire": "^4.0.1"
   },
-  "author": "Anis Kadri",
+  "author": "Apache Software Foundation",
   "contributors": [
     {
       "name": "Brian LeRoux",
@@ -147,6 +141,9 @@
     {
       "name": "Jesse MacFadyen",
       "email": "purplecabbage@gmail.com"
+    },
+    {
+      "name": "Anis Kadri"
     }
   ],
   "license": "Apache-2.0",
