@@ -46,9 +46,9 @@
   "devDependencies": {
     "@cordova/eslint-config": "^2.0.0",
     "jasmine": "^3.5.0",
-    "mock-stdin": "^0.3.1",
-    "nyc": "^14.1.1",
-    "rewire": "^4.0.1"
+    "mock-stdin": "^1.0.0",
+    "nyc": "^15.1.0",
+    "rewire": "^5.0.0"
   },
   "author": "Anis Kadri",
   "contributors": [
