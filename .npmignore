@@ -1,5 +1,5 @@
-temp
-spec
-e2e
+.*
+appveyor.yml
 coverage
-.nyc_output
+spec
+temp
