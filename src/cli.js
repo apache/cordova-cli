@@ -310,7 +310,7 @@ function cli (inputArgs) {
     }
 
     if (warningPartial) {
-        const upgradeMsg = `Please upgrade to the latest Node.js version available (LTS version recommended).`;
+        const upgradeMsg = 'Please upgrade to the latest Node.js version available (LTS version recommended).';
         logger.warn(`Warning: Node.js ${NODE_VERSION} ${warningPartial}. ${upgradeMsg}`);
     }
 
@@ -451,7 +451,8 @@ function cli (inputArgs) {
             args['save-exact'] = conf.get('save-exact');
         }
 
-        var download_opts = { searchpath: args.searchpath,
+        var download_opts = {
+            searchpath: args.searchpath,
             noregistry: args.noregistry,
             nohooks: args.nohooks,
             cli_variables: cli_vars,
