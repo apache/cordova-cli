@@ -38,10 +38,10 @@ These commands are available at all times.
 
 | Command  | Description
 |----------|--------------
-| create | Create a project
-| help `<command>` | Get help for a command
-| telemetry | Turn telemetry collection on or off
-| config | Set, get, delete, edit, and list global cordova options
+| `create` | Create a project
+| `help <command>` | Get help for a command
+| `telemetry` | Turn telemetry collection on or off
+| `config` | Set, get, delete, edit, and list global cordova options
 
 ## Project Command List
 
@@ -49,15 +49,16 @@ These commands are supported when the current working directory is a valid Cordo
 
 | Command      | Description
 |--------------|--------------
-| info         | Generate project information
-| requirements | Checks and print out all the installation requirements for platforms specified
-| platform     | Manage project platforms
-| plugin       | Manage project plugins
-| prepare      | Copy files into platform(s) for building
-| compile      | Build platform(s)
-| clean        | Cleanup project from build artifacts
-| run          | Run project (including prepare && compile)
-| serve        | Run project with a local webserver (including prepare)
+| `info`         | Generate project information
+| `requirements` | Checks and print out all the installation requirements for platforms specified
+| `platform`     | Manage project platforms
+| `plugin`       | Manage project plugins
+| `prepare`      | Copy files into platform(s) for building
+| `compile`      | Compile project for platform(s)
+| `build`        | Build project for platform(s) (`prepare` + `compile`)
+| `clean`        | Cleanup project from build artifacts
+| `run`          | Run project (including prepare && compile)
+| `serve`        | Run project with a local webserver (including prepare)
 
 ## Common options
 
@@ -351,7 +352,7 @@ based on the following criteria (listed in order of precedence):
         cordova plugin ls
 
 ### Conflicting plugins
-Conflicting plugins may occur when adding plugins that use `edit-config` tags in their plugin.xml file. `edit-config` allows plugins to add or replace attributes of XML elements.  
+Conflicting plugins may occur when adding plugins that use `edit-config` tags in their plugin.xml file. `edit-config` allows plugins to add or replace attributes of XML elements.
 
 This feature can cause issues with the application if more than one plugin tries to modify the same XML element. Conflict detection has been implemented to prevent plugins from being added so one plugin doesn't try to overwrite another plugin's `edit-config` changes. An error will be thrown when a conflict in `edit-config` has been found and the plugin won't be added. The error message will mention that all conflicts must be resolved before the plugin can be added. One option to resolving the `edit-config` conflict is to make changes to the affected plugins' plugin.xml so that they do not modify the same XML element. The other option is to use the `--force` flag to force add the plugin. This option should be used with caution as it ignores the conflict detection and will overwrite all conflicts it has with other plugins, thus may leave the other plugins in a bad state.
 
@@ -374,7 +375,7 @@ cordova prepare [<platform> [..]]
 
 | Option     | Description
 |------------|------------------
-| `<platform> [..]` | Platform name(s) to prepare. If not specified, all platforms are built.
+| `<platform> [..]` | Platform name(s) to prepare. If not specified, all platforms are prepared.
 
 ## cordova compile command
 
@@ -386,9 +387,9 @@ It only performs the compilation step without doing prepare. It's common to invo
 ### Syntax
 
 ```bash
-cordova build [<platform> [...]]
-    [--debug|--release]
-    [--device|--emulator|--target=<targetName>]
+cordova compile [<platform> [...]]
+    [--debug | --release]
+    [--device | --emulator | --target=<targetName>]
     [--buildConfig=<configfile>]
     [-- <platformOpts>]
 ```
@@ -404,8 +405,8 @@ Shortcut for `cordova prepare` + `cordova compile` for all/the specified platfor
 
 ```bash
 cordova build [<platform> [...]]
-    [--debug|--release]
-    [--device|--emulator]
+    [--debug | --release]
+    [--device | --emulator]
     [--buildConfig=<configfile>]
     [-- <platformOpts>]
 ```
@@ -416,7 +417,7 @@ cordova build [<platform> [...]]
 | --debug    | Perform a debug build. This typically translates to debug mode for the underlying platform being built.
 | --release  | Perform a release build. This typically translates to release mode for the underlying platform being built.
 | --device   | Build it for a device
-| --emulator | Build it for an emulator. In particular, the platform architecture might be different for a device Vs emulator.
+| --emulator | Build it for an emulator. In particular, the platform architecture might be different for a device vs. emulator.
 | --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process especially related to signing the package.
 | `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.
 
@@ -445,8 +446,9 @@ Prepares, builds, and deploys app on specified platform devices/emulators. If a 
 ```bash
 cordova run [<platform> [...]]
     [--list | --debug | --release]
-    [--noprepare] [--nobuild]
-    [--device|--emulator|--target=<targetName>]
+    [--noprepare]
+    [--nobuild]
+    [--device | --emulator | --target=<targetName>]
     [--buildConfig=<configfile>]
     [-- <platformOpts>]
 ```
