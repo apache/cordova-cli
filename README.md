@@ -28,7 +28,7 @@
 
 > The command line tool to build, deploy and manage [Cordova](http://cordova.apache.org)-based applications.
 
-[Apache Cordova](http://cordova.apache.org) allows for building native mobile applications using HTML, CSS and JavaScript.
+[Apache Cordova](https://cordova.apache.org) allows for building native mobile applications using HTML, CSS and JavaScript.
 This tool helps with management of multi-platform Cordova applications as well as Cordova plugin integration.
 
 ## Installation
