@@ -26,7 +26,7 @@
 [![Node CI](https://github.com/apache/cordova-cli/workflows/Node%20CI/badge.svg?branch=master)](https://github.com/apache/cordova-cli/actions?query=branch%3Amaster)
 [![codecov.io](https://codecov.io/github/apache/cordova-cli/coverage.svg?branch=master)](https://codecov.io/github/apache/cordova-cli?branch=master)
 
-> The command line tool to build, deploy and manage [Cordova](http://cordova.apache.org)-based applications.
+> The command line tool to build, deploy and manage [Cordova](https://cordova.apache.org)-based applications.
 
 [Apache Cordova](https://cordova.apache.org) allows for building native mobile applications using HTML, CSS and JavaScript.
 This tool helps with management of multi-platform Cordova applications as well as Cordova plugin integration.
