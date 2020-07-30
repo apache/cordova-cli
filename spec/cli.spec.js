@@ -493,8 +493,8 @@ describe('cordova cli', () => {
             cli.__set__('NODE_VERSION_REQUIREMENT', '>=8');
 
             return cli(['node', 'cordova']).then(() => {
-                const errorMsg = logger.warn.calls.argsFor(1).toString();
-                expect(errorMsg).toMatch(/v6.1.0 is no longer supported./);
+                const errorMsg = logger.warn.calls.allArgs().toString();
+                expect(errorMsg).toMatch(/Node.js v6.1.0 is no longer supported./);
             });
         });
 
@@ -504,8 +504,8 @@ describe('cordova cli', () => {
             cli.__set__('NODE_VERSION_REQUIREMENT', '>=8');
 
             return cli(['node', 'cordova']).then(() => {
-                const errorMsg = logger.warn.calls.argsFor(1).toString();
-                expect(errorMsg).toBeFalsy();
+                const errorMsg = logger.warn.calls.allArgs().toString();
+                expect(errorMsg).not.toMatch(/Node.js v6.1.0 is no longer supported./);
             });
         });
 
@@ -515,8 +515,8 @@ describe('cordova cli', () => {
             cli.__set__('NODE_VERSION_REQUIREMENT', '>=8');
 
             return cli(['node', 'cordova']).then(() => {
-                const errorMsg = logger.warn.calls.argsFor(1).toString();
-                expect(errorMsg).toMatch(/v8.0.0 has been deprecated./);
+                const errorMsg = logger.warn.calls.allArgs().toString();
+                expect(errorMsg).toMatch(/Node.js v8.0.0 has been deprecated./);
             });
         });
 
@@ -526,8 +526,8 @@ describe('cordova cli', () => {
             cli.__set__('NODE_VERSION_REQUIREMENT', '>=8');
 
             return cli(['node', 'cordova']).then(() => {
-                const errorMsg = logger.warn.calls.argsFor(1).toString();
-                expect(errorMsg).toBeFalsy();
+                const errorMsg = logger.warn.calls.allArgs().toString();
+                expect(errorMsg).not.toMatch(/Node.js v8.0.0 has been deprecated./);
             });
         });
     });
