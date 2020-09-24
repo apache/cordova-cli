@@ -171,7 +171,7 @@ const _legacyPlatformInfo = {
     }],
     android: async () => [{
         key: 'android',
-        value: await _failSafeSpawn('android', ['list', 'target'])
+        value: await _failSafeSpawn('avdmanager', ['list', 'target'])
     }]
 };
 
