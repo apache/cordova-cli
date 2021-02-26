@@ -33,7 +33,7 @@
     "loud-rejection": "^2.2.0",
     "nopt": "^4.0.3",
     "semver": "^7.3.2",
-    "systeminformation": "^4.34.6",
+    "systeminformation": "^5.5.0",
     "update-notifier": "^4.1.0"
   },
   "devDependencies": {
