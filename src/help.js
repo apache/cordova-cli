@@ -21,27 +21,20 @@ const cordova_lib = require('cordova-lib');
 const path = require('path');
 
 module.exports = function help (args) {
-    let command,
-        file,
-        raw,
-        docdir;
     args = args || [];
-    command = ((args)[0] || 'cordova');
-    docdir = path.join(__dirname, '..', 'doc');
-    file = [
-        command + '.md',
-        command + '.txt',
+
+    const command = ((args)[0] || 'cordova');
+    const docdir = path.join(__dirname, '..', 'doc');
+    const file = [
+        `${command}.md`,
+        `${command}.txt`,
         'cordova.md',
         'cordova.txt'
-    ].map(function (file) {
-        const f = path.join(docdir, file);
-        if (fs.existsSync(f)) {
-            return f;
-        }
-    }).filter(function (f) {
-        return !!f;
-    });
-    raw = fs.readFileSync(file[0]).toString('utf8').replace(/cordova-cli/g, cordova_lib.binname);
+    ]
+        .map(f => path.join(docdir, f))
+        .filter(f => !!fs.existsSync(f));
+
+    const raw = fs.readFileSync(file[0]).toString('utf8').replace(/cordova-cli/g, cordova_lib.binname);
     // cordova.emit('results', raw);
 
     return raw;
