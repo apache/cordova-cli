@@ -16,12 +16,12 @@
     specific language governing permissions and limitations
     under the License.
 */
-var fs = require('fs');
-var cordova_lib = require('cordova-lib');
-var path = require('path');
+const fs = require('fs');
+const cordova_lib = require('cordova-lib');
+const path = require('path');
 
 module.exports = function help (args) {
-    var command,
+    let command,
         file,
         raw,
         docdir;
@@ -34,7 +34,7 @@ module.exports = function help (args) {
         'cordova.md',
         'cordova.txt'
     ].map(function (file) {
-        var f = path.join(docdir, file);
+        const f = path.join(docdir, file);
         if (fs.existsSync(f)) {
             return f;
         }

@@ -21,10 +21,10 @@
 const { EOL } = require('os');
 
 // Google Analytics tracking code
-var GA_TRACKING_CODE = 'UA-64283057-7';
+const GA_TRACKING_CODE = 'UA-64283057-7';
 
-var pkg = require('../package.json');
-var Insight = require('insight');
+const pkg = require('../package.json');
+const Insight = require('insight');
 
 /**
  * By redefining `get optOut` we trick Insight into tracking
@@ -38,7 +38,7 @@ class RelentlessInsight extends Insight {
     get realOptOut () { return super.optOut; }
 }
 
-var insight = new RelentlessInsight({
+const insight = new RelentlessInsight({
     trackingCode: GA_TRACKING_CODE,
     pkg: pkg
 });
@@ -96,7 +96,7 @@ function isOptedIn () {
  * Has the user already answered the telemetry prompt? (thereby opting in or out?)
  */
 function hasUserOptedInOrOut () {
-    var insightOptOut = insight.realOptOut === undefined;
+    const insightOptOut = insight.realOptOut === undefined;
     return !(insightOptOut);
 }
 
