@@ -139,9 +139,9 @@ describe('telemetry', () => {
             spyOn(console, 'log');
             spyOn(telemetry, 'track').and.callThrough();
             response = Symbol('response');
-            insight.askPermission.and.callFake((_, cb) => {
+            insight.askPermission.and.callFake((_) => {
                 insight.optOut = !response;
-                cb(null, response);
+                return Promise.resolve(response);
             });
         });
 
@@ -257,7 +257,7 @@ describe('telemetry', () => {
             it('does NOT show prompt when running on a CI [T020]', () => {
                 process.env.CI = 1;
                 return telemetry.showPrompt().then(result => {
-                    expect(result).toBe(false);
+                    expect(result).toBe(undefined);
                     expect(insight.config.set).not.toHaveBeenCalled();
                     expect(process.stdout.write).not.toHaveBeenCalled();
                 });
