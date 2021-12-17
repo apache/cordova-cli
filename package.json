@@ -37,7 +37,7 @@
     "update-notifier": "^5.1.0"
   },
   "devDependencies": {
-    "@cordova/eslint-config": "^3.0.0",
+    "@cordova/eslint-config": "^4.0.0",
     "jasmine": "^3.10.0",
     "mock-stdin": "^1.0.0",
     "nyc": "^15.1.0",
