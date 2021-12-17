@@ -20,6 +20,21 @@
 -->
 # Cordova-cli Release Notes
 
+### 11.0.0 (Dec 17, 2021)
+
+* [GH-575](https://github.com/apache/cordova-cli/pull/575) chore: rebuilt `package-lock.json`
+* [GH-574](https://github.com/apache/cordova-cli/pull/574) dep: bump `@cordova/eslint-config@^4.0.0`
+* [GH-573](https://github.com/apache/cordova-cli/pull/573) dep: update `insight` w/ updated code usage
+* [GH-572](https://github.com/apache/cordova-cli/pull/572) dep: bump all dependencies
+* [GH-570](https://github.com/apache/cordova-cli/pull/570) feat: rebuilt `package-lock.json` w/ v2
+* [GH-571](https://github.com/apache/cordova-cli/pull/571) feat!: update node support
+* [GH-564](https://github.com/apache/cordova-cli/pull/564) chore: `npmrc`
+* [GH-559](https://github.com/apache/cordova-cli/pull/559) docs: remove plugin save command from CLI help
+* [GH-550](https://github.com/apache/cordova-cli/pull/550) dep: `systeminformation@^5.5.0`
+* [GH-535](https://github.com/apache/cordova-cli/pull/535) chore(pkg): remove deprecated `no-op` field `preferGlobal`
+* [GH-534](https://github.com/apache/cordova-cli/pull/534) chore: clean up `package.json`
+* [GH-533](https://github.com/apache/cordova-cli/pull/533) (android) Replace deprecated `android` command with `avdmanager`
+
 ### 10.0.0 (Jul 31, 2020)
 
 * [GH-521](https://github.com/apache/cordova-cli/pull/521) test: fix node.js version check

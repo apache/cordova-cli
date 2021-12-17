@@ -1,6 +1,6 @@
 {
   "name": "cordova",
-  "version": "11.0.0-dev",
+  "version": "11.0.0",
   "description": "Cordova command line interface tool",
   "main": "cordova",
   "engines": {
