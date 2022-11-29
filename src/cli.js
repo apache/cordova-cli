@@ -16,7 +16,6 @@
 */
 
 const nopt = require('nopt');
-const updateNotifier = require('update-notifier');
 const pkg = require('../package.json');
 const telemetry = require('./telemetry');
 const help = require('./help');
@@ -75,27 +74,6 @@ const shortHands = {
     h: '--help',
     t: '--template'
 };
-
-function checkForUpdates () {
-    try {
-        // Checks for available update and returns an instance
-        const notifier = updateNotifier({ pkg });
-
-        if (notifier.update &&
-           notifier.update.latest !== pkg.version) {
-            // Notify using the built-in convenience method
-            notifier.notify();
-        }
-    } catch (e) {
-        // https://issues.apache.org/jira/browse/CB-10062
-        if (e && e.message && /EACCES/.test(e.message)) {
-            console.log('Update notifier was not able to access the config file.\n' +
-                'You may grant permissions to the file: \'sudo chmod 744 ~/.config/configstore/update-notifier-cordova.json\'');
-        } else {
-            throw e;
-        }
-    }
-}
 
 let shouldCollectTelemetry = false;
 
@@ -256,8 +234,6 @@ function handleTelemetryCmd (subcommand, isOptedIn) {
 }
 
 function cli (inputArgs) {
-    checkForUpdates();
-
     const args = nopt(knownOpts, shortHands, inputArgs);
 
     process.on('uncaughtException', function (err) {

@@ -34,7 +34,6 @@ Aliases
 Options
     -v, --version ...................... prints out this utility's version
     -d, --verbose ...................... debug mode produces verbose log output for all activity,
-    --no-update-notifier ............... disables check for CLI updates
     --nohooks .......................... suppress executing hooks
                                          (taking RegExp hook patterns as parameters)
 
