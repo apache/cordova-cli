@@ -20,6 +20,17 @@
 -->
 # Cordova-cli Release Notes
 
+### 11.1.0 (Jan 11, 2023)
+
+* [GH-603](https://github.com/apache/cordova-cli/pull/603) dep: bump to latest minor+patch w/ `package-lock` rebuild
+  * `cordova-common@^4.1.0`
+  * `cordova-create@^4.1.0`
+  * `cordova-lib@^11.1.0`
+  * `systeminformation@^5.17.3`
+* [GH-599](https://github.com/apache/cordova-cli/pull/599) chore: remove unnecessary gendered text
+* [GH-600](https://github.com/apache/cordova-cli/pull/600) ci: update codecov & run on node 14-18
+* [GH-587](https://github.com/apache/cordova-cli/pull/587) dep(npm): bump packages to latest minor/patch revisions w/ `package-lock`
+
 ### 11.0.0 (Dec 17, 2021)
 
 * [GH-575](https://github.com/apache/cordova-cli/pull/575) chore: rebuilt `package-lock.json`
