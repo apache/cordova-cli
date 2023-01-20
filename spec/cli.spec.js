@@ -18,7 +18,6 @@
 const path = require('path');
 const rewire = require('rewire');
 const { events, cordova } = require('cordova-lib');
-const telemetry = require('../src/telemetry');
 
 describe('cordova cli', () => {
     let cli, logger;
@@ -41,12 +40,6 @@ describe('cordova cli', () => {
         ]);
         cli.__set__({ logger });
         spyOn(console, 'log');
-
-        // Prevent accidentally turning telemetry on/off during testing
-        spyOn(telemetry, 'track');
-        spyOn(telemetry, 'turnOn');
-        spyOn(telemetry, 'turnOff');
-        spyOn(telemetry, 'showPrompt').and.returnValue(Promise.resolve());
     });
 
     describe('options', () => {
@@ -243,102 +236,6 @@ describe('cordova cli', () => {
                 );
                 const opts = cordova.plugin.calls.argsFor(0)[2];
                 expect(opts.production).toBe(false);
-            });
-        });
-    });
-
-    describe('telemetry', () => {
-        const Insight = require('insight');
-        let isOptedOut;
-
-        beforeEach(() => {
-            // Allow testing if we _really_ would send tracking requests
-            telemetry.track.and.callThrough();
-            telemetry.turnOn.and.callThrough();
-            telemetry.turnOff.and.callThrough();
-            spyOn(Insight.prototype, 'track').and.callThrough();
-            spyOn(Insight.prototype, '_save');
-            spyOnProperty(Insight.prototype, 'optOut', 'get')
-                .and.callFake(() => isOptedOut);
-            spyOnProperty(Insight.prototype, 'optOut', 'set')
-                .and.callFake(x => { isOptedOut = x; });
-
-            // Set a normal opted-in user as default
-            spyOn(telemetry, 'isCI').and.returnValue(false);
-            isOptedOut = false;
-        });
-
-        it("Test#023 : skips prompt when user runs 'cordova telemetry X'", () => {
-            isOptedOut = undefined;
-
-            return Promise.resolve()
-                .then(_ => cli(['node', 'cordova', 'telemetry', 'on']))
-                .then(_ => cli(['node', 'cordova', 'telemetry', 'off']))
-                .then(() => {
-                    expect(telemetry.showPrompt).not.toHaveBeenCalled();
-                });
-        });
-
-        it("Test#024 : is NOT collected when user runs 'cordova telemetry on' while NOT opted-in", () => {
-            isOptedOut = true;
-
-            return cli(['node', 'cordova', 'telemetry', 'on']).then(() => {
-                expect(Insight.prototype.track).not.toHaveBeenCalled();
-            });
-        });
-
-        it("Test#025 : is collected when user runs 'cordova telemetry off' while opted-in", () => {
-            return cli(['node', 'cordova', 'telemetry', 'off']).then(() => {
-                expect(telemetry.track).toHaveBeenCalledWith('telemetry', 'off', 'via-cordova-telemetry-cmd', 'successful');
-                expect(Insight.prototype.track).toHaveBeenCalled();
-                expect(Insight.prototype._save).toHaveBeenCalled();
-            });
-        });
-
-        it('Test#026 : tracks platforms/plugins subcommands', () => {
-            spyOn(cordova, 'platform').and.returnValue(Promise.resolve());
-
-            return cli(['node', 'cordova', 'platform', 'add', 'ios']).then(() => {
-                expect(telemetry.track).toHaveBeenCalledWith('platform', 'add', 'successful');
-                expect(Insight.prototype.track).toHaveBeenCalled();
-                expect(Insight.prototype._save).toHaveBeenCalled();
-            });
-        });
-
-        it('Test#027 : shows prompt if user neither opted in or out yet', () => {
-            isOptedOut = undefined;
-            spyOn(cordova, 'prepare').and.returnValue(Promise.resolve());
-
-            return cli(['node', 'cordova', 'prepare']).then(() => {
-                expect(telemetry.showPrompt).toHaveBeenCalled();
-            });
-        });
-
-        it('Test#029 : is NOT collected in CI environments', () => {
-            telemetry.isCI.and.returnValue(true);
-
-            return cli(['node', 'cordova', '--version']).then(() => {
-                expect(telemetry.track).not.toHaveBeenCalled();
-            });
-        });
-
-        it("Test#030 : is NOT collected when --no-telemetry flag found and doesn't prompt", () => {
-            isOptedOut = undefined;
-
-            return cli(['node', 'cordova', '--version', '--no-telemetry']).then(() => {
-                expect(telemetry.showPrompt).not.toHaveBeenCalled();
-                expect(Insight.prototype.track).not.toHaveBeenCalled();
-            });
-        });
-
-        it("Test#033 : track opt-out that happened via 'cordova telemetry off' even if user is NOT opted-in ", () => {
-            isOptedOut = true;
-
-            return cli(['node', 'cordova', 'telemetry', 'off']).then(() => {
-                expect(telemetry.isOptedIn()).toBeFalsy();
-                expect(telemetry.track).toHaveBeenCalledWith('telemetry', 'off', 'via-cordova-telemetry-cmd', 'successful');
-                expect(Insight.prototype.track).toHaveBeenCalled();
-                expect(Insight.prototype._save).toHaveBeenCalled();
             });
         });
     });
