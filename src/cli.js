@@ -379,9 +379,7 @@ function cli (inputArgs) {
         // Pass nopt-parsed args to PlatformApi through opts.options
         opts.options = args;
         opts.options.argv = unparsedArgs;
-        if (cmd === 'run' && args.list && cordova.targets) {
-            return cordova.targets.call(null, opts);
-        }
+
         return cordova[cmd].call(null, opts);
     } else if (cmd === 'requirements') {
         // All options without dashes are assumed to be platform names
