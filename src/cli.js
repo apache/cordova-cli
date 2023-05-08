@@ -79,7 +79,7 @@ const shortHands = {
 function checkForUpdates () {
     try {
         // Checks for available update and returns an instance
-        const notifier = updateNotifier({ pkg: pkg });
+        const notifier = updateNotifier({ pkg });
 
         if (notifier.update &&
            notifier.update.latest !== pkg.version) {
