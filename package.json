@@ -4,7 +4,7 @@
   "description": "Cordova command line interface tool",
   "main": "cordova",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=16.13.0"
   },
   "bin": {
     "cordova": "./bin/cordova"
@@ -23,17 +23,17 @@
   ],
   "dependencies": {
     "configstore": "^5.0.1",
-    "cordova-common": "^4.1.0",
+    "cordova-common": "^5.0.0",
     "cordova-create": "^4.1.0",
     "cordova-lib": "^11.1.0",
     "editor": "^1.0.0",
     "execa": "^5.1.1",
-    "fs-extra": "^10.1.0",
+    "fs-extra": "^11.1.1",
     "insight": "^0.11.1",
     "loud-rejection": "^2.2.0",
-    "nopt": "^5.0.0",
-    "semver": "^7.3.8",
-    "systeminformation": "^5.17.3",
+    "nopt": "^7.1.0",
+    "semver": "^7.5.0",
+    "systeminformation": "^5.17.12",
     "update-notifier": "^5.1.0"
   },
   "devDependencies": {
