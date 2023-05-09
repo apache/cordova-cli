@@ -40,7 +40,7 @@ class RelentlessInsight extends Insight {
 
 const insight = new RelentlessInsight({
     trackingCode: GA_TRACKING_CODE,
-    pkg: pkg
+    pkg
 });
 
 /**
@@ -116,14 +116,14 @@ function isNoTelemetryFlag (args) {
 
 // this is to help testing, so we don't have to wait for the full 30
 module.exports = {
-    track: track,
-    turnOn: turnOn,
-    turnOff: turnOff,
-    clear: clear,
-    isOptedIn: isOptedIn,
-    hasUserOptedInOrOut: hasUserOptedInOrOut,
-    isCI: isCI,
-    showPrompt: showPrompt,
-    isNoTelemetryFlag: isNoTelemetryFlag,
+    track,
+    turnOn,
+    turnOff,
+    clear,
+    isOptedIn,
+    hasUserOptedInOrOut,
+    isCI,
+    showPrompt,
+    isNoTelemetryFlag,
     timeoutInSecs: 30
 };
