@@ -20,6 +20,23 @@
 -->
 # Cordova-cli Release Notes
 
+### 12.0.0 (May 20, 2023)
+
+**Breaking:**
+
+* [GH-611](https://github.com/apache/cordova-cli/pull/611) feat!(run): call platform api to list targets
+* [GH-595](https://github.com/apache/cordova-cli/pull/595) feat!: remove `update-notifier` support
+* [GH-615](https://github.com/apache/cordova-cli/pull/615) dep!: bump `cordova-create@5.0.0` & `cordova-lib@12.0.0`
+* [GH-613](https://github.com/apache/cordova-cli/pull/613) dep!: bump possible dependencies & set bump node requirement `>=16.13.0`
+  * `@cordova/eslint-config@^5.0.0`
+  * `jasmine@^4.6.0`
+  * `rewire@^6.0.0`
+  * `cordova-common@5.0.0`
+  * `fs-extra@11.1.1`
+  * `nopt@7.1.0`
+  * `semver@7.5.0`
+  * `systeminformation@5.17.12`
+
 ### 11.1.0 (Jan 11, 2023)
 
 * [GH-603](https://github.com/apache/cordova-cli/pull/603) dep: bump to latest minor+patch w/ `package-lock` rebuild
