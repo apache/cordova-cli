@@ -26,7 +26,7 @@ description: Learn how to use Cordova CLI commands and their options.
 
 # Cordova Command-line-interface (CLI) Reference
 
-## Syntax
+## CLI Syntax
 
 ```bash
 cordova <command> [options] -- [platformOpts]
@@ -75,36 +75,70 @@ These options apply to all cordova-cli commands.
 
 Certain commands have options (`platformOpts`) that are specific to a particular platform. They can be provided to the cordova-cli with a '--' separator that stops the command parsing within the cordova-lib module and passes through rest of the options for platforms to parse.
 
-## Examples
--  This example demonstrates how cordova-cli can be used to create a project with the `camera` plugin and run it for `android` platform. In particular, platform specific options like `--keystore` can be provided:
+## CLI Usage Example
 
-        # Create a cordova project
-        cordova create myApp com.myCompany.myApp myApp
-        cd myApp
-        # Add camera plugin to the project and remember that in config.xml & package.json.
-        cordova plugin add cordova-plugin-camera
-        # Add android platform to the project and remember that in config.xml & package.json.
-        cordova platform add android
-        # Check to see if your system is configured for building android platform.
-        cordova requirements android
-        # Build the android and emit verbose logs.
-        cordova build android --verbose
-        # Run the project on the android platform.
-        cordova run android
-        # Build for android platform in release mode with specified signing parameters.
-        cordova build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
+The following example illustrates how to utilize Cordova CLI to perform various tasks such as:
 
-## cordova create command
+- Creating a project
+- Adding the `camera` plugin
+- Adding, building, and running the project on the `android` platform
 
-### Synopsis
+Additionally, it includes an example showcasing the usage of specific options provided by the Cordova-Android platform, such as `--keystore`, which is utilized for release signing.
 
-Create the directory structure for the Cordova project in the specified path.
+1. Create a cordova project
 
-### Syntax
+    ```bash
+    cordova create myApp com.myCompany.myApp myApp
+    cd myApp
+    ```
 
-```
+2. Add Camera Plugin to the Project
+
+    ```bash
+    cordova plugin add cordova-plugin-camera
+    ```
+
+3. Add Android Platform to the Project
+
+    ```bash
+    cordova platform add android
+    ```
+
+4. Confirm System is Configured with Android Platform Requirements
+
+    ```bash
+    cordova requirements android
+    ```
+
+5. Build Project for Android with Verbose Logging Enabled
+
+    ```bash
+    cordova build android --verbose
+    ```
+
+6. Run Project on Android Platform
+
+    ```bash
+    cordova run android
+    ```
+
+7. Build Project for Android in Release Mode with Signing Parameters
+
+    ```bash
+    cordova build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
+    ```
+
+## `cordova create` command
+
+Creates the directory structure for the Cordova project in the specified path.
+
+**Command Syntax:**
+
+```bash
 cordova create path [id [name]] [options]
 ```
+
+**Arguments:**
 
 | Value | Description   |
 |-------|---------------|
@@ -112,7 +146,7 @@ cordova create path [id [name]] [options]
 | id    | _Default_: `io.cordova.hellocordova` <br/>  Reverse domain-style identifier that maps to `id` attribute of `widget` element in `config.xml`. This can be changed but there may be code generated using this value, such as Java package names. It is recommended that you select an appropriate value.  |
 | name  | _Default_: `HelloCordova` <br/> Application's display title that maps `name` element in `config.xml` file. This can be changed but there may be code generated using this value, such as Java class names. The default value is `HelloCordova`, but it is recommended that you select an appropriate value. |
 
-### Options
+**Options:**
 
 | Option | Description |
 |--------|-------------|
@@ -122,20 +156,18 @@ cordova create path [id [name]] [options]
 
 Cordova CLI works with the following directory structure:
 
-```
+```bash
 myapp/
 |-- config.xml
 |-- merges/
 | | |-- android/
-| | |-- windows/
 | | |-- ios/
 |-- www/
 |-- platforms/
 | |-- android/
-| |-- windows/
 | |-- ios/
 |-- plugins/
-  |--cordova-plugin-camera/
+  |-- cordova-plugin-camera/
 ```
 
 #### config.xml
@@ -144,11 +176,19 @@ Configures your application and allows you to customize the behavior of your pro
 
 #### www/
 
-Contains the project's web artifacts, such as .html, .css and .js files. As a cordova application developer, most of your code and assets will go here. They will be copied on a `cordova prepare` to each platform's www directory. The www source directory is reproduced within each platform's subdirectory, appearing for example in `platforms/ios/www` or `platforms/android/assets/www`. Because the CLI constantly copies over files from the source www folder, you should only edit these files and not the ones located under the platforms subdirectories. If you use version control software, you should add this source www folder, along with the merges folder, to your version control system.
+The "`www`" directory contains the web artifacts of the project, encompassing various file types with extensions including, but not limited to, `.html`, `.css`, and `.js`.
+
+As a Cordova application developer, most of your code and assets will be placed in this directory. During the `cordova prepare` command execution, the contents of the "`www`" directory are copied to the corresponding `www` directories within each platform's subdirectory. For instance, you can find it at `platforms/ios/www` or `platforms/android/assets/www`.
+
+It's important to note that since the CLI regularly copies files from the source "`www`" folder, you should only make edits to the files in this directory and avoid modifying the ones located in the platform subdirectories.
+
+If you're using version control software, it's recommended to include both the source "`www`" folder and the "`merges`" folder in your version control system.
+
+When using frameworks that require a transpiling process, it is crucial to understand that the final output, which is intended for distribution, should be placed in the "`www`" directory. The purpose of the "`www`" directory is not to store the untranspiled source code. Instead, it is recommended to keep the untranspiled source code in a separate directory dedicated to that purpose.
 
 #### platforms/
 
-Contains all the source code and build scripts for the platforms that you add to your project.
+Contains all of the source code for the platforms that you add to your project.
 
 > **WARNING:** When using the CLI to build your application, you should not edit any files in the /platforms/ directory unless you know what you are doing, or if documentation specifies otherwise. The files in this directory are routinely overwritten when preparing applications for building, or when plugins are re-installed.
 
@@ -160,7 +200,7 @@ Any added plugins will be extracted or copied into this directory.
 
 Platform-specific web assets (HTML, CSS and JavaScript files) are contained within appropriate subfolders in this directory. These are deployed during a `prepare` to the appropriate native directory.  Files placed under `merges/` will override matching files in the `www/` folder for the relevant platform. A quick example, assuming a project structure of:
 
-```
+```bash
 merges/
 |-- ios/
 | -- app.js
@@ -174,21 +214,23 @@ After building the Android and iOS projects, the Android application will contai
 
 #### Version control
 
-It is recommended not to check in `platforms/` and `plugins/` directories into version control as they are considered a build artifact. Your platforms and plugins will be saved in config.xml & package.json automatically. These platforms/plugins will be downloaded when `cordova prepare` is invoked.
+To ensure a cleaner version control setup, it is advisable not to include the `platforms/` and `plugins/` directories in your version control system. These directories are considered build artifacts. Instead, the platforms and plugins used in your project are automatically recorded in the `config.xml` and `package.json` files. When you invoke the `cordova prepare` command, the necessary platforms and plugins will be downloaded and set up based on the information specified in these configuration files.
+
+By excluding the `platforms/` and `plugins/` directories from version control and relying on the `config.xml` and `package.json` files, you can maintain a more streamlined development and continuous integration workflow.
 
 ### Examples
 
 - Create a Cordova project in `myapp` directory using the specified ID and display name:
 
-        cordova create myapp com.mycompany.myteam.myapp MyApp
+```bash
+cordova create myapp com.mycompany.myteam.myapp MyApp
+```
 
-## cordova platform command
-
-### Synopsis
+## `cordova platform` command
 
 Manage cordova platforms - allowing you to add, remove, update and list platforms. Running commands to add or remove platforms affects the contents of the project's platforms directory.
 
-### Syntax
+**Command Syntax:**
 
 ```bash
 cordova {platform | platforms} [
@@ -213,7 +255,7 @@ cordova {platform | platforms} [
 
 There are a number of ways to specify a platform:
 
-```
+```text
 <platform-spec> : platform[@version] | path | url[#commit-ish]
 ```
 
@@ -228,52 +270,65 @@ There are a number of ways to specify a platform:
 ### Supported Platforms
 
 - `android`
-- `ios`
-- `windows`
 - `browser`
 - `electron`
+- `ios`
 
 ### Examples
 
 - Add pinned version of the `android` and `ios` platform and save the downloaded version to `config.xml` & `package.json`:
 
-        cordova platform add android ios
+```bash
+cordova platform add android ios
+```
 
 - Add `android` platform with [semver](http://semver.org/) version ^5.0.0 and save it to `config.xml` & `package.json`:
 
-        cordova platform add android@^5.0.0
+```bash
+cordova platform add android@^5.0.0
+```
 
 - Add platform by cloning the specified git repo and checkout to the `4.0.0` tag:
 
-        cordova platform add https://github.com/myfork/cordova-android.git#4.0.0
+```bash
+cordova platform add https://github.com/myfork/cordova-android.git#4.0.0
+```
 
 - Add platform using a local directory named `android`:
 
-        cordova platform add ../android
+```bash
+cordova platform add ../android
+```
 
 - Add platform using the specified tarball:
 
-        cordova platform add ../cordova-android.tgz
+```bash
+cordova platform add ../cordova-android.tgz
+```
 
 - Remove `android` platform from the project and remove from `config.xml` & `package.json`:
 
-        cordova platform rm android
+```bash
+cordova platform rm android
+```
 
 - Remove `android` platform from the project and do NOT remove from `config.xml` & `package.json`:
 
-        cordova platform rm android --nosave
+```bash
+cordova platform rm android --nosave
+```
 
 - List available and installed platforms with version numbers. This is useful to find version numbers when reporting issues:
 
-        cordova platform ls
+```bash
+cordova platform ls
+```
 
-## cordova plugin command
-
-### Synopsis
+## `cordova plugin` command
 
 Manage project plugins
 
-### Syntax
+**Command Syntax:**
 
 ```bash
 cordova {plugin | plugins} [
@@ -357,14 +412,12 @@ This feature can cause issues with the application if more than one plugin tries
 
 Refer to the [plugin.xml guide](https://cordova.apache.org/docs/en/latest/plugin_ref/spec.html#edit-config) for managing `edit-config`, resolving conflicts, and examples.
 
-## cordova prepare command
-
-### Synopsis
+## `cordova prepare` command
 
 Transforms config.xml metadata to platform-specific manifest files, copies icons & splashscreens,
 copies plugin files for specified platforms so that the project is ready to build with each native SDK.
 
-### Syntax
+**Command Syntax:**
 
 ```
 cordova prepare [<platform> [..]]
@@ -376,14 +429,12 @@ cordova prepare [<platform> [..]]
 |------------|------------------
 | `<platform> [..]` | Platform name(s) to prepare. If not specified, all platforms are prepared.
 
-## cordova compile command
-
-### Synopsis
+## `cordova compile` command
 
 `cordova compile` is a subset of the [cordova build command](#cordova-build-command).
 It only performs the compilation step without doing prepare. It's common to invoke `cordova build` instead of this command - however, this stage is useful to allow extending using [hooks][Hooks guide].
 
-### Syntax
+**Command Syntax:**
 
 ```bash
 cordova compile [<platform> [...]]
@@ -394,13 +445,11 @@ cordova compile [<platform> [...]]
 ```
 For detailed documentation see [cordova build command](#cordova-build-command) docs below.
 
-## cordova build command
-
-### Synopsis
+## `cordova build` command
 
 Shortcut for `cordova prepare` + `cordova compile` for all/the specified platforms. Allows you to build the app for the specified platform.
 
-### Syntax
+**Command Syntax:**
 
 ```bash
 cordova build [<platform> [...]]
@@ -424,23 +473,27 @@ cordova build [<platform> [...]]
 
 - Build for `android` and `windows` platform in `debug` mode for deployment to device:
 
-        cordova build android windows --debug --device
+```bash
+cordova build android windows --debug --device
+```
 
 - Build for `android` platform in `release` mode and use the specified build configuration:
 
-        cordova build android --release --buildConfig=..\myBuildConfig.json
+```bash
+cordova build android --release --buildConfig=..\myBuildConfig.json
+```
 
 - Build for `android` platform in release mode and pass custom platform options to android build process:
 
-        cordova build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
+```bash
+cordova build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
+```
 
-## cordova run command
-
-### Synopsis
+## `cordova run` command
 
 Prepares, builds, and deploys app on specified platform devices/emulators. If a device is connected it will be used, unless an eligible emulator is already running.
 
-### Syntax
+**Command Syntax:**
 
 ```bash
 cordova run [<platform> [...]]
@@ -470,50 +523,51 @@ cordova run [<platform> [...]]
 
 - Run a release build of current cordova project on `android` platform emulator named `Nexus_5_API_23_x86`. Use the spcified build configuration when running:
 
-        cordova run android --release --buildConfig=..\myBuildConfig.json --target=Nexus_5_API_23_x86
+```bash
+cordova run android --release --buildConfig=..\myBuildConfig.json --target=Nexus_5_API_23_x86
+```
 
 - Run a debug build of current cordova project on `android` platform using a device or emulator (if no device is connected). Skip doing the build:
 
-        cordova run android --nobuild
+```bash
+cordova run android --nobuild
+```
 
 - Run a debug build of current cordova project on an `ios` device:
 
-        cordova run ios --device
+```bash
+cordova run ios --device
+```
 
 - Enumerate names of all the connected devices and available emulators that can be used to run this app:
 
-        cordova run ios --list
+```bash
+cordova run ios --list
+```
 
+## `cordova emulate` command
 
-## cordova emulate command
+Alias for `cordova run --emulator`. Launches the emulator instead of device. See [cordova run command docs](#cordova-run-command) for more details.
 
-### Synopsis
-
-Alias for `cordova run --emulator`. Launches the emulator instead of device.
-See [cordova run command docs](#cordova-run-command) for more details.
-
-## cordova clean command
-
-### Synopsis
+## `cordova clean` command
 
 Cleans the build artifacts for all the platforms, or the specified platform by running platform-specific build cleanup.
 
-### Syntax
+**Command Syntax:**
 
-```
+```bash
 cordova clean [<platform> [...]]
 ```
 
-### Example
+**Example Usage:**
 
 - Clean `android` platform build artifacts:
 
-        cordova clean android
+```bash
+cordova clean android
+```
 
-
-## cordova requirements command
-
-### Synopsis
+## `cordova requirements` command
 
 Checks and print out all the requirements for platforms specified (or all platforms added
 to project if none specified). If all requirements for each platform are met, exits with code 0
@@ -521,62 +575,58 @@ otherwise exits with non-zero code.
 
 This can be useful when setting up a machine for building a particular platform.
 
-### Syntax
+**Command Syntax:**
 
+```bash
+cordova requirements [platform?]
 ```
-cordova requirements android
-```
 
-## cordova info command
-
-### Synopsis
+## `cordova info` command
 
 Print out useful information helpful for submitting bug
 reports and getting help.
 
-### Syntax
+**Command Syntax:**
 
-```
+```bash
 cordova info
 ```
 
-## cordova serve command
-
-### Synopsis
+## `cordova serve` command
 
 Run a local web server for www/ assets using specified `port` or default of 8000. Access projects at: `http://HOST_IP:PORT/PLATFORM/www`
 
-### Syntax
+**Command Syntax:**
 
-```
+```bash
 cordova serve [port]
 ```
 
-## cordova telemetry command
-
-### Synopsis
+## `cordova telemetry` command
 
 Turns telemetry collection on or off.
 
-### Syntax
+**Command Syntax:**
 
-```
-cordova telemetry [STATE]
+```bash
+cordova telemetry [State]
 ```
 
-| Option      | Description
+| State       | Description
 |-------------|------------------
 | on          | Turn telemetry collection on.
 | off         | Turn telemetry collection off.
 
 ### Details
- A timed prompt asking the user to opt-in or out is displayed the first time cordova is run.
- It lasts for 30 seconds, after which the user is automatically opted-out if they don't provide any answer.
- In CI environments, the `CI` environment variable can be set, which will prevent the prompt from showing up.
- Telemetry collection can also be turned off on a single command by using the `--no-telemetry` flag.
 
-### Examples
-```
+A timed prompt asking the user to opt-in or out is displayed the first time cordova is run.
+It lasts for 30 seconds, after which the user is automatically opted-out if they don't provide any answer.
+In CI environments, the `CI` environment variable can be set, which will prevent the prompt from showing up.
+Telemetry collection can also be turned off on a single command by using the `--no-telemetry` flag.
+
+**Usage Example:**
+
+```bash
 cordova telemetry on
 cordova telemetry off
 cordova build --no-telemetry
@@ -584,39 +634,36 @@ cordova build --no-telemetry
 
 For details, see our privacy notice: https://cordova.apache.org/privacy
 
-## cordova help command
-
-### Synopsis
+## `cordova help` command
 
 Show syntax summary, or the help for a specific command.
 
-### Syntax
+**Command Syntax:**
 
-```
+```bash
 cordova help [command]
 cordova [command] -h
 cordova -h [command]
 ```
 
-## cordova config command
-
-### Synopsis
+## `cordova config` command
 
 Set, get, delete, edit, and list global cordova options.
 
-### Syntax
+**Command Syntax:**
 
+```bash
+cordova config [ls|edit|set|get|delete] <key?> <value?>
 ```
+
+**Usage Examples:**
+
+```bash
 cordova config ls
 cordova config edit
-cordova config set <key> <value>
-cordova config get <key>
-cordova config delete <key>
-```
-### Examples
-
-```
 cordova config set save-exact true
+cordova config get save-exact
+cordova config delete save-exact
 ```
 
 [Hooks guide]: http://cordova.apache.org/docs/en/latest/guide_appdev_hooks_index.md.html
