@@ -1,5 +1,5 @@
 ---
-title: CLI Reference
+title: CLI Commands
 description: Learn how to use Cordova CLI commands and their options.
 ---
 
@@ -24,7 +24,7 @@ description: Learn how to use Cordova CLI commands and their options.
 #
 -->
 
-# Cordova Command-line-interface (CLI) Reference
+# Cordova Command-line-interface (CLI) Commands
 
 ## CLI Syntax
 
@@ -261,7 +261,7 @@ There are a number of ways to specify a platform:
 
 | Value | Description |
 |-----------|-------------|
-| platform  | Platform name e.g. android, ios, windows etc. to be added to the project. Every release of cordova CLI pins a version for each platform. When no version is specified this version is used to add the platform. |
+| platform  | Platform name e.g. android, ios, electron etc. to be added to the project. Every release of cordova CLI pins a version for each platform. When no version is specified this version is used to add the platform. |
 | version   | Major.minor.patch version specifier using semver |
 | path      | Path to a directory or tarball containing a platform |
 | url       | URL to a git repository or tarball containing a platform |
@@ -379,31 +379,45 @@ based on the following criteria (listed in order of precedence):
 
 - Add `cordova-plugin-camera` and `cordova-plugin-file` to the project and save it to `config.xml` & `package.json`. Use `../plugins` directory to search for the plugins.
 
-        cordova plugin add cordova-plugin-camera cordova-plugin-file --save --searchpath ../plugins
+    ```bash
+    cordova plugin add cordova-plugin-camera cordova-plugin-file --searchpath ../plugins
+    ```
 
 - Add `cordova-plugin-camera` with [semver](http://semver.org/) version ^2.0.0 and save it to `config.xml` & `package.json`:
 
-        cordova plugin add cordova-plugin-camera@^2.0.0
+    ```bash
+    cordova plugin add cordova-plugin-camera@^2.0.0
+    ```
 
 - Add the plugin from the specified local directory:
 
-        cordova plugin add ../cordova-plugin-camera
+    ```bash
+    cordova plugin add ../cordova-plugin-camera
+    ```
 
 - Add the plugin from the specified tarball file:
 
-        cordova plugin add ../cordova-plugin-camera.tgz
+    ```bash
+    cordova plugin add ../cordova-plugin-camera.tgz
+    ```
 
 - Remove the plugin from the project and the `config.xml` & `package.json`:
 
-        cordova plugin rm camera
+    ```bash
+    cordova plugin rm camera
+    ```
 
 - Remove the plugin from the project, but not the `config.xml` or `package.json`:
 
-        cordova plugin rm camera --nosave
+    ```bash
+    cordova plugin rm camera --nosave
+    ```
 
 - List all plugins installed in the project:
 
-        cordova plugin ls
+    ```bash
+    cordova plugin ls
+    ```
 
 ### Conflicting plugins
 Conflicting plugins may occur when adding plugins that use `edit-config` tags in their plugin.xml file. `edit-config` allows plugins to add or replace attributes of XML elements.
@@ -419,7 +433,7 @@ copies plugin files for specified platforms so that the project is ready to buil
 
 **Command Syntax:**
 
-```
+```bash
 cordova prepare [<platform> [..]]
 ```
 
@@ -471,10 +485,10 @@ cordova build [<platform> [...]]
 
 ### Examples
 
-- Build for `android` and `windows` platform in `debug` mode for deployment to device:
+- Build for `android` and `ios` platform in `debug` mode for deployment to device:
 
 ```bash
-cordova build android windows --debug --device
+cordova build android ios --debug --device
 ```
 
 - Build for `android` platform in `release` mode and use the specified build configuration:
