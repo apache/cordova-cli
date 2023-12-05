@@ -1,4 +1,5 @@
-*.txt
-cordova.cmd
+.(.*)
+(.*).txt
 coverage
-jasmine.json
+cordova.cmd
+node_modules
