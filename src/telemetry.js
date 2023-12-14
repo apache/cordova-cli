@@ -18,65 +18,67 @@
 // For further details on telemetry, see:
 // https://github.com/cordova/cordova-discuss/pull/43
 
-const { EOL } = require('os');
+// const { EOL } = require('os');
 
 // Google Analytics tracking code
-const GA_TRACKING_CODE = 'UA-64283057-7';
+// const GA_TRACKING_CODE = 'UA-64283057-7';
 
-const pkg = require('../package.json');
-const Insight = require('insight');
+// const pkg = require('../package.json');
+// const Insight = require('insight');
 
 /**
  * By redefining `get optOut` we trick Insight into tracking
  * even though the user might have opted out.
  */
-class RelentlessInsight extends Insight {
-    get optOut () { return false; }
+// class RelentlessInsight extends Insight {
+//     get optOut () { return false; }
 
-    set optOut (value) { super.optOut = value; }
+//     set optOut (value) { super.optOut = value; }
 
-    get realOptOut () { return super.optOut; }
-}
+//     get realOptOut () { return super.optOut; }
+// }
 
-const insight = new RelentlessInsight({
-    trackingCode: GA_TRACKING_CODE,
-    pkg
-});
+// const insight = new RelentlessInsight({
+//     trackingCode: GA_TRACKING_CODE,
+//     pkg
+// });
 
 /**
  * Returns true if the user opted in, and false otherwise
  */
 function showPrompt () {
-    insight._permissionTimeout = module.exports.timeoutInSecs || 30;
+    // insight._permissionTimeout = module.exports.timeoutInSecs || 30;
 
-    const msg = 'May Cordova anonymously report usage statistics to improve the tool over time?';
+    return Promise.resolve(false);
 
-    return insight.askPermission(msg).then(optIn => {
-        if (optIn) {
-            console.log(EOL + 'Thanks for opting into telemetry to help us improve cordova.');
-            module.exports.track('telemetry', 'on', 'via-cli-prompt-choice', 'successful');
-        } else {
-            console.log(EOL + 'You have been opted out of telemetry. To change this, run: cordova telemetry on.');
-            // Always track telemetry opt-outs! (whether opted-in or opted-out)
-            module.exports.track('telemetry', 'off', 'via-cli-prompt-choice', 'successful');
-        }
+    // const msg = 'May Cordova anonymously report usage statistics to improve the tool over time?';
 
-        return optIn;
-    });
+    // return insight.askPermission(msg).then(optIn => {
+    //     if (optIn) {
+    //         console.log(EOL + 'Thanks for opting into telemetry to help us improve cordova.');
+    //         module.exports.track('telemetry', 'on', 'via-cli-prompt-choice', 'successful');
+    //     } else {
+    //         console.log(EOL + 'You have been opted out of telemetry. To change this, run: cordova telemetry on.');
+    //         // Always track telemetry opt-outs! (whether opted-in or opted-out)
+    //         module.exports.track('telemetry', 'off', 'via-cli-prompt-choice', 'successful');
+    //     }
+
+    //     return optIn;
+    // });
 }
 
 function track (...args) {
     // Remove empty, null or undefined strings from arguments
-    const filteredArgs = args.filter(val => val && val.length !== 0);
-    insight.track(...filteredArgs);
+    // const filteredArgs = args.filter(val => val && val.length !== 0);
+    // insight.track(...filteredArgs);
 }
 
 function turnOn () {
-    insight.optOut = false;
+    // insight.optOut = false;
 }
 
 function turnOff () {
-    insight.optOut = true;
+    // insight.optOut = true;
 }
 
 /**
@@ -85,19 +87,21 @@ function turnOff () {
  * Useful for testing purposes
  */
 function clear () {
-    insight.optOut = undefined;
+    // insight.optOut = undefined;
 }
 
 function isOptedIn () {
-    return !insight.realOptOut;
+    return false;
+    // return !insight.realOptOut;
 }
 
 /**
  * Has the user already answered the telemetry prompt? (thereby opting in or out?)
  */
 function hasUserOptedInOrOut () {
-    const insightOptOut = insight.realOptOut === undefined;
-    return !(insightOptOut);
+    return true;
+    // const insightOptOut = insight.realOptOut === undefined;
+    // return !(insightOptOut);
 }
 
 /**
