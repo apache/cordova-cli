@@ -40,7 +40,6 @@ These commands are available at all times.
 |----------|--------------
 | `create` | Create a project
 | `help <command>` | Get help for a command
-| `telemetry` | Turn telemetry collection on or off
 | `config` | Set, get, delete, edit, and list global cordova options
 
 ## Project Command List
@@ -69,7 +68,6 @@ These options apply to all cordova-cli commands.
 | -d or --verbose      | Pipe out more verbose output to your shell. You can also subscribe to `log` and `warn` events if you are consuming `cordova-cli` as a node module by calling `cordova.on('log', function() {})` or `cordova.on('warn', function() {})`.
 | -v or --version      | Print out the version of your `cordova-cli` install.
 |--nohooks             | Suppress executing hooks (taking RegExp hook patterns as parameters)
-| --no-telemetry       | Disable telemetry collection for the current command.
 
 ## Platform-specific options
 
@@ -615,38 +613,6 @@ Run a local web server for www/ assets using specified `port` or default of 8000
 ```bash
 cordova serve [port]
 ```
-
-## `cordova telemetry` command
-
-Turns telemetry collection on or off.
-
-**Command Syntax:**
-
-```bash
-cordova telemetry [State]
-```
-
-| State       | Description
-|-------------|------------------
-| on          | Turn telemetry collection on.
-| off         | Turn telemetry collection off.
-
-### Details
-
-A timed prompt asking the user to opt-in or out is displayed the first time cordova is run.
-It lasts for 30 seconds, after which the user is automatically opted-out if they don't provide any answer.
-In CI environments, the `CI` environment variable can be set, which will prevent the prompt from showing up.
-Telemetry collection can also be turned off on a single command by using the `--no-telemetry` flag.
-
-**Usage Example:**
-
-```bash
-cordova telemetry on
-cordova telemetry off
-cordova build --no-telemetry
-```
-
-For details, see our privacy notice: https://cordova.apache.org/privacy
 
 ## `cordova help` command
 

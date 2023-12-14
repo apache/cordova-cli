@@ -5,7 +5,6 @@ Synopsis
 Global Commands
     create ............................. Create a project
     help ............................... Get help for a command
-    telemetry .......................... Turn telemetry collection on or off
     config ............................. Set, get, delete, edit, and list global cordova options
 
 Project Commands
