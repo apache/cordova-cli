@@ -25,15 +25,15 @@
     "configstore": "^5.0.1",
     "cordova-common": "^5.0.0",
     "cordova-create": "^5.0.0",
-    "cordova-lib": "^12.0.0",
+    "cordova-lib": "^12.0.1",
     "editor": "^1.0.0",
     "execa": "^5.1.1",
-    "fs-extra": "^11.1.1",
+    "fs-extra": "^11.2.0",
     "insight": "^0.11.1",
     "loud-rejection": "^2.2.0",
-    "nopt": "^7.1.0",
-    "semver": "^7.5.0",
-    "systeminformation": "^5.17.12"
+    "nopt": "^7.2.0",
+    "semver": "^7.5.4",
+    "systeminformation": "^5.21.20"
   },
   "devDependencies": {
     "@cordova/eslint-config": "^5.0.0",
