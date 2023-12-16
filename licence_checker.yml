@@ -15,14 +15,41 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: Release Auditing
-
-on: [push, pull_request]
-
-jobs:
-  test:
-    name: Check License Headers
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: erisu/apache-rat-action@2840c4d69521d23ab0cfd346e14406d884c656da
+# Compiled list of allowed 3RD PARTY LICENSES from:
+#
+# ASF CATEGORY A: WHAT CAN WE INCLUDE IN AN ASF PROJECT
+# https://www.apache.org/legal/resolved.html#category-a
+#
+# Licenses converted into the SPDX standardized short identifier format.
+# https://spdx.org/licenses/
+allowed-licenses:
+  - AFL-3.0
+  - Apache-1.1
+  - Apache-2.0
+  - BlueOak-1.0.0
+  - BSD-2-Clause
+  - BSD-3-Clause-LBNL
+  - BSD-3-Clause
+  - BSL-1.0
+  - EPICS
+  - HPND
+  - ICU
+  - ISC
+  - MIT
+  - MS-PL
+  - MulanPSL-2.0
+  - NCSA
+  - PHP-3.01
+  - PostgreSQL
+  - PSF-2.0
+  - StandardML-NJ
+  - Unicode-DFS-2015
+  - Unicode-DFS-2016
+  - Unlicense
+  - UPL-1.0
+  - W3C
+  - WTFPL
+  - X11
+  - Xnet
+  - zlib-acknowledgement
+  - ZPL-2.0
