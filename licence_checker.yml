@@ -57,3 +57,4 @@ allowed-licenses:
 
 ignored-packages:
   - spdx-exceptions@2.3.0
+  - underscore@1.2.1
