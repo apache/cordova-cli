@@ -23,6 +23,7 @@
 # Licenses converted into the SPDX standardized short identifier format.
 # https://spdx.org/licenses/
 allowed-licenses:
+  - 0BSD
   - AFL-3.0
   - Apache-1.1
   - Apache-2.0
@@ -39,6 +40,7 @@ allowed-licenses:
   - ICU
   - ISC
   - MIT
+  - MIT-0
   - MS-PL
   - MulanPSL-2.0
   - NCSA
