@@ -26,11 +26,13 @@ allowed-licenses:
   - AFL-3.0
   - Apache-1.1
   - Apache-2.0
+  - APAFML
   - BlueOak-1.0.0
   - BSD-2-Clause
-  - BSD-3-Clause-LBNL
   - BSD-3-Clause
+  - BSD-3-Clause-LBNL
   - BSL-1.0
+  - CC-PDDC
   - CC0-1.0
   - EPICS
   - HPND
@@ -40,11 +42,11 @@ allowed-licenses:
   - MS-PL
   - MulanPSL-2.0
   - NCSA
+  - OGL-UK-3.0
   - PHP-3.01
   - PostgreSQL
   - PSF-2.0
-  - StandardML-NJ
-  - Unicode-DFS-2015
+  - SMLNJ
   - Unicode-DFS-2016
   - Unlicense
   - UPL-1.0
@@ -52,7 +54,7 @@ allowed-licenses:
   - WTFPL
   - X11
   - Xnet
-  - zlib-acknowledgement
+  - Zlib
   - ZPL-2.0
 
 ignored-packages:
