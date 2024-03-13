@@ -28,12 +28,12 @@ jobs:
       - uses: actions/checkout@v4
 
       # Check license headers
-      - uses: erisu/apache-rat-action@2840c4d69521d23ab0cfd346e14406d884c656da
+      - uses: erisu/apache-rat-action@555ae80334a535eb6c1f8920b121563a5a985a75
 
       # Setup environment with node
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       # Install node packages
       - name: npm install packages

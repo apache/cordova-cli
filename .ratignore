@@ -1,4 +1,4 @@
-.(.*)
+\.(.*)
 (.*).txt
 coverage
 cordova.cmd
