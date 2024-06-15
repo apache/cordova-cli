@@ -29,7 +29,11 @@ cli(process.argv).catch(err => {
         const errorOutput = typeof err === 'string' ? err : util.inspect(err);
         throw new CordovaError('Promise rejected with non-error: ' + errorOutput);
     }
-    process.exitCode = err.code || 1;
+    if (typeof err.code !== 'number') {
+        process.exitCode = 1;
+    } else {
+        process.exitCode = err.code;
+    }
 
     // We cannot emit an error event here, as that would cause another error
     console.error(err.message);
