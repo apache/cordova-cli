@@ -17,7 +17,6 @@
 
 const nopt = require('nopt');
 const pkg = require('../package.json');
-const telemetry = require('./telemetry');
 const help = require('./help');
 const info = require('./info');
 const cordova_lib = require('cordova-lib');
@@ -75,14 +74,10 @@ const shortHands = {
     t: '--template'
 };
 
-let shouldCollectTelemetry = false;
-
 module.exports = function (inputArgs) {
     // If no inputArgs given, use process.argv.
     inputArgs = inputArgs || process.argv;
     let cmd = inputArgs[2]; // e.g: inputArgs= 'node cordova run ios'
-    const subcommand = getSubCommand(inputArgs, cmd);
-    const isTelemetryCmd = (cmd === 'telemetry');
     const isConfigCmd = (cmd === 'config');
 
     // ToDO: Move nopt-based parsing of args up here
@@ -136,101 +131,13 @@ module.exports = function (inputArgs) {
     }
 
     return Promise.resolve().then(function () {
-        /**
-         * Skip telemetry prompt if:
-         * - CI environment variable is present
-         * - Command is run with `--no-telemetry` flag
-         * - Command ran is: `cordova telemetry on | off | ...`
-         */
-
-        if (telemetry.isCI(process.env) || telemetry.isNoTelemetryFlag(inputArgs)) {
-            return Promise.resolve(false);
-        }
-
-        /**
-         * We shouldn't prompt for telemetry if user issues a command of the form: `cordova telemetry on | off | ...x`
-         * Also, if the user has already been prompted and made a decision, use his saved answer
-         */
-        if (isTelemetryCmd) {
-            const isOptedIn = telemetry.isOptedIn();
-            return handleTelemetryCmd(subcommand, isOptedIn);
-        }
-
-        if (telemetry.hasUserOptedInOrOut()) {
-            return Promise.resolve(telemetry.isOptedIn());
-        }
-
-        /**
-         * Otherwise, prompt user to opt-in or out
-         * Note: the prompt is shown for 30 seconds. If no choice is made by that time, User is considered to have opted out.
-         */
-        return telemetry.showPrompt();
-    }).then(function (collectTelemetry) {
-        shouldCollectTelemetry = collectTelemetry;
-        if (isTelemetryCmd) {
-            return Promise.resolve();
-        }
         return cli(inputArgs);
-    }).then(function () {
-        if (shouldCollectTelemetry && !isTelemetryCmd) {
-            telemetry.track(cmd, subcommand, 'successful');
-        }
-    }).catch(function (err) {
-        if (shouldCollectTelemetry && !isTelemetryCmd) {
-            telemetry.track(cmd, subcommand, 'unsuccessful');
-        }
-        throw err;
     });
 };
-
-function getSubCommand (args, cmd) {
-    if (['platform', 'platforms', 'plugin', 'plugins', 'telemetry', 'config'].indexOf(cmd) > -1) {
-        return args[3]; // e.g: args='node cordova platform rm ios', 'node cordova telemetry on'
-    }
-    return null;
-}
 
 function printHelp (command) {
     const result = help([command]);
     cordova.emit('results', result);
-}
-
-function handleTelemetryCmd (subcommand, isOptedIn) {
-    if (subcommand !== 'on' && subcommand !== 'off') {
-        logger.subscribe(events);
-        printHelp('telemetry');
-        return;
-    }
-
-    const turnOn = subcommand === 'on';
-    let cmdSuccess = true;
-
-    // turn telemetry on or off
-    try {
-        if (turnOn) {
-            telemetry.turnOn();
-            console.log('Thanks for opting into telemetry to help us improve cordova.');
-        } else {
-            telemetry.turnOff();
-            console.log('You have been opted out of telemetry. To change this, run: cordova telemetry on.');
-        }
-    } catch (ex) {
-        cmdSuccess = false;
-    }
-
-    // track or not track ?, that is the question
-
-    if (!turnOn) {
-        // Always track telemetry opt-outs (whether user opted out or not!)
-        telemetry.track('telemetry', 'off', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful' : 'unsuccessful');
-        return Promise.resolve();
-    }
-
-    if (isOptedIn) {
-        telemetry.track('telemetry', 'on', 'via-cordova-telemetry-cmd', cmdSuccess ? 'successful' : 'unsuccessful');
-    }
-
-    return Promise.resolve();
 }
 
 function cli (inputArgs) {
@@ -241,10 +148,6 @@ function cli (inputArgs) {
             logger.error(err.message);
         } else {
             logger.error(err);
-        }
-        // Don't send exception details, just send that it happened
-        if (shouldCollectTelemetry) {
-            telemetry.track('uncaughtException');
         }
         process.exit(1);
     });
