@@ -19,7 +19,6 @@
     under the License.
 */
 
-require('loud-rejection/register');
 const util = require('util');
 const { events, CordovaError } = require('cordova-common');
 const cli = require('../src/cli');

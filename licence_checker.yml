@@ -60,5 +60,5 @@ allowed-licenses:
   - ZPL-2.0
 
 ignored-packages:
-  - spdx-exceptions@2.3.0
+  - spdx-exceptions@2.5.0
   - underscore@1.2.1
