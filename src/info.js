@@ -15,8 +15,8 @@
     under the License.
 */
 
-const path = require('path');
-const fs = require('fs-extra');
+const fs = require('node:fs');
+const path = require('node:path');
 const execa = require('execa');
 const { osInfo } = require('systeminformation');
 const { cordova, cordova_platforms: { getPlatformApi } } = require('cordova-lib');
