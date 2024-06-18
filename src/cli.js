@@ -114,7 +114,7 @@ module.exports = function (inputArgs) {
     // If "delete" is called
     if (isConfigCmd && inputArgs[3] === 'delete') {
         if (inputArgs[4]) {
-            conf.del(inputArgs[4]);
+            conf.delete(inputArgs[4]);
         }
     }
 

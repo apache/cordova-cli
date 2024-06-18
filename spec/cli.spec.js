@@ -15,7 +15,7 @@
     under the License.
 */
 
-const path = require('path');
+const path = require('node:path');
 const rewire = require('rewire');
 const { events, cordova } = require('cordova-lib');
 
@@ -303,7 +303,7 @@ describe('cordova cli', () => {
             set (key, value) {
                 cordovaConfig[key] = value;
             },
-            del (key) {
+            delete (key) {
                 delete cordovaConfig[key];
             },
             path () {

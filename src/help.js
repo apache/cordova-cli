@@ -16,9 +16,9 @@
     specific language governing permissions and limitations
     under the License.
 */
-const fs = require('fs');
+const fs = require('node:fs');
+const path = require('node:path');
 const cordova_lib = require('cordova-lib');
-const path = require('path');
 
 module.exports = function help (args) {
     args = args || [];
