@@ -303,7 +303,7 @@ describe('cordova cli', () => {
             set (key, value) {
                 cordovaConfig[key] = value;
             },
-            del (key) {
+            delete (key) {
                 delete cordovaConfig[key];
             },
             path () {
