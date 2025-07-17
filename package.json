@@ -28,7 +28,7 @@
     "cordova-lib": "^12.0.2",
     "editor": "^1.0.0",
     "execa": "^5.1.1",
-    "nopt": "^7.2.0",
+    "nopt": "^8.1.0",
     "semver": "^7.5.4",
     "systeminformation": "^5.21.20"
   },
