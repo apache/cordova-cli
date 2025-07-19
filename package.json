@@ -4,7 +4,7 @@
   "description": "Cordova command line interface tool",
   "main": "cordova",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.5.0"
   },
   "bin": {
     "cordova": "./bin/cordova"
@@ -23,20 +23,20 @@
   ],
   "dependencies": {
     "configstore": "^5.0.1",
-    "cordova-common": "^5.0.0",
+    "cordova-common": "^5.0.1",
     "cordova-create": "^5.0.0",
-    "cordova-lib": "^12.0.1",
+    "cordova-lib": "^12.0.2",
     "editor": "^1.0.0",
     "execa": "^5.1.1",
-    "nopt": "^7.2.0",
-    "semver": "^7.5.4",
-    "systeminformation": "^5.21.20"
+    "nopt": "^8.1.0",
+    "semver": "^7.7.2",
+    "systeminformation": "^5.27.7"
   },
   "devDependencies": {
-    "@cordova/eslint-config": "^5.0.0",
-    "jasmine": "^5.1.0",
-    "nyc": "^17.0.0",
-    "rewire": "^7.0.0"
+    "@cordova/eslint-config": "^5.1.0",
+    "jasmine": "^5.8.0",
+    "nyc": "^17.1.0",
+    "rewire": "^9.0.0"
   },
   "author": "Apache Software Foundation",
   "license": "Apache-2.0",
