@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "configstore": "^5.0.1",
-    "cordova-common": "^5.0.1",
+    "cordova-common": "^6.0.0",
     "cordova-create": "^5.0.0",
     "cordova-lib": "^12.0.2",
     "editor": "^1.0.0",
