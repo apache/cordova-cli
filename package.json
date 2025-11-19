@@ -29,7 +29,7 @@
     "editor": "^1.0.0",
     "execa": "^5.1.1",
     "nopt": "^9.0.0",
-    "semver": "^7.7.2",
+    "semver": "^7.7.3",
     "systeminformation": "^5.27.7"
   },
   "devDependencies": {
