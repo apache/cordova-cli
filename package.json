@@ -4,7 +4,7 @@
   "description": "Cordova command line interface tool",
   "main": "cordova",
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=20.17.0 || >=22.9.0"
   },
   "bin": {
     "cordova": "./bin/cordova"
