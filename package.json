@@ -30,7 +30,7 @@
     "execa": "^5.1.1",
     "nopt": "^9.0.0",
     "semver": "^7.7.3",
-    "systeminformation": "^5.27.7"
+    "systeminformation": "^5.27.11"
   },
   "devDependencies": {
     "@cordova/eslint-config": "^6.0.0",
