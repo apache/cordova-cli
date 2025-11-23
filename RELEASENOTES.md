@@ -20,6 +20,53 @@
 -->
 # Cordova-cli Release Notes
 
+### 13.0.0 (Nov 23, 2025)
+
+**Breaking Changes:**
+
+* [GH-678](https://github.com/apache/cordova-cli/pull/678) feat!: bump dependencies & node engine requirement
+* [GH-633](https://github.com/apache/cordova-cli/pull/633) feat!: remove telemetry feature
+* [GH-672](https://github.com/apache/cordova-cli/pull/672) chore(npm)!: bump various npm packages
+* [GH-666](https://github.com/apache/cordova-cli/pull/666) chore!: bump node requirement & npm dependencies
+* [GH-642](https://github.com/apache/cordova-cli/pull/642) chore!: Prepare for next major
+
+**Fixes:**
+
+* [GH-662](https://github.com/apache/cordova-cli/pull/662) fix: bump @babel/helpers
+* [GH-640](https://github.com/apache/cordova-cli/pull/640) fix: remove potential error when setting exit code
+
+**Others:**
+
+* [GH-679](https://github.com/apache/cordova-cli/pull/679) chore: update release audit workflow & license headers
+* [GH-677](https://github.com/apache/cordova-cli/pull/677) chore(deps-dev): bump js-yaml from 4.1.0 to 4.1.1
+* [GH-676](https://github.com/apache/cordova-cli/pull/676) chore(deps): bump glob from 10.4.5 to 10.5.0
+* [GH-673](https://github.com/apache/cordova-cli/pull/673) chore: license headers
+* [GH-671](https://github.com/apache/cordova-cli/pull/671) chore(deps): bump tmp from 0.2.3 to 0.2.4
+* [GH-668](https://github.com/apache/cordova-cli/pull/668) chore(coverage): Move from nyc to c8 for code coverage
+* [GH-667](https://github.com/apache/cordova-cli/pull/667) chore(deps): bump on-headers and compression
+* [GH-665](https://github.com/apache/cordova-cli/pull/665) chore(deps-dev): bump brace-expansion from 1.1.11 to 1.1.12
+* [GH-658](https://github.com/apache/cordova-cli/pull/658) chore(deps): bump systeminformation from 5.22.11 to 5.23.8
+* [GH-657](https://github.com/apache/cordova-cli/pull/657) chore(deps): bump path-to-regexp and express
+* [GH-654](https://github.com/apache/cordova-cli/pull/654) chore(deps): bump cross-spawn from 7.0.3 to 7.0.6
+* [GH-655](https://github.com/apache/cordova-cli/pull/655) chore(ci): Add code scanning & fix dependabot failures
+* [GH-646](https://github.com/apache/cordova-cli/pull/646) chore(deps): bump micromatch from 4.0.7 to 4.0.8
+* [GH-652](https://github.com/apache/cordova-cli/pull/652) chore(deps): bump cookie and express
+* [GH-643](https://github.com/apache/cordova-cli/pull/643) chore: Update dependencies
+* [GH-637](https://github.com/apache/cordova-cli/pull/637) chore(deps): bump express from 4.18.2 to 4.19.2
+* [GH-639](https://github.com/apache/cordova-cli/pull/639) chore(deps): bump tar from 6.2.0 to 6.2.1
+* [GH-641](https://github.com/apache/cordova-cli/pull/641) chore(deps): bump braces from 3.0.2 to 3.0.3
+* [GH-635](https://github.com/apache/cordova-cli/pull/635) chore(deps): bump ip from 2.0.0 to 2.0.1
+* [GH-631](https://github.com/apache/cordova-cli/pull/631) chore: Rolled dependencies to the latest non-breaking versions
+* [GH-670](https://github.com/apache/cordova-cli/pull/670) ci: various workflow improvements
+* [GH-669](https://github.com/apache/cordova-cli/pull/669) ci(workflow): update release-audit & license config
+* [GH-656](https://github.com/apache/cordova-cli/pull/656) ci: use apache-rat-action@v1 (tag)
+* [GH-638](https://github.com/apache/cordova-cli/pull/638) ci: update codecov@v4 w/ token
+* [GH-636](https://github.com/apache/cordova-cli/pull/636) ci: update release audit workflow
+* [GH-630](https://github.com/apache/cordova-cli/pull/630) ci(gh-action): add Apache RAT & package license checker workflow
+* [GH-554](https://github.com/apache/cordova-cli/pull/554) doc(create): update default values
+* [GH-428](https://github.com/apache/cordova-cli/pull/428) doc: update `README`.md
+* [GH-616](https://github.com/apache/cordova-cli/pull/616) doc: update & refactor cli reference
+
 ### 12.0.0 (May 20, 2023)
 
 **Breaking:**
