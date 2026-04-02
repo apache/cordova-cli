@@ -37,4 +37,5 @@ cli(process.argv).catch(err => {
     // We cannot emit an error event here, as that would cause another error
     console.error(err.message);
     events.emit('verbose', err.stack);
+    process.exit(process.exitCode);
 });
