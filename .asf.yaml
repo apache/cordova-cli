@@ -16,7 +16,21 @@
 # under the License.
 
 notifications:
-  commits:              commits@cordova.apache.org
-  issues:               issues@cordova.apache.org
-  pullrequests_status:  issues@cordova.apache.org
+  commits: commits@cordova.apache.org
+  issues: issues@cordova.apache.org
+  pullrequests_status: issues@cordova.apache.org
   pullrequests_comment: issues@cordova.apache.org
+github:
+  rulesets:
+    - name: "Default Branch Protection"
+      type: branch
+      branches:
+        includes:
+          - "~DEFAULT_BRANCH"
+          - "release/*"
+          - "rel/*"
+        excludes: []
+      bypass_teams:
+        - root
+      restrict_deletion: true
+      restrict_force_push: true
