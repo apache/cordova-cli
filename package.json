@@ -12,7 +12,7 @@
   "scripts": {
     "test": "npm run lint && npm run cover",
     "lint": "eslint .",
-    "cover": "c8 jasmine"
+    "cover": "c8 jasmine \"spec/**/*.spec.js\""
   },
   "repository": "github:apache/cordova-cli",
   "bugs": "https://github.com/apache/cordova-cli/issues",
@@ -34,9 +34,14 @@
   },
   "devDependencies": {
     "@cordova/eslint-config": "^6.0.0",
-    "c8": "^10.1.3",
-    "jasmine": "^5.12.0",
+    "c8": "^11.0.0",
+    "jasmine": "^6.3.0",
     "rewire": "^9.0.1"
+  },
+  "overrides": {
+      "c8": {
+          "yargs": "^18.0.0"
+      }
   },
   "author": "Apache Software Foundation",
   "license": "Apache-2.0",

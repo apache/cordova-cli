@@ -298,7 +298,7 @@ describe('cordova cli', () => {
 
     describe('config', () => {
         let clirevert, confrevert, editorArgs, confHolder;
-        const cordovaConfig = {};
+        let cordovaConfig = {};
 
         const confMock = {
             all: cordovaConfig,
@@ -319,6 +319,7 @@ describe('cordova cli', () => {
         };
 
         beforeEach(() => {
+            cordovaConfig = {};
             clirevert = cli.__set__('editor', (path1, cb) => {
                 editorArgs = path1();
                 cb();
@@ -340,6 +341,7 @@ describe('cordova cli', () => {
         });
 
         it('Test#043 : config delete is called', () => {
+            cordovaConfig.foo = true;
             return cli(['node', 'cordova', 'config', 'delete', 'foo']).then(() => {
                 expect(cordovaConfig.foo).toBeUndefined();
             });
@@ -352,6 +354,7 @@ describe('cordova cli', () => {
         });
 
         it('Test #045 : config get is called', () => {
+            cordovaConfig.foo = true;
             return cli(['node', 'cordova', 'config', 'get', 'foo']).then(() => {
                 expect(confHolder).toBe(true);
             });
@@ -397,7 +400,7 @@ describe('cordova cli', () => {
             });
         });
 
-        it('should not warn users about unsupported node version', () => {
+        it('should not warn users about supported node version', () => {
             cli.__set__('NODE_VERSION', 'v8.0.0');
             cli.__set__('NODE_VERSION_DEPRECATING_RANGE', null);
             cli.__set__('NODE_VERSION_REQUIREMENT', '>=8');
@@ -419,7 +422,7 @@ describe('cordova cli', () => {
             });
         });
 
-        it('should warn users about deprecated node version', () => {
+        it('should not warn users about non-deprecated node version', () => {
             cli.__set__('NODE_VERSION', 'v10.0.0');
             cli.__set__('NODE_VERSION_DEPRECATING_RANGE', '<10');
             cli.__set__('NODE_VERSION_REQUIREMENT', '>=8');
