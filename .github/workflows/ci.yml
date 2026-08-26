@@ -25,33 +25,23 @@ on:
     branches:
       - '*'
 
-permissions:
-  contents: read
-  security-events: write
-
 jobs:
-  test:
-    name: NodeJS ${{ matrix.node-version }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        node-version: [20.x, 22.x, 24.x]
-        os: [ubuntu-latest, windows-latest, macos-15]
+  codeql:
+    name: CodeQL Analysis
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: ${{ matrix.node-version }}
+          persist-credentials: false
+          fetch-depth: 1
 
-      - name: Environment Information
-        run: |
-          node --version
-          npm --version
-
-      - uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         with:
           languages: javascript
           queries: security-and-quality
@@ -60,15 +50,43 @@ jobs:
               - coverage
               - node_modules
 
+      - uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+
+  test:
+    name: NodeJS ${{ matrix.node-version }} on ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: read
+
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x, 24.x, 26.x]
+        os: [ubuntu-latest, windows-latest, macos-26]
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Environment Information
+        run: |
+          node --version
+          npm --version
+
       - name: npm install and test
         run: npm cit
         env:
           CI: true
 
-      - uses: github/codeql-action/analyze@v3
-
-      # v4.6.0
-      - uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238
+      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         if: success()
         with:
           name: ${{ runner.os }} node.js ${{ matrix.node-version }}
