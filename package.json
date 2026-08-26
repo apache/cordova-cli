@@ -22,7 +22,7 @@
     "cli"
   ],
   "dependencies": {
-    "configstore": "^5.0.1",
+    "configstore": "^8.0.0",
     "cordova-common": "^6.0.0",
     "cordova-create": "^6.0.0",
     "cordova-lib": "^13.0.0",
