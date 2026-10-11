@@ -28,8 +28,16 @@ description: Learn how to use Cordova CLI commands and their options.
 
 ## CLI Syntax
 
+**Unix/macOS:**
+
 ```bash
 cordova <command> [options] -- [platformOpts]
+```
+
+**Windows:**
+
+```text
+cordova <command> [options] "--" [platformOpts]
 ```
 
 ## Global Command List
@@ -127,13 +135,13 @@ Additionally, it includes an example showcasing the usage of specific options pr
     **Unix/macOS:**
 
     ```bash
-    cordova build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
+    cordova build android --release -- --keystore="../android.keystore" --storePassword=android --alias=mykey
     ```
 
     **Windows:**
 
-    ```bash
-    cordova build android --release "--" --keystore="..\android.keystore" --storePassword=android --alias=mykey
+    ```text
+    cordova build android --release "--" --keystore="../android.keystore" --storePassword=android --alias=mykey
     ```
 
 ## `cordova create` command
@@ -436,7 +444,7 @@ cordova build android ios --debug --device
 - Build for `android` platform in `release` mode and use the specified build configuration:
 
 ```bash
-cordova build android --release --buildConfig=..\myBuildConfig.json
+cordova build android --release --buildConfig="../myBuildConfig.json"
 ```
 
 - Build for `android` platform in release mode and pass custom platform options to android build process:
@@ -444,13 +452,13 @@ cordova build android --release --buildConfig=..\myBuildConfig.json
 **Unix/macOS:**
 
 ```bash
-cordova build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
+cordova build android --release -- --keystore="../android.keystore" --storePassword=android --alias=mykey
 ```
 
 **Windows:**
 
-```bash
-cordova build android --release "--" --keystore="..\android.keystore" --storePassword=android --alias=mykey
+```text
+cordova build android --release "--" --keystore="../android.keystore" --storePassword=android --alias=mykey
 ```
 
 ## `cordova run` command
@@ -488,7 +496,7 @@ cordova run [<platform> [...]]
 - Run a release build of current cordova project on `android` platform emulator named `Nexus_5_API_23_x86`. Use the spcified build configuration when running:
 
 ```bash
-cordova run android --release --buildConfig=..\myBuildConfig.json --target=Nexus_5_API_23_x86
+cordova run android --release --buildConfig="../myBuildConfig.json" --target=Nexus_5_API_23_x86
 ```
 
 - Run a debug build of current cordova project on `android` platform using a device or emulator (if no device is connected). Skip doing the build:
