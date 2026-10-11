@@ -28,8 +28,16 @@ description: Learn how to use Cordova CLI commands and their options.
 
 ## CLI Syntax
 
+**Unix/macOS:**
+
 ```bash
 cordova <command> [options] -- [platformOpts]
+```
+
+**Windows:**
+
+```text
+cordova <command> [options] "--" [platformOpts]
 ```
 
 ## Global Command List
@@ -72,6 +80,8 @@ These options apply to all cordova-cli commands.
 ## Platform-specific options
 
 Certain commands have options (`platformOpts`) that are specific to a particular platform. They can be provided to the cordova-cli with a '--' separator that stops the command parsing within the cordova-lib module and passes through rest of the options for platforms to parse.
+
+> **Note for Windows users:** On Windows (Command Prompt and PowerShell), the `--` separator must be enclosed in quotation marks (`"--"`) so that the shell forwards the arguments to platform build scripts correctly.
 
 ## CLI Usage Example
 
@@ -122,8 +132,16 @@ Additionally, it includes an example showcasing the usage of specific options pr
 
 7. Build Project for Android in Release Mode with Signing Parameters
 
+    **Unix/macOS:**
+
     ```bash
-    cordova build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
+    cordova build android --release -- --keystore="../android.keystore" --storePassword=android --alias=mykey
+    ```
+
+    **Windows:**
+
+    ```text
+    cordova build android --release "--" --keystore="../android.keystore" --storePassword=android --alias=mykey
     ```
 
 ## `cordova create` command
@@ -413,7 +431,7 @@ cordova build [<platform> [...]]
 | --device   | Build it for a device
 | --emulator | Build it for an emulator. In particular, the platform architecture might be different for a device vs. emulator.
 | --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process especially related to signing the package.
-| `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.
+| `<platformOpts>` | To provide platform specific options, you must include them after `--` separator (on Windows shells, enclose in quotes: `"--"`). Review platform guide docs for more details.
 
 ### Examples
 
@@ -426,13 +444,21 @@ cordova build android ios --debug --device
 - Build for `android` platform in `release` mode and use the specified build configuration:
 
 ```bash
-cordova build android --release --buildConfig=..\myBuildConfig.json
+cordova build android --release --buildConfig="../myBuildConfig.json"
 ```
 
 - Build for `android` platform in release mode and pass custom platform options to android build process:
 
+**Unix/macOS:**
+
 ```bash
-cordova build android --release -- --keystore="..\android.keystore" --storePassword=android --alias=mykey
+cordova build android --release -- --keystore="../android.keystore" --storePassword=android --alias=mykey
+```
+
+**Windows:**
+
+```text
+cordova build android --release "--" --keystore="../android.keystore" --storePassword=android --alias=mykey
 ```
 
 ## `cordova run` command
@@ -463,14 +489,14 @@ cordova run [<platform> [...]]
 | --emulator  | Deploy to an emulator
 | --target    | Deploy to a specific target emulator/device. Use `--list` to display target options
 | --buildConfig=`<configFile>` | Default: build.json in cordova root directory. <br/> Use the specified build configuration file. `build.json` file is used to specify paramaters to customize the app build process especially related to signing the package.
-| `<platformOpts>` | To provide platform specific options, you must include them after `--` separator. Review platform guide docs for more details.
+| `<platformOpts>` | To provide platform specific options, you must include them after `--` separator (on Windows shells, enclose in quotes: `"--"`). Review platform guide docs for more details.
 
 ### Examples
 
 - Run a release build of current cordova project on `android` platform emulator named `Nexus_5_API_23_x86`. Use the spcified build configuration when running:
 
 ```bash
-cordova run android --release --buildConfig=..\myBuildConfig.json --target=Nexus_5_API_23_x86
+cordova run android --release --buildConfig="../myBuildConfig.json" --target=Nexus_5_API_23_x86
 ```
 
 - Run a debug build of current cordova project on `android` platform using a device or emulator (if no device is connected). Skip doing the build:
