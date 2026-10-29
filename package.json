@@ -35,7 +35,7 @@
   "devDependencies": {
     "@cordova/eslint-config": "^6.0.0",
     "c8": "^11.0.0",
-    "jasmine": "^6.3.0",
+    "jasmine": "^7.0.0",
     "rewire": "^9.0.1"
   },
   "overrides": {
