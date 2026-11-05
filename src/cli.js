@@ -140,6 +140,7 @@ module.exports = function (inputArgs) {
 function printHelp (command) {
     const result = help([command]);
     cordova.emit('results', result);
+    return result;
 }
 
 function cli (inputArgs) {
@@ -150,6 +151,15 @@ function cli (inputArgs) {
             logger.error(err.message);
         } else {
             logger.error(err);
+        }
+        process.exit(1);
+    });
+
+    process.on('unhandledRejection', function (reason) {
+        const msg = reason instanceof Error ? reason.message : String(reason);
+        logger.error(msg);
+        if (reason instanceof Error) {
+            events.emit('verbose', reason.stack);
         }
         process.exit(1);
     });
