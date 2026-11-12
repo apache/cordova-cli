@@ -31,6 +31,7 @@ const Configstore = require('configstore');
 const conf = new Configstore(pkg.name + '-config');
 const editor = require('editor');
 const semver = require('semver');
+const cdvLibUtil = require('cordova-lib/src/cordova/util');
 
 // process.version is not declared writable or has no setter so storing in const for Jasmine.
 const NODE_VERSION = process.version;
@@ -256,6 +257,11 @@ function cli (inputArgs) {
     if (platformCommands.indexOf(cmd) !== -1) {
         // All options without dashes are assumed to be platform names
         opts.platforms = undashed.slice(1);
+        // If no platform was specified, use all installed platforms so that
+        // platform-specific hooks (e.g. prepare hooks) are executed.
+        if (opts.platforms.length === 0) {
+            opts.platforms = cdvLibUtil.listPlatforms(cdvLibUtil.cdProjectRoot());
+        }
 
         // Pass nopt-parsed args to PlatformApi through opts.options
         opts.options = args;
