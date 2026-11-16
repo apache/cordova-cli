@@ -266,6 +266,11 @@ function cli (inputArgs) {
             opts.platforms = cordova_lib.cordova_platforms.getInstalledPlatforms(process.cwd());
         }
 
+        // If no platform is specified, use all installed platforms
+        if (opts.platforms.length === 0) {
+            opts.platforms = cordova_lib.cordova_util.listPlatforms(process.cwd());
+        }
+
         // Pass nopt-parsed args to PlatformApi through opts.options
         opts.options = args;
         opts.options.argv = unparsedArgs;
